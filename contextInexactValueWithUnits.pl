@@ -6,7 +6,7 @@ loadMacros('NumberWithUnits.pm');
 our %fundamental_units = %Units::fundamental_units;
 our %known_units = %Units::known_units;
 
-sub _parserInexactValueWithUnits_init {InexactValueWithUnits::Init()};
+sub _contextInexactValueWithUnits_init {InexactValueWithUnits::Init()};
 
 package InexactValueWithUnits;
 
