@@ -14,7 +14,7 @@ loadMacros(
   #"contextScientificNotation.pl",
   "contextInexactValue.pl",
   "parserNumberWithUnits.pl",
-  "parserInexactValueWithUnits.pl"
+  "contextInexactValueWithUnits.pl"
 
 );
 
