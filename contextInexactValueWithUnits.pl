@@ -1,6 +1,7 @@
 loadMacros('MathObjects.pl');
+loadMacros('betterUnits.pl');
 
-loadMacros('NumberWithUnits.pm');
+#loadMacros('NumberWithUnits.pm');
 
 
 our %fundamental_units = %Units::fundamental_units;
@@ -85,154 +86,158 @@ sub name {'inexactValue'};
 sub cmp_class {'Inexact Value with Units'};
 
 sub new {
-  my $self = shift; my $class = ref($self) || $self;
-  my $context = (Value::isContext($_[0]) ? shift : $self->context);
-  my $num = shift;
-  # we need to check if units is the options hash
-  my $units = shift;
-  my $options;
+	my $self = shift; my $class = ref($self) || $self;
+	my $context = (Value::isContext($_[0]) ? shift : $self->context);
+	my $num = shift;
+	
+	# we need to check if units is the options hash
+	my $units = shift;
+	my $options;
 
-  if (ref($units) eq 'HASH') {
-    $options = $units;
-    $units = '';
-  } else {
-    $options = shift;
-  }
+	if (ref($units) eq 'HASH') {
+		$options = $units;
+		$units = '';
+	} else {
+		$options = shift;
+	}
 
-  # register a new unit/s if needed
-  if (defined($options->{newUnit})) {
-    my @newUnits;
-    if (ref($options->{newUnit}) eq 'ARRAY') {
-      @newUnits = @{$options->{newUnit}};
-    } else {
-      @newUnits = ($options->{newUnit});
-    }
+	# register a new unit/s if needed
+	if (defined($options->{newUnit})) {
+		my @newUnits;
+		if (ref($options->{newUnit}) eq 'ARRAY') {
+			@newUnits = @{$options->{newUnit}};
+		} else {
+			@newUnits = ($options->{newUnit});
+		}
 
-    foreach my $newUnit (@newUnits) {
-      if (ref($newUnit) eq 'HASH') {
-	Parser::Legacy::ObjectWithUnits::add_unit($newUnit->{name}, $newUnit->{conversion});
-      } else {
-	Parser::Legacy::ObjectWithUnits::add_unit($newUnit);
-      }
-    }
-  }
+		foreach my $newUnit (@newUnits) {
+			if (ref($newUnit) eq 'HASH') {
+				Parser::Legacy::ObjectWithUnits::add_unit($newUnit->{name}, $newUnit->{conversion});
+			} else {
+				Parser::Legacy::ObjectWithUnits::add_unit($newUnit);
+			}
+		}
+	}
+	Value::Error("You must provide a ".$self->name) unless defined($num);
 
-  Value::Error("You must provide a ".$self->name) unless defined($num);
+	(my $tempnum,$units) = splitUnits($num) unless $units;
+	
+	if (defined $tempnum){
+		$num = $tempnum;
+	}
+	#warn "Trying to make:  $num";
 
-  ($tempnum,$units) = Parser::Legacy::ObjectWithUnits::splitUnits($num) unless $units;
-  if (defined $tempnum){
-    $num = $tempnum;
-  }
-  #warn "Trying to make:  $num";
-  
-  #Value::Error("You must provide units for your ".$self->name) unless $units;
-  if ($units){
-    Value::Error("Your units can only contain one division") if $units =~ m!/.*/!;
-  }
-    #warn "Trying to make:  $num";
-  $num = $self->makeValue($num,context=>$context);
-  
-  my %Units = $units ? Parser::Legacy::ObjectWithUnits::getUnits($units) : %fundamental_units;
-  
-  #warn "Trying to make:  ${Units{s}}";
-  Value::Error($Units{ERROR}) if ($Units{ERROR});
-  # make a copy of the inexact value to do comparisons with
- 
-  my $refcopy = $num->copy; 
-  #warn $refcopy;
-  $num->{inexactValue} = $refcopy;
-  $num->{units} = $units;
-  $num->{units_ref} = \%Units;
-  $num->{isValue} = 1;
-  $num->{correct_ans} .= ' '.$units if defined $num->{correct_ans};
-  #$test = Parser::Legacy::ObjectWithUnits::TeXunits($units);
-  #warn "$test";
-  $num->{correct_ans_latex_string} .= ' '. Parser::Legacy::ObjectWithUnits::TeXunits($units) if defined $num->{correct_ans_latex_string};
-  bless $num, $class;
+	#Value::Error("You must provide units for your ".$self->name) unless $units;
+	if ($units){
+		Value::Error("Your units can only contain one division") if $units =~ m!/.*/!;
+	}
+	#warn "Trying to make:  $num";
+	$num = $self->makeValue($num,context=>$context);
 
-  # $self = shift; my $class = ref($self) || $self;
-  # # my $context = (Value::isContext($_[0]) ? shift : $self->context);
+	my %Units = $units ? Parser::Legacy::ObjectWithUnits::getUnits($units) : %fundamental_units;
 
+	#warn "Trying to make:  ${Units{s}}";
+	Value::Error($Units{ERROR}) if ($Units{ERROR});
+	# make a copy of the inexact value to do comparisons with
+
+	my $refcopy = $num->copy; 
+	#warn $refcopy;
+	$num->{inexactValue} = $refcopy;
+	$num->{units} = defined $units ? $units : '';
+	$num->{units_ref} = \%Units;
+	$num->{isValue} = 1;
+	$num->{correct_ans} .= ' '.$units if defined $num->{correct_ans};
+	#$test = Parser::Legacy::ObjectWithUnits::TeXunits($units);
+	#warn "$test";
+	$num->{correct_ans_latex_string} .= ' '. Parser::Legacy::ObjectWithUnits::TeXunits($units) if defined $num->{correct_ans_latex_string};
+	bless $num, $class;
+
+	# $self = shift; my $class = ref($self) || $self;
+	# # my $context = (Value::isContext($_[0]) ? shift : $self->context);
 
 
-  # $self = $self->SUPER::new(@_);
-  $num->{precedence}{'InexactValueWithUnits'} = 4;
-  # $num = $self->makeValue("2.0",context=>$context);
-  # $units = 'g';
-  # my %Units = Parser::Legacy::ObjectWithUnits::getUnits($units);
-  # Value::Error($Units{ERROR}) if ($Units{ERROR});
-  # $num->{units} = $units;
-  # $num->{units_ref} = \%Units;
-  # $num->{isValue} = 1;
-  # $num->{correct_ans} .= ' '.$units if defined $num->{correct_ans};
-  # $num->{correct_ans_latex_string} .= ' '.TeXunits($units) if defined $num->{correct_ans_latex_string};
-  # bless $num, $class;
 
-  return $num;
+	# $self = $self->SUPER::new(@_);
+	$num->{precedence}{'InexactValueWithUnits'} = 4;
+	# $num = $self->makeValue("2.0",context=>$context);
+	# $units = 'g';
+	# my %Units = Parser::Legacy::ObjectWithUnits::getUnits($units);
+	# Value::Error($Units{ERROR}) if ($Units{ERROR});
+	# $num->{units} = $units;
+	# $num->{units_ref} = \%Units;
+	# $num->{isValue} = 1;
+	# $num->{correct_ans} .= ' '.$units if defined $num->{correct_ans};
+	# $num->{correct_ans_latex_string} .= ' '.TeXunits($units) if defined $num->{correct_ans_latex_string};
+	# bless $num, $class;
+
+	return $num;
 }
+
+sub splitUnits {
+	my $aUnit = '(?:'.getPrefixNames().')?(?:'.Parser::Legacy::ObjectWithUnits::getUnitNames().')(?:\s*(?:\^|\*\*)\s*[-+]?\d+)?';
+	my $unitPattern = $aUnit.'(?:\s*[/* ]\s*'.$aUnit.')*';
+	my $unitSpace = "($aUnit) +($aUnit)";
+	my $string = shift;
+	my ($num,$units) = $string =~ m!^(.*?(?:[)}\]0-9a-z]|\d\.))\s*($unitPattern)\s*$!;
+	if ($units) {
+		while ($units =~ s/$unitSpace/$1*$2/) {};
+		$units =~ s/ //g;
+		$units =~ s/\*\*/^/g;
+	}
+	return ($num,$units);
+}
+
+sub getPrefixNames {
+	my $a;
+	my $b;
+	my $prefixes = \%Units::prefixes;
+	my @prefixArray = keys %$prefixes;
+	my @sortedArray = main::PGsort(sub {
+		return length($_[1]) > length($_[0]) if length($_[0]) != length($_[1]);
+		return ($_[0] cmp $_[1]) > 0 ;
+	}, @prefixArray);
+	my $joined = join('|', @sortedArray);
+	return $joined;
+}
+
 sub make {
-   my $self = shift;
-   #$r = ref($self);
-   #warn "make called: $r";
-   return $self;
+	my $self = shift;
+	return $self;
  }
 
 sub makeValue {
-  my $self = shift; my $value = shift;
-  #my %options = (context => $self->context, @_);
-  #$num = 1;
-   my $context = (Value::isContext($_[0]) ? shift : $self->context);
-   #$num = InexactValue::InexactValue::make($value);
-  #$v= Value::makeValue($value);
-  #$te=Value->context;
-  #Value::Error("$v");
-  #warn "Trying to make:  $value";
-  if (ref($value) eq ARRAY){
-    # this is the case when we want to pass a value with explicit sig figs
-    @arr = @$value;
-    #warn "DOING WEIRD";
-    return Value->Package("InexactValue")->new($arr[0], $arr[1]);
-  } else {
-       # warn "DOING WEIRD2 $value";
-    return Value->Package("InexactValue")->new($value);
-  }
-
-  # my $num = Value->Package("InexactValue")->new($value);
-
-  # return $num;
+	my $self = shift; my $value = shift;
+	my $context = (Value::isContext($_[0]) ? shift : $self->context);
+	if (ref($value) eq ARRAY){
+		# this is the case when we want to pass a value with explicit sig figs
+		@arr = @$value;
+		return Value->Package("InexactValue")->new($arr[0], $arr[1]);
+	} else {
+		return Value->Package("InexactValue")->new($value);
+	}
 }
 
-sub checkStudentValue {
-  my $self = shift; my $student = shift;
-  return 1;
-}
+# sub checkStudentValue {
+#   my $self = shift; my $student = shift;
+#   return 1;
+# }
 
 sub cmp {
-  #warn "this is warning me.";
-    my $self = shift;
-    #Value::Error("HEHEHEHE");
-  #my $correct = ($self->{correct_ans}||$self->string);
-  my $cmp = new AnswerEvaluator;
-  $cmp->ans_hash(
-    type => "Value (".$self->class.")",
+  my $self = shift;
+  my $cmp = $self->SUPER::cmp(
     correct_ans => $self->string,
-    correct_ans_latex_string => $self->TeX,
-    correct_value => $self,
-    $self->cmp_defaults(@_),
-    %{$self->{context}{cmpDefaults}{$self->class} || {}},  # context-specified defaults
-    @_,
-  );
-  
+    correct_ans_latex_string =>  $self->TeX,
+    @_
+  );  
   $cmp->install_pre_filter('erase');
   $cmp->install_pre_filter(sub {
     my $ans = shift;
-    #warn "prefilter is running";
     $inexactWithUnitsStudent=0;
     $studentAnswer = $ans->{student_ans};
     #warn "StudentAnswer:  $studentAnswer";
     if ($ans->{student_ans} eq ''){
       $inexactWithUnitsStudent = $self->new([0,9**9**9],'');  #blank answer is zero with infinite sf
-     } else {
+      } else {
       $inexactWithUnitsStudent = $self->new($ans->{student_ans});
     }
     $ans->{student_value} = $inexactWithUnitsStudent;
@@ -241,59 +246,128 @@ sub cmp {
     
     return $ans;
   });
-  $cmp->install_evaluator('erase');
-  $cmp->install_evaluator(sub {
-    my $ans = shift;
-    #warn "evaluator is running";
 
-    my $correct = $ans->{correct_value};
-    my $student = $ans->{student_value};
-    $ans->{_filter_name} = "InexactValueWithUnits answer checker";
-    $creditSF = $self->getFlag("creditSigFigs");
-    $creditValue = $self->getFlag("creditValue");
-    $creditUnits = $self->getFlag("creditUnits");
-    $failOnValueWrong = $self->getFlag("failOnValueWrong");
-
-    $ans->score(0); # assume failure
-    $self->context->clearError();
-
-    $currentCredit = 0;
-
-    if ($correct->{inexactValue}->valueAsRoundedNumber() == $student->{inexactValue}->valueAsRoundedNumber()) {
-      # numbers match, now check sig figs
-        $currentCredit += $creditValue;
-      if ($correct->sigFigs() == $student->sigFigs()){
-        $currentCredit += $creditSF;
-      }
-      # grade units!          
-      if (compareUnitHash($correct->{units_ref}, $student->{units_ref} )){
-        $currentCredit += $creditUnits;
-      }
-    } else {
-        if ($failOnValueWrong){
-          # do nothing
-                  
-        } else {
-      
-          # grade sig figs amount anyways
-          if ($correct->sigFigs() == $student->sigFigs()){
-            $currentCredit += $creditSF;
-          }
-          # grade units!          
-          if (compareUnitHash($correct->{units_ref}, $student->{units_ref} )){
-            $currentCredit += $creditUnits;
-          }
-        }
-    }
-    #$ans->score(1);
-    $ans->score($currentCredit);
-
-    return $ans;
-  });
-
+  # REMINDER:  Evaluator should JUST be for equality
+  #           if you need messages for why it's wrong, that MUST go in post-filter
+  #           the reason for this is that MultiAnswer will stop evaluating if there is a message after the individual evaluation
+  
   return $cmp;
 }
 
+sub cmp_parse {
+	my $self = shift; my $ans = shift;
+
+	$studentAnswer = $ans->{student_ans};
+	if ($ans->{student_ans} eq ''){
+		$inexactWithUnitsStudent = $self->new([0,9**9**9],'');  #blank answer is zero with infinite sf
+	} else {
+		$inexactWithUnitsStudent = $self->new($ans->{student_ans});
+	}
+	$ans->{student_value} = $inexactWithUnitsStudent;
+	$ans->{preview_latex_string} = $inexactWithUnitsStudent->TeX; #$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
+	$ans->{student_ans} = $inexactWithUnitsStudent->string; #$inexactStudent->string; 
+
+	my $correct = $ans->{correct_value};
+	my $student = $ans->{student_value};
+	$ans->{_filter_name} = "InexactValueWithUnits answer checker";
+	$creditSF = $self->getFlag("creditSigFigs");
+	$penaltyRoundingError = $self->getFlag("penaltyRoundingError");
+	$creditValue = $self->getFlag("creditValue");
+	$creditUnits = $self->getFlag("creditUnits");
+	$failOnValueWrong = $self->getFlag("failOnValueWrong");
+
+	$ans->score(0); # assume failure
+	$self->context->clearError();
+
+	$currentCredit = 0;
+	
+	my $result = $correct->compareValuesWithUnits(
+		$student,
+		{
+			"creditSigFigs"=>$creditSF,
+			"penaltyRoundingError"=>$penaltyRoundingError,
+			"creditValue"=>$creditValue,
+			"creditUnits"=>$creditUnits,
+			"failOnValueWrong"=>$failOnValueWrong
+		});
+	
+	my @resultArr = @$result;
+	$currentCredit = shift @resultArr;
+	$message = shift @resultArr;
+
+	$ans->score($currentCredit);
+
+	return $ans;
+}
+
+sub compareValuesWithUnits {
+	my $self = shift;
+	my $student = shift;
+	my $options = shift;
+
+	my $roundingErrorPossibles = $options->{"roundingErrorPossibles"};
+	my $penaltyRoundingError = $options->{"penaltyRoundingError"};
+	my $creditSF = $options->{"creditSigFigs"};	
+	my $creditValue = $options->{"creditValue"};
+	my $creditUnits = $options->{"creditUnits"};
+	my $failOnValueWrong = $options->{"failOnValueWrong"};
+	my $currentCredit = 0;
+	my $message = '';
+	
+	if ($self->{inexactValue}->valueAsRoundedNumber() == $student->{inexactValue}->valueAsRoundedNumber()) {
+		# numbers match, now check sig figs
+		$currentCredit += $creditValue;
+		
+	} else {
+		# use the possible rounding error calculations to compute an "acceptable" range for potential student answers
+		if (defined $roundingErrorPossibles) {
+			my @possibles = @$roundingErrorPossibles;
+			# take the last one for now.
+			my $lastPossible = pop @possibles;
+			my $range = abs ($lastPossible->{inexactValue}->valueAsRoundedNumber() - $self->{inexactValue}->valueAsRoundedNumber());
+			my $min = $self->{inexactValue}->valueAsRoundedNumber() - $range;
+			my $max = $self->{inexactValue}->valueAsRoundedNumber() + $range;
+			if ($student->{inexactValue}->valueAsRoundedNumber() < $max && $student->{inexactValue}->valueAsRoundedNumber() > $min) {
+				# within rounding error range!
+				$message .= "Your answer probably has rounding errors.  ";
+				$currentCredit += $creditValue;
+				if (defined $penaltyRoundingError){
+					$currentCredit -= $penaltyRoundingError;
+				}
+			} else {
+				# not within range, failed value!
+				if ($failOnValueWrong){
+					$message .= "Your answer is incorrect.  ";
+					return [$currentCredit, $message];
+				}
+			}
+		} else {
+			# not within range, failed value!
+			if ($failOnValueWrong){
+				$message .= "Your answer is incorrect.  ";
+				return [$currentCredit, $message];
+			}
+		}
+	}
+	# if we haven't returned yet, then we check sig figs and units
+		
+	# grade sig figs amount anyways
+	if ($self->sigFigs() == $student->sigFigs()){
+		$currentCredit += $creditSF;
+	} else {
+		$message  .= "Incorrect sig figs.  ";
+	}
+	# grade units!          
+	if (compareUnitHash($self->{units_ref}, $student->{units_ref} )){
+		$currentCredit += $creditUnits;
+	} else {
+		$message .= "Incorrect units.  ";
+	}
+		
+	
+	
+	return [$currentCredit, $message];
+}
 
 sub string {
   my $self = shift;
@@ -323,6 +397,7 @@ sub TeX {
   return $n . '\ ' . Parser::Legacy::ObjectWithUnits::TeXunits($self->{units});
 }
 
+
 sub add {
   my ($self,$l,$r,$other) = InexactValueWithUnits::InexactValueWithUnits::checkOpOrderWithPromote(@_);
   $leftPos = $l->leastSignificantPosition();    
@@ -330,9 +405,9 @@ sub add {
   $leftMostPosition = $self->basicMin($leftPos, $rightPos);
   $newValue = $l->valueAsNumber() + $r->valueAsNumber();
   $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
-  my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
+  #my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
   #Value::Error("error is $units");
-  return $self->new($num, $self->{units});
+  return $self->new([$newValue, $newSigFigs], $self->{units});
 }
 
 sub sub {
@@ -342,30 +417,39 @@ sub sub {
   $leftMostPosition = $self->basicMin($leftPos, $rightPos);
   $newValue = $l->valueAsNumber() - $r->valueAsNumber();
   $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
-  my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
+  #my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
   #Value::Error("error is $units");
-  return $self->new($num, $self->{units});
+  return $self->new([$newValue, $newSigFigs], $self->{units});
 }
 
 sub mult {
-  my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
-  $minSf = $left->minSf($left, $right);
-  my $num = Value->Package("InexactValue")->new($left->valueAsNumber() * $right->valueAsNumber(), $minSf);
-  
-  $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1);
-
-  return $self->new($num, $newUnitString);
+	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
+	#$minSf = $left->minSf($left, $right);
+	#warn "SF: " . $minSf;
+	# warn "LEFT: " .$left;
+	# warn "RIGHT: " .$right;
+	# warn "LEFT: " .$left->{inexactValue};
+	# warn "RIGHT: " .$right->{inexactValue};
+	# warn "LEFT: " .$left->{inexactValue}->valueAsNumber;
+	# warn "RIGHT: " .$right->{inexactValue}->valueAsNumber;
+	my $newInexact = $left->{inexactValue} * $right->{inexactValue};
+	# warn "RESULT: " .$newInexact;
+	# warn "LEFT: " .$left->{units};
+	# warn "RIGHT: " .$right->{units};
+	$newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1);
+	# warn "UNITS: " . $newUnitString;
+	$result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
+	# warn "Result final: " .$result;
+	return $result;
 }
 
 sub div {
   my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
   #Value::Error("Division by zero") if $r->{data}[0] == 0;
-  $minSf = $left->minSf($left, $right);
-  my $num = Value->Package("InexactValue")->new($left->valueAsNumber() / $right->valueAsNumber(), $minSf);
-  
+  #$minSf = $left->minSf($left, $right);
+  my $newInexact = $left->{inexactValue} / $right->{inexactValue};
   $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 0);
-  #return $self->new($num, "g");
-  return $self->new($num, $newUnitString);
+  return $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
 }
 
 sub combineStringUnitsCleanly {
@@ -452,7 +536,7 @@ sub combineStringUnitsCleanly {
     }
   } 
 
-  for ($a=0;$a< scalar(@numerator); $a++){
+  for (local $a=0;$a< scalar(@numerator); $a++){
     if ($a > 0){
       $newUnitString = $newUnitString . '*';
     }
@@ -461,7 +545,7 @@ sub combineStringUnitsCleanly {
   if (scalar @denominator > 0){
     $newUnitString =  $newUnitString . '/';
   }
-  for ($a=0;$a< scalar(@denominator); $a++){
+  for (local $a=0;$a< scalar(@denominator); $a++){
     if ($a > 0){
       $newUnitString = $newUnitString . '*';
     }
@@ -489,9 +573,9 @@ sub compareUnitHash {
     my %cmp = map { $_ => 1 } keys %left;
     for my $key (keys %right) {
       last unless exists $cmp{$key};
-      if ($left{$key} ne $right{$key}){
-        warn $left{$key} . ' ne ' . $right{$key};
-      }
+      # if ($left{$key} ne $right{$key}){
+      #   warn $left{$key} . ' ne ' . $right{$key};
+      # }
       last unless $left{$key} eq $right{$key};
       delete $cmp{$key};
     }
@@ -574,34 +658,64 @@ sub process_term_for_stringCombine {
 
 sub process_factor_for_stringCombine {
 	my $string = shift;
-  my $isNumerator = shift;
+	my $isNumerator = shift;
 	#split the factor into unit and powers
 
 	my $options = shift;
 
 	my $fundamental_units = \%Units::fundamental_units;
 	my $known_units = \%Units::known_units;
+	my $prefixes = \%Units::prefixes;
 	
 	if (defined($options->{fundamental_units})) {
-	  $fundamental_units = $options->{fundamental_units};
+		$fundamental_units = $options->{fundamental_units};
 	}
 
 	if (defined($options->{known_units})) {
-	  $known_units = $options->{known_units};
+		$known_units = $options->{known_units};
 	}
 
 	my ($unit_name,$power) = split(/\^/, $string);
+	my @unitsNameArray = keys %$known_units;
+	my $unitsJoined = join '|', @unitsNameArray;
+	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
+	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
+	# warn "Unit Base: " .$unit_base;
+	# warn "Unit Prefix: " .$unit_prefix;
+
 	$power = 1 unless defined($power);
 
-	if ( defined( $known_units->{$unit_name} )  ) {
-    unless ($isNumerator) {
-      $power = $power * -1;
-    }
-		my %unit_name_hash = (name=> $unit_name, unitHash => $known_units->{$unit_name}, power=>$power);   # $reference_units contains all of the known units.
-    return %unit_name_hash;
-    
+	if ( defined( $known_units->{$unit_base} )  ) {
+		$prefixExponent = 0;
+		# warn "prefix exponent: ".$prefixExponent;
+		if ( defined($unit_prefix) && $unit_prefix ne ''){
+			 if (exists($prefixes->{$unit_prefix})){
+				$prefixExponent = $prefixes->{$unit_prefix}->{'exponent'};
+			} else {
+				die "Unit Prefix unrecognizable: |$unit_prefix|";
+			}
+		}
+		unless ($isNumerator) {
+			$power = $power * -1;
+		}
+		
+		my $unit_hash_ref = $known_units->{$unit_base};
+		my %unit_hash = %$unit_hash_ref;
+
+		my $u;
+		foreach $u (keys %unit_hash) {
+			if ( $u eq 'factor' ) {
+				# only need to modify the factor by the prefix, not the power.
+				# We do this so we can cancel the powers out without having to worry about undoing the underlying hash.
+				# The underlying hash is just used to recognize the unit.  We can match foot with ft via the hash.
+				$unit_hash{$u} = ($unit_hash{$u}*(10**$prefixExponent));  # calculate the correction factor for the unit
+			}
+		}
+		my %unit_name_hash = (name=> $unit_prefix.$unit_base, unitHash => \%unit_hash, power=>$power);   # $reference_units contains all of the known units.
+		return %unit_name_hash;
+
 	} else {
-		die "UNIT ERROR Unrecognizable unit: |$unit_name|";
+		die "UNIT ERROR Unrecognizable unit: |$unit_base|";
 	}
 	#return @known_unit_hash_array;
 }
