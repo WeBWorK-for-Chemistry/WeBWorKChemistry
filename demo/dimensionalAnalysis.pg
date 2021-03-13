@@ -16,7 +16,7 @@ loadMacros(
   "parserPopUp.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
-  "parserConversionFactor.pl",
+  "parserDimensionalAnalysis.pl",
   "parserMultiAnswer.pl",
   "weightedGrader.pl"
 );
