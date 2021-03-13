@@ -1,7 +1,5 @@
 loadMacros("MathObjects.pl");
-loadMacros('NumberWithUnits.pm');
-
-# loadMacros("parserInexactValue.pl");
+loadMacros('PGauxiliaryFunctions.pl'); # needed for Round function
 
 sub _contextInexactValue_init {InexactValue::Init()}
 
@@ -286,7 +284,9 @@ sub preferScientificNotation {
 
 sub valueAsNumber {
   my $self = shift;
+  
   @valArray = $self->value;# + 0;
+  #warn "ValueAsNumber: " . ($valArray[0] + 0);
   $valAsNumber = $valArray[0] + 0;
   return $valAsNumber;
 }
@@ -405,6 +405,10 @@ sub string {
             # there is definitely a decimal, count how many places
             $fixedDecimal = $self->sigFigs() - length($nondecimalPartAbs);
             # redo convert value to fixed decimal place
+            #warn "fixedDecimal: " . $fixedDecimal;
+            if ($fixedDecimal eq "Inf"){
+              return sprintf("%.0f", $self->roundingHack($valAsNumber));
+            } 
             return sprintf("%.${fixedDecimal}f", $self->roundingHack($valAsNumber));
 
           } elsif ($self->sigFigs() == length($nondecimalPartAbs)) {
@@ -473,6 +477,8 @@ sub string {
 sub roundingHack {
   my $self = shift;
   my $s = shift;
+  return main::Round($s, 13);
+  #Round($val, +for decimal/-for other way);
   # floating point rounding causes errors
   # 5.555 is stored as 5.554999999999999999 something... and it will round down to 5.55, when we want it to round up to 5.56!
   # Hacky way to fix:  tack on a few zeros to the end with a 1 before rounding. 
@@ -1074,17 +1080,36 @@ sub minSf {
 }
 
 sub basicMin {
-  $self = shift;
-  my $a = shift;
-  my $b = shift;
-  my $minSf = 0;
-  if ($a > $b){
-    $minSf = $b;
-  } else {
-    $minSf = $a;
-  }
-  return $minSf;
+	$self = shift;
+	my $a = shift;
+	my $b = shift;
+	my $minSf = 0;
+	if ($a > $b){
+	$minSf = $b;
+	} else {
+	$minSf = $a;
+	}
+	return $minSf;
 }
+
+sub isExactZero {
+	$self = shift;
+	if ($self->sigFigs == 9**9**9 && $self->valueAsNumber == 0){
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+sub isOne {
+	$self = shift;
+	if ($self->valueAsNumber == 1){
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 
 # negative values mean last place is tens or hundreds, etc.
 # positive values mean last place is in the decimal region, tenths, hundredths, etc
@@ -1166,16 +1191,30 @@ sub sub {
 }
 
 sub mult {
-  my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
-  $minSf = $left->minSf($left, $right);
-  return $self->new($left->valueAsNumber() * $right->valueAsNumber(), $minSf);
+	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
+	# edge case: multiplication by exact zero gives exact zero
+	if ($left->isExactZero || $right->isExactZero){
+		return $self->new(0,9**9**9);
+	}
+
+	$minSf = $left->minSf($left, $right);
+	# warn 'left: ' . $left->$valueAsNumber();
+	# warn 'right: ' . $right->$valueAsNumber();
+	return $self->new($left->valueAsNumber() * $right->valueAsNumber(), $minSf);
 }
 
 sub div {
-  my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
-  Value::Error("Division by zero") if $r->{data}[0] == 0;
-  $minSf = $self->minSf($l, $r);
-  return $self->new($l->valueAsNumber() / $r->valueAsNumber(), $minSf);
+	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
+	Value::Error("Division by zero") if $r->{data}[0] == 0;
+	# edge case: division using exact zero gives exact zero
+	if ($l->isExactZero ){
+		return $self->new(0,9**9**9);
+	}
+
+	$minSf = $self->minSf($l, $r);
+	# warn 'left: ' . $left->$valueAsNumber();
+	# warn 'right: ' . $right->$valueAsNumber();
+	return $self->new($l->valueAsNumber() / $r->valueAsNumber(), $minSf);
 }
 
 sub power {
@@ -1235,85 +1274,232 @@ sub abs {
 #
 sub cmp_class {"Inexact Value"}
 
-sub cmp {
-    my $self = shift;
-  #my $correct = ($self->{correct_ans}||$self->string);
-  my $cmp = new AnswerEvaluator;
-  $cmp->ans_hash(
-    type => "Value (".$self->class.")",
-    correct_ans => $self->string,
-    correct_ans_latex_string => $self->TeX,
-    correct_value => $self,
-    $self->cmp_defaults(@_),
-    %{$self->{context}{cmpDefaults}{$self->class} || {}},  # context-specified defaults
-    @_,
-  );
-  # my $cmp = $self->SUPER::cmp(
-  #    correct_ans => $self->string,
-  #    correct_ans_latex_string => $self->TeX,
-  #   @_
-  # );
-  
 
-  $cmp->install_pre_filter('erase');
-  $cmp->install_pre_filter(sub {
-    my $ans = shift;
-    $inexactStudent=0;
-    if ($ans->{student_ans} eq ''){
-      $inexactStudent = $self->new(0,$inf);  #blank answer is zero with infinite sf
-    } else {
-      $inexactStudent = $self->new($ans->{student_ans});
-    }
-    # $ans->{correct_ans} = $self->string;
-    # $ans->{correct_ans_latex_string} = $self->TeX;
-    $ans->{student_value} = $inexactStudent;
-    $ans->{preview_latex_string} = $inexactStudent->TeX;#$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
-    $ans->{student_ans} = $inexactStudent->string; 
-    
-    return $ans;
-  });
-  $cmp->install_evaluator('erase');
-  $cmp->install_evaluator(sub {
-    my $ans = shift;
-    my $correct = $ans->{correct_value};
-    my $student = $ans->{student_value};
-    $ans->{_filter_name} = "InexactValue answer checker";
-    $creditSF = $self->getFlag("creditSigFigs");
-    $creditValue = $self->getFlag("creditValue");
-    $failOnValueWrong = $self->getFlag("failOnValueWrong");
+# sub cmp_preprocess {
+#   my $self = shift; my $ans = shift;
+#   #$inexactStudent=0;
+#   warn "student value is: " . ref($ans->{student_value});
+#   if (defined $ans->{student_value}) {
+#     $ans->{preview_latex_string} = $ans->{student_value}->TeX;
+#     $ans->{student_ans} = $self->quoteHTML($ans->{student_value}->string);
+#   } else {
+#     $ans->{student_value} = $self->new(0,$inf);  #blank answer is zero with infinite sf
+#   }
+# }
 
-    $ans->score(0); # assume failure
-    $self->context->clearError();
+# sub cmp_defaults {
+#   warn "defualts!";  
+#   return (
+#   Value::Real->cmp_defaults(@_),
+#   typeMatch => 'InexactValue::InexactValue',
+# );
+# }
 
-    $currentCredit = 0;
-    if ($correct->valueAsRoundedNumber() == $student->valueAsRoundedNumber()){
-      # numbers match, now check sig figs
-        $currentCredit += $creditValue;
-      if ($correct->sigFigs() == $student->sigFigs()){
-        $currentCredit += $creditSF;
-      } else {
-        #$ans->{ans_message} = "Your significant figures are not correct.";
-      }
-    } else {
-        if ($failOnValueWrong){
-          #$ans->{ans_message} = $correct->valueAsRoundedNumber();
-        } else {
-          # grade sig figs amount anyways
-          if ($correct->sigFigs() == $student->sigFigs()){
-            $currentCredit += $creditSF;
-            #$ans->{ans_message} = "Your value is not correct, but your significant values are good.";
-          } else {
-            #$ans->{ans_message} = "Your value and your significant figures are both incorrect.";
-          }
-        }
-    }
-    $ans->score($currentCredit);
-
-    return $ans;
-  });
-
-  return $cmp;
+sub typeMatch {
+  my $self = shift;  my $other = shift;
+  warn 'oh, it does check types';
+  return 1 unless ref($other);
+  $self->type eq $other->type && !$other->isFormula;
 }
+
+sub cmp {
+	my $self = shift;
+
+	my $cmp = $self->SUPER::cmp(
+		correct_ans => $self->string,
+		correct_ans_latex_string =>  $self->TeX,
+		@_
+	);  
+
+
+	$cmp->install_pre_filter('erase');
+	$cmp->install_pre_filter(sub {
+		my $ans = shift;
+		$inexactStudent=0;
+		if ($ans->{student_ans} eq ''){
+			$inexactStudent = $self->new(0,$inf);  #blank answer is zero with infinite sf
+		} else {
+			$inexactStudent = $self->new($ans->{student_ans});
+		}
+
+		$ans->{student_value} = $inexactStudent;
+		$ans->{preview_latex_string} = $inexactStudent->TeX;#$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
+		$ans->{student_ans} = $inexactStudent->string; 
+
+		return $ans;
+	});
+
+	return $cmp;
+}
+
+sub cmp_parse {
+	my $self = shift; my $ans = shift;
+	$ans->{_filter_name} = "InexactValue answer checker";
+    
+	#warn "in evaluator: " . ref($ans->{correct_value});
+	#$ans->{correct_value}->cmp_parse($ans);
+
+	my $correct = $ans->{correct_value};
+	my $student = $ans->{student_value};
+	$ans->{_filter_name} = "InexactValue answer checker";
+	$creditSF = $self->getFlag("creditSigFigs");
+	$creditValue = $self->getFlag("creditValue");
+	$failOnValueWrong = $self->getFlag("failOnValueWrong");
+
+	$ans->score(0); # assume failure
+	$self->context->clearError();
+
+	$currentCredit = 0;
+
+	#
+	
+	# warn "ValueAsNumber: " . $student->valueAsNumber;
+	# warn $student->valueAsNumber == 0 ? "zero" : $student->valueAsNumber;
+	# warn $student->sigFigs;
+
+	# Edge case of entering zero.  This is not perfect.  Theoretically, we could have zero with sig figs... but skip for now.
+	if ($student->valueAsNumber == 0){
+		if ($correct->valueAsNumber == 0){
+			$ans->score(1);
+		} else {
+			$ans->score(0);
+		}
+		return $ans;
+	}
+
+	$currentCredit = $correct->compareValue($student, {"creditSigFigs"=>$creditSF, "creditValue"=>$creditValue, "failOnValueWrong"=>$failOnValueWrong});
+
+	# # The following is naive - the actual answer might be 1.25 and a student may answer 1.3.  This will evaluate as false when it should evaluate
+	# # as true, but marked sig figs wrong.  
+	# # if ($correct->valueAsRoundedNumber() == $student->valueAsRoundedNumber()){
+
+	# # Instead, we will compare both numbers rounded to the smallest number of sig figs between the two.  However, in the case
+	# # of a student having the fewer number of sig figs, we limit to only one sig fig lower than the correct number.  i.e.
+	# # Student: 1.1 g vs Correct: 1.111 g will mark student as wrong.
+	# # Student: 1.11 g vs Correct: 1.111 g will mark student as correct.
+	# # Student: 1.11111111 g vs Correct: 1.111 g will mark student as correct
+	# # *** This condition can be later adjusted with flags.
+	# # Keep edge case in mind:
+	# # Correct Answer: 5 g
+	# # Student cannot have 1 fewer sig fig in this case. 
+	# my $min = $correct->sigFigs() < $student->sigFigs() ? $correct->sigFigs() : $student->sigFigs();
+	# if ($min < 1){
+	# 	$ans->score(0);
+	# 	return $ans;
+	# }
+	# if ($correct->sigFigs() - $min > 1){
+	# 	$min = $correct->sigFigs - 1;
+	# }
+	
+	# my $transformedCorrect = $self->new($correct->valueAsNumber, $min);
+	# my $transformedStudent = $self->new($student->valueAsNumber, $min);
+	# # warn $transformedCorrect->valueAsRoundedNumber;
+	# # warn $transformedStudent->valueAsRoundedNumber;
+	# # warn $transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber ? "true" : "false";
+	# # warn $correct->sigFigs == $student->sigFigs ? "true" : "false";
+	# # warn $creditValue;
+	# # warn $creditSF;
+	# # warn $failOnValueWrong;
+	# # WHAT ABOUT ROUNDING ERRORS??? NEED ANOTHER CHECK FOR SLIGHT VARIATIONS... TO COME!
+	# if ($transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber){
+	# 	# numbers match, now check sig figs
+	# 	$currentCredit += $creditValue;
+	# 	if ($correct->sigFigs == $student->sigFigs){
+	# 		$currentCredit += $creditSF;
+	# 	} else {
+	# 	#$ans->{ans_message} = "Your significant figures are not correct.";
+	# 	}
+	# } else {
+	# 	if ($failOnValueWrong) {
+	# 		#$ans->{ans_message} = $correct->valueAsRoundedNumber();
+	# 	} else {
+	# 		# grade sig figs amount anyways
+	# 		if ($correct->sigFigs == $student->sigFigs){
+	# 			$currentCredit += $creditSF;
+	# 		#$ans->{ans_message} = "Your value is not correct, but your significant values are good.";
+	# 		} else {
+	# 		#$ans->{ans_message} = "Your value and your significant figures are both incorrect.";
+	# 		}
+	# 	}
+	# }
+	$ans->score($currentCredit);
+
+	return $ans;
+}
+
+sub compareValue {
+	my $self = shift;
+	my $student = shift;
+	my $options = shift;
+
+	$creditSF = $options->{"creditSigFigs"};	
+	$creditValue = $options->{"creditValue"};
+	$failOnValueWrong = $options->{"failOnValueWrong"};
+	my $currentCredit = 0;
+
+	my $min = $self->sigFigs() < $student->sigFigs() ? $self->sigFigs() : $student->sigFigs();
+	if ($min < 1){
+		return 0; # assume wrong
+	}
+
+	# this is the greatest acceptable difference in sig figs if student has FEWER sig figs than the correct answer
+	# i.e. correct answer should be 1.609 and student puts 1.6 -> difference is 2
+	#		but if student puts 2, that's a difference of 3.... too much.
+	my $maxDifference = 2;
+
+	if ($self->sigFigs() - $min > $maxDifference){
+		$min = $self->sigFigs - $maxDifference;
+	}
+	
+	my $transformedCorrect = $self->new($self->valueAsNumber, $min);
+	my $transformedStudent = $self->new($student->valueAsNumber, $min);
+	# warn $transformedCorrect->valueAsRoundedNumber;
+	# warn $transformedStudent->valueAsRoundedNumber;
+	# warn $transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber ? "true" : "false";
+	# warn $correct->sigFigs == $student->sigFigs ? "true" : "false";
+	# warn $creditValue;
+	# warn $creditSF;
+	# warn $failOnValueWrong;
+	# WHAT ABOUT ROUNDING ERRORS??? NEED ANOTHER CHECK FOR SLIGHT VARIATIONS... TO COME!
+	if ($transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber){
+		# numbers match, now check sig figs
+		$currentCredit += $creditValue;
+		if ($self->sigFigs == $student->sigFigs){
+			$currentCredit += $creditSF;
+		} else {
+		#$ans->{ans_message} = "Your significant figures are not correct.";
+		}
+	} else {
+		if ($failOnValueWrong) {
+			#$ans->{ans_message} = $correct->valueAsRoundedNumber();
+		} else {
+			# grade sig figs amount anyways
+			if ($self->sigFigs == $student->sigFigs){
+				$currentCredit += $creditSF;
+			#$ans->{ans_message} = "Your value is not correct, but your significant values are good.";
+			} else {
+			#$ans->{ans_message} = "Your value and your significant figures are both incorrect.";
+			}
+		}
+	}
+	return $currentCredit;
+
+}
+
+# sub cmp_parse {
+#   my $self = shift; my $ans = shift;
+
+#   my $context = $ans->{correct_value}{context} || $current;
+
+#   my $correct = $ans->{correct_value};
+#   my $student = $ans->{student_value};
+#   $ans->{_filter_name} = "InexactValue answer checker";
+#   $creditSF = $self->getFlag("creditSigFigs");
+#   $creditValue = $self->getFlag("creditValue");
+#   $failOnValueWrong = $self->getFlag("failOnValueWrong");
+
+#   $ans->score(0); # assume failure
+# }
 
 sub clone {
     my $self = shift;
