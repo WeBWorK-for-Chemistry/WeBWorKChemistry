@@ -1,3 +1,6 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
 
 ##############################################
 
@@ -11,11 +14,11 @@ loadMacros(
   "answerHints.pl",
   "niceTables.pl",
   "parserPopUp.pl",
-  #"contextScientificNotation.pl",
   "contextInexactValue.pl",
-  "parserNumberWithUnits.pl",
-  "contextInexactValueWithUnits.pl"
-
+  "contextInexactValueWithUnits.pl",
+  "parserConversionFactor.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
 );
 
 HEADER_TEXT(<<EOF);
@@ -31,6 +34,7 @@ HEADER_TEXT(<<EOF);
   line-height: 1px;
   width: 100%;
   border-bottom: 1px solid black;
+  margin-bottom: 4px;
   }
   .conversionEQmath {
     padding: 1em;
@@ -50,13 +54,13 @@ sub conversionEQ {
     $html .= '<div>';
       $html .= $start;
     $html .= '</div>';
-    for my $i (0..$n-1) {
+    for ($i=0; $i < $n; $i+=2) {
       $html .= '<div class="conversionEQmath">';
          $html .= math_ev3('\times');
       $html .= '</div>';
       $html .= '<div class="conversionEQcol">';
          $html .= '<div>';
-             $html .= $colsref->[$i][0];
+             $html .= $colsref->[$i];
          $html .= '</div>';       
          $html .= '<div class="conversionFractionBar">';
              $html .= '<svg height="1" width="40">';
@@ -64,7 +68,7 @@ sub conversionEQ {
              $html .= '</svg>';
          $html .= '</div>';       
          $html .= '<div>';
-             $html .= $colsref->[$i][1];
+             $html .= $colsref->[$i+1];
          $html .= '</div>';       
       $html .= '</div>';
   }
@@ -78,153 +82,68 @@ sub conversionEQ {
   MODES(HTML=>$html);
 }
 
+install_weighted_grader();
+
 Context("Numeric");
 
 $m = list_random(26.5, 32.5, 17.3, 11.4, 10.6, 41.7);
 
-@factor = ( "km", "cm", "m", "mm");
 
-$b1 = 1;
-$b2 = 1000;
-$b3 = 1;
-$b4 = 1000;
 
 Context("InexactValueWithUnits");
 
-# Context()->flags->set(snDigits=>2);
+$given = InexactValueWithUnits($m, 'mi/hr');
 
-# $a = $m*$b1/$b2*$b3/$b4;
+# using 1 mi = 1.609 meters
+$n1 = InexactValueWithUnits('1.609', 'km'); 
+$d1 = InexactValueWithUnits(['1', 9**9**9], 'mi'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
 
-# $ans = InexactValue("$a");
+# using 1 km = 1e3 meters
+$n2 = InexactValueWithUnits(['1000', 9**9**9], 'm'); # make this exact (infinite s.f.)
+$d2 = InexactValueWithUnits(['1', 9**9**9], 'km'); # make this exact (infinite s.f.)
 
-# $newUnit = {name=>'yd',conversion=>{factor=>0.9144,m=>1}};
+# using 1 hr = 60 min
+$n3 = InexactValueWithUnits(['1', 9**9**9], 'hr'); # make this exact (infinite s.f.)
+$d3 = InexactValueWithUnits(['60', 9**9**9], 'min'); # make this exact (infinite s.f.)
 
- $given = InexactValueWithUnits('3.0', 'mi/hr');
- $convs = [
-   [InexactValueWithUnits(['1', 9**9**9], 'mi'),InexactValueWithUnits(['3', 9**9**9], 'ft')],
-   [InexactValueWithUnits(60, 'min'),InexactValueWithUnits(1, 'hr')]
- ];
- $answer = InexactValueWithUnits('60','m/s');
+# using 1 min = 60 s
+$n4 = InexactValueWithUnits(['1', 9**9**9], 'min'); # make this exact (infinite s.f.)
+$d4 = InexactValueWithUnits(['60', 9**9**9], 's'); # make this exact (infinite s.f.)
 
+$answer = $given * $n1 / $d1 * $n2 / $d2 * $n3 / $d3 * $n4 / $d4;
 
-$answerInexact = InexactValueWithUnits('62.10', 'm/s');
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter (not ready yet!) will adjust how the scoring is done.
 
-# $testold = $given*$given;
+$ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4,$answer)->asDimensionalAnalysis($given);
 
-$test = InexactValueWithUnits('3.1', 'ft');
-$test2 = InexactValueWithUnits('4.21', 'feet');
-$testAdd = $test + $test2;
-
-$testSub = $test - $test2;
-
-$testMult = $test * $test2;
-
-$test3 = InexactValueWithUnits('3.1', 'kg*m^2');
-$test4 = InexactValueWithUnits('4.21', 'm^2');
-$testDiv = $test3 / $test4;
-
-$test5 = InexactValueWithUnits('7.000', 'kg*m^2');
-$test6 = InexactValueWithUnits('2.000', 'kg*m^2');
-$testUnitless = $test5 / $test6;
-
-# $test5 = InexactValueWithUnits('4.00', 'ft/s');
-
-#$result = $answerInexact->cmp_parse;
-
-# %result= Units::evaluate_units($test3->{units});
-# $debug='';
-# # $units = $self->{units_ref};
-#   foreach $key (keys %result) {
-#     $debug = $debug . "$key => $result{$key}\n";
-#   }
-        
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
 ##############################################
 
 TEXT(beginproblem());
 
-#BEGIN_PGML
-#
-#Using the following equality, create the correct conversion factor using the drop down menus and solve the problem below:
-#
-#*[$b1] kilometers = [$b2] meters*
-#
-#*[$b3] meter = [$b4] millimeters*
-#
-#Convert [$m] mm to kilometers.
-#
-#
-#[@ LayoutTable(
-#  [
-#    [' ',PGML('[___]{$b1}[_]{$popa}'),' ',PGML('[___]{$b3}[_]{$popb}'),' '],
-#    [PGML('[$m] mm x '),PGML('----'),PGML('x'),PGML('----'), PGML(' = [_______]{$ans}[_]{$pope}')],
-#    [' ', PGML('[___]{$b2}[_]{$popc}'),' ',PGML('[___]{$b4}[_]{$popd}'),' ']
-#  ], 
-#  align => 'X X X X X',
-#  center => 0,
-#  )
-#@]* 
-
-#[@conversionEQ($given,[[ans_rule(10),ans_rule(10)],[ans_rule(10),ans_rule(10)]],ans_rule(10));@]*
-#[________]{$answerInexact}
-#[$result->{ans_hash}]
-
 BEGIN_PGML
 
-[@conversionEQ($given,[[ans_rule(10),ans_rule(10)],[ans_rule(10),ans_rule(10)]],ans_rule(10));@]*
-
-[$answerInexact]
-
-[`[$answerInexact]`]
-
-[_________]
-
-[`[$test] + [$test2] = [$testAdd]`] 
-
-[`[$test] - [$test2] = [$testSub]`] 
-
-[`[$test] \times [$test2] = [$testMult]`] 
-
-[`\frac{[$test3]}{[$test4]} = [$testDiv]`] 
-
-[`\frac{[$test5]}{[$test6]} = [$testUnitless]`] 
-
+[@conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
  
 END_PGML
-#[________]{$answerInexact}
-# if (Parser::Legacy::InexactValueWithUnits::compareUnitHash($correct->{units_ref}, $student->{units_ref}) {
-# }
 
-for my $i (0,1) {
-  for my $j (0,1) {
-    ANS($convs->[$i][$j]->cmp->withPostFilter(sub {
-      my $ans = shift;
-      if ($ans->{score}) {
-        my $correct = $ans->{correct_value};
-        my $student = $ans->{student_value};
-        if ($correct->{units} ne $student->{units}) {
-          $ans->{ans_message} = "Your conversion factor equals one, but your units do not cancel correctly";
-          $ans->score(0);
-        }
-      }
-      return $ans;
-    }));
-  }
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
 }
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
 
-ANS($answer->cmp->withPostFilter(sub {
-  my $ans = shift;
-  if ($ans->{score}) {
-    my $correct = $ans->{correct_value};
-    my $student = $ans->{student_value};
-    if ($correct->getUnits() ne $student->getUnits()) {
-      $ans->{ans_message} = "Your conversion factor equals one, but your units do not cancel correctly";
-      $ans->score(0);
-    }
-  }
-  return $ans;
-}));
-
-ANS($answerInexact->cmp);
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
 
 ##############################################
 BEGIN_TEXT
