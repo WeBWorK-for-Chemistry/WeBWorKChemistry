@@ -1,0 +1,93 @@
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGinfo.pl",
+   "contextArbitraryString.pl"
+   #"communication.pl"
+   #"source.pl",        # allows code to be displayed on certain sites.
+   #"PGcourse.pl",      # Customization file for the course
+);
+#warn ref($WeBWorK::CGI);
+
+HEADER_TEXT(<<EOF);
+<script>
+	function processChanges(jsmeEvent) {
+		var jsme = jsmeEvent.src;
+		var smiles = jsme.smiles();
+		var jmeFile = jsme.jmeFile();
+		document.getElementById('jmeFile').value = jmeFile;
+		document.getElementById('drawingSMILES').value = smiles;
+	}
+    function jsmeOnLoad() {
+        jsmeApplet = new JSApplet.JSME("jsme_container", "380px", "340px", {
+            "options" : "oldlook,marker"
+		});
+		jsmeApplet.setCallBack("AfterStructureModified", processChanges);
+		var jmeFile = document.getElementById('jmeFile').value;
+		jsmeApplet.readMolecule(jmeFile);
+	}
+	
+</script>
+<script type="text/javascript" language="javascript" src="/webwork2_course_files/123/jsme/jsme.nocache.js"></script>
+
+EOF
+
+$drawingTool = MODES(
+	HTML=>
+	"<div id='jsme_container'></div>",
+	TeX =>
+	"An embedded molecule drawing app."
+);
+
+#listVariables();
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+# Show which answers are correct and which ones are incorrect
+$showPartialCorrectAnswers = 1;
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+
+##############################################################
+#
+#  Text
+#
+#
+
+Context()->normalStrings;
+my $jmeFile = $inputs_ref->{"jmeFile"};
+my $drawingSMILES = $inputs_ref->{"drawingSMILES"};
+
+TEXT(qq!<h3>Draw the structure for butane in the box below:</h3>!);
+
+TEXT(qq!$drawingTool!);
+
+TEXT(qq!<input type='hidden' name="drawingSMILES" id="drawingSMILES" value="$drawingSMILES" /><br />!);
+TEXT(qq!<input type='hidden' name="jmeFile" id="jmeFile" value="$jmeFile" /><br />!);
+
+RECORD_FORM_LABEL('jmeFile');
+NAMED_HIDDEN_ANS_RULE('drawingSMILES');
+
+	
+##############################################################
+#
+#  Answers
+#
+#
+
+Context("ArbitraryString");
+LABELED_ANS('drawingSMILES',Compute("CCCC")->cmp());
+
+
+ENDDOCUMENT();        
