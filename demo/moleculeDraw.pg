@@ -1,4 +1,6 @@
 
+#  This file needs JSME javascript available to webwork.  This file assumes it is in the html folder under the course folder.
+
 ########################################################################
 
 DOCUMENT();      
