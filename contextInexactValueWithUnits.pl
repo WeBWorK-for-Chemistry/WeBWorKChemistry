@@ -136,6 +136,14 @@ sub new {
 
 	my %Units = $units ? Parser::Legacy::ObjectWithUnits::getUnits($units) : %fundamental_units;
 
+	#quick loop to remove fundamental units that are zero
+	@keys = (keys %Units);
+	for ($i=scalar @keys -1;$i>=0; $i--){
+		if ($Units{$keys[$i]} == 0){
+			delete $Units{$keys[$i]};
+		}
+	}
+
 	#warn "Trying to make:  ${Units{s}}";
 	Value::Error($Units{ERROR}) if ($Units{ERROR});
 	# make a copy of the inexact value to do comparisons with
@@ -621,11 +629,12 @@ sub process_unit_for_stringCombine {
   return @numerator_array;
 }
 
+# returns an array of hashes with properties: unitHash (hash containing fundamentals), name (string), power (number)
 sub process_term_for_stringCombine {
 	my $string = shift;
-  my $isNumerator = shift;
+	my $isNumerator = shift;
 	my $options = shift;
-
+	
 	my $fundamental_units = \%Units::fundamental_units;
 	my $known_units = \%Units::known_units;
 	
@@ -637,7 +646,7 @@ sub process_term_for_stringCombine {
 	  $known_units = $options->{known_units};
 	}
 	
-  my @known_unit_hash_array = ();
+  	my @known_unit_hash_array = ();
 	#my %unit_hash = %$fundamental_units;
 	if ($string) {
 
@@ -711,6 +720,16 @@ sub process_factor_for_stringCombine {
 				$unit_hash{$u} = ($unit_hash{$u}*(10**$prefixExponent));  # calculate the correction factor for the unit
 			}
 		}
+		#quick loop to remove fundamental units that are zero
+		@keys = (keys %unit_hash);
+		for ($i=scalar @keys -1;$i>=0; $i--){
+			#warn 'searching '.$keys[$i] . ':  '.%unit_hash{$keys[$i]};
+			if ($unit_hash{$keys[$i]} == 0){
+			#	warn 'got one';
+				delete $unit_hash{$keys[$i]};
+			}
+		}
+
 		my %unit_name_hash = (name=> $unit_prefix.$unit_base, unitHash => \%unit_hash, power=>$power);   # $reference_units contains all of the known units.
 		return %unit_name_hash;
 
