@@ -120,6 +120,9 @@ $answer = $given * $n1 / $d1 * $n2 / $d2 * $n3 / $d3 * $n4 / $d4;
 
 $ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4,$answer)->asDimensionalAnalysis($given);
 
+$texProblem = '[``' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}``]';
+
+$solution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4],$answer);
 # use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
 ##############################################
 
@@ -127,7 +130,9 @@ TEXT(beginproblem());
 
 BEGIN_PGML
 
-[@conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+[@ MODES(HTML=>conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)), TeX=>''); @]*
+
+[@ MODES(HTML=>'', TeX=>$texProblem); @]**
  
 END_PGML
 
@@ -168,12 +173,12 @@ For more information on unit conversion, click [@ htmlLink( protect_underbar("ht
 END_PGML_HINT
 ##############################################
 
-#BEGIN_PGML_SOLUTION
 
+BEGIN_PGML_SOLUTION
 
+[``[$solution]``]
 
-
-#END_PGML_SOLUTION
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
 
