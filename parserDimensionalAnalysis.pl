@@ -173,6 +173,7 @@ sub asDimensionalAnalysis {
 				$roundingErrorAnswer /= $denominator;
 			}
 			push @possibleRoundingErrorAnswers, $roundingErrorAnswer;
+
 			my $roundingErrorAnswer = $given;
 						for ($i = 0; $i < scalar @correctArray - 1; $i+=2){
 				my $numerator = $correctArray[$i];
@@ -215,6 +216,137 @@ sub asDimensionalAnalysis {
 	);
 }
 
+package DimensionalAnalysis;
+
+sub generateExplanation {
+
+	# starts with an array in case you want to separate numerator part and denominator part
+	my $startingArrayRef = shift; 
+	# array of conversion factors organized as [numerator,denominator,numerator,denominator,...] 
+	my $conversionFactorsRef = shift;
+	# final pre-calculated answer, NOT an array because we want it shown as one number
+	my $finalAnswer = shift;
+
+	# this is an options optional parameter
+	my $options = shift;
+
+	my $explanation = '';
+
+	@startingArray = @{ $startingArrayRef };
+
+	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units});
+	my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;
+
+	# This is only for the first value!
+	if (scalar(@startingArray) == 2) {
+		$explanation .= '\frac{';
+		$explanation .= @startingArray[0]->TeX;
+		$explanation .= '}{';
+		$explanation .= @startingArray[1]->TeX;
+		$explanation .= '}';
+	} else {
+
+		my $val = $startingArray[0]->{inexactValue};
+		my $numeratorUnits = '';
+		my $denominatorUnits = '';
+				
+		@unitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($startingArray[0]->{units});
+		foreach $unit (@unitArray){
+			$found = 0;
+			for ($i=0; $i < scalar @finalAnswerUnitArrayCopy; $i++){
+		 		if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($unit->{unitHash}, $finalAnswerUnitArrayCopy[$i]->{unitHash})){
+					# Same so do NOT cancel out.
+					splice(@finalAnswerUnitArrayCopy,$i,1);
+					if ($unit->{power} > 0) {
+						$numeratorUnits .= $unit->{name};
+						if ($unit->{power} > 1){
+							$numeratorUnits .= '^{'.$unit->{power}.'}';
+						}
+					} else {
+						$denominatorUnits .= $unit->{name};
+						if ($unit->{power} < -1){
+							$denominatorUnits .= '^{'.abs($unit->{power}).'}';
+						}
+					}
+					$found=1;
+					last;
+				} 
+			}
+			if ($found==0){
+				if ($unit->{power} > 0) {
+					$numeratorUnits .= '\cancel{\rm ';
+					$numeratorUnits .= $unit->{name};
+					if ($unit->{power} > 1){
+						$numeratorUnits .= '^{'.$unit->{power}.'}';
+					}
+					$numeratorUnits .= '}';
+				} else {
+					$denominatorUnits .= '\cancel{\rm ';
+					$denominatorUnits .= $unit->{name};
+					if ($unit->{power} < -1){
+						$denominatorUnits .= '^{'.abs($unit->{power}).'}';
+					}
+					$denominatorUnits .= '}';
+				}
+			}
+		}
+
+		if ($denominatorUnits eq ''){
+			$explanation .= $val .$numeratorUnits;
+		} else{
+			$explanation .= '\frac{' .$val. $numeratorUnits . '}{' .'1'. $denominatorUnits . '}';
+		}
+		
+	}
+
+	
+
+	# now parse the dimensional analysis part
+	@conversionFactors = @{ $conversionFactorsRef };
+	for ($i=0; $i < scalar @conversionFactors; $i++){
+		$isDenominator = $i % 2;
+		$found = 0;
+		#warn 'Factor unit: '.$conversionFactors[$i]->{units};
+		for $key (keys %{$conversionFactors[$i]->{units_ref}}){
+			#warn $key .': '. $conversionFactors[$i]->{units_ref}->{$key};
+		}
+		for ($j=0; $j < scalar @finalAnswerUnitArrayCopy; $j++){
+			
+			#warn 'Answer unit: '.$finalAnswerUnitArrayCopy[$j]->{name}.'^'.$finalAnswerUnitArrayCopy[$j]->{power};
+			for $key (keys %{$finalAnswerUnitArrayCopy[$j]->{unitHash}}){
+				#warn $key .': '. $finalAnswerUnitArrayCopy[$j]->{unitHash}->{$key};
+			}
+
+			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($conversionFactors[$i]->{units_ref}, $finalAnswerUnitArrayCopy[$j]->{unitHash})){
+				# Same so do NOT cancel out.
+				splice(@finalAnswerUnitArrayCopy,$j,1);	
+
+				if ($isDenominator){
+					$explanation .= '{'. $conversionFactors[$i]->TeX . '}';
+				} else {
+					$explanation .= '\times';
+					$explanation .= '\frac{' . $conversionFactors[$i]->TeX . '}';
+				}
+				$found=1;
+				last;
+			}
+		}
+		#doesn't match units with answer, so cancel it.
+		if ($found == 0){
+			if ($isDenominator){
+				$explanation .= '{'. $conversionFactors[$i]->{inexactValue} . '\cancel{\rm '. $conversionFactors[$i]->{units} . '}}';
+			} else {
+				$explanation .= '\times';
+				$explanation .= '\frac{' . $conversionFactors[$i]->{inexactValue} . '\cancel{\rm ' . $conversionFactors[$i]->{units} . '}}';
+			}
+		}
+	}
+
+	$explanation .= '=' . $finalAnswer->TeX;
+
+	return $explanation;
+
+}
 
 
 1;
