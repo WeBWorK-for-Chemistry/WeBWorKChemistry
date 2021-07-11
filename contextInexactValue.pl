@@ -348,13 +348,21 @@ sub string {
   @valArray = $self->value;# + 0;
   $valAsNumber = $valArray[0];
 
+  
+
   if ($self->preferScientificNotation() || $forceScientific) {
     $decimals = $self->sigFigs() - 1;
     
     if ($preventClean) {
+      
           return sprintf("%.${decimals}e", $self->roundingHack($valAsNumber));
         } else {
-          return $self->cleanSciText(sprintf("%.${decimals}e", $self->roundingHack($valAsNumber) ));
+          # warn $valAsNumber;
+          $log = main::floor(log(abs($valAsNumber))/log(10));
+          # warn $log*-1;
+          # warn $decimals;
+          $rounded = main::Round($valAsNumber,($log*-1) + $decimals);
+          return $self->cleanSciText(sprintf("%.${decimals}e", $rounded));
         }   
 
   } else {
@@ -477,7 +485,8 @@ sub string {
 sub roundingHack {
   my $self = shift;
   my $s = shift;
-  return main::Round($s, 13);
+  
+  return main::Round($s,20);
   #Round($val, +for decimal/-for other way);
   # floating point rounding causes errors
   # 5.555 is stored as 5.554999999999999999 something... and it will round down to 5.55, when we want it to round up to 5.56!
@@ -492,17 +501,21 @@ sub roundingHack {
     @esplit3 = split(/e/, $s);
     if ($esplit3[0] =~ /\./){
       $hackedNumber = $esplit3[0].'000000001e'.$esplit3[1];
+      
       $hackedNumber = $hackedNumber + 0; 
     } else {
       $hackedNumber = $esplit3[0].'.000000001e'.$esplit3[1];
+      
       $hackedNumber = $hackedNumber + 0;
     }
   }else {
     if ($s =~ /\./){
       $hackedNumber = "$s".'000000001';
+      
       $hackedNumber = $hackedNumber + 0; 
     } else {
       $hackedNumber = "$s".'.000000001';
+      
       $hackedNumber = $hackedNumber + 0;
     }
   }
@@ -661,7 +674,16 @@ sub generateSfRoundingExplanation {
   if (!defined $roundTo || !$roundTo){
     return "Error:  Didn't specify a number of digits to round to.";
   }
-  my $detailedExplanation = shift;
+  my $options = shift;
+  my $suppressStart=0;
+  if (exists $options->{suppressStart}){
+    $suppressStart = $options->{suppressStart};
+  }
+  # my $outputTextOnly;
+  # if (exists $options->{outputTextOnly}){
+  #   $outputTextOnly = $options->{outputTextOnly};
+  # }
+  
   my $useSciNot = $self->preferScientificNotation();
 
   my $s = $self->string(true);
@@ -678,10 +700,12 @@ sub generateSfRoundingExplanation {
   $decimalRemoved = $trimmedData =~ s/\.?\,?//r;
 
   my $explanation = '';
+  my $textExplanation = '';
 
-  if ($detailedExplanation){
+  if ($suppressStart != 1) {
     $explanation = $originalValue->TeX . '~\\text{with ' . $roundTo . ' sig figs }→~'; 
   }
+
 
     # need to remove digits
   if (length($decimalRemoved) > $roundTo ) {
@@ -712,14 +736,17 @@ sub generateSfRoundingExplanation {
 
     if ($useSciNot) {
       $explanation = $explanation . '\\overbrace{'. $keepPart.'}^{\\text{keep}}~'.'\\overbrace{\\underset{↑}{'. $firstDigitToDrop . '}'.$restToDrop .'}^{\\text{reject}}\times 10^{' . $trailingExponent . '}';
+      $textExplanation = " Keep the " . $keepPart . " part of the original number. The rest will be dropped as insignificant except for the exponential portion. "
     } else {     
       $explanation = $explanation. $leadingZeros .'\\overbrace{'. $keepPart .'}^{\\text{keep}}~'.'\\overbrace{\\underset{↑}{'. $firstDigitToDrop . '}'.$restToDrop . '}^{\\text{reject}}';
+      $textExplanation = " Keep the " . $keepPart . " part of the original number. The rest will be considered insignificant."
     }
 
     $roundingExplanation = $firstDigitToDrop >= 5 ? '5 or greater' : 'less than 5';
     $roundingDirection = $firstDigitToDrop >= 5 ? 'up' : 'down';
     $explanation = $explanation . "\\xrightarrow[\\text{$roundingExplanation, round $roundingDirection}]{\\text{since $firstDigitToDrop at arrow is }}";
-          
+    $textExplanation = $textExplanation . " Since the first insignificant digit after is " . $roundingExplanation . ", the last significant digit needs to be rounded " . $roundingDirection ."."; 
+
     if ($useSciNot){
       $explanation = $explanation. $self->TeX;
     } else {
@@ -738,12 +765,14 @@ sub generateSfRoundingExplanation {
         }
       }
       $explanation = $explanation .$leadingZeros. $keepPart;
+      
     }
 
     if ($s =~ /e/ && !$useSciNot) {
       #if scientific despite not prefering it, we HAVE to use sci notation to display correct sigfigs
       $explanation = $explanation . "\\xrightarrow[\\text{required for $roundTo sig figs}]{\\text{scientific notation}}";
       $explanation = $explanation . $self->TeX;
+      $textExplanation = $textExplanation . " Even though the number was using standard notation, we are forced to use scientific notation to display the correct number of significant figures in this case."
     } 
 
   
@@ -754,24 +783,33 @@ sub generateSfRoundingExplanation {
     } else {
       $explanation = $explanation. $leadingZeros .'\\overbrace{'. $trimmedData . '}^{\\text{keep}}~';
     }
+    $textExplanation = $textExplanation . " The provided number does not have enough significant figures.";
 
   
     $originalSF = $originalValue->sigFigs();
     $zeroesNeeded = $roundTo - $originalSF;
     $explanation = $explanation . "\\xrightarrow[\\text{Need to add $zeroesNeeded zeros}]{\\text{Only $originalSF sig figs}}";
-
+    $textExplanation = $textExplanation . " We must add " . $zeroesNeeded . " extra zeroes to the end of this number.";
     if ($s =~ /e/ && !$useSciNot) {
       #if scientific despite not prefering it, we HAVE to use sci notation to display correct sigfigs
       $explanation = $explanation . '✘' . "\\xrightarrow[\\text{must use scientific notation}]{\\text{Impossible with standard notation}}";
+      $textExplanation = $textExplanation . " Even though the number was using standard notation, we are forced to use scientific notation to display the correct number of significant figures in this case.";
     } 
     $explanation = $explanation . $self->TeX;
 
   } else {
     #perfect length already, do nothing
     $explanation = $explanation . 'Already has correct number of significant figures!';
+    $textExplanation = $textExplanation . " This number already has the correct number of significant figures.";
   }
+
+
+  my $result = {
+    TeX => $explanation,
+    text => $textExplanation
+  };
+  return $result;
   
-  return $explanation;
 }
 
 
@@ -949,6 +987,7 @@ sub generateMultiplyDivideExplanation {
   }
 
   my $explanation = '';
+  my $textExplanation = '';
 
   $valueFirstR = $valueFirst;
   if ($useUnroundedFirst){
@@ -1020,7 +1059,9 @@ sub generateMultiplyDivideExplanation {
   $unroundedValueCleaned = $useSciNot ? sprintf('%e',$self->valueAsNumber) : sprintf('%f', $self->valueAsNumber);
   $newInexact = $self->new("$unroundedValueCleaned", $minSF);
   $sfExplained = $newInexact->generateSfRoundingExplanation($minSF);
-  $explanation = $explanation . $sfExplained ;
+  $explanation = $explanation . $sfExplained;
+
+ 
 
   return $explanation;
 }

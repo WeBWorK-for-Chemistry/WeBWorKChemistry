@@ -19,7 +19,6 @@ loadMacros(
    "contextInexactValue.pl"
 );
 
-
 ##############################################################
 #
 #  Setup
@@ -53,11 +52,11 @@ $sf3 = 3;
 $ans3 = InexactValue($val3,$sf3);
 $ans3Explanation = $ans3->generateSfRoundingExplanation($sf3, true);
 
-$val4 = "5.566655e-15";
+$val4 = "5.56655555e-15";
 $inex4 = InexactValue($val4);
-$sf4 = 3;
+$sf4 = 5;
 $ans4 = InexactValue($val4,$sf4);
-$ans4Explanation = $ans4->generateSfRoundingExplanation($sf4, true);
+$ans4Explanation = $ans4->generateSfRoundingExplanation($sf4, {suppressStart => 0});
 
 $val5 = "0.0035";
 $sf5 = 4;
@@ -88,6 +87,8 @@ $ans8Explanation = $ans8->generateSfRoundingExplanation($sf8, true);
 # Print problem number and point value (weight) for the problem
 TEXT(beginproblem());
 
+
+
 BEGIN_PGML
 
 Round [`[$val1]`] to [$sf1] significant figures:  [________]{$ans1}
@@ -97,6 +98,8 @@ Round [`[$val1]`] to [$sf1b] significant figures:  [________]{$ans1b}
 Convert [`[$val2]`] to have [$sf2] signficant figures: [________]{$ans2}
 
 Round [`[$val3]`] to [$sf3] signficant figures: [________]{$ans3}
+
+
 
 Round [`[$inex4]`] to [$sf4] significant figures: [________]{$ans4}
 
@@ -111,25 +114,37 @@ Round [`[$val8]`] to [$sf8] signficant figures:  [________]{$ans8}
 END_PGML
 
 
+
 BEGIN_SOLUTION
 
-\[ $ans1Explanation \]
 
-\[ $ans1bExplanation \]
 
-\[ $ans2Explanation \]
+$ans1Explanation->{text}
+\[ $ans1Explanation->{TeX} \]
 
-\[ $ans3Explanation \]
+$ans1bExplanation->{text}
+\[ $ans1bExplanation->{TeX} \]
 
-\[ $ans4Explanation \]
+$ans2Explanation->{text}
+\[ $ans2Explanation->{TeX} \]
 
-\[ $ans5Explanation \]
+$ans3Explanation->{text}
+\[ $ans3Explanation->{TeX} \]
 
-\[ $ans6Explanation \]
+$ans4Explanation->{text}
+\[ $ans4Explanation->{TeX} \]
 
-\[ $ans7Explanation \]
+$ans5Explanation->{text}
+\[ $ans5Explanation->{TeX} \]
 
-\[ $ans8Explanation \]
+$ans6Explanation->{text}
+\[ $ans6Explanation->{TeX} \]
+
+$ans7Explanation->{text}
+\[ $ans7Explanation->{TeX} \]
+
+$ans8Explanation->{text}
+\[ $ans8Explanation->{TeX} \]
 
 END_SOLUTION
 
