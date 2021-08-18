@@ -19,6 +19,8 @@ sub Init {
 	$context->functions->clear;
 	$context->strings->clear;
 
+	$context->strings->add(infinity => {infinite => 1});
+	$context->strings->add(inf => {infinite => 1});
 	#
 	#  Don't reduce constant values (so 10^2 won't be replaced by 100)
 	#
@@ -55,7 +57,7 @@ package InexactValue::InexactValue;
 
 our @ISA = qw(Value);
 
-# definition for infinity
+# practical definition for infinity for sig fig count
 my $inf    = 9**9**9;  
 
 sub new {
@@ -71,7 +73,7 @@ sub new {
 	$x = [$x] unless ref($x) eq 'ARRAY';
 	# Value::Error("Can't convert ARRAY of length %d to %s",scalar(@{$x}),Value::showClass($self))
 	#   unless (scalar(@{$x}) == 1);
-	
+
 	my $argCount = @$x;
 	my $sigFigCount = 0;
 	my $isScientificNotation = false;
@@ -98,7 +100,12 @@ sub new {
 			# 2nd arg is an options hash
 			$options = $x->[1];
 		} else {
-			$sigFigCount = $x->[1];
+			# check for infinity string first
+			if (ref $x->[1] eq 'Value::Infinity') {
+				$sigFigCount = $inf;
+			} else {
+				$sigFigCount = $x->[1];
+			}
 		}
 
 		if ($argCount > 2)
@@ -115,7 +122,6 @@ sub new {
 	} else {
 		# one argument means that a text value representing the significant figures value has been provided
 		# verify the string contains a number we can match
-
 		($matchNumber) = $x->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
 		unless (defined $matchNumber) { 
 			$temp = $x->[0];
@@ -189,7 +195,6 @@ sub new {
 
 sub make {
 	my $self = shift;
- 
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	#Value::Error($self->value);
 	#my $x = shift; $x = [$x,@_] if scalar(@_) > 0; # not going to worry about this scenario yet.
@@ -221,7 +226,12 @@ sub make {
 			# 2nd arg is an options hash
 			$options = $self->[1];
 		} else {
-			$sigFigCount = $self->[1];
+			# check for infinity string first
+			if ($x->[1] eq 'infinity' || $x->[1] eq 'Infinity') {
+				$sigFigCount = $inf;
+			} else {
+				$sigFigCount = $x->[1];
+			}
 		}
 
 		if ($argCount > 2)
@@ -1453,6 +1463,7 @@ sub cmp_parse {
 
 	$currentCredit = 0;
 
+	warn $student;
 	# Edge case of entering zero.  This is not perfect.  Theoretically, we could have zero with sig figs... but skip for now.
 	if ($student->valueAsNumber == 0){
 		if ($correct->valueAsNumber == 0){
@@ -1533,6 +1544,7 @@ sub compareValue {
 	$failOnValueWrong = $options->{"failOnValueWrong"};
 
 	my $currentCredit = 0;
+
 
 	my $min = $self->sigFigs() < $student->sigFigs() ? $self->sigFigs() : $student->sigFigs();
 	if ($min < 1){
