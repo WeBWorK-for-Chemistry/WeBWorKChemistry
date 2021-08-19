@@ -58,8 +58,9 @@ $ans1Exp = $ans1->generateMultiplyDivideExplanation($ival1, $ival2, -1); # show 
 
 Combination operations are harder to do, but still possible:
 ![image](https://user-images.githubusercontent.com/7821384/130149521-80adb9a1-c535-4c61-97ae-6f10c13bc01f.png)
+![image](https://user-images.githubusercontent.com/7821384/130150211-769e9d11-b400-4632-8e13-f76004894457.png)
 
-
+See the demo page for sigFigCombinationProblem.pg to see how this is done.
 
 # InexactValueWithUnits
 
