@@ -1112,7 +1112,7 @@ sub generateMultiplyDivideExplanation {
 	# may need to force more digits under extreme sig figs cases
 	$unroundedValueCleaned = $useSciNot ? sprintf('%e',$self->valueAsNumber) : sprintf('%f', $self->valueAsNumber);
 	$newInexact = $self->new("$unroundedValueCleaned", $minSF);
-	$sfExplained = $newInexact->generateSfRoundingExplanation($minSF);
+	$sfExplained = $newInexact->generateSfRoundingExplanation($minSF)->{TeX};
 	$explanation = $explanation . $sfExplained;
 
  
@@ -1463,7 +1463,7 @@ sub cmp_parse {
 
 	$currentCredit = 0;
 
-	warn $student;
+	# warn $student;
 	# Edge case of entering zero.  This is not perfect.  Theoretically, we could have zero with sig figs... but skip for now.
 	if ($student->valueAsNumber == 0){
 		if ($correct->valueAsNumber == 0){
