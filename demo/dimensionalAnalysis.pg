@@ -140,7 +140,7 @@ BEGIN_PGML
 Convert [$given] to m/s.  Use the equalities: 1 mi = 1.609 km, 1 min = 60 s, and 1 hr = 60 min
 
 [@ conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)) @]*
-[@ MODES(TeX=>$texProblem) @]**
+[@ MODES(TeX=>$texProblem, HTML=>'') @]**
 
 END_PGML
 
