@@ -17,11 +17,15 @@ You can even explicitly make the value exact.  (This is useful when you want to 
 
 `InexactValue(2, Infinity);`
 
+**`InexactValue` internally stores the unrounded value and only presents a rounded value based on the stored number of significant figures.**
+
 The methods include getting the number of sig figs.  This is useful for questions asking a student how many significant figures a number might have: 
 
 `$inexactValue->sigFigs`
 
 Best of all, you can do math with InexactValue and the correct significant figures are calculated according to the standard rules taught in most chemistry courses.  
+**Math operations are performed only on the internally stored unrounded value.  Concurrent operations are performed to calculate the new number of sig figs.**
+
 ```
 $result = InexactValue("4.00") * InexactValue("2.0");
 # $result contains an InexactValue with value of 8 and 2 significant figures.  The string output will be "8.0". 
@@ -34,6 +38,28 @@ A student could write 3.2, 3.3, 3.4, or 3.5 as the answer, especially if viewing
 $m0 = InexactValue(3.3, 2, { tolerance => 0.2});
 ```
 There is also a method called `simpleUncertainty` that outputs the uncertainty value for an intro-level chemistry problem.  (i.e. +/- 1 for the last significant digit).  If you would like to help develop a proper uncertainty value (i.e. adding absolute uncertainty and multiplying/dividing relative uncertainty), please open an issue and start submitting PRs!
+
+## Explanations
+
+There are many explanation generators built-in to this context.  
+![image](https://user-images.githubusercontent.com/7821384/130148314-0d25c72d-5063-4662-a0ec-7f706851b0d5.png)
+![image](https://user-images.githubusercontent.com/7821384/130148335-978cbee5-5099-4b2c-97b9-4c3a79d47a15.png)
+
+The preceding example uses `$val1->generateSfCountingExplanation(1);` to generate the solution.  The boolean parameter just tells it generate a more detailed version.
+
+There are also these:
+```
+$ans1Exp = $ans1->generateSfRoundingExplanation($sf1, 1);  # number of sig figs to round to, detailed
+$ans1Exp = $ans1->generateAddSubtractExplanation($ival1, $ival2, 1);  # show how the answer was calculated from the first two parameters, the third parameter incidicates adding
+$ans1Exp = $ans1->generateAddSubtractExplanation($ival1, $ival2, -1);  # show how the answer was calculated from the first two parameters, the third parameter incidicates subtracting
+$ans1Exp = $ans1->generateMultiplyDivideExplanation($ival1, $ival2, +1); # show how the answer was calculated from the first two parameters, the third parameter incidicates multiplying
+$ans1Exp = $ans1->generateMultiplyDivideExplanation($ival1, $ival2, -1); # show how the answer was calculated from the first two parameters, the third parameter incidicates dividing
+```
+
+Combination operations are harder to do, but still possible:
+![image](https://user-images.githubusercontent.com/7821384/130149521-80adb9a1-c535-4c61-97ae-6f10c13bc01f.png)
+
+
 
 # InexactValueWithUnits
 
