@@ -73,3 +73,23 @@ for ($i=0; $i<scalar @ansArr; $i++){
 WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
 ```
 So what is `asDimensionalAnalysis` doing?  First, it distinguishes the numerators and denominators as pairs that go together.  But the order does NOT matter.  The final parameter in the MultiAnswer part is always the answer.  `asDimensionalAnalysis` will recalculate the student's answer using their dimensional analysis and compare it to the student's provided answer.  
+
+In the demo area, there is a problem called conversionProblem.pg.  This file will output a problem that looks like this:
+![image](https://user-images.githubusercontent.com/7821384/130147502-22e56ab5-c70f-4697-b447-523f0e11c9e5.png)
+
+How do you get a student to put the correct values into the equality blanks?  Well, order doesn't matter if you use the `asEquality` method:
+```
+$equalityMultiAnswer = MultiAnswer($n1,$d1)->asEquality();
+```
+Now, the student can put 1L in either of the blanks as long as they put 1000mL in the other.
+
+The same applies to the pair of conversion factors in the second part of the problem:
+```
+$conversionFactorsMultiAnswer = MultiAnswer($n1,$d1,$d1,$n1)->asPairOfConversionFactors();
+```
+Since we need four answer blanks, we have to explicitly use four values despite them being repeated.  But the order the student enters the conversion factors doesn't matter again.
+
+This problem also shows a variation of the `asDimensionalAnalysis` problem.  Here, the given value needs to be entered into the correct space by the student. The $given variable is now a the MultiAnswer parameter and we also need to tell `asDimensionalAnalysis` to also grade the given value.  So the first blank is *not* part of a conversion factor. 
+```
+$ma = MultiAnswer($given,$n1,$d1,$answer)->asDimensionalAnalysis($given,{gradeGiven=>1});
+```
