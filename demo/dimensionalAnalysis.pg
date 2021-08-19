@@ -18,7 +18,8 @@ loadMacros(
   "contextInexactValueWithUnits.pl",
   "parserDimensionalAnalysis.pl",
   "parserMultiAnswer.pl",
-  "weightedGrader.pl"
+  "weightedGrader.pl",
+  "scaffold.pl"
 );
 
 HEADER_TEXT(<<EOF);
@@ -79,7 +80,8 @@ sub conversionEQ {
       $html .= $end;
   $html .= '</div>';
   $html .= '</div>';
-  MODES(HTML=>$html);
+
+  MODES(HTML=>$html, TeX=>'');
 }
 
 install_weighted_grader();
@@ -96,19 +98,19 @@ $given = InexactValueWithUnits($m, 'mi/hr');
 
 # using 1 mi = 1.609 meters
 $n1 = InexactValueWithUnits('1.609', 'km'); 
-$d1 = InexactValueWithUnits(['1', 9**9**9], 'mi'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+$d1 = InexactValueWithUnits(['1', Infinity], 'mi'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
 
 # using 1 km = 1e3 meters
-$n2 = InexactValueWithUnits(['1000', 9**9**9], 'm'); # make this exact (infinite s.f.)
-$d2 = InexactValueWithUnits(['1', 9**9**9], 'km'); # make this exact (infinite s.f.)
+$n2 = InexactValueWithUnits(['1000', Infinity], 'm'); # make this exact (infinite s.f.)
+$d2 = InexactValueWithUnits(['1', Infinity], 'km'); # make this exact (infinite s.f.)
 
 # using 1 hr = 60 min
-$n3 = InexactValueWithUnits(['1', 9**9**9], 'hr'); # make this exact (infinite s.f.)
-$d3 = InexactValueWithUnits(['60', 9**9**9], 'min'); # make this exact (infinite s.f.)
+$n3 = InexactValueWithUnits(['1', Infinity], 'hr'); # make this exact (infinite s.f.)
+$d3 = InexactValueWithUnits(['60', Infinity], 'min'); # make this exact (infinite s.f.)
 
 # using 1 min = 60 s
-$n4 = InexactValueWithUnits(['1', 9**9**9], 'min'); # make this exact (infinite s.f.)
-$d4 = InexactValueWithUnits(['60', 9**9**9], 's'); # make this exact (infinite s.f.)
+$n4 = InexactValueWithUnits(['1', Infinity], 'min'); # make this exact (infinite s.f.)
+$d4 = InexactValueWithUnits(['60', Infinity], 's'); # make this exact (infinite s.f.)
 
 $answer = $given * $n1 / $d1 * $n2 / $d2 * $n3 / $d3 * $n4 / $d4;
 
@@ -120,20 +122,26 @@ $answer = $given * $n1 / $d1 * $n2 / $d2 * $n3 / $d3 * $n4 / $d4;
 
 $ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4,$answer)->asDimensionalAnalysis($given);
 
-$texProblem = '[``' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}``]';
+$problem = 3;
+
+$texProblem = '[`' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}`]';
 
 $solution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4],$answer);
 # use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
 ##############################################
 
+#[@ MODES(HTML=>conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)), TeX=>''); @]*
+
+#[@ MODES(HTML=>'', TeX=>$texProblem); @]**
+
 TEXT(beginproblem());
 
 BEGIN_PGML
+Convert [$given] to m/s.  Use the equalities: 1 mi = 1.609 km, 1 min = 60 s, and 1 hr = 60 min
 
-[@ MODES(HTML=>conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)), TeX=>''); @]*
+[@ conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)) @]*
+[@ MODES(TeX=>$texProblem) @]**
 
-[@ MODES(HTML=>'', TeX=>$texProblem); @]**
- 
 END_PGML
 
 # This weights the final answer with X percentage and splits the rest among the conversion factors.
@@ -145,7 +153,8 @@ for ($i=0; $i<scalar @ansArr; $i++){
 	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
 }
 WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
-
+#Section::End();
+#Scaffold::End();
 # Without weighting, you could simply use this:
 # ANS($ma->cmp);
 # each answer blank will be worth the same amount of points.
