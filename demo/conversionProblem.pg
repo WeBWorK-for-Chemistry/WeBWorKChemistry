@@ -43,6 +43,7 @@ HEADER_TEXT(<<EOF);
   .conversionFactorGrouping{
       display:flex;
       justify-content:space-evenly;
+      align-items: center;
   }
   </style>  
 EOF
@@ -85,7 +86,7 @@ sub conversionEQ {
     $html .= $end;
     $html .= '</div>';
     $html .= '</div>';
-    MODES(HTML=>$html);
+    MODES(HTML=>$html, TeX=>'');
 }
 
 sub conversionFactor {
@@ -108,10 +109,7 @@ sub conversionFactor {
         $html .= '</div>';
     $html .= '</div>';
 
-    my $tex;
-    $tex = '\frac{\hspace{2cm}}{\hspace{2cm}}';
-
-    MODES(HTML=>$html, TeX=>$tex);
+    MODES(HTML=>$html, TeX=>'');
 }
 
 install_weighted_grader();
@@ -144,7 +142,9 @@ $conversionFactorsMultiAnswer = MultiAnswer($n1,$d1,$d1,$n1)->asPairOfConversion
 
 $ma = MultiAnswer($given,$n1,$d1,$answer)->asDimensionalAnalysis($given,{gradeGiven=>1});
 
-$texProblem = '[``' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}``]';
+$texConversionFactor = '\frac\{\hspace\{2cm\}\}\{\hspace\{2cm\}\}';
+$tconversionFactor = '\frac{a}{b}'; 
+#$texProblem = '' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}';
 
 $solution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
 # use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
@@ -159,9 +159,9 @@ BEGIN_PGML
 
 END_PGML
 $scaffold = Scaffold::Begin(
-    open_first_section => 0,
-    can_open => "when_previous_correct",
-    instructor_can_open => "when_previous_correct",
+    open_first_section => 1,
+    can_open => "always",
+    instructor_can_open => "always",
     is_open  => "correct_or_first_incorrect",
     hardcopy_is_open  => "always",
 );
@@ -172,7 +172,7 @@ BEGIN_PGML
 
 Write the equality statement you'll need to do the conversion:  
 
-[@ ans_rule(10) @]* = [@ ans_rule(10) @]*
+[@ ans_rule(20) @]* = [@ ans_rule(20) @]*
 
 END_PGML
 
@@ -183,33 +183,39 @@ Section::End();
 
 
 Section::Begin("Part 2: Conversion Factors");
-$groupStart = '<div class="conversionFactorGrouping">';
-$groupEnd = '</div>';
+$groupStart = '';
+$groupEnd = '';
 BEGIN_PGML
 
 Write the conversion factors that you can create from the equality:  
 
-[$groupStart]*
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+
 [@ conversionFactor(ans_rule(10), ans_rule(10)) @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ MODES(HTML=>'&amp;', TeX=>'\&') @]*
 [@ conversionFactor(ans_rule(10), ans_rule(10)) @]*
-[$groupEnd]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+
+[@ MODES(HTML=>'</div>', TeX=>'') @]*
 
 END_PGML
 
-#Conversion Factors Checker
+# Conversion Factors Checker
 ANS($conversionFactorsMultiAnswer->cmp);
 
 Section::End();
 
 
 Section::Begin("Part 3: Dimensional Analysis");
+$texProblem = '[``' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}``]';
 BEGIN_PGML
 
 Finish the problem by solving it using dimensional analysis:
 
-[@ MODES(HTML=>conversionEQ(ans_rule(10),[ans_rule(10),ans_rule(10)],ans_rule(10)), TeX=>''); @]*
-
+[@ conversionEQ(ans_rule(10),[ans_rule(10),ans_rule(10)],ans_rule(10)) @]*
 [@ MODES(HTML=>'', TeX=>$texProblem); @]**
+
  
 END_PGML
 
