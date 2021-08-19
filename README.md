@@ -40,3 +40,27 @@ $result = $n1/$d1;
 # using values above
 # $result contains an InexactValueWithUnits that will output the string:  1.609 km mi^-1
 ```
+
+# ParserDimensionalAnalysis
+This is a utility that I wrote to enable easier problem writing when you want students to show how they did a conversion using dimensional analysis.  It uses `parser::MultiAnswer` as a base. 
+
+As an example, let's assume you want the student to do a four-step dimensional analysis problem to arrive at an answer.  This is what the problem looks like to the student:
+![image](https://user-images.githubusercontent.com/7821384/130133801-0435ff88-212a-4287-b68b-20695b948464.png)
+To see how to format this for display and for hardcopy, see the demo section for dimensional analysis.
+
+Since we want the student to fill in the rest, those are answer blanks that need to be graded.  While optional, you might also want to weight the final answer a little more than the work to get that answer. You would simply setup the problem like this:
+```
+# The dimensional analysis part
+$ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4,$answer)->asDimensionalAnalysis($given);
+
+# This weights the final answer at 50% and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+```
+So what is `asDimensionalAnalysis` doing?  First, it distinguishes the numerators and denominators as pairs that go together.  But the order does NOT matter.  The final parameter in the MultiAnswer part is always the answer.  `asDimensionalAnalysis` will recalculate the student's answer using their dimensional analysis and compare it to the student's provided answer.  
