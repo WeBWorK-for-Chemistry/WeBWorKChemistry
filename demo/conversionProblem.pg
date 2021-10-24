@@ -27,9 +27,13 @@ HEADER_TEXT(<<EOF);
   .conversionEQ {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    margin-top: -30px;
+    justify-content: space-evenly;
   }
   .conversionEQ > div {
     text-align: center;
+    margin-top: 30px;
   }
   .conversionFractionBar {
   line-height: 1px;
@@ -42,7 +46,7 @@ HEADER_TEXT(<<EOF);
   }
   .conversionFactorGrouping{
       display:flex;
-      justify-content:space-evenly;
+      justify-content: space-around;
       align-items: center;
   }
   </style>  
@@ -172,7 +176,7 @@ BEGIN_PGML
 
 Write the equality statement you'll need to do the conversion:  
 
-[@ ans_rule(20) @]* = [@ ans_rule(20) @]*
+[@ ans_rule(10) @]* = [@ ans_rule(10) @]*
 
 END_PGML
 
