@@ -131,8 +131,12 @@ sub new {
 	if ($units){
 		Value::Error("Your units can only contain one division") if $units =~ m!/.*/!;
 	}
-	#warn "Trying to make:  $num";
+	#@temp = @$num;
+	#$temp0 = $temp[0];
+	#$temp1 = $temp[1];
+	#warn "Trying to make:  $temp0 $temp1";
 	$num = $self->makeValue($num,context=>$context);
+	#warn "result is $num";
 
 	my %Units = $units ? Parser::Legacy::ObjectWithUnits::getUnits($units) : %fundamental_units;
 
@@ -160,24 +164,7 @@ sub new {
 	$num->{correct_ans_latex_string} .= ' '. Parser::Legacy::ObjectWithUnits::TeXunits($units) if defined $num->{correct_ans_latex_string};
 	bless $num, $class;
 
-	# $self = shift; my $class = ref($self) || $self;
-	# # my $context = (Value::isContext($_[0]) ? shift : $self->context);
-
-
-
-	# $self = $self->SUPER::new(@_);
 	$num->{precedence}{'InexactValueWithUnits'} = 4;
-	# $num = $self->makeValue("2.0",context=>$context);
-	# $units = 'g';
-	# my %Units = Parser::Legacy::ObjectWithUnits::getUnits($units);
-	# Value::Error($Units{ERROR}) if ($Units{ERROR});
-	# $num->{units} = $units;
-	# $num->{units_ref} = \%Units;
-	# $num->{isValue} = 1;
-	# $num->{correct_ans} .= ' '.$units if defined $num->{correct_ans};
-	# $num->{correct_ans_latex_string} .= ' '.TeXunits($units) if defined $num->{correct_ans_latex_string};
-	# bless $num, $class;
-
 	return $num;
 }
 

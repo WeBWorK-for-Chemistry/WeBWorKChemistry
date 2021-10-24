@@ -146,7 +146,7 @@ $texConversionFactor = '\frac\{\hspace\{2cm\}\}\{\hspace\{2cm\}\}';
 $tconversionFactor = '\frac{a}{b}'; 
 #$texProblem = '' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}';
 
-$solution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
 # use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
 ##############################################
 
@@ -265,8 +265,19 @@ END_PGML_HINT
 
 
 BEGIN_PGML_SOLUTION
+The goal is to convert a value with units of [$given->{units}] to [$answer->{units}].
 
-[``[$solution]``]
+You'll first need to come up with the appropriate equality that can do this conversion.  One equality is enough in this case.
+
+[```[$n1] = [$d1]```]
+
+Next, you can convert this equality to a conversion factor.  The two conversion factors you can generate are:
+
+[```\frac{[$n1]}{[$d1]} \text{ & } \frac{[$d1]}{[$n1]} ```]
+
+Finally, construct your problem with the given value of [$given] at the beginning and multiply the one conversion factor that will cancel out the [``[$given->{units}]``] and leave you with [``[$answer->{units}]``] in the answer.
+
+[```[$dimensionalAnalysisSolution]```]
 
 END_PGML_SOLUTION
 

@@ -443,8 +443,18 @@ sub string {
 					# must show as sci notation
 					$digits = $self->sigFigs() - 1;
 					if ($preventClean) {
+						# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
+						if ($digits > 20) {
+							#warn "digits greater than 20 (no clean) $valAsNumber";
+							return sprintf("%e", $self->roundingHack($valAsNumber));
+						}
 						return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
 					} else {
+						# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
+						if ($digits > 20) {
+							#warn "digits greater than 20 $valAsNumber";
+							return $self->cleanSciText(sprintf("%e", $self->roundingHack($valAsNumber)));
+						}
 						return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 					}
 				}
