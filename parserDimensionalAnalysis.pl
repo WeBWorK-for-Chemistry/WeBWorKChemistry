@@ -163,8 +163,12 @@ sub asDimensionalAnalysis {
 				$ansHash->setMessage($count, $message);
 				$count++;
 
-				#shift @correctArray; # throw away the first value
+				shift @correctArray; # throw away the first value, don't need it anymore
 			} 
+
+			# Remove the answer from the correct array and student array
+			$correctAnswer = pop @correctArray;
+			$studentAnswer = pop @studentArray;
 			
 			while (scalar @studentArray > 1) {
 
@@ -172,7 +176,10 @@ sub asDimensionalAnalysis {
 				$denominator = shift @studentArray;
 				$numeratorScore=0;
 				$denominatorScore=0;
-				for ($j=$factorIndexStart; $j < scalar @correctArray - 1; $j+=2) {
+				$studentRatio = $numerator->{inexactValue}/$denominator->{inexactValue};  
+
+				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) { 
+				#for ($j=$factorIndexStart; $j < scalar @correctArray - 1; $j+=2) {
 					# check for matching units on both parts, then check for matching value (with tolerance)
 					if ($correctArray[$j]->{units} eq $numerator->{units} && $correctArray[$j+1]->{units} eq $denominator->{units}){
 						$valueGradeNumerator = $correctArray[$j]->{inexactValue}->compareValue($numerator->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
@@ -185,6 +192,18 @@ sub asDimensionalAnalysis {
 						if ($denominatorScore != 0 && $denominatorScore != 1){
 							$ansHash->setMessage($count+1,"Most likely you have a significant figures problem.");
 						}
+						if ($numeratorScore == 0 && $denominatorScore == 0) {
+							# check the ratio to see if those match.  Maybe student used a different equality like 1L/1000mL instead of 0.001L/1mL
+							$correctRatio = $correctArray[$j]->{inexactValue}/$correctArray[$j+1]->{inexactValue}; 
+							#warn "correct: $correctRatio";
+							$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+							$numeratorScore = $result;
+							$denominatorScore = $result;  
+						}
+	
+						delete $correctArray[$j+1];
+						delete $correctArray[$j];
+						last;
 					} 
 				}
 				push @scores, $numeratorScore;
@@ -192,6 +211,9 @@ sub asDimensionalAnalysis {
 				$count++;
 				$count++;
 			}
+
+			# reload correctArray with the full array since we've been removing stuff.
+			my @correctArray = @{$correct};
 
 			# compute a potential answer with rounding errors from the correct dimensional analysis
 			# This might have problems, but right now, we recalculate the answer by reducing the number
@@ -234,11 +256,12 @@ sub asDimensionalAnalysis {
 			}
 			push @possibleRoundingErrorAnswers, $roundingErrorAnswer;
 
+
 			# now grade final answer
-			$finalStudentAnswer = shift @studentArray;
+			#$finalStudentAnswer = shift @studentArray;
 			$correctAnswer = pop @correctArray;
 			my $result = $correctAnswer->compareValuesWithUnits(
-				$finalStudentAnswer,
+				$studentAnswer,
 				{
 					"roundingErrorPossibles"=> \@possibleRoundingErrorAnswers,
 					"penaltyRoundingError"=>0.25,
@@ -248,6 +271,7 @@ sub asDimensionalAnalysis {
 					"failOnValueWrong"=>1
 				});
 			my @resultArr = @$result;
+	
 			push @scores, shift @resultArr;
 			my $message = shift @resultArr;
 			if ($message ne ''){
@@ -333,7 +357,10 @@ sub asEquality {
 					}
 					if ($right->sigFigs != 9**9**9){
 						#warn "right is exact";
+						#warn $right->valueAsNumber;
+						#warn $right->{units};
 						$studentArray[1] = InexactValueWithUnits::InexactValueWithUnits->new([$right->valueAsNumber,9**9**9], $right->{units});
+						#warn $studentArray[1];
 					}
 				} 
 			}
@@ -342,11 +369,53 @@ sub asEquality {
 			my $count=1;
 			my $studentGiven;
 
+			# What if student supplied inverted equality? i.e. instead of 1 mL = 1e-3 L, they provide 1000 mL = 1 L.
+			# We need to make sure the right units are used, BUT instead of comparing individual values, divide numerator and denominator and compare results.
+			# Assume 2 values for array.  This is an equality.  Must have both sides filled out.
+			if (scalar @studentArray != 2) {
+				push @scores, 0;
+				push @scores, 0;
+				return \@scores;
+			}
+
+			$correctRatio = $correctArray[0]->{inexactValue}/$correctArray[1]->{inexactValue};
+			$studentRatio;
+			
+			# Equalities MUST have units.  They are pointless without them.  So only grade if the units are there.
+			if ($studentArray[0]->{units} eq $correctArray[0]->{units} && $studentArray[1]->{units} eq $correctArray[1]->{units}) {
+
+				$studentRatio = $studentArray[0]->{inexactValue}/$studentArray[1]->{inexactValue};
+				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+				push @scores, $result;
+				push @scores, $result;
+				return \@scores;
+				
+
+			} elsif ($studentArray[1]->{units} eq $correctArray[0]->{units} && $studentArray[0]->{units} eq $correctArray[1]->{units}) {
+
+				$studentRatio = $studentArray[1]->{inexactValue}/$studentArray[0]->{inexactValue};
+				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+				push @scores, $result;
+				push @scores, $result;
+				return \@scores;
+
+			} else {
+
+				push @scores, 0;
+				push @scores, 0;
+				$ansHash->setMessage(1,"Without correct units, the equality is incorrect.");
+				return \@scores;
+			}
+			
 			#$studentValue = shift @studentArray;
 			# check for matching units on both parts, then check for matching value (with tolerance)
 			for ($i = 0; $i < scalar @studentArray; $i++) {
 				$score = 0;
-				for ($j = 0; $j < scalar @correctArray; $j++) {
+				#warn scalar @correctArray;
+				for ($j = scalar @correctArray - 1; $j >= 0; $j--) {
+					#warn $studentArray[$i];
+					#warn $studentArray[$i]->{units};
+					#warn $correctArray[$j];
 					if ($studentArray[$i]->{units} eq $correctArray[$j]->{units}){
 						my $correctValue = $correctArray[$j];
 						$score = $correctValue->{inexactValue}->compareValue($studentArray[$i]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
@@ -405,7 +474,7 @@ sub asPairOfConversionFactors {
 					$studentArray[$i] = $newValue;
 				} 				
 			}
-
+			
 			# check both values in equality to see if they must be exact or not.	
 			for ($i = 0; $i < scalar @studentArray; $i+=2) {
 				$numerator = $studentArray[$i];
@@ -454,8 +523,12 @@ sub asPairOfConversionFactors {
 			for ($i = 0; $i < scalar @studentArray; $i+=2) {
 				$scoreNum = 0;
 				$scoreDenom = 0;
-				for ($j = 0; $j < scalar @correctArray; $j+=2) {
-
+				# maybe student used 1L/1000mL instead of 0.001L/1mL, need to calculate the ratio and see if it matches instead.
+				$studentRatio = $studentArray[$i]->{inexactValue}/$studentArray[$i+1]->{inexactValue};  
+				#warn "student: $studentRatio";
+				#needs to go backwards here because we're deleting items from the array 
+				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) {  
+				
 					if ($studentArray[$i]->{units} eq $correctArray[$j]->{units} && $correctArray[$j+1]->{units} eq $studentArray[$i+1]->{units}) {
 						$scoreNum = $correctArray[$j]->{inexactValue}->compareValue($studentArray[$i]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
 						if ($scoreNum != 0 && $scoreNum != 1) {
@@ -465,6 +538,15 @@ sub asPairOfConversionFactors {
 						$scoreDenom = $correctArray[$j+1]->{inexactValue}->compareValue($studentArray[$i+1]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
 						if ($scoreDenom != 0 && $scoreDenom != 1) {
 							$ansHash->setMessage($i+1+1,"Most likely you have a significant figures problem.");
+						}
+
+						if ($scoreNum == 0 && $scoreDenom == 0) {
+							# check the ratio to see if those match.  Maybe student used a different equality like 1L/1000mL instead of 0.001L/1mL
+							$correctRatio = $correctArray[$j]->{inexactValue}/$correctArray[$j+1]->{inexactValue}; 
+							#warn "correct: $correctRatio";
+							$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+							$scoreNum = $result;
+							$scoreDenom = $result;  
 						}
 
 						delete $correctArray[$j+1];
@@ -497,10 +579,15 @@ sub generateExplanation {
 
 	my $explanation = '';
 
+	
 	@startingArray = @{ $startingArrayRef };
 
 	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units});
 	my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;
+
+	$startingUnits = $startingArray[0]->{units};
+	$endingUnits = $finalAnswer->{units};
+	
 
 	# This is only for the first value!
 	if (scalar(@startingArray) == 2) {
@@ -510,7 +597,7 @@ sub generateExplanation {
 		$explanation .= @startingArray[1]->TeX;
 		$explanation .= '}';
 	} else {
-
+		
 		my $val = $startingArray[0]->{inexactValue};
 		my $numeratorUnits = '';
 		my $denominatorUnits = '';
@@ -538,6 +625,7 @@ sub generateExplanation {
 				} 
 			}
 			if ($found==0){
+				
 				if ($unit->{power} > 0) {
 					$numeratorUnits .= '\cancel{\rm ';
 					$numeratorUnits .= $unit->{name};
@@ -606,10 +694,12 @@ sub generateExplanation {
 			}
 		}
 	}
-
+	
 	$explanation .= '=' . $finalAnswer->TeX;
 
-	return $explanation;
+
+
+	return  $explanation;
 
 }
 
