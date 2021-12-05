@@ -884,9 +884,11 @@ sub generateAddSubtractExplanation {
 	my $operation = shift;
 	my $options = shift;
 
-	$useUnroundedFirst = $options->{useUnroundedFirst};
-	$useUnroundedSecond = $options->{useUnroundedSecond};
-	$leaveUnrounded = $options->{leaveUnrounded};
+	my $useUnroundedFirst = $options->{useUnroundedFirst};
+	my $useUnroundedSecond = $options->{useUnroundedSecond};
+	my $leaveUnrounded = $options->{leaveUnrounded};
+	my $usePlainText = $options->{plainText};
+	
 
 	if (!defined $first || !$first){
 		return "Error:  Didn't specify the first parameter.";
@@ -957,14 +959,36 @@ sub generateAddSubtractExplanation {
 
 	$firstTeX = $first->TeX;
 	$secondTeX = $second->TeX;
-	my $explanation = '\\overbrace{' . substr($firstTeX, 0, $strPosFirst) . '\\underline{' . substr($firstTeX, $strPosFirst,1) . '}' . $firstTrail .'}^{\\text{' . $self->getNameOfPosition($posFirst). '}}';
-	$explanation = $explanation . ($operation > 0 ?  '+' : '-' ) . '\\overbrace{' . substr($secondTeX, 0, $strPosSecond) . '\\underline{' . substr($secondTeX, $strPosSecond,1) . '}' . $secondTrail .'}^{\\text{' . $self->getNameOfPosition($posSecond). '}}';
+	my $explanation = '';
+
+	if ($usePlainText){
+		my $operationVerb = $operation > 0 ? "adding" : "subtracting";
+		my $operationObject = $operation > 0 ? "to" : "from";
+		my $nameOfFirstPosition = ($posFirst >= 7 || $posFirst <= -7) ? $self->getNameOfPosition($posFirst) : 'in the '. $self->getNameOfPosition($posFirst) . ' place';
+		my $nameOfSecondPosition = ($posSecond >= 7 || $posSecond <= -7) ? $self->getNameOfPosition($posSecond) : 'in the '. $self->getNameOfPosition($posSecond) . ' place';
+		$explanation .= "You are $operationVerb a value whose <i>least significant digit</i> is $nameOfSecondPosition $operationObject a value whose <i>least significant digit</i> is $nameOfFirstPosition. ";
+
+	} else {
+		$explanation .= '\\overbrace{' . substr($firstTeX, 0, $strPosFirst) . '\\underline{' . substr($firstTeX, $strPosFirst,1) . '}' . $firstTrail .'}^{\\text{' . $self->getNameOfPosition($posFirst). '}}';
+		$explanation .= ($operation > 0 ?  '+' : '-' ) . '\\overbrace{' . substr($secondTeX, 0, $strPosSecond) . '\\underline{' . substr($secondTeX, $strPosSecond,1) . '}' . $secondTrail .'}^{\\text{' . $self->getNameOfPosition($posSecond). '}}';
+	}
+	
 
 	$rightmost = $posFirst > $posSecond ? $posFirst : $posSecond; #need this to limit floating point errors when decimals are present
 	$leftmost = $posFirst < $posSecond ? $posFirst : $posSecond; #this one is for actual rounding.
 	$leftmostName = $self->getNameOfPosition($leftmost);
-	$explanation = $explanation . "\\xrightarrow[\\text{position is the $leftmostName position}]{\\text{Left-most smallest significant}}";
-
+	if ($usePlainText) {
+		my $leftMostNamePlainText = ($leftmost >= 7 || $leftmost <= -7) ? $leftmostName : "the $leftmostName position" ;
+		$explanation .= "The answer should have its <i>least significant digit</i> be the same as the left-most digit of the those two positions:  $leftMostNamePlainText. ";
+	} else {
+		if ($leftmost >= 7 || $leftmost <= -7) {
+			$explanation .= "\\xrightarrow[\\text{position is $leftmostName}]{\\text{Left-most smallest significant}}";
+		} else {
+			$explanation .= "\\xrightarrow[\\text{position is the $leftmostName position}]{\\text{Left-most smallest significant}}";
+		}
+	}
+	
+	
 	$simpleOperation = $operation > 0 ? $valueFirst + $valueSecond : $valueFirst - $valueSecond;
  
 	#if there are any floating point errors, this will show up here.  Need to limit the digits displayed.
@@ -992,22 +1016,38 @@ sub generateAddSubtractExplanation {
 	}
 
 	# this is for scientific notation, will stay blank if nothing
-	$answerTrail = '';
+	my $answerTrail = '';
 	if ($first->preferScientificNotation || $second->preferScientificNotation || $simpleAsInexact->preferScientificNotation){
 		@expsplit = split(/e/, $simpleAsValue);
 		$exp = $expsplit[1]+0;
-		$answerTrail = "\\times 10^{$exp}";
+		if ($usePlainText){
+			$answerTrail = "x10^$exp";
+		}else {
+			$answerTrail = "\\times 10^{$exp}";
+		}
 		$simpleAsValue = $expsplit[0];  #overwriting simpleAsValue so we don't write the exponent part AGAIN later.
 	}
 
-	$explanation = $explanation . substr($simpleAsValue, 0, $strActualAnswerPosition) . '\\underline{' . substr($simpleAsValue, $strActualAnswerPosition,1) . '}' . substr($simpleAsValue, $strActualAnswerPosition + 1,length($simpleAsValue)-$strActualAnswerPosition) . $answerTrail;
-
-	unless ($leaveUnrounded){
-		$explanation = $explanation . "\\xrightarrow[\\text{$leftmostName position}]{\\text{Round to}}";
-		$explanation = $explanation . $self->TeX;
+	if ($usePlainText){
+		$boldValue = substr($simpleAsValue, $strActualAnswerPosition,1);
+		$value = substr($simpleAsValue, 0, $strActualAnswerPosition) . '<b>' . $boldValue . '</b>' . substr($simpleAsValue, $strActualAnswerPosition + 1, length($simpleAsValue)-$strActualAnswerPosition) . $answerTrail;
+		
+		$explanation .= "The answer by calculator is $value, but we now know the least significant figure is the bold $boldValue. ";
+	} else {
+		$explanation .= substr($simpleAsValue, 0, $strActualAnswerPosition) . '\\underline{' . substr($simpleAsValue, $strActualAnswerPosition,1) . '}' . substr($simpleAsValue, $strActualAnswerPosition + 1,length($simpleAsValue)-$strActualAnswerPosition) . $answerTrail;
 	}
 
-	return $explanation;
+	unless ($leaveUnrounded){
+		if ($usePlainText){
+			my $answer = $self->string; 
+			$explanation .= "Finally, round to the least significant figure to get <b>$answer</b>."
+		} else {
+			$explanation .= "\\xrightarrow[\\text{$leftmostName position}]{\\text{Round to}}";
+			$explanation .= $self->TeX;
+		}
+	}
+
+	$explanation;
 }
 
 sub generateMultiplyDivideExplanation {
@@ -1125,8 +1165,11 @@ sub generateMultiplyDivideExplanation {
 	$sfExplained = $newInexact->generateSfRoundingExplanation($minSF)->{TeX};
 	$explanation = $explanation . $sfExplained;
 
- 
-
+	if ($includePlainText){
+		return $plainTextExplanation . $explanation;
+	} else {
+		return $explanation;
+	}
 	return $explanation;
 }
 

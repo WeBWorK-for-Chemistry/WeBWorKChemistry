@@ -39,6 +39,7 @@ $ival2 = InexactValue($val2/1000, 2);
 $ans1 = $ival1 + $ival2;
 
 $ans1Exp = $ans1->generateAddSubtractExplanation($ival1, $ival2, 1);
+$ans1ExpPlain = $ans1->generateAddSubtractExplanation($ival1, $ival2, 1, { plainText => 1});
 
 $val3 = $rand_num_generator->random(300, 500, 0.01);
 $val4 = $rand_num_generator->random(100, 200, 1);
@@ -47,12 +48,14 @@ $ival4 = InexactValue($val4, 3);
 $ans2 = $ival3 - $ival4;
 
 $ans2Exp = $ans2->generateAddSubtractExplanation($ival3, $ival4, -1);
+$ans2ExpPlain = $ans2->generateAddSubtractExplanation($ival3, $ival4, -1, { plainText => 1});
 
 $ival5 = InexactValue("5.665e-9");
 $ival6 = InexactValue("1.281e-8");
 $ans3 = $ival5 + $ival6;
 
 $ans3Exp = $ans3->generateAddSubtractExplanation($ival5, $ival6, 1);
+$ans3ExpPlain = $ans3->generateAddSubtractExplanation($ival5, $ival6, 1, { plainText => 1});
 
 ##############################################################
 #
@@ -76,15 +79,26 @@ Do the following math problems using correct significant figures. Assume none of
 
 END_PGML
 
-BEGIN_SOLUTION
+BEGIN_PGML_SOLUTION
+[`[$ival1] + [$ival2]  = `]
 
-\[ $ans1Exp \]
+[$ans1ExpPlain]*
 
-\[ $ans2Exp \]
+[`[$ans1Exp]`]
 
-\[ $ans3Exp \]
+[`[$ival3] - [$ival4] = `]
 
-END_SOLUTION
+[$ans2ExpPlain]*
+
+[`[$ans2Exp]`]
+
+[` [$ival5] + [$ival6] = `]
+
+[$ans3ExpPlain]*
+
+[`[$ans3Exp]`]
+
+END_PGML_SOLUTION
 
 
 
