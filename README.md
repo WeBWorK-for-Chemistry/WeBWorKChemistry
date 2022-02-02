@@ -3,6 +3,20 @@ WeBWorK scripts for doing problems related to Chemistry (and beyond!)
 
 This repo is a work-in-progress!  It has not yet been added to the WeBWorK repo as it needs more testing and improvements.  If you want to contribute, please submit a PR!  It's easy to do.  (Fork this repo, make some changes to your forked repo, then come back here and make a PR that points to your forked repo.)  
 
+## Installation instructions
+Copy the macro files into the macro folder of the class you want to use this for.  Then, link to these (as necessary) in your pg file.
+
+```
+loadMacros(
+# other files you use along with these...
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl"
+);
+```
+All of these files can be used on their own except for `parserDimensionalAnalysis.pl`.  It must be paired up with `parserMultiAnswer.pl` to function.
+
 # InexactValue
 
 You can create an InexactValue with a string:
@@ -21,7 +35,22 @@ You can even explicitly make the value exact.  (This is useful when you want to 
 
 The methods include getting the number of sig figs.  This is useful for questions asking a student how many significant figures a number might have: 
 
-`$inexactValue->sigFigs`
+```
+$inexactValue = InexactValue(3e-9, 4);  
+	#the value 4 with 3 sig figs.
+$inexactValue->value  	#outputs: 3e-9
+$inexactValue->sigFigs 	#outputs: 4
+$inexactValue->string  	#outputs: 3.000x10^-9
+$inexactValue->TeX  	#outputs: 3.000\times10^{-9}
+
+$inexactValue2 = $inexactValue / InexactValue(7e-8, 2);  
+	#the value 0.04285714... with 2 sig figs.
+$inexactValue2->value  	#outputs: 0.0428571428571... 
+$inexactValue2->sigFigs #outputs: 2
+$inexactValue2->string  #outputs: 0.043
+$inexactValue2->TeX  	#outputs: 0.043
+
+```
 
 Best of all, you can do math with InexactValue and the correct significant figures are calculated according to the standard rules taught in most chemistry courses.  
 **Math operations are performed only on the internally stored unrounded value.  Concurrent operations are performed to calculate the new number of sig figs.**
