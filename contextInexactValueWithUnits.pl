@@ -89,9 +89,9 @@ sub new {
 	my $self = shift; my $class = ref($self) || $self;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	my $num = shift;
-	
 	# we need to check if units is the options hash
 	my $units = shift;
+	
 	my $options;
 
 	if (ref($units) eq 'HASH') {
@@ -176,8 +176,9 @@ sub splitUnits {
 	my ($num,$units) = $string =~ m!^(.*?(?:[)}\]0-9a-z]|\d\.))\s*($unitPattern)\s*$!;
 	if ($units) {
 		while ($units =~ s/$unitSpace/$1*$2/) {};
-		$units =~ s/ //g;
-		$units =~ s/\*\*/^/g;
+		#$units =~ s/ //g;  # Why did I remove spaces here?  this conflicts with units like "fl oz" which have a space.  I don't want to force having a '-' dash between them yet.
+							# This might break something else, but we'll remove it for now.						
+		$units =~ s/\*\*/^/g; #replace Perl exponent notation (**) with standard computer caret notation (^)
 	}
 	return ($num,$units);
 }
@@ -202,6 +203,7 @@ sub make {
 
 sub makeValue {
 	my $self = shift; my $value = shift;
+	
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	if (ref($value) eq ARRAY){
 		# this is the case when we want to pass a value with explicit sig figs
@@ -253,6 +255,7 @@ sub cmp_parse {
 	my $self = shift; my $ans = shift;
 
 	$studentAnswer = $ans->{student_ans};
+	
 	if ($ans->{student_ans} eq ''){
 		$inexactWithUnitsStudent = $self->new([0,9**9**9],'');  #blank answer is zero with infinite sf
 	} else {
@@ -389,7 +392,54 @@ sub TeX {
   my $n = InexactValue::InexactValue::string($self);
   
   $n =~ s/E\+?(-?)0*([^)]*)/\\times 10^{$1$2}/i; # convert E notation to x10^(...)
-  return $n . '\ ' . Parser::Legacy::ObjectWithUnits::TeXunits($self->{units});
+  return $n . '\ ' . TeXunits($self->{units});
+}
+
+# Adapted from NumberWithUnits.pm original which fails to add spaces in units that have a space.
+#  Convert units to TeX format
+#  (fix superscripts, put terms in \rm,
+#   escape percent,
+#   and make a \frac out of fractions)
+#
+sub TeXunits {
+  my $units = shift;
+  $units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
+  $units =~ s/\*/\\,/g; 
+  $units =~ s/%/\\%/g;
+  $units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
+  return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
+  my $displayMode = WeBWorK::PG::Translator::PG_restricted_eval(q!$main::displayMode!);
+  return '{\textstyle\frac{'.$1.'}{'.$2.'}}' if ($displayMode eq 'HTML_tth');
+  return '{\textstyle\frac{\rm\mathstrut '.$1.'}{\rm\mathstrut '.$2.'}}';
+}
+
+
+sub convertTo {
+	my $self = shift;
+	my $unitFrom = $self->{units};
+	my $unitTo = shift;
+
+	#%m = %{$self->context->flags};
+	#warn %m;
+	#foreach my $name (keys %m) {
+    #	warn "$name $m{$name}";
+ 	#}
+	#warn 
+	$region = 'us';
+	if ($self->context->flags->get('unitRegion') eq 'uk'){
+		$region = 'uk';
+	}
+	unless (defined $self->{units}){
+		Value::Error("The value provided doesn't contain any units so cannot be converted.");
+	}
+	# adding a temporary zero so that we can reuse the same function for parsing units with values
+	#(my $tempnum,$unitTo) = splitUnits("0 $unitTo") unless $unitTo;
+	#warn $unitFrom;
+	#warn $unitTo;
+	my $multiplier = Units::convertUnit($unitFrom,$unitTo, {region=> $region});
+	$t2 = $self->{inexactValue} * $multiplier;
+	$t = $self->new([$t2->value, $t2->sigFigs], $unitTo);
+	return $t;
 }
 
 

@@ -57,6 +57,49 @@ our %fundamental_units = ('factor' => 1,
 our $PI = 4*atan2(1,1);
 #         9.80665 m/s^2  -- standard acceleration of gravity
 
+our %known_units_uk = (
+  'fluid ounce'  => {
+    'factor'    => 0.0000284130625,
+    'm'         => 3
+  },
+  'fl oz'  => {
+    'factor'    => 0.0000284130625,
+    'm'         => 3
+  },
+  'gill'  => {
+    'factor'    => 0.0001420653125,
+    'm'         => 3
+  },
+  'gi'  => {
+    'factor'    => 0.0001420653125,
+    'm'         => 3
+  },
+  'pint'  => {
+    'factor'    => 0.00056826125,
+    'm'         => 3
+  },
+  'pt'  => {
+    'factor'    => 0.00056826125,
+    'm'         => 3
+  },
+  'quart'  => {
+    'factor'    => 0.0011365225,
+    'm'         => 3
+  },
+  'qt'  => {
+    'factor'    => 0.0011365225,
+    'm'         => 3
+  },
+  'gallon'  => {
+    'factor'    => 0.00454609,
+    'm'         => 3
+  },
+  'gal'  => {
+    'factor'    => 0.00454609,
+    'm'         => 3
+  },
+);
+
 our %known_units = ('m'  => {
                            'factor'    => 1,
                            'm'         => 1
@@ -297,6 +340,14 @@ our %known_units = ('m'  => {
                            'factor'    => 0.0002365882365,
                            'm'         => 3
                           },
+        'fluid ounce'  => {
+          'factor'    => 0.0000295735295625,
+          'm'         => 3
+        },
+        'fl oz'  => {
+          'factor'    => 0.0000295735295625,
+          'm'         => 3
+        },
 				'gal'  => {
                            'factor'    => 0.003785411784,
                            'm'         => 3
@@ -307,6 +358,14 @@ our %known_units = ('m'  => {
                           },
 				'gallons'  => {
                            'factor'    => 0.003785411784,
+                           'm'         => 3
+                          },
+        'pint'  => {
+                           'factor'    => 0.000473176473,
+                           'm'         => 3
+                          },
+        'pt'  => {
+                           'factor'    => 0.000473176473,
                            'm'         => 3
                           },
 				'qt'  => {
@@ -842,7 +901,7 @@ sub process_term {
 		#split the numerator or denominator into factors -- the separators are *
 
 	    my @factors = split(/\*/, $string);
-
+    
 		my $f;
 		foreach $f (@factors) {
 			my %factor_hash = process_factor($f,{fundamental_units => $fundamental_units, known_units => $known_units});
@@ -907,6 +966,7 @@ sub process_factor {
 
 	my @unitsNameArray = keys %$known_units;
 	my $unitsJoined = join '|', @unitsNameArray;
+  
 	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
 	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
 
@@ -936,6 +996,99 @@ sub process_factor {
 		die "UNIT ERROR Unrecognizable unit: |$unit_base|";
 	}
 	%unit_hash;
+}
+
+sub convertUnit {
+  my $fromUnit = shift;
+	my $toUnit = shift;
+  #warn $fromUnit;
+  #warn $toUnit;
+  my $options = shift;
+
+	my $fundamental_units = \%fundamental_units;
+	my $known_units = \%known_units;
+  my $region = 'us';
+
+  if (defined($options->{fundamental_units})) {
+	  $fundamental_units = $options->{fundamental_units};
+	}
+
+	if (defined($options->{known_units})) {
+	  $known_units = $options->{known_units};
+	}
+
+  if (defined($options->{region})){
+    $region = $options->{region};
+  }
+
+  if ($region eq 'uk'){
+    @known_units{ keys %known_units_uk } = values %known_units_uk;
+  }
+
+  my ($unit_name_from,$power_from) = split(/\^/, $fromUnit);
+  #warn $unit_name_from;
+	$power_from = 1 unless defined($power_from);
+
+  my %unit_hash_from = %$fundamental_units;
+	if ( defined( $known_units->{$unit_name_from} )  ) {
+		my %unit_name_from_hash = %{$known_units->{$unit_name_from}};   # $reference_units contains all of the known units.
+    #warn %unit_name_from_hash;
+		my $u;
+		foreach $u (keys %unit_name_from_hash) {
+			if ( $u eq 'factor' ) {
+        #warn "$u: $unit_name_from{$u}";
+        #warn "$u: $unit_name_from_hash{$u}";
+				$unit_hash_from{$u} = $unit_name_from_hash{$u}**$power_from;  # calculate the correction factor for the unit
+        #warn "power: $power_from";
+			} else {
+				my $fundamental_unit = $unit_name_from_hash{$u};
+        $fundamental_unit = 0 unless defined($fundamental_unit); # a fundamental unit which doesn't appear in the unit need not be defined explicitly
+				#warn "fundamental: $fundamental_unit";
+        $unit_hash_from{$u} = $fundamental_unit*$power_from; # calculate the power of the fundamental unit in the unit
+			}
+		}
+	} else {
+		die "UNIT ERROR Unrecognizable unit: |$unit_name_from|";
+	}
+
+  my ($unit_name_to,$power_to) = split(/\^/, $toUnit);
+  #warn $unit_name_to;
+	$power_to = 1 unless defined($powepower_tor_to);
+
+  my %unit_hash_to = %$fundamental_units;
+	if ( defined( $known_units->{$unit_name_to} )  ) {
+		my %unit_name_to_hash = %{$known_units->{$unit_name_to}};   # $reference_units contains all of the known units.
+    #warn %unit_name_to_hash;
+		my $u;
+		foreach $u (keys %unit_name_to_hash) {
+			if ( $u eq 'factor' ) {
+        #warn "$u: $unit_name_to{$u}";
+        #warn "$u: $unit_name_to_hash{$u}";
+				$unit_hash_to{$u} = $unit_name_to_hash{$u}**$power_to;  # calculate the correction factor for the unit
+        #warn "power: $power_to";
+			} else {
+				my $fundamental_unit = $unit_name_to_hash{$u};
+        $fundamental_unit = 0 unless defined($fundamental_unit); # a fundamental unit which doesn't appear in the unit need not be defined explicitly
+				#warn "fundamental: $fundamental_unit";
+        $unit_hash_to{$u} = $fundamental_unit*$power_to; # calculate the power of the fundamental unit in the unit
+			}
+		}
+	} else {
+		die "UNIT ERROR Unrecognizable unit: |$unit_name_to|";
+	}
+  
+  #foreach my $name (keys %unit_hash_from) {
+   # warn "$name $unit_hash_from{$name}";
+  #}
+#foreach my $name (keys %unit_hash_to) {
+  #  warn "$name $unit_hash_to{$name}";
+ #}
+
+  $multiplier = $unit_hash_from{'factor'}/$unit_hash_to{'factor'};
+  #warn "multiplier:  $multiplier";
+
+	#%unit_hash_from;
+  return $multiplier;
 }
 
 # # This is the "exported" subroutine.  Use this to evaluate the units given in an answer.

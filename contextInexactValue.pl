@@ -93,8 +93,10 @@ sub new {
 
 	if ($argCount >= 2) {
 		# two arguments mean either a specific number of sig figs is provided or an options hash
-		$isScientificNotation = $x->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
-		$matchNumber = $x->[0];
+		#$isScientificNotation = $x->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+		@result = getValue($x->[0]);
+		$isScientificNotation = $result[1];
+		$matchNumber = $result[0]; #$x->[0];
 
 		if (ref $x->[1] eq ref {}){
 			# 2nd arg is an options hash
@@ -121,19 +123,34 @@ sub new {
 
 	} else {
 		# one argument means that a text value representing the significant figures value has been provided
+		@result = getValue($x->[0]);
+		$isScientificNotation = $result[1];
+		$matchNumber = $result[0];
 		# verify the string contains a number we can match
-		($matchNumber) = $x->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
-		unless (defined $matchNumber) { 
-			$temp = $x->[0];
-				Value::Error("Can't convert this to a value. $temp  ");
-		}
+		#($matchNumber) = $x->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
+		# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
+		#($matchNumber) = $x->[0] =~ /((?:10\^\+?-?\d+)|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
+		#unless (defined $matchNumber) { 
+		#	$temp = $x->[0];
+		#		Value::Error("Can't convert this to a value. $temp  ");
+		#}
 		
 		# find out if this is standard notation or scientific notation
-		$isScientificNotation = $x->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+		# /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+		# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
+		#$isScientificNotation = $x->[0] =~ /((?:10\^\+?-?\d+)|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
 		
+		#($isSimpleExponent, $expVal) = $x->[0] =~ /((?:^10\^(\+?-?\d+)))/;
+		#if ($isSimpleExponent) {
+		#	# do the math...
+		#	warn "exponent!";
+		#	$matchNumber =  10**$expVal;
+		#	
+		#} 
+
 		# replace fancier scientific notation with plain 'e' so the computer recognizes it
-		$matchNumber =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
-		
+		#$matchNumber =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
+		#warn $matchNumber;
 		# split into coefficient and rest is scientific notation 
 		my @parts = split(/e/, $matchNumber);
 		
@@ -193,6 +210,42 @@ sub new {
 	return $s;
 }
 
+sub getValue {
+	my $x = shift;
+	#no warnings "numeric";
+	my @result;
+	$result[1] = 0;
+	
+	# verify the string contains a number we can match
+	#($matchNumber) = $x->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
+	# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
+	($result[0]) = $x =~ /((?:10\^\+?-?\d+)|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
+	unless (defined $result[0]) { 
+		$temp = $x;
+			Value::Error("Can't convert this to a value. $temp  ");
+	}
+	
+	# find out if this is standard notation or scientific notation
+	# /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+	# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
+	$result[1] = $x =~ /((?:10\^\+?-?\d+)|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+	
+	($isSimpleExponent, $expVal) = $x =~ /((?:^10\^(\+?-?\d+)))/;
+	if ($isSimpleExponent) {
+		# do the math...
+		$result[0] =  10**$expVal;
+		return @result;
+	} 
+
+	# replace fancier scientific notation with plain 'e' so the computer recognizes it
+	$result[0] =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
+	
+	# split into coefficient and rest is scientific notation 
+	#my @parts = split(/e/, $matchNumber);
+
+	return @result;
+}
+
 sub make {
 	my $self = shift;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
@@ -219,8 +272,11 @@ sub make {
 
 	if ($argCount >= 2) {
 		# two arguments mean that a plain number with an explicit number of significant figures has been provided
-		$isScientificNotation = $self->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
-		$matchNumber = $self->[0];
+		@result = getValue($x->[0]);
+		$isScientificNotation = $result[1];
+		$matchNumber = $result[0]; #$x->[0];
+		#$isScientificNotation = $self->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+		#$matchNumber = $self->[0];
 		
 		if (ref $self->[1] eq ref {}){
 			# 2nd arg is an options hash
@@ -248,17 +304,20 @@ sub make {
 		# one argument means that a text value representing the significant figures value has been provided
 		# verify the string contains a number we can match
 
-		($matchNumber) = $self->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
-		unless (defined $matchNumber) { 
-			$temp = $self->[0];
-				Value::Error("Can't convert this to a value. $temp  ");
-		}
+		@result = getValue($x->[0]);
+		$isScientificNotation = $result[1];
+		$matchNumber = $result[0]; #$x->[0];
+		# ($matchNumber) = $self->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
+		# unless (defined $matchNumber) { 
+		# 	$temp = $self->[0];
+		# 		Value::Error("Can't convert this to a value. $temp  ");
+		# }
 		
-		# find out if this is standard notation or scientific notation
-		$isScientificNotation = $self->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+		# # find out if this is standard notation or scientific notation
+		# $isScientificNotation = $self->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
 		
-		# replace fancier scientific notation with plain 'e' so the computer recognizes it
-		$matchNumber =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
+		# # replace fancier scientific notation with plain 'e' so the computer recognizes it
+		# $matchNumber =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
 		
 		# split into coefficient and rest is scientific notation 
 		my @parts = split(/e/, $matchNumber);
@@ -401,23 +460,28 @@ sub string {
 
 	@valArray = $self->value;# + 0;
 	$valAsNumber = $valArray[0];
-
 	
 
 	if ($self->preferScientificNotation() || $forceScientific) {
 		$decimals = $self->sigFigs() - 1;
 		
 		if ($preventClean) {
+			if ($decimals == $inf){
+				return sprintf("%e", $self->roundingHack($valAsNumber));
+			} else {
+				return sprintf("%.${decimals}e", $self->roundingHack($valAsNumber));
+			}
+		} else {
+			# warn $valAsNumber;
+			if ($decimals == $inf){
+				return $self->cleanSciText(sprintf("%e", $valAsNumber));
+			}else {
+				$log = main::floor(log(abs($valAsNumber))/log(10));
+				$rounded = main::Round($valAsNumber,($log*-1) + $decimals);
 			
-					return sprintf("%.${decimals}e", $self->roundingHack($valAsNumber));
-				} else {
-					# warn $valAsNumber;
-					$log = main::floor(log(abs($valAsNumber))/log(10));
-					# warn $log*-1;
-					# warn $decimals;
-					$rounded = main::Round($valAsNumber,($log*-1) + $decimals);
-					return $self->cleanSciText(sprintf("%.${decimals}e", $rounded));
-				}   
+				return $self->cleanSciText(sprintf("%.${decimals}e", $rounded));
+			}
+		}   
 
 	} else {
 		if ($valAsNumber == 0){

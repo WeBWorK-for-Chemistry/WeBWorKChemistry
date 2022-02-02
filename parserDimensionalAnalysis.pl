@@ -132,7 +132,7 @@ sub asDimensionalAnalysis {
 					$studentCalc /= $studentArray[$i];
 				}
 			}
-    		$ansHash->setMessage(scalar @studentArray,"Your dimensional analysis returns this value: $studentCalc");
+			$ansHash->setMessage(scalar @studentArray,"Your dimensional analysis returns this value: $studentCalc");
 
 			# Time to grade dimensional analysis!
 			# Grading assumes that the answer provided includes the REQURIED pathway for dimensional analysis.  While order will not matter,
@@ -179,15 +179,27 @@ sub asDimensionalAnalysis {
 				$studentRatio = $numerator->{inexactValue}/$denominator->{inexactValue};  
 
 				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) { 
-				#for ($j=$factorIndexStart; $j < scalar @correctArray - 1; $j+=2) {
 					# check for matching units on both parts, then check for matching value (with tolerance)
 					if ($correctArray[$j]->{units} eq $numerator->{units} && $correctArray[$j+1]->{units} eq $denominator->{units}){
-						$valueGradeNumerator = $correctArray[$j]->{inexactValue}->compareValue($numerator->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+						# if answer is an exact number (like 12 inches in 1 ft), student's input of 12 will automatically be inexact, so just tolerate sig fig "errors" if answer is exact
+						$numeratorCreditSigFigs = 0.5;
+						$numeratorCreditValue = 0.5;
+						if ($correctArray[$j]->{inexactValue}->sigFigs() == Inf){
+							$numeratorCreditSigFigs = 0;
+							$numeratorCreditValue = 1.0;
+						}
+						$valueGradeNumerator = $correctArray[$j]->{inexactValue}->compareValue($numerator->{inexactValue},{"creditSigFigs"=>$numeratorCreditSigFigs, "creditValue"=>$numeratorCreditValue, "failOnValueWrong"=>1});
 						$numeratorScore = $valueGradeNumerator;
 						if ($numeratorScore != 0 && $numeratorScore != 1){
 							$ansHash->setMessage($count,"Most likely you have a significant figures problem.");
 						}
-						$valueGradeDenominator = $correctArray[$j+1]->{inexactValue}->compareValue($denominator->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+						$denominatorCreditSigFigs = 0.5;
+						$denominatorCreditValue = 0.5;
+						if ($correctArray[$j+1]->{inexactValue}->sigFigs() == Inf){
+							$denominatorCreditSigFigs = 0;
+							$denominatorCreditValue = 1.0;
+						}
+						$valueGradeDenominator = $correctArray[$j+1]->{inexactValue}->compareValue($denominator->{inexactValue},{"creditSigFigs"=>$denominatorCreditSigFigs, "creditValue"=>$denominatorCreditValue, "failOnValueWrong"=>1});
 						$denominatorScore = $valueGradeDenominator;
 						if ($denominatorScore != 0 && $denominatorScore != 1){
 							$ansHash->setMessage($count+1,"Most likely you have a significant figures problem.");
@@ -199,10 +211,13 @@ sub asDimensionalAnalysis {
 							$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
 							$numeratorScore = $result;
 							$denominatorScore = $result;  
+
 						}
 	
-						delete $correctArray[$j+1];
-						delete $correctArray[$j];
+						splice(@correctArray, $j, 2);
+						#delete $correctArray[$j+1];
+						#splice(@correctArray, $j, 1);
+						#delete $correctArray[$j];
 						last;
 					} 
 				}
@@ -423,7 +438,8 @@ sub asEquality {
 							$ansHash->setMessage($i+1,"Most likely you have a significant figures problem.");
 						}
 						
-						delete $correctArray[$j];
+						splice(@correctArray, $j, 1);
+						#delete $correctArray[$j];
 						last;
 					}
 				}
@@ -549,8 +565,9 @@ sub asPairOfConversionFactors {
 							$scoreDenom = $result;  
 						}
 
-						delete $correctArray[$j+1];
-						delete $correctArray[$j];
+						splice(@correctArray, $j, 2);
+						#delete $correctArray[$j+1];
+						#delete $correctArray[$j];
 						last;
 					}
 
