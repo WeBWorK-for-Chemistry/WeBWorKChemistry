@@ -419,12 +419,6 @@ sub convertTo {
 	my $unitFrom = $self->{units};
 	my $unitTo = shift;
 
-	#%m = %{$self->context->flags};
-	#warn %m;
-	#foreach my $name (keys %m) {
-    #	warn "$name $m{$name}";
- 	#}
-	#warn 
 	$region = 'us';
 	if ($self->context->flags->get('unitRegion') eq 'uk'){
 		$region = 'uk';
@@ -432,10 +426,7 @@ sub convertTo {
 	unless (defined $self->{units}){
 		Value::Error("The value provided doesn't contain any units so cannot be converted.");
 	}
-	# adding a temporary zero so that we can reuse the same function for parsing units with values
-	#(my $tempnum,$unitTo) = splitUnits("0 $unitTo") unless $unitTo;
-	#warn $unitFrom;
-	#warn $unitTo;
+
 	my $multiplier = Units::convertUnit($unitFrom,$unitTo, {region=> $region});
 	$t2 = $self->{inexactValue} * $multiplier;
 	$t = $self->new([$t2->value, $t2->sigFigs], $unitTo);

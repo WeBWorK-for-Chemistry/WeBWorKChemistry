@@ -79,8 +79,12 @@ To do a simple, quick conversion you can use the `convertTo` function and supply
 ```
 $value = InexactValueWithUnits('5.50', 'km');
 $result = $value->convertTo('mi');
-# $result now contains the inexact value: 3.42 mi (with 3 sig figs) 
+# $result now contains the inexact value, 3.42 mi, with 3 sig figs 
 ```
+A context flag exists for InexactValue called `unitRegion`.  Set this to `uk` to copy over Imperial measurements (e.g. 1 pint = 20 fl oz) to the known units hash.  This is useful when using the unit conversion function shown previously and when grading unit conversions in dimensional analysis problems (next section).  The default is `us` region, but currently only pertains to volume measurements.
+```
+Context()->flags->set('unitRegion'=>'uk');
+```  
 
 # ParserDimensionalAnalysis
 This is a utility that I wrote to enable easier problem writing when you want students to show how they did a conversion using dimensional analysis.  It uses `parser::MultiAnswer` as a base. 
