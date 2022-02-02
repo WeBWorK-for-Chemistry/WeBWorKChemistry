@@ -75,7 +75,12 @@ $result = $n1/$d1;
 # using values above
 # $result contains an InexactValueWithUnits that will output the string:  1.609 km mi^-1
 ```
-
+To do a simple, quick conversion you can use the `convertTo` function and supply the unit to convert to as the first parameter.  These conversions will always assume that the initial measurement is the least precise value.  The function will fail if the physical quantities do not match.  Currently, only simple units, not compound units, can be converted with this function.
+```
+$value = InexactValueWithUnits('5.50', 'km');
+$result = $value->convertTo('mi');
+# $result now contains the inexact value: 3.42 mi (with 3 sig figs) 
+```
 
 # ParserDimensionalAnalysis
 This is a utility that I wrote to enable easier problem writing when you want students to show how they did a conversion using dimensional analysis.  It uses `parser::MultiAnswer` as a base. 
