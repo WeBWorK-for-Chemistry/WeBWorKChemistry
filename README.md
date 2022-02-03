@@ -93,7 +93,7 @@ See the demo page for sigFigCombinationProblem.pg to see how this is done.
 
 # InexactValueWithUnits
 
-This is an extension of InexactValue with a modified version of the units macro.  To make an InexactValueWithUnits, you provide exactly what you would provide a normal InexactValue as an array for the first parameter, then the units for the second parameter.
+This is an extension of InexactValue with a modified version of the units macro.  To make an `InexactValueWithUnits`, you provide exactly what you would provide a normal `InexactValue` as an array for the first parameter, then the units for the second parameter.
 ```
 $n1 = InexactValueWithUnits('1.609', 'km');
 $d1 = InexactValueWithUnits(['1', Infinity], 'mi');
@@ -154,7 +154,7 @@ $conversionFactorsMultiAnswer = MultiAnswer($n1,$d1,$d1,$n1)->asPairOfConversion
 ```
 Since we need four answer blanks, we have to explicitly use four values despite them being repeated.  But the order the student enters the conversion factors doesn't matter again.
 
-This problem also shows a variation of the `asDimensionalAnalysis` problem.  Here, the given value needs to be entered into the correct space by the student. The $given variable is now a the MultiAnswer parameter and we also need to tell `asDimensionalAnalysis` to also grade the given value.  So the first blank is *not* part of a conversion factor. 
+This problem also shows a variation of the `asDimensionalAnalysis` problem.  Here, the given value needs to be entered into the correct space by the student. The `$given` variable is now a `MultiAnswer` parameter and we also need to tell `asDimensionalAnalysis` to also grade the given value.  The first blank is *not* part of a conversion factor, but is still graded. 
 ```
 $ma = MultiAnswer($given,$n1,$d1,$answer)->asDimensionalAnalysis($given,{gradeGiven=>1});
 ```
