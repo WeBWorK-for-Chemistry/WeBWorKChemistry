@@ -169,11 +169,18 @@ sub new {
 }
 
 sub splitUnits {
-	my $aUnit = '(?:'.getPrefixNames().')?(?:'.Parser::Legacy::ObjectWithUnits::getUnitNames().')(?:\s*(?:\^|\*\*)\s*[-+]?\d+)?';
+	my $unitNames = Parser::Legacy::ObjectWithUnits::getUnitNames();
+	my $aUnit = '(?:'.getPrefixNames().')?(?:'.$unitNames.')(?:\s*(?:\^|\*\*)\s*[-+]?\d+)?';
 	my $unitPattern = $aUnit.'(?:\s*[/* ]\s*'.$aUnit.')*';
 	my $unitSpace = "($aUnit) +($aUnit)";
 	my $string = shift;
+	# This seems to handle when user inputs latex mu value "\mu" in place of simple 'u'.  i.e. \mu m instead of um for micrometers
+	# Also, automatically converts 'u' prefix to the more accurate 'μ' prefix (which is harder to type)
+	$string =~ s/(\\mu\s?|u)(?=$unitNames)/μ/;  # replace \mu, \mu with space, or u with: μ
+	
 	my ($num,$units) = $string =~ m!^(.*?(?:[)}\]0-9a-z]|\d\.))\s*($unitPattern)\s*$!;
+	#warn "units: $units" if $units;
+	#warn "unitless: $string[0]" unless $units;
 	if ($units) {
 		while ($units =~ s/$unitSpace/$1*$2/) {};
 		#$units =~ s/ //g;  # Why did I remove spaces here?  this conflicts with units like "fl oz" which have a space.  I don't want to force having a '-' dash between them yet.
@@ -231,16 +238,15 @@ sub cmp {
     my $ans = shift;
     $inexactWithUnitsStudent=0;
     $studentAnswer = $ans->{student_ans};
-    #warn "StudentAnswer:  $studentAnswer";
     if ($ans->{student_ans} eq ''){
       $inexactWithUnitsStudent = $self->new([0,9**9**9],'');  #blank answer is zero with infinite sf
       } else {
       $inexactWithUnitsStudent = $self->new($ans->{student_ans});
     }
-    $ans->{student_value} = $inexactWithUnitsStudent;
-    $ans->{preview_latex_string} = $inexactWithUnitsStudent->TeX;#$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
+	$ans->{student_value} = $inexactWithUnitsStudent;
+	$ans->{preview_latex_string} = $inexactWithUnitsStudent->TeX;#$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
     $ans->{student_ans} = $inexactWithUnitsStudent->string; #$inexactStudent->string; 
-    
+
     return $ans;
   });
 
@@ -386,16 +392,15 @@ sub string {
 
 sub TeX {
   my $self = shift;
-  # $cla =  ref($self);
-  # warn "Just checking: $cla";
-  # return "2";
   my $n = InexactValue::InexactValue::string($self);
   
   $n =~ s/E\+?(-?)0*([^)]*)/\\times 10^{$1$2}/i; # convert E notation to x10^(...)
+
   return $n . '\ ' . TeXunits($self->{units});
 }
 
 # Adapted from NumberWithUnits.pm original which fails to add spaces in units that have a space.
+# also display micro 'u' as the greek mu.
 #  Convert units to TeX format
 #  (fix superscripts, put terms in \rm,
 #   escape percent,
@@ -408,7 +413,7 @@ sub TeXunits {
   $units =~ s/%/\\%/g;
   $units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
   return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
-  my $displayMode = WeBWorK::PG::Translator::PG_restricted_eval(q!$main::displayMode!);
+  my $displayMode = $main::displayMode;
   return '{\textstyle\frac{'.$1.'}{'.$2.'}}' if ($displayMode eq 'HTML_tth');
   return '{\textstyle\frac{\rm\mathstrut '.$1.'}{\rm\mathstrut '.$2.'}}';
 }

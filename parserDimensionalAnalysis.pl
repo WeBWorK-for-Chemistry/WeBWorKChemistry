@@ -108,9 +108,15 @@ sub asDimensionalAnalysis {
 				if (Units::comparePhysicalQuantity($numerator->{units_ref}, $denominator->{units_ref})){
 					my $studentInverseRatio = $denominator->{inexactValue} / $numerator->{inexactValue};
 					my $ratio = $numerator->{units_ref}->{factor} / $denominator->{units_ref}->{factor};
+					my $a = $ratio+0;
+					$a =  main::Round($a,15);
+					my $b = $studentInverseRatio->valueAsNumber +0;
 					
-					if ($ratio == $studentInverseRatio->valueAsNumber()){
-						# warn "this is an exact ratio  $numerator  /  $denominator";
+					# comparing as string values to avoid floating point errors in comparison.  
+					# 1000 != 1/0.001 in floating point math even though we know they are equal.
+					# This MAY have an impact on precision tolerances. However, it would be odd to assume
+					# greater than 12 significant figures for educational problems... so maybe moot.
+					if ($ratio eq $studentInverseRatio->valueAsNumber()){  
 						# they're exact!  convert them to values with infinite sig figs
 						if ($numerator->sigFigs != 9**9**9){
 							$studentArray[$i] = InexactValueWithUnits::InexactValueWithUnits->new([$numerator->valueAsNumber,9**9**9], $numerator->{units});
@@ -176,11 +182,22 @@ sub asDimensionalAnalysis {
 				$denominator = shift @studentArray;
 				$numeratorScore=0;
 				$denominatorScore=0;
-				$studentRatio = $numerator->{inexactValue}/$denominator->{inexactValue};  
-
+				# warn $numerator->{inexactValue}->value;
+				# warn $denominator->{inexactValue}->value;
+				$studentRatio = $numerator->{inexactValue} / $denominator->{inexactValue};  
+				#warn $studentRatio->value;
+				#$studentRatio2 = main::Round($studentRatio->value,20);
+				# warn ref $correctArray[0];
+				# warn %{$correctArray[0]->{units_ref}};
+				# warn %{$numerator->{units_ref}};
+				# warn %{$correctArray[1]->{units_ref}};
+				# warn %{$denominator->{units_ref}};
+				$res = Units::compareUnitRefs($correctArray[1]->{units_ref},$denominator->{units_ref});
+				#warn "They match?  $res";
 				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) { 
 					# check for matching units on both parts, then check for matching value (with tolerance)
-					if ($correctArray[$j]->{units} eq $numerator->{units} && $correctArray[$j+1]->{units} eq $denominator->{units}){
+					#if ($correctArray[$j]->{units} eq $numerator->{units} && $correctArray[$j+1]->{units} eq $denominator->{units}){
+					if (Units::compareUnitRefs($correctArray[$j]->{units_ref},$numerator->{units_ref}) && Units::compareUnitRefs($correctArray[$j+1]->{units_ref},$denominator->{units_ref})){
 						# if answer is an exact number (like 12 inches in 1 ft), student's input of 12 will automatically be inexact, so just tolerate sig fig "errors" if answer is exact
 						$numeratorCreditSigFigs = 0.5;
 						$numeratorCreditValue = 0.5;
@@ -206,11 +223,20 @@ sub asDimensionalAnalysis {
 						}
 						if ($numeratorScore == 0 && $denominatorScore == 0) {
 							# check the ratio to see if those match.  Maybe student used a different equality like 1L/1000mL instead of 0.001L/1mL
+							#warn $correctArray[$j]->{inexactValue}->value;
+							#warn $correctArray[$j+1]->{inexactValue}->value;
 							$correctRatio = $correctArray[$j]->{inexactValue}/$correctArray[$j+1]->{inexactValue}; 
-							#warn "correct: $correctRatio";
-							$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
-							$numeratorScore = $result;
-							$denominatorScore = $result;  
+							#$correctRatio2 = main::Round($correctRatio->value, 20);
+							#$correctRatio += 0;
+							#warn "correct: $correctRatio2";
+							#warn "student: $studentRatio2";
+							#$equal = $correctRatio2 == $studentRatio2;
+							#warn "are equal? $equal";
+							$numeratorScore = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>$numeratorCreditSigFigs, "creditValue"=>$numeratorCreditValue, "failOnValueWrong"=>1});
+							$denominatorScore = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>$denominatorCreditSigFigs, "creditValue"=>$denominatorCreditValue, "failOnValueWrong"=>1});
+							#warn "$result";
+							#$numeratorScore = $result;
+							#$denominatorScore = $result;  
 
 						}
 	

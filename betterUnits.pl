@@ -817,7 +817,7 @@ our %prefixes = (
 	'Z' => {'name' => 'zetta', 'exponent' => 21} ,
 	'E' => {'name' => 'exa', 'exponent' => 18} ,
 	'P' => {'name' => 'peta', 'exponent' => 15} ,
-	'T' => {'name' => 'tera', 'exponent' => 12},
+	'T' => {'name' => 'tera', 'exponent' => 12} ,
 	'G' => {'name' => 'giga', 'exponent' => 9} ,
 	'M' => {'name' => 'mega', 'exponent' => 6} ,
 	'k' => {'name' => 'kilo', 'exponent' => 3} ,
@@ -828,6 +828,7 @@ our %prefixes = (
 	'm' => {'name' => 'milli', 'exponent' => -3} ,
 	'u' => {'name' => 'micro', 'exponent' => -6} ,
 	'μ' => {'name' => 'micro', 'exponent' => -6} ,
+  #'\mu' => {'name' => 'micro', 'exponent' => -6} ,
 	'n' => {'name' => 'nano', 'exponent' => -9} ,
 	'p' => {'name' => 'pico', 'exponent' => -12} ,
 	'f' => {'name' => 'femto', 'exponent' => -15} ,
@@ -920,6 +921,33 @@ sub process_term {
 	#returns a unit hash.
 	#print "process_term returns", %unit_hash, "\n";
 	return(%unit_hash);
+}
+
+sub compareUnitRefs {
+  my $first = shift;
+  my %a = %$first;
+  my $second = shift;
+  my %b = %$second;
+  my $equal = 1;
+  if (%a != %b){
+    $equal = 0;  # do not have same # of keys
+  } else {
+    # https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare#:~:text=Compare%20is%20not%20a%20detailed%20enough%20phrase%20when,don%27t%20have%20the%20same%20number%20of%20keysn%22%3B%20%7D
+    my %cmp = map { $_ => 1 } keys %a;
+    for my $key (keys %b) {
+        last unless exists $cmp{$key};
+        last unless $a{$key} eq $b{$key};
+        delete $cmp{$key};
+    }
+    if (%cmp){
+      $equal = 0;
+    }
+  }
+  return $equal;
+
+  foreach $u (keys %$first){
+
+  }
 }
 
 sub comparePhysicalQuantity {
