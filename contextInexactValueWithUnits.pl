@@ -605,7 +605,7 @@ sub TeXunits {
   $units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
   $units =~ s/\*/\\,/g; 
   $units =~ s/%/\\%/g;
-  $units =~ s/μ/\\mu/g;
+  $units =~ s/μ/\\mu /g;
   $units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
   return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
   my $displayMode = $main::displayMode;
