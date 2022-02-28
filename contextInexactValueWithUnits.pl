@@ -82,7 +82,7 @@ package InexactValueWithUnits::InexactValueWithUnits;
 #our @ISA = qw(Value);
 our @ISA = qw(Parser::Legacy::ObjectWithUnits InexactValue::InexactValue);
 
-sub name {'inexactValue'};
+sub name {'inexactValueWithUnits'};
 sub cmp_class {'Inexact Value with Units'};
 
 sub new {
@@ -101,23 +101,70 @@ sub new {
 		$options = shift;
 	}
 
+	
 	# register a new unit/s if needed
-	if (defined($options->{newUnit})) {
-		my @newUnits;
-		if (ref($options->{newUnit}) eq 'ARRAY') {
-			@newUnits = @{$options->{newUnit}};
+	# first from the context (global)
+	if (defined($self->context->flags->get('newUnit'))){
+		my $newUnit =$self->context->flags->get('newUnit');
+		if (ref($newUnit) eq 'ARRAY') {
+			@newUnits = @{$newUnit};
 		} else {
-			@newUnits = ($options->{newUnit});
+			@newUnits = ($newUnit);
 		}
 
 		foreach my $newUnit (@newUnits) {
 			if (ref($newUnit) eq 'HASH') {
 				Parser::Legacy::ObjectWithUnits::add_unit($newUnit->{name}, $newUnit->{conversion});
-			} else {
+			} elsif (ref($newUnit) eq 'ARRAY') {
+				# create the unit hash manually and set it the same for all units in the array as they all mean the same thing
+				@sameUnits = @{$newUnit};
+				my $unitFundamentIdentical = '';
+				$knownUnits = \%BetterUnits::known_units;
+				foreach my $sameUnit (@sameUnits) {
+					
+					
+					if ($unitFundamentIdentical eq ''){
+						$unitFundamentIdentical = $sameUnit;
+					}  
+					my $unitHash = {	'factor' 	=> 1,
+										"$unitFundamentIdentical"     => 1 } ;
+					$knownUnits->{$sameUnit} = $unitHash;
+					#warn $sameUnit;
+					#warn $unitHash;
+					$BetterUnits::fundamental_units{$unitFundamentIdentical} = 0;
+					#warn %known_units;
+
+				}
+				#warn "$_ $BetterUnits::known_units{$_}\n" for (keys %BetterUnits::known_units);
+			}
+			else{
 				Parser::Legacy::ObjectWithUnits::add_unit($newUnit);
+				#my %op = %{$options->{known_units}};
+  				#warn "$_ $op{$_}\n" for (keys %op);
+				#warn %fundamental_units;
 			}
 		}
-	}
+	} 
+
+	# %fun = $BetterUnits::known_units;
+    #   warn "$_ $fun{$_}\n" for (keys %fun);
+	# #second from the value
+	# if (defined($options->{newUnit})) {
+	# 	my @newUnits;
+	# 	if (ref($options->{newUnit}) eq 'ARRAY') {
+	# 		@newUnits = @{$options->{newUnit}};
+	# 	} else {
+	# 		@newUnits = ($options->{newUnit});
+	# 	}
+
+	# 	foreach my $newUnit (@newUnits) {
+	# 		if (ref($newUnit) eq 'HASH') {
+	# 			$self->add_unit($newUnit->{name}, $newUnit->{conversion});
+	# 		} else {
+	# 			$self->add_unit($newUnit);
+	# 		}
+	# 	}
+	# }
 	Value::Error("You must provide a ".$self->name) unless defined($num);
 
 	(my $tempnum,$units) = splitUnits($num) unless $units;
@@ -138,11 +185,57 @@ sub new {
 	$num = $self->makeValue($num,context=>$context);
 	#warn "result is $num";
 
-	my %Units = $units ? Parser::Legacy::ObjectWithUnits::getUnits($units) : %fundamental_units;
+	# store a copy of fundamental units on self
+	$num->{fundamental_units} = \%fundamental_units;
+	$num->{known_units} = {};
 
+	# register a new unit/s if needed
+	# first from the context (global)
+	if (defined($self->context->flags->get('newUnit'))){
+
+		my $newUnit =$self->context->flags->get('newUnit');
+		if (ref($newUnit) eq 'ARRAY') {
+			@newUnits = @{$newUnit};
+		} else {
+			@newUnits = ($newUnit);
+		}
+
+		foreach my $newUnit (@newUnits) {
+			if (ref($newUnit) eq 'HASH') {
+				$self->add_unit($num, $newUnit->{name}, $newUnit->{conversion});
+				
+			} elsif (ref($newUnit) eq 'ARRAY') {
+				# create the unit hash manually and set it the same for all units in the array as they all mean the same thing
+				@sameUnits = @{$newUnit};
+				my $unitFundamentIdentical = '';
+				foreach my $sameUnit (@sameUnits) {
+					if ($unitFundamentIdentical eq ''){
+						$unitFundamentIdentical = $sameUnit;
+					} 
+					my $unitHash = {	'factor' 	=> 1,
+										"$unitFundamentIdentical"     => 1 } ;
+					 
+					$self->add_unit($num, $sameUnit, $unitHash);
+					#$BetterUnits::fundamental_units{$unitFundamentIdentical} = 0;
+					#warn %known_units;
+
+				}
+				#warn "$_ $BetterUnits::known_units{$_}\n" for (keys %BetterUnits::known_units);
+			} else {
+				$self->add_unit($num, $newUnit);
+			}
+		}
+	} 
+	
+	
+# warn $units;
+	my %Units = $units ? Parser::Legacy::ObjectWithUnits::getUnits($units) : %fundamental_units;
+	
+ 	#warn "$_ $Units{$_}\n" for (keys %Units);
 	#quick loop to remove fundamental units that are zero
 	@keys = (keys %Units);
 	for ($i=scalar @keys -1;$i>=0; $i--){
+		#warn $Units{$keys[$i]};
 		if ($Units{$keys[$i]} == 0){
 			delete $Units{$keys[$i]};
 		}
@@ -159,6 +252,7 @@ sub new {
 	$num->{units_ref} = \%Units;
 	$num->{isValue} = 1;
 	$num->{correct_ans} .= ' '.$units if defined $num->{correct_ans};
+	
 	#$test = Parser::Legacy::ObjectWithUnits::TeXunits($units);
 	#warn "$test";
 	$num->{correct_ans_latex_string} .= ' '. Parser::Legacy::ObjectWithUnits::TeXunits($units) if defined $num->{correct_ans_latex_string};
@@ -167,6 +261,63 @@ sub new {
 	$num->{precedence}{'InexactValueWithUnits'} = 4;
 	return $num;
 }
+
+# borrowed from NumberWithUnits.pm
+sub add_fundamental_unit {
+  my $self = shift;
+  my $num = shift;
+  my $unit = shift;
+  $num->{fundamental_units}->{$unit} = 0;
+	#warn $fundamental_units;
+}
+
+# borrowed from NumberWithUnits.pm
+sub add_unit {
+  my $self = shift;
+  my $num = shift;
+  my $unit = shift;
+  my $hash = shift;
+  
+  unless (ref($hash) eq 'HASH') {
+    $hash = {'factor'    => 1,
+	     "$unit"     => 1 };
+  }
+
+  # make sure that if this unit is defined in terms of any other units
+  # then those units are fundamental units.  
+  foreach my $subUnit (keys %$hash) {
+    if (!defined($num->{fundamental_units}->{$subUnit})) {
+      $self->add_fundamental_unit($num, $subUnit);
+    }
+  }
+
+  $num->{known_units}->{$unit} = $hash;
+
+}
+
+
+# sub mergeNewUnits {
+# 	my $self = shift;
+# 	my $options = shift;
+
+# 	if (defined($self->context->flags->get('newUnit'))){
+
+# 		my $newUnit =$self->context->flags->get('newUnit');
+# 		if (ref($newUnit) eq 'ARRAY') {
+# 			@newUnits = @{$newUnit};
+# 		} else {
+# 			@newUnits = ($newUnit);
+# 		}
+
+# 		foreach my $newUnit (@newUnits) {
+# 			if (ref($newUnit) eq 'HASH') {
+# 				$self->add_unit($newUnit->{name}, $newUnit->{conversion});
+# 			} else {
+# 				$self->add_unit($newUnit);
+# 			}
+# 		}
+# 	} 
+# }
 
 sub splitUnits {
 	my $unitNames = Parser::Legacy::ObjectWithUnits::getUnitNames();
@@ -193,7 +344,7 @@ sub splitUnits {
 sub getPrefixNames {
 	my $a;
 	my $b;
-	my $prefixes = \%Units::prefixes;
+	my $prefixes = \%BetterUnits::prefixes;
 	my @prefixArray = keys %$prefixes;
 	my @sortedArray = main::PGsort(sub {
 		return length($_[1]) > length($_[0]) if length($_[0]) != length($_[1]);
@@ -205,6 +356,7 @@ sub getPrefixNames {
 
 sub make {
 	my $self = shift;
+	
 	return $self;
  }
 
@@ -392,10 +544,12 @@ sub string {
 
 sub TeX {
   my $self = shift;
-  my $n = InexactValue::InexactValue::string($self);
-  
-  $n =~ s/E\+?(-?)0*([^)]*)/\\times 10^{$1$2}/i; # convert E notation to x10^(...)
-
+  #$n = InexactValue::InexactValue::string($self);
+  $n = $self->{inexactValue};
+  #warn "$n";
+  $n =~ s/(?:E|x10\^)\+?(-?)0*([^)]*?)$/\\times 10^{$1$2}/gi; # convert E notation to x10^(...)
+  #warn "$n";
+	
   return $n . '\ ' . TeXunits($self->{units});
 }
 
@@ -411,6 +565,7 @@ sub TeXunits {
   $units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
   $units =~ s/\*/\\,/g; 
   $units =~ s/%/\\%/g;
+  $units =~ s/μ/\\mu/g;
   $units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
   return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
   my $displayMode = $main::displayMode;
@@ -432,7 +587,7 @@ sub convertTo {
 		Value::Error("The value provided doesn't contain any units so cannot be converted.");
 	}
 
-	my $multiplier = Units::convertUnit($unitFrom,$unitTo, {region=> $region});
+	my $multiplier = BetterUnits::convertUnit($unitFrom,$unitTo, {region=> $region});
 	$t2 = $self->{inexactValue} * $multiplier;
 	$t = $self->new([$t2->value, $t2->sigFigs], $unitTo);
 	return $t;
@@ -463,21 +618,47 @@ sub sub {
   return $self->new([$newValue, $newSigFigs], $self->{units});
 }
 
+sub mergeUnits {
+	my $self = shift;
+	my $leftOptions = shift;
+	my $rightOptions = shift;
+
+	my $leftKnown = $leftOptions->{known_units};
+	my $rightKnown = $rightOptions->{known_units};
+	my $mainKnown = \%BetterUnits::known_units;
+	
+	my $leftFundamental = $leftOptions->{fundamental_units};
+	my $rightFundamental = $rightOptions->{fundamental_units};
+	
+	foreach my $subUnit (keys %$rightKnown) {
+		if (!defined($leftFundamental->{$subUnit})) {
+			$leftFundamental->{$subUnit} = 0;
+		}
+
+		if (!defined($mainKnown->{$subUnit})) {
+  			$mainKnown->{$subUnit} = $rightKnown->{$subUnit};
+		}
+  	}
+	foreach my $subUnit (keys %$leftKnown) {
+		if (!defined($mainKnown->{$subUnit})) {
+  			$mainKnown->{$subUnit} = $leftKnown->{$subUnit};
+		}
+	}
+
+
+	my $options = {known_units=>$mainKnown, fundamental_units=>$leftFundamental};
+	return $options;
+}
+
 sub mult {
 	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
-	#$minSf = $left->minSf($left, $right);
-	#warn "SF: " . $minSf;
-	# warn "LEFT: " .$left;
-	# warn "RIGHT: " .$right;
-	# warn "LEFT: " .$left->{inexactValue};
-	# warn "RIGHT: " .$right->{inexactValue};
-	# warn "LEFT: " .$left->{inexactValue}->valueAsNumber;
-	# warn "RIGHT: " .$right->{inexactValue}->valueAsNumber;
+
 	my $newInexact = $left->{inexactValue} * $right->{inexactValue};
-	# warn "RESULT: " .$newInexact;
-	# warn "LEFT: " .$left->{units};
-	# warn "RIGHT: " .$right->{units};
-	$newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1);
+
+	# merge additional units with standard units
+	my $newOptions = $self->mergeUnits($left,$right); 
+
+	$newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1, $newOptions);
 	# warn "UNITS: " . $newUnitString;
 	$result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
 	# warn "Result final: " .$result;
@@ -488,8 +669,13 @@ sub div {
   my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
   #Value::Error("Division by zero") if $r->{data}[0] == 0;
   #$minSf = $left->minSf($left, $right);
+
   my $newInexact = $left->{inexactValue} / $right->{inexactValue};
-  $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 0);
+
+  # merge additional units with standard units
+  my $newOptions = $self->mergeUnits($left,$right); 
+
+  $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 0, $newOptions);
   return $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
 }
 
@@ -497,8 +683,9 @@ sub combineStringUnitsCleanly {
   my $left = shift;
   my $right = shift;
   my $isMultiply= shift;
-  my @unitArrayLeft = process_unit_for_stringCombine($left);
-  my @unitArrayRight = process_unit_for_stringCombine($right);
+  my $options = shift;
+  my @unitArrayLeft = process_unit_for_stringCombine($left, $options);
+  my @unitArrayRight = process_unit_for_stringCombine($right, $options);
 
   my $newUnitString = '';
   my @numerator;
@@ -639,8 +826,8 @@ sub process_unit_for_stringCombine {
 
   my $options = shift;
 
-  my $fundamental_units = \%Units::fundamental_units;
-  my $known_units = \%Units::known_units;
+  my $fundamental_units = \%BetterUnits::fundamental_units;
+  my $known_units = \%BetterUnits::known_units;
     
   if (defined($options->{fundamental_units})) {
     $fundamental_units = $options->{fundamental_units};
@@ -668,8 +855,8 @@ sub process_term_for_stringCombine {
 	my $isNumerator = shift;
 	my $options = shift;
 	
-	my $fundamental_units = \%Units::fundamental_units;
-	my $known_units = \%Units::known_units;
+	my $fundamental_units = \%BetterUnits::fundamental_units;
+	my $known_units = \%BetterUnits::known_units;
 	
 	if (defined($options->{fundamental_units})) {
 	  $fundamental_units = $options->{fundamental_units};
@@ -705,9 +892,9 @@ sub process_factor_for_stringCombine {
 
 	my $options = shift;
 
-	my $fundamental_units = \%Units::fundamental_units;
-	my $known_units = \%Units::known_units;
-	my $prefixes = \%Units::prefixes;
+	my $fundamental_units = \%BetterUnits::fundamental_units;
+	my $known_units = \%BetterUnits::known_units;
+	my $prefixes = \%BetterUnits::prefixes;
 	
 	if (defined($options->{fundamental_units})) {
 		$fundamental_units = $options->{fundamental_units};
@@ -715,15 +902,22 @@ sub process_factor_for_stringCombine {
 
 	if (defined($options->{known_units})) {
 		$known_units = $options->{known_units};
+		#warn "TEHERE ARE KNOWN UNITS:";
+		#warn %$known_units;
 	}
-
+	# %op = %$known_units;
+	# warn $known_units;
+	# warn "$_ $op{$_}\n" for (keys %op);
 	my ($unit_name,$power) = split(/\^/, $string);
 	my @unitsNameArray = keys %$known_units;
 	my $unitsJoined = join '|', @unitsNameArray;
+	
 	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
 	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
-	# warn "Unit Base: " .$unit_base;
-	# warn "Unit Prefix: " .$unit_prefix;
+	 #warn $unitsJoined;
+	 #warn $unit_name;
+	 #warn "Unit Base: " .$unit_base;
+	 #warn "Unit Prefix: " .$unit_prefix;
 
 	$power = 1 unless defined($power);
 

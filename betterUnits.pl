@@ -7,7 +7,7 @@ sub evaluate_units {
 }
 
 # Methods for evaluating units in answers
-package Units;
+package BetterUnits;
 
 #require Exporter;
 #@ISA = qw(Exporter);
@@ -844,6 +844,12 @@ sub process_unit {
 
     my $options = shift;
 
+    # $fund = $options->{known_units};
+    # %op = %$fund;
+    # warn "decoding options";
+	  # warn "$_ $op{$_}\n" for (keys %op);
+    # warn "end options";
+
     my $fundamental_units = \%fundamental_units;
     my $known_units = \%known_units;
 	
@@ -855,6 +861,7 @@ sub process_unit {
       $known_units = $options->{known_units};
     }
 
+# 
     
     die ("UNIT ERROR: No units were defined.") unless defined($string);  #
 	#split the string into numerator and denominator --- the separator is /
@@ -978,6 +985,8 @@ sub process_factor {
 	#split the factor into unit and powers
 
 	my $options = shift;
+  #my %op = %{$options->{known_units}};
+  #warn "$_ $op{$_}\n" for (keys %op);
 
 	my $fundamental_units = \%fundamental_units;
 	my $known_units = \%known_units;
@@ -997,6 +1006,9 @@ sub process_factor {
   
 	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
 	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
+  #warn "$unitsJoined";
+  #warn $unit_prefix;
+  #warn $unit_base;
 
 	$power = 1 unless defined($power);
 	my %unit_hash = %$fundamental_units;
