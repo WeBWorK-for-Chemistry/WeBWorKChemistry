@@ -228,8 +228,8 @@ sub new {
 	} 
 	
 	
-# warn $units;
-	my %Units = $units ? Parser::Legacy::ObjectWithUnits::getUnits($units) : %fundamental_units;
+#warn "$units WTH" ;
+	my %Units = $units ? getUnits($units) : %fundamental_units;
 	
  	#warn "$_ $Units{$_}\n" for (keys %Units);
 	#quick loop to remove fundamental units that are zero
@@ -260,6 +260,24 @@ sub new {
 
 	$num->{precedence}{'InexactValueWithUnits'} = 4;
 	return $num;
+}
+
+# copied from Units.pm
+sub getUnits {
+  my $units = shift;
+  my $options = {};
+  if ($fundamental_units) {
+    $options->{fundamental_units} = $fundamental_units;
+  }
+  if ($known_units) {
+    $options->{known_units} = $known_units;
+  }
+  my %Units = BetterUnits::evaluate_units($units,$options);
+  if ($Units{ERROR}) {
+    $Units{ERROR} =~ s/ at ([^ ]+) line \d+(\n|.)*//;
+    $Units{ERROR} =~ s/^UNIT ERROR:? *//;
+  }
+  return %Units;
 }
 
 # borrowed from NumberWithUnits.pm
@@ -318,9 +336,31 @@ sub add_unit {
 # 		}
 # 	} 
 # }
+sub getUnitNames {
+
+  my $units = \%BetterUnits::known_units;
+   #warn %$units;
+   my @keys = keys(%$units);
+   my $compare = sub { 
+	   return length($_[1]) < length($_[0]) if length($_[0]) != length($_[1]); 
+	   my $cmp = $_[0] cmp $_[1];
+	   if ($cmp == 1) {
+		   return 0;
+	   } else {
+		   return 1;
+	   }
+	   };
+	#warn @keys;
+    #my $result = join('|', @keys);
+	my $result2 = join('|', main::PGsort( $compare,@keys));
+	#warn "$result2";
+	return $result2;
+}
+
 
 sub splitUnits {
-	my $unitNames = Parser::Legacy::ObjectWithUnits::getUnitNames();
+	my $unitNames = getUnitNames();
+	
 	my $aUnit = '(?:'.getPrefixNames().')?(?:'.$unitNames.')(?:\s*(?:\^|\*\*)\s*[-+]?\d+)?';
 	my $unitPattern = $aUnit.'(?:\s*[/* ]\s*'.$aUnit.')*';
 	my $unitSpace = "($aUnit) +($aUnit)";
@@ -914,10 +954,10 @@ sub process_factor_for_stringCombine {
 	
 	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
 	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
-	 #warn $unitsJoined;
-	 #warn $unit_name;
-	 #warn "Unit Base: " .$unit_base;
-	 #warn "Unit Prefix: " .$unit_prefix;
+	# warn $unitsJoined;
+	# warn $unit_name;
+	# warn "Unit Base: " .$unit_base;
+	# warn "Unit Prefix: " .$unit_prefix;
 
 	$power = 1 unless defined($power);
 

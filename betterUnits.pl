@@ -838,6 +838,27 @@ our %prefixes = (
 );
 
 
+sub evaluate_units {
+        my $unit = shift;
+	my $options = shift;
+
+	my $fundamental_units = \%fundamental_units;
+	my $known_units = \%known_units;
+	
+	if (defined($options->{fundamental_units}) && $options->{fundamental_units}) {
+	  $fundamental_units = $options->{fundamental_units};
+	}
+
+	if (defined($options->{known_units}) && $options->{fundamental_units}) {
+	  $known_units = $options->{known_units};
+	}
+	
+	my %output =  process_unit( $unit, {fundamental_units => $fundamental_units, known_units => $known_units});
+	%output = %$fundamental_units if $@;  # this is what you get if there is an error.
+	$output{'ERROR'}=$@ if $@;
+	%output;
+}
+
 sub process_unit {
 
     my $string = shift;
@@ -1007,6 +1028,7 @@ sub process_factor {
 	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
 	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
   #warn "$unitsJoined";
+  #warn $unit_name;
   #warn $unit_prefix;
   #warn $unit_base;
 
