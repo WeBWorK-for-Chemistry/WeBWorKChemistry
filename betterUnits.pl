@@ -3,7 +3,7 @@
 # This is the "exported" subroutine.  Use this to evaluate the units given in an answer.
 
 sub evaluate_units {
-	&Units::evaluate_units;
+	&BetterUnits::evaluate_units;
 }
 
 # Methods for evaluating units in answers
@@ -852,7 +852,7 @@ sub evaluate_units {
 	if (defined($options->{known_units}) && $options->{fundamental_units}) {
 	  $known_units = $options->{known_units};
 	}
-	
+  
 	my %output =  process_unit( $unit, {fundamental_units => $fundamental_units, known_units => $known_units});
 	%output = %$fundamental_units if $@;  # this is what you get if there is an error.
 	$output{'ERROR'}=$@ if $@;
@@ -870,7 +870,7 @@ sub process_unit {
     # warn "decoding options";
 	  # warn "$_ $op{$_}\n" for (keys %op);
     # warn "end options";
-
+    #warn $string;
     my $fundamental_units = \%fundamental_units;
     my $known_units = \%known_units;
 	
@@ -882,27 +882,27 @@ sub process_unit {
       $known_units = $options->{known_units};
     }
 
-# 
-    
     die ("UNIT ERROR: No units were defined.") unless defined($string);  #
-	#split the string into numerator and denominator --- the separator is /
+	  #split the string into numerator and denominator --- the separator is /
     my ($numerator,$denominator) = split( m{/}, $string );
 
-
-
     $denominator = "" unless defined($denominator);
+
     my %numerator_hash = process_term($numerator,{fundamental_units => $fundamental_units, known_units => $known_units});
     my %denominator_hash =  process_term($denominator,{fundamental_units => $fundamental_units, known_units => $known_units});
-
+    #warn %numerator_hash;
+    #warn %denominator_hash;
 
     my %unit_hash = %$fundamental_units;
 	my $u;
 	foreach $u (keys %unit_hash) {
 		if ( $u eq 'factor' ) {
-			$unit_hash{$u} = $numerator_hash{$u}/$denominator_hash{$u};  # calculate the correction factor for the unit
+      # calculate the correction factor for the unit
+			$unit_hash{$u} = $numerator_hash{$u}/$denominator_hash{$u};  
 		} else {
-
-			$unit_hash{$u} = $numerator_hash{$u} - $denominator_hash{$u}; # calculate the power of the fundamental unit in the unit
+      # calculate the power of the fundamental unit in the unit
+      # possibility that new unit is in denominator but not numerator, so check first. Assume zero power for missing fundamental.
+			$unit_hash{$u} = ($numerator_hash{$u} ? $numerator_hash{$u} : 0) - ($denominator_hash{$u} ? $denominator_hash{$u} : 0); 
 		}
 	}
 	# return a unit hash.
@@ -933,17 +933,28 @@ sub process_term {
     
 		my $f;
 		foreach $f (@factors) {
-			my %factor_hash = process_factor($f,{fundamental_units => $fundamental_units, known_units => $known_units});
+      # here we should check to see if there are any unknown units combined with spaces
+      # i.e. "mol Fe2+" will fail in process_factor subroutine because it is two units, not one.
+      # The trick is to not split units that are technically one (like fluid ounce).  
+      # Adding a dash is fine, but if a user adds a custom unit with spaces, we want to honor it.
+      my @unitsNameArray = keys %$known_units;
+      @unitsNameArray = grep(/\s/, @unitsNameArray);
+	    my $unitsJoined = join '|', @unitsNameArray;
+      my @splitUnits = ( $f =~ m/($unitsJoined|\S+)/g );
+      
+      foreach $f (@splitUnits) {
+        my %factor_hash = process_factor($f,{fundamental_units => $fundamental_units, known_units => $known_units});
 
-			my $u;
-			foreach $u (keys %unit_hash) {
-				if ( $u eq 'factor' ) {
-					$unit_hash{$u} = $unit_hash{$u} * $factor_hash{$u};  # calculate the correction factor for the unit
-				} else {
+        my $u;
+        foreach $u (keys %unit_hash) {
+          if ( $u eq 'factor' ) {
+            $unit_hash{$u} = $unit_hash{$u} * $factor_hash{$u};  # calculate the correction factor for the unit
+          } else {
 
-					$unit_hash{$u} = $unit_hash{$u} + $factor_hash{$u}; # calculate the power of the fundamental unit in the unit
-				}
-			}
+            $unit_hash{$u} = $unit_hash{$u} + $factor_hash{$u}; # calculate the power of the fundamental unit in the unit
+          }
+        }
+      }
 		}
 	}
 	#returns a unit hash.
@@ -1000,6 +1011,29 @@ sub comparePhysicalQuantity {
 	return $equal;
 }
 
+sub add_unit {
+  my $unit = shift;
+  my $hash = shift;
+ 
+  my $fundamental_units = \%fundamental_units;
+	my $known_units = \%known_units;
+	  
+  unless (ref($hash) eq 'HASH') {
+    $hash = {'factor'    => 1,
+	     "$unit"     => 1 };
+  }
+  #warn "adding units";
+  # make sure that if this unit is defined in terms of any other units
+  # then those units are fundamental units.  
+  foreach my $subUnit (keys %$hash) {
+    if (!defined($fundamental_units->{$subUnit})) {
+      $fundamental_units->{$subUnit} = 0;
+    }
+  }
+  
+  $known_units->{$unit} = $hash;
+}
+
 
 sub process_factor {
 	my $string = shift;
@@ -1026,15 +1060,18 @@ sub process_factor {
 	my $unitsJoined = join '|', @unitsNameArray;
   
 	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
-	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
-  #warn "$unitsJoined";
-  #warn $unit_name;
-  #warn $unit_prefix;
-  #warn $unit_base;
-
+	my $unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
+  $unit_prefix =~ s/\s//;
+  #warn $unitsJoined;
 	$power = 1 unless defined($power);
 	my %unit_hash = %$fundamental_units;
-	if ( defined( $known_units->{$unit_base} )  ) {
+	unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
+    # if not-strict mode, register this unit as a new unit with its own fundamentals
+    BetterUnits::add_unit($unit_name);
+    $unit_base = $unit_name;
+    undef $unit_prefix;
+		#die "UNIT ERROR Unrecognizable unit: |$unit_base|";
+  }
 		$prefixExponent = 0;
 		if ( defined($unit_prefix) && $unit_prefix ne ''){
 			 if (exists($prefixes{$unit_prefix})){
@@ -1054,9 +1091,7 @@ sub process_factor {
 				$unit_hash{$u} = $fundamental_unit*$power; # calculate the power of the fundamental unit in the unit
 			}
 		}
-	} else {
-		die "UNIT ERROR Unrecognizable unit: |$unit_base|";
-	}
+	 
 	%unit_hash;
 }
 

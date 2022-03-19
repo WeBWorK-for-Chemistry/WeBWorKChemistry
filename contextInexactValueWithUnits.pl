@@ -85,6 +85,8 @@ our @ISA = qw(Parser::Legacy::ObjectWithUnits InexactValue::InexactValue);
 sub name {'inexactValueWithUnits'};
 sub cmp_class {'Inexact Value with Units'};
 
+$strictUnits = 1;
+
 sub new {
 	my $self = shift; my $class = ref($self) || $self;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
@@ -101,6 +103,12 @@ sub new {
 		$options = shift;
 	}
 
+	# this will require units to be defined in betterUnits.
+	# setting to false will cause anything after the number to be added 
+	# as a new unit if not recognized.
+	if (defined($self->context->flags->get('strictUnits'))){
+		$strictUnits = $self->context->flags->get('strictUnits');
+	}
 	
 	# register a new unit/s if needed
 	# first from the context (global)
@@ -120,8 +128,7 @@ sub new {
 				@sameUnits = @{$newUnit};
 				my $unitFundamentIdentical = '';
 				$knownUnits = \%BetterUnits::known_units;
-				foreach my $sameUnit (@sameUnits) {
-					
+				foreach my $sameUnit (@sameUnits) {					
 					
 					if ($unitFundamentIdentical eq ''){
 						$unitFundamentIdentical = $sameUnit;
@@ -166,12 +173,28 @@ sub new {
 	# 	}
 	# }
 	Value::Error("You must provide a ".$self->name) unless defined($num);
-
-	(my $tempnum,$units) = splitUnits($num) unless $units;
 	
-	if (defined $tempnum){
-		$num = $tempnum;
+	if (ref $num eq "ARRAY"){
+		my $t = join( ',', @$num );;
+		#warn "Array: $t";
+	} else {
+		#warn "Value: $num";		
 	}
+	if (ref $num eq "ARRAY") {
+		#warn "From Array: $units";
+	} else {
+		(my $tempnum,$units) = splitUnits($num) unless $units;
+		if (defined $tempnum){
+			$num = $tempnum;
+		}
+		#warn "From Value: $units";
+	}
+	
+	# check that units are valid
+	if ($strictUnits){
+
+	}
+	
 	#warn "Trying to make:  $num";
 
 	#Value::Error("You must provide units for your ".$self->name) unless $units;
@@ -191,47 +214,49 @@ sub new {
 
 	# register a new unit/s if needed
 	# first from the context (global)
-	if (defined($self->context->flags->get('newUnit'))){
+	# if (defined($self->context->flags->get('newUnit'))){
 
-		my $newUnit =$self->context->flags->get('newUnit');
-		if (ref($newUnit) eq 'ARRAY') {
-			@newUnits = @{$newUnit};
-		} else {
-			@newUnits = ($newUnit);
-		}
+	# 	my $newUnit =$self->context->flags->get('newUnit');
+	# 	if (ref($newUnit) eq 'ARRAY') {
+	# 		@newUnits = @{$newUnit};
+	# 	} else {
+	# 		@newUnits = ($newUnit);
+	# 	}
 
-		foreach my $newUnit (@newUnits) {
-			if (ref($newUnit) eq 'HASH') {
-				$self->add_unit($num, $newUnit->{name}, $newUnit->{conversion});
+	# 	foreach my $newUnit (@newUnits) {
+	# 		if (ref($newUnit) eq 'HASH') {
+	# 			$self->add_unit($num, $newUnit->{name}, $newUnit->{conversion});
 				
-			} elsif (ref($newUnit) eq 'ARRAY') {
-				# create the unit hash manually and set it the same for all units in the array as they all mean the same thing
-				@sameUnits = @{$newUnit};
-				my $unitFundamentIdentical = '';
-				foreach my $sameUnit (@sameUnits) {
-					if ($unitFundamentIdentical eq ''){
-						$unitFundamentIdentical = $sameUnit;
-					} 
-					my $unitHash = {	'factor' 	=> 1,
-										"$unitFundamentIdentical"     => 1 } ;
+	# 		} elsif (ref($newUnit) eq 'ARRAY') {
+	# 			# create the unit hash manually and set it the same for all units in the array as they all mean the same thing
+	# 			@sameUnits = @{$newUnit};
+	# 			my $unitFundamentIdentical = '';
+	# 			foreach my $sameUnit (@sameUnits) {
+	# 				if ($unitFundamentIdentical eq ''){
+	# 					$unitFundamentIdentical = $sameUnit;
+	# 				} 
+	# 				my $unitHash = {	'factor' 	=> 1,
+	# 									"$unitFundamentIdentical"     => 1 } ;
 					 
-					$self->add_unit($num, $sameUnit, $unitHash);
-					#$BetterUnits::fundamental_units{$unitFundamentIdentical} = 0;
-					#warn %known_units;
+	# 				$self->add_unit($num, $sameUnit, $unitHash);
+	# 				#$BetterUnits::fundamental_units{$unitFundamentIdentical} = 0;
+	# 				#warn %known_units;
 
-				}
-				#warn "$_ $BetterUnits::known_units{$_}\n" for (keys %BetterUnits::known_units);
-			} else {
-				$self->add_unit($num, $newUnit);
-			}
-		}
-	} 
+	# 			}
+	# 			#warn "$_ $BetterUnits::known_units{$_}\n" for (keys %BetterUnits::known_units);
+	# 		} else {
+	# 			$self->add_unit($num, $newUnit);
+	# 		}
+	# 	}
+	# } 
 	
 	
 #warn "$units WTH" ;
+
 	my %Units = $units ? getUnits($units) : %fundamental_units;
-	
- 	#warn "$_ $Units{$_}\n" for (keys %Units);
+	#warn %Units;
+
+	#warn "$_ $Units{$_}\n" for (keys %Units);
 	#quick loop to remove fundamental units that are zero
 	@keys = (keys %Units);
 	for ($i=scalar @keys -1;$i>=0; $i--){
@@ -240,6 +265,8 @@ sub new {
 			delete $Units{$keys[$i]};
 		}
 	}
+	# warn $num;
+	# warn %Units;
 
 	#warn "Trying to make:  ${Units{s}}";
 	Value::Error($Units{ERROR}) if ($Units{ERROR});
@@ -350,35 +377,46 @@ sub getUnitNames {
 		   return 1;
 	   }
 	   };
-	#warn @keys;
-    #my $result = join('|', @keys);
 	my $result2 = join('|', main::PGsort( $compare,@keys));
-	#warn "$result2";
 	return $result2;
 }
 
 
 sub splitUnits {
-	my $unitNames = getUnitNames();
-	
-	my $aUnit = '(?:'.getPrefixNames().')?(?:'.$unitNames.')(?:\s*(?:\^|\*\*)\s*[-+]?\d+)?';
-	my $unitPattern = $aUnit.'(?:\s*[/* ]\s*'.$aUnit.')*';
-	my $unitSpace = "($aUnit) +($aUnit)";
+	#my $unitNames = getUnitNames();
+	#my $aUnit = '(?:'.getPrefixNames().')?(?:'.$unitNames.')(?:\s*(?:\^|\*\*)\s*[-+]?\d+)?';
+	#my $unitPattern = $aUnit.'(?:\s*[/* ]\s*'.$aUnit.')*';
+	#my $unitSpace = "($aUnit) +($aUnit)";
 	my $string = shift;
+
+	
 	# This seems to handle when user inputs latex mu value "\mu" in place of simple 'u'.  i.e. \mu m instead of um for micrometers
 	# Also, automatically converts 'u' prefix to the more accurate 'μ' prefix (which is harder to type)
-	$string =~ s/(\\mu\s?|u)(?=$unitNames)/μ/;  # replace \mu, \mu with space, or u with: μ
+	#warn "$string";
+	#$string =~ s/(\\mu\s?|u)(?=$unitNames)/μ/;  # replace \mu, \mu with space, or u with: μ
+	#warn "$string";
+	#my ($num,$units) = $string =~ m!^(.*?(?:[)}\]0-9a-z]|\d\.))\s*($unitPattern)\s*$!;
+	#my $regex = qr/^(\d*?[\.,]?\d*?(?:e|\s?[x|\*]\s?10\^)[+-]?\d*|\d*[\.,]?\d*)(.*)$/mp;
+
+	if ($string =~ /(\d+?[\.]?\d*?(?:e|\s?[x|\*]\s?10\^)[+-]?\d+|\d*[\.]\d*|\d*)(.*)/g){
+		#warn $1;
+		#warn $2;
+		$val = $1;
+		$units = $2;
+	}
+	#warn "Going to match: >$string<";
+	#warn "$num2";
 	
-	my ($num,$units) = $string =~ m!^(.*?(?:[)}\]0-9a-z]|\d\.))\s*($unitPattern)\s*$!;
 	#warn "units: $units" if $units;
 	#warn "unitless: $string[0]" unless $units;
 	if ($units) {
-		while ($units =~ s/$unitSpace/$1*$2/) {};
+		#while ($units =~ s/$unitSpace/$1*$2/) {};
 		#$units =~ s/ //g;  # Why did I remove spaces here?  this conflicts with units like "fl oz" which have a space.  I don't want to force having a '-' dash between them yet.
 							# This might break something else, but we'll remove it for now.						
 		$units =~ s/\*\*/^/g; #replace Perl exponent notation (**) with standard computer caret notation (^)
 	}
-	return ($num,$units);
+	#warn "$units";
+	return ($val,$units);
 }
 
 sub getPrefixNames {
@@ -546,7 +584,7 @@ sub compareValuesWithUnits {
 		}
 	}
 	# if we haven't returned yet, then we check sig figs and units
-		
+	
 	# grade sig figs amount anyways
 	if ($self->sigFigs() == $student->sigFigs()){
 		$currentCredit += $creditSF;
@@ -554,6 +592,7 @@ sub compareValuesWithUnits {
 		$message  .= "Incorrect sig figs.  ";
 	}
 	# grade units!          
+	warn "GRADING $self and $student";
 	if (compareUnitHash($self->{units_ref}, $student->{units_ref} )){
 		$currentCredit += $creditUnits;
 	} else {
@@ -832,28 +871,48 @@ sub compareUnitHash {
   #my %right = %$rightref->{unitHash}};
   my %right = %$rightref;
 
+  
   # from https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare
   # same number of keys?
   if (%left != %right) {
-    #warn 'not equal not correct';
+    # warn 'not equal not correct';
+	# should never be called unless error in code
+	#warn "LEFT: " . join(',',%left);
+	#warn "RIGHT: " . join(',',%right);
+	#warn "not equal at all";
     return 0;
   } else {
     my %cmp = map { $_ => 1 } keys %left;
     for my $key (keys %right) {
       last unless exists $cmp{$key};
-      # if ($left{$key} ne $right{$key}){
-      #   warn $left{$key} . ' ne ' . $right{$key};
-      # }
       last unless $left{$key} eq $right{$key};
       delete $cmp{$key};
     }
     if (%cmp) {
-      #warn %cmp;
+	  #warn "LEFT: " . join(',',%left);
+	  #warn "RIGHT: " . join(',',%right);
+      #warn "LEFTOVER: " . join(',',%cmp);
       #warn 'was not correct';
       return 0;
     } else {
-      #warn 'was correct';
-      return 1;
+      my %cmp = map { $_ => 1 } keys %right;
+	  for my $key (keys %left) {
+		last unless exists $cmp{$key};
+		last unless $left{$key} eq $right{$key};
+		delete $cmp{$key};
+	  }  
+	  if (%cmp){
+		#warn "LEFT: " . join(',',%left);
+		#warn "RIGHT: " . join(',',%right);
+		#warn "LEFTOVER: " . join(',',%cmp);
+		#warn 'was not correct';
+		return 0;
+	  } else {
+		#warn "LEFT: " . join(',',%left);
+		#warn "RIGHT: " . join(',',%right);
+		#warn "Correct";
+      	return 1;
+	  }
     }
   }
 }
@@ -910,14 +969,25 @@ sub process_term_for_stringCombine {
 	#my %unit_hash = %$fundamental_units;
 	if ($string) {
 
-		#split the numerator or denominator into factors -- the separators are *
+		#split the numerator or denominator into factors -- the separators are * and blank space (assuming it's not part of a known unit)
 	  my @factors = split(/\*/, $string);
 
 		my $f;
 		foreach $f (@factors) {
-			my %factor_hash = process_factor_for_stringCombine($f,$isNumerator,{fundamental_units => $fundamental_units, known_units => $known_units});
-      push @known_unit_hash_array, \%factor_hash;
+			# here we should check to see if there are any unknown units combined with spaces
+			# i.e. "mol Fe2+" will fail in process_factor subroutine because it is two units, not one.
+			# The trick is to not split units that are technically one (like fluid ounce).  
+			# Adding a dash is fine, but if a user adds a custom unit with spaces, we want to honor it.
+			my @unitsNameArray = keys %$known_units;
+			@unitsNameArray = grep(/\s/, @unitsNameArray);
+			my $unitsJoined = join '|', @unitsNameArray;
+			my @splitUnits = ( $f =~ m/($unitsJoined|\S+)/g );
 			
+			foreach $f (@splitUnits) {
+
+				my %factor_hash = process_factor_for_stringCombine($f,$isNumerator,{fundamental_units => $fundamental_units, known_units => $known_units});
+				push @known_unit_hash_array, \%factor_hash;
+			}
 		}
 	}
 	#returns a unit hash.
@@ -953,18 +1023,26 @@ sub process_factor_for_stringCombine {
 	my $unitsJoined = join '|', @unitsNameArray;
 	
 	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
-	my ($unit_prefix) = $unit_name =~ s/($unitsJoined)$//r;
-	# warn $unitsJoined;
-	# warn $unit_name;
-	# warn "Unit Base: " .$unit_base;
-	# warn "Unit Prefix: " .$unit_prefix;
+	my $unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
+	$unit_prefix =~ s/\s//;
+	#warn $unitsJoined;
+	#warn "NAME: $unit_name";
+	#warn "Unit Base: " .$unit_base;
+	#warn "Unit Prefix: " .$unit_prefix;
 
 	$power = 1 unless defined($power);
 
-	if ( defined( $known_units->{$unit_base} )  ) {
-		$prefixExponent = 0;
+	#if ( defined( $known_units->{$unit_base} )  ) {
+	unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
+		# if not-strict mode, register this unit as a new unit with its own fundamentals
+		BetterUnits::add_unit($unit_name);
+		$unit_base = $unit_name;
+		$unit_prefix = '';
+		#die "UNIT ERROR Unrecognizable unit: |$unit_base|";
+  	}
+	$prefixExponent = 0;
 		# warn "prefix exponent: ".$prefixExponent;
-		if ( defined($unit_prefix) && $unit_prefix ne ''){
+		if ( defined($unit_prefix) && $unit_prefix ne '') {
 			 if (exists($prefixes->{$unit_prefix})){
 				$prefixExponent = $prefixes->{$unit_prefix}->{'exponent'};
 			} else {
@@ -999,10 +1077,10 @@ sub process_factor_for_stringCombine {
 
 		my %unit_name_hash = (name=> $unit_prefix.$unit_base, unitHash => \%unit_hash, power=>$power);   # $reference_units contains all of the known units.
 		return %unit_name_hash;
-
-	} else {
-		die "UNIT ERROR Unrecognizable unit: |$unit_base|";
-	}
+	
+	# } else {
+	# 	die "UNIT ERROR Unrecognizable unit: |$unit_base|";
+	# }
 	#return @known_unit_hash_array;
 }
 

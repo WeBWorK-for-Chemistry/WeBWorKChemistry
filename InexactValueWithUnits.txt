@@ -1,0 +1,50 @@
+Derived from InexactValue
+
+sub new()
+-takes string (value and unit together) OR array,string ([value, sf count], units)
+-parses value into InexactValue
+-parses units and gets a unit hash
+    - unit hash is a set of fundamentals and a factor (i.e. cm^2 would have meter=>2, factor=>0.000001)
+    - units are compared to list in betterUnits
+    - custom units can be pre-added via Context
+    - unmatched units are automatically added new fundamentals
+
+
+(used via cmp(), cmp_parse())
+sub compareValuesWithUnits()
+-compares value as a roundedNumber, i.e. the number with current sig figs 
+    - if they don't match, we could still have the "correct" calculated value just bad sig figs. i.e. answer is 1.2, but entered 1.233
+    - options->{"roundingErrorPossibles"} are calculated acceptable errors that still give a "correct" value.  Commonly used with rounding errors. 
+      These values compared with the real value give us a range in which to accept an answer as valid.  $penaltyRoundingError is applied instead of no credit.
+        -source: parserDimensionalAnalysis
+            - internally reduces all sig figs by 1 and calculates the answer based on that.  This will give the basic "rounding error" answer.
+-compares sig figs (needed in case one is 1.2 and another is 1.200)
+    - $creditSF is applied if matching
+-compares unit hash 
+    - compareUnitHash() - just compares unit hash
+
+
+
+unit grading
+    types of units
+        built-in units
+            - must match always (match hash)
+
+        context units 
+            - define multiple versions of the same unit
+            - include option to handle variations i.e. Fe2+ correct if contains('Fe')
+            
+        automatically added units
+            - added from problem
+                
+            - added from student answer
+
+parserDimensionalAnalysis
+    final answer
+    - add option to relax grading final answer for unknown units i.e. convert g to mol but student puts mol Fe2+
+        - compare current hash to copy of hash with original fundamentals to see what is extra
+
+    conversion factors
+    - any extra units don't need to match answer as long as they cancel out.  i.e. we're comparing hashes for numerator and denominator and they should be the same
+    - mol Fe2+ / mol FeCl2
+        - these need to match the answers with some tolerance for the actual unit

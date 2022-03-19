@@ -1,0 +1,18 @@
+^((?:\d*?[\.,]?\d*?(?:e|(?:\s?[x|\*]\s?10\^))[+-]?\d*)|(?:\d*[\.,]?\d*))\s*?.*  gm
+
+
+1.50e23 test molecules mol kg F C degC km^2 teeth
+
+1.50x10^-23 test molecules mol kg F C degC km teeth
+
+1x10^-23 test molecules mol kg F C degC km teeth
+
+0.0035540 test molecules mol kg F C degC km teeth
+
+.0035540 test molecules mol kg F C degC km teeth
+
+12 test molecules mol
+
+1200 test molecules mol kg F C degC km teeth
+
+1200. test molecules mol kg F C degC km teeth
