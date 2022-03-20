@@ -408,7 +408,7 @@ sub parseValue {
 	
 	if (scalar @chemical == 0) {
 		
-		while($x =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)(\d*)(?:\}?)(?:\^?\{?)(\d*[+-]?)(?:\}?)/g){
+		while($x =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)(\d*[+-]?)(?:\}?)/g){
 			my $chemicalPiece = {};
 			if ($1){
 				if (exists $polyatomicFormulaVariations{$1}){
@@ -421,7 +421,7 @@ sub parseValue {
 				}
 			}
 			if ($2){
-				$chemicalPiece->{count} = $2;
+				$chemicalPiece->{count} = subscriptReverse($2);
 			} else {
 				$chemicalPiece->{count} = 1;
 			}
@@ -433,10 +433,9 @@ sub parseValue {
 				} elsif (index($3, '-') != -1) {
 					$sign = -1;
 				} 
-				($val) =$3 =~ /\d/;
+				($val) =$3 =~ /(\d)/;
 				if (defined $val){
-					warn $val;
-					$value = $val;
+					$value = superscriptReverse($val);
 				}
 				$chemicalPiece->{charge} = $sign*$value;
 			}
@@ -580,7 +579,7 @@ sub string {
 		if (abs($overallCharge) != 1){
 			$value = abs($overallCharge);
 		}
-		$text .= "^{$sign$value}";
+		$text .= "^{$value$sign}";
 	}
 	return $text;
 }
@@ -626,6 +625,21 @@ sub subscript{
 	return $value;
 }
 
+sub subscriptReverse{
+	my $value = shift;
+	$value =~ s/₁/1/g;
+	$value =~ s/₂/2/g;
+	$value =~ s/₃/3/g;
+	$value =~ s/₄/4/g;
+	$value =~ s/₅/5/g;
+	$value =~ s/₆/6/g;
+	$value =~ s/₇/7/g;
+	$value =~ s/₈/8/g;
+	$value =~ s/9/₉/g;
+	$value =~ s/₀/0/g;
+	return $value;
+}
+
 sub superscript{
 	my $value = shift;
 	$value =~ s/1/¹/g;
@@ -638,6 +652,21 @@ sub superscript{
 	$value =~ s/8/⁸/g;
 	$value =~ s/9/⁹/g;
 	$value =~ s/0/⁰/g;
+	return $value;
+}
+
+sub superscriptReverse{
+	my $value = shift;
+	$value =~ s/¹/1/g;
+	$value =~ s/²/2/g;
+	$value =~ s/³/3/g;
+	$value =~ s/⁴/4/g;
+	$value =~ s/⁵/5/g;
+	$value =~ s/⁶/6/g;
+	$value =~ s/⁷/7/g;
+	$value =~ s/⁸/8/g;
+	$value =~ s/⁹/9/g;
+	$value =~ s/⁰/0/g;
 	return $value;
 }
 

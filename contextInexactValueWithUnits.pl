@@ -114,6 +114,23 @@ sub new {
 	# this is for use in chemistry so that chemical units (i.e. FeCl_3) are recognized and can be matched up with 
 	# the named version (i.e. iron (III) chloride).  This avoids having the question writer to have to come up with 
 	# many variations of the same unit for each question.
+
+	# There are a few issues with having chemicals be recognizable units.  Some elements have the same symbol as a common unit. (listed)
+	# hydrogen (H) and henry (H)
+	# carbon (C) and coulomb (C)
+	# sulfur (S) and siemens (S)
+	# protactinium (Pa) and pascal (Pa)
+	# nitrogen (N) and newton (N)
+	# fluorine (F) and farad (F)
+	# vanadium (V) and volt (V)
+	# tungsten (W) and watt (W)
+	# meitnerium (Mt) and megaton (Mt)
+	# A possible solution is to find chemical units FIRST if $hasChemicals is true.  However, that could backfire if a chemistry problem has chemicals and Pascal units for pressure.
+	# While unlikely, it's possible.  
+	# Another better solution is to check for chemical units, THEN check that the first unit is a quantitative unit rather than qualitative. 
+	# i.e. There never will be 1.4 carbon. If 1.4 C is written, that has to mean Coulomb.  But if 1.4 g C is written, that C is interpreted as carbon since g is quantitative.  
+	# This isn't foolproof but close enough.  We'll id qualitative units by having an additional hash property in the definition.  Units need to be checked in the term section.
+
 	if (defined($self->context->flags->get('hasChemicals'))){
 		$hasChemicals = $self->context->flags->get('hasChemicals');
 	}
@@ -736,7 +753,7 @@ sub mult {
 	if (defined $left->{context}->flags->get('hasChemicals')){
 	  $newOptions->{hasChemicals} = $left->{context}->flags->get('hasChemicals');
 	} 
-
+	
 	$newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1, $newOptions);
 	$result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
 	
@@ -1046,23 +1063,12 @@ sub process_factor_for_stringCombine {
 	my @unitsNameArray = keys %$known_units;
 	my $unitsJoined = join '|', @unitsNameArray;
 	
-	my ($unit_base) = $unit_name =~ /($unitsJoined)$/;
-	my $unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
-	$unit_prefix =~ s/\s//;
-	#warn $unitsJoined;
-	#warn "NAME: $string";
-	#warn "Unit Base: $unit_base";
-	# warn "Unit Prefix: " .$unit_prefix;
-
+	my $unit_base;
+	my $unit_prefix;
 	$power = 1 unless defined($power);
-	#warn "has chemicals";
-	#if ( defined( $known_units->{$unit_base} )  ) {
-		
-	unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
-		
-		if ($options->{hasChemicals}){
-			
-			if (!defined &Chemical::Chemical::new){
+	
+	if ($options->{hasChemicals}){
+		if (!defined &Chemical::Chemical::new){
 				die "You need to load contextChemical.pl if you want to use chemicals as units.";
 			}
 			my $chemical = Chemical::Chemical->new($string);
@@ -1070,32 +1076,44 @@ sub process_factor_for_stringCombine {
 				$power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
 				$unit_prefix = '';  # remove any prefix parsed before.
 				$unit_base = $chemical->guid();
+				
 		        # now check if the $unit_base is in the list before adding it.  Since there are many variations of chemical names, we can only check against a post-processed name.
 				unless ($known_units->{$unit_base}){
-				#warn "add unit $unit_base";
+					#warn "add unit $unit_base";
 					BetterUnits::add_unit($unit_base);
-					
 				}
 				#warn "chem: $unit_base";
 			}
-		} 
-		unless (defined($unit_base)){
-			# if not-strict mode, register this unit as a new unit with its own fundamentals
-			#warn "add unit $unit_name";
-			BetterUnits::add_unit($unit_name);
-			$unit_base = $unit_name;
-			$unit_prefix = '';
-			#warn "unknown $unit_base";
-			#die "UNIT ERROR Unrecognizable unit: |$unit_base|";
-		}
-  	}
+	}
+
+	unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
+		($unit_base) = $unit_name =~ /($unitsJoined)$/;
+		$unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
+		$unit_prefix =~ s/\s//;
+		#warn $unitsJoined;
+		#warn "NAME: $string";
+		#warn "Unit Base: $unit_base";
+		# warn "Unit Prefix: " .$unit_prefix;
+	}
+
+	unless (defined($unit_base)){
+		# if not-strict mode, register this unit as a new unit with its own fundamentals
+		#warn "add unit $unit_name";
+		
+		BetterUnits::add_unit($unit_name);
+		$unit_base = $unit_name;
+		$unit_prefix = '';
+		#warn "unknown $unit_base";
+		#die "UNIT ERROR Unrecognizable unit: |$unit_base|";
+	}
+	
 	$prefixExponent = 0;
 	# warn "prefix exponent: ".$prefixExponent;
 	if ( defined($unit_prefix) && $unit_prefix ne '') {
 			if (exists($prefixes->{$unit_prefix})){
 			$prefixExponent = $prefixes->{$unit_prefix}->{'exponent'};
 		} else {
-			die "Unit Prefix unrecognizable: |$unit_prefix|";
+			warn "Unit Prefix unrecognizable: $unit_prefix";
 		}
 	}
 	unless ($isNumerator) {
