@@ -67,7 +67,7 @@ sub parserInexactValueWithUnits::known_units {
 }
 sub parserInexactValueWithUnits::add_unit {
     my $newUnit = shift;
-	my $Units= Parser::Legacy::ObjectWithUnits::add_unit($newUnit->{name}, $newUnit->{conversion});
+	my $Units= BetterUnits::add_unit($newUnit->{name}, $newUnit->{conversion});
     return %$Units;
 }
 
@@ -85,7 +85,8 @@ our @ISA = qw(Parser::Legacy::ObjectWithUnits InexactValue::InexactValue);
 sub name {'inexactValueWithUnits'};
 sub cmp_class {'Inexact Value with Units'};
 
-$strictUnits = 1;
+my $strictUnits = 1;
+my $hasChemicals= 0;
 
 sub new {
 	my $self = shift; my $class = ref($self) || $self;
@@ -109,6 +110,13 @@ sub new {
 	if (defined($self->context->flags->get('strictUnits'))){
 		$strictUnits = $self->context->flags->get('strictUnits');
 	}
+
+	# this is for use in chemistry so that chemical units (i.e. FeCl_3) are recognized and can be matched up with 
+	# the named version (i.e. iron (III) chloride).  This avoids having the question writer to have to come up with 
+	# many variations of the same unit for each question.
+	if (defined($self->context->flags->get('hasChemicals'))){
+		$hasChemicals = $self->context->flags->get('hasChemicals');
+	}
 	
 	# register a new unit/s if needed
 	# first from the context (global)
@@ -122,7 +130,7 @@ sub new {
 
 		foreach my $newUnit (@newUnits) {
 			if (ref($newUnit) eq 'HASH') {
-				Parser::Legacy::ObjectWithUnits::add_unit($newUnit->{name}, $newUnit->{conversion});
+				BetterUnits::add_unit($newUnit->{name}, $newUnit->{conversion});
 			} elsif (ref($newUnit) eq 'ARRAY') {
 				# create the unit hash manually and set it the same for all units in the array as they all mean the same thing
 				@sameUnits = @{$newUnit};
@@ -145,7 +153,7 @@ sub new {
 				#warn "$_ $BetterUnits::known_units{$_}\n" for (keys %BetterUnits::known_units);
 			}
 			else{
-				Parser::Legacy::ObjectWithUnits::add_unit($newUnit);
+				BetterUnits::add_unit($newUnit);
 				#my %op = %{$options->{known_units}};
   				#warn "$_ $op{$_}\n" for (keys %op);
 				#warn %fundamental_units;
@@ -299,6 +307,10 @@ sub getUnits {
   if ($known_units) {
     $options->{known_units} = $known_units;
   }
+  if ($hasChemicals){
+	  $options->{hasChemicals} = 1;
+  }
+
   my %Units = BetterUnits::evaluate_units($units,$options);
   if ($Units{ERROR}) {
     $Units{ERROR} =~ s/ at ([^ ]+) line \d+(\n|.)*//;
@@ -340,29 +352,6 @@ sub add_unit {
 
 }
 
-
-# sub mergeNewUnits {
-# 	my $self = shift;
-# 	my $options = shift;
-
-# 	if (defined($self->context->flags->get('newUnit'))){
-
-# 		my $newUnit =$self->context->flags->get('newUnit');
-# 		if (ref($newUnit) eq 'ARRAY') {
-# 			@newUnits = @{$newUnit};
-# 		} else {
-# 			@newUnits = ($newUnit);
-# 		}
-
-# 		foreach my $newUnit (@newUnits) {
-# 			if (ref($newUnit) eq 'HASH') {
-# 				$self->add_unit($newUnit->{name}, $newUnit->{conversion});
-# 			} else {
-# 				$self->add_unit($newUnit);
-# 			}
-# 		}
-# 	} 
-# }
 sub getUnitNames {
 
   my $units = \%BetterUnits::known_units;
@@ -585,8 +574,10 @@ sub compareValuesWithUnits {
 	}
 	# if we haven't returned yet, then we check sig figs and units
 	
-	# grade sig figs amount anyways
-	if ($self->sigFigs() == $student->sigFigs()){
+	# grade sig figs amount anyways 
+	# CAUTION!  If correct answer is exact, then disregard sig figs because students have no way to force system to recognize an 'exact' value.  
+	# Exact values are ver context-dependent.
+	if ($self->sigFigs() == Inf || $self->sigFigs() == $student->sigFigs()){
 		$currentCredit += $creditSF;
 	} else {
 		$message  .= "Incorrect sig figs.  ";
@@ -598,7 +589,11 @@ sub compareValuesWithUnits {
 	} else {
 		$message .= "Incorrect units.  ";
 	}
-		
+	warn $self;
+	warn %{$self->{units_ref}};
+	warn $student;
+	warn %{$student->{units_ref}};
+	warn "credit: $currentCredit  $message";
 	
 	
 	return [$currentCredit, $message];
@@ -641,11 +636,13 @@ sub TeX {
 #
 sub TeXunits {
   my $units = shift;
+  warn "units: $units";
   $units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
   $units =~ s/\*/\\,/g; 
   $units =~ s/%/\\%/g;
   $units =~ s/μ/\\mu /g;
   $units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
+  warn "units: $units";
   return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
   my $displayMode = $main::displayMode;
   return '{\textstyle\frac{'.$1.'}{'.$2.'}}' if ($displayMode eq 'HTML_tth');
@@ -731,16 +728,18 @@ sub mergeUnits {
 
 sub mult {
 	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
-
 	my $newInexact = $left->{inexactValue} * $right->{inexactValue};
 
 	# merge additional units with standard units
 	my $newOptions = $self->mergeUnits($left,$right); 
+	
+	if (defined $left->{context}->flags->get('hasChemicals')){
+	  $newOptions->{hasChemicals} = $left->{context}->flags->get('hasChemicals');
+	} 
 
 	$newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1, $newOptions);
-	# warn "UNITS: " . $newUnitString;
 	$result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
-	# warn "Result final: " .$result;
+	
 	return $result;
 }
 
@@ -748,14 +747,20 @@ sub div {
   my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
   #Value::Error("Division by zero") if $r->{data}[0] == 0;
   #$minSf = $left->minSf($left, $right);
-
   my $newInexact = $left->{inexactValue} / $right->{inexactValue};
 
   # merge additional units with standard units
-  my $newOptions = $self->mergeUnits($left,$right); 
-
+  my $newOptions = $self->mergeUnits($left,$right);
+	
+  if (defined $left->{context}->flags->get('hasChemicals')){
+	$newOptions->{hasChemicals} = $left->{context}->flags->get('hasChemicals');
+  } 
+    
   $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 0, $newOptions);
-  return $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
+ 
+  $result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
+  $test = $result->{context}->flags->get('hasChemicals');
+  return $result;
 }
 
 sub combineStringUnitsCleanly {
@@ -763,6 +768,12 @@ sub combineStringUnitsCleanly {
   my $right = shift;
   my $isMultiply= shift;
   my $options = shift;
+
+  if ($hasChemicals){
+	  #warn "HAS CHEMICALS!!!!";
+	  $options->{hasChemicals} = 1;
+  }
+
   my @unitArrayLeft = process_unit_for_stringCombine($left, $options);
   my @unitArrayRight = process_unit_for_stringCombine($right, $options);
 
@@ -824,6 +835,7 @@ sub combineStringUnitsCleanly {
       #no match for right unit, so put it into the new unit
 
       my %newUnitHash = %{$unitArrayRight[$r]};
+	  
       if (%newUnitHash{power} > 0){
         if ($isMultiply){
           push @numerator, \%newUnitHash;
@@ -930,10 +942,14 @@ sub process_unit_for_stringCombine {
     
   if (defined($options->{fundamental_units})) {
     $fundamental_units = $options->{fundamental_units};
+  } else {
+    $options->{fundamental_units} = $fundamental_units;
   }
 
   if (defined($options->{known_units})) {
     $known_units = $options->{known_units};
+  } else {
+    $options->{known_units} = $known_units;
   }
   
   die ("UNIT ERROR: No units were defined.") unless defined($string);  #
@@ -941,8 +957,8 @@ sub process_unit_for_stringCombine {
   my ($numerator,$denominator) = split( m{/}, $string );
 
   $denominator = "" unless defined($denominator);
-  my @numerator_array = process_term_for_stringCombine($numerator, 1, {fundamental_units => $fundamental_units, known_units => $known_units});
-  my @denominator_array =  process_term_for_stringCombine($denominator, 0, {fundamental_units => $fundamental_units, known_units => $known_units});
+  my @numerator_array = process_term_for_stringCombine($numerator, 1, $options);
+  my @denominator_array =  process_term_for_stringCombine($denominator, 0, $options);
 
   push @numerator_array, @denominator_array;
   return @numerator_array;
@@ -958,12 +974,16 @@ sub process_term_for_stringCombine {
 	my $known_units = \%BetterUnits::known_units;
 	
 	if (defined($options->{fundamental_units})) {
-	  $fundamental_units = $options->{fundamental_units};
+		$fundamental_units = $options->{fundamental_units};
+	} else {
+		$options->{fundamental_units} = $fundamental_units;
 	}
 
 	if (defined($options->{known_units})) {
 	  $known_units = $options->{known_units};
-	}
+	} else {
+    	$options->{known_units} = $known_units;
+  	}
 	
   	my @known_unit_hash_array = ();
 	#my %unit_hash = %$fundamental_units;
@@ -985,13 +1005,14 @@ sub process_term_for_stringCombine {
 			
 			foreach $f (@splitUnits) {
 
-				my %factor_hash = process_factor_for_stringCombine($f,$isNumerator,{fundamental_units => $fundamental_units, known_units => $known_units});
+				my %factor_hash = process_factor_for_stringCombine($f,$isNumerator, $options);
+
 				push @known_unit_hash_array, \%factor_hash;
 			}
 		}
 	}
 	#returns a unit hash.
-	#print "process_term returns", %unit_hash, "\n";
+	
 	return @known_unit_hash_array;
 }
 
@@ -1008,13 +1029,16 @@ sub process_factor_for_stringCombine {
 	
 	if (defined($options->{fundamental_units})) {
 		$fundamental_units = $options->{fundamental_units};
+	} else {
+		$options->{fundamental_units} = $fundamental_units;
 	}
 
 	if (defined($options->{known_units})) {
 		$known_units = $options->{known_units};
-		#warn "TEHERE ARE KNOWN UNITS:";
-		#warn %$known_units;
-	}
+	} else {
+    	$options->{known_units} = $known_units;
+  	}
+
 	# %op = %$known_units;
 	# warn $known_units;
 	# warn "$_ $op{$_}\n" for (keys %op);
@@ -1026,57 +1050,83 @@ sub process_factor_for_stringCombine {
 	my $unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
 	$unit_prefix =~ s/\s//;
 	#warn $unitsJoined;
-	#warn "NAME: $unit_name";
-	#warn "Unit Base: " .$unit_base;
-	#warn "Unit Prefix: " .$unit_prefix;
+	#warn "NAME: $string";
+	#warn "Unit Base: $unit_base";
+	# warn "Unit Prefix: " .$unit_prefix;
 
 	$power = 1 unless defined($power);
-
+	#warn "has chemicals";
 	#if ( defined( $known_units->{$unit_base} )  ) {
+		
 	unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
-		# if not-strict mode, register this unit as a new unit with its own fundamentals
-		BetterUnits::add_unit($unit_name);
-		$unit_base = $unit_name;
-		$unit_prefix = '';
-		#die "UNIT ERROR Unrecognizable unit: |$unit_base|";
+		
+		if ($options->{hasChemicals}){
+			
+			if (!defined &Chemical::Chemical::new){
+				die "You need to load contextChemical.pl if you want to use chemicals as units.";
+			}
+			my $chemical = Chemical::Chemical->new($string);
+			if (defined $chemical && scalar @{$chemical->{data}} > 0){
+				$power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
+				$unit_prefix = '';  # remove any prefix parsed before.
+				$unit_base = $chemical->guid();
+		        # now check if the $unit_base is in the list before adding it.  Since there are many variations of chemical names, we can only check against a post-processed name.
+				unless ($known_units->{$unit_base}){
+				#warn "add unit $unit_base";
+					BetterUnits::add_unit($unit_base);
+					
+				}
+				#warn "chem: $unit_base";
+			}
+		} 
+		unless (defined($unit_base)){
+			# if not-strict mode, register this unit as a new unit with its own fundamentals
+			#warn "add unit $unit_name";
+			BetterUnits::add_unit($unit_name);
+			$unit_base = $unit_name;
+			$unit_prefix = '';
+			#warn "unknown $unit_base";
+			#die "UNIT ERROR Unrecognizable unit: |$unit_base|";
+		}
   	}
 	$prefixExponent = 0;
-		# warn "prefix exponent: ".$prefixExponent;
-		if ( defined($unit_prefix) && $unit_prefix ne '') {
-			 if (exists($prefixes->{$unit_prefix})){
-				$prefixExponent = $prefixes->{$unit_prefix}->{'exponent'};
-			} else {
-				die "Unit Prefix unrecognizable: |$unit_prefix|";
-			}
+	# warn "prefix exponent: ".$prefixExponent;
+	if ( defined($unit_prefix) && $unit_prefix ne '') {
+			if (exists($prefixes->{$unit_prefix})){
+			$prefixExponent = $prefixes->{$unit_prefix}->{'exponent'};
+		} else {
+			die "Unit Prefix unrecognizable: |$unit_prefix|";
 		}
-		unless ($isNumerator) {
-			$power = $power * -1;
-		}
-		
-		my $unit_hash_ref = $known_units->{$unit_base};
-		my %unit_hash = %$unit_hash_ref;
+	}
+	unless ($isNumerator) {
+		$power = $power * -1;
+	}
+	
+	my $unit_hash_ref = $known_units->{$unit_base};
+	my %unit_hash = %$unit_hash_ref;
 
-		my $u;
-		foreach $u (keys %unit_hash) {
-			if ( $u eq 'factor' ) {
-				# only need to modify the factor by the prefix, not the power.
-				# We do this so we can cancel the powers out without having to worry about undoing the underlying hash.
-				# The underlying hash is just used to recognize the unit.  We can match foot with ft via the hash.
-				$unit_hash{$u} = ($unit_hash{$u}*(10**$prefixExponent));  # calculate the correction factor for the unit
-			}
+	my $u;
+	foreach $u (keys %unit_hash) {
+		if ( $u eq 'factor' ) {
+			# only need to modify the factor by the prefix, not the power.
+			# We do this so we can cancel the powers out without having to worry about undoing the underlying hash.
+			# The underlying hash is just used to recognize the unit.  We can match foot with ft via the hash.
+			$unit_hash{$u} = ($unit_hash{$u}*(10**$prefixExponent));  # calculate the correction factor for the unit
 		}
-		#quick loop to remove fundamental units that are zero
-		@keys = (keys %unit_hash);
-		for ($i=scalar @keys -1;$i>=0; $i--){
-			#warn 'searching '.$keys[$i] . ':  '.%unit_hash{$keys[$i]};
-			if ($unit_hash{$keys[$i]} == 0){
-			#	warn 'got one';
-				delete $unit_hash{$keys[$i]};
-			}
+	}
+	#quick loop to remove fundamental units that are zero
+	@keys = (keys %unit_hash);
+	for ($i=scalar @keys -1;$i>=0; $i--){
+		#warn 'searching '.$keys[$i] . ':  '.%unit_hash{$keys[$i]};
+		if ($unit_hash{$keys[$i]} == 0){
+		#	warn 'got one';
+			delete $unit_hash{$keys[$i]};
 		}
+	}
 
-		my %unit_name_hash = (name=> $unit_prefix.$unit_base, unitHash => \%unit_hash, power=>$power);   # $reference_units contains all of the known units.
-		return %unit_name_hash;
+	my %unit_name_hash = (name=> $unit_prefix.$unit_base, unitHash => \%unit_hash, power=>$power);   # $reference_units contains all of the known units.
+	#warn %unit_name_hash;
+	return %unit_name_hash;
 	
 	# } else {
 	# 	die "UNIT ERROR Unrecognizable unit: |$unit_base|";

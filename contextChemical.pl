@@ -425,8 +425,20 @@ sub parseValue {
 			} else {
 				$chemicalPiece->{count} = 1;
 			}
-			if ($3){
-				$chemicalPiece->{charge} = $3;
+			if ($3) {
+				my $sign = 1;
+				my $value = 1;
+				if (index($3, '+') != -1) {
+					$sign = 1;
+				} elsif (index($3, '-') != -1) {
+					$sign = -1;
+				} 
+				($val) =$3 =~ /\d/;
+				if (defined $val){
+					warn $val;
+					$value = $val;
+				}
+				$chemicalPiece->{charge} = $sign*$value;
 			}
 
 			push @chemical, $chemicalPiece;
@@ -543,14 +555,32 @@ sub gcd {
 	return $a;
 }
 
+sub guid {
+	# for now, we'll use the string as the guid, but this won't work for future versions where isomers can be distinguished.
+	my $self = shift;
+	return $self->string();
+}
+
 sub string {
 	my $self = shift;
 	my $text = '';
+	my $overallCharge=0;
 	foreach my $component (@{$self->{data}}) {
+		if (exists $component->{charge}){
+			$overallCharge += $component->{charge};
+		}
 		$text .= @elements[$component->{atomNum}-1];
 		if ($component->{count} > 1){
 			$text .= subscript($component->{count});
 		}
+	}
+	if ($overallCharge != 0){
+		my $sign = $overallCharge > 0 ? "+" : "-";
+		my $value = '';
+		if (abs($overallCharge) != 1){
+			$value = abs($overallCharge);
+		}
+		$text .= "^{$sign$value}";
 	}
 	return $text;
 }
@@ -558,12 +588,24 @@ sub string {
 
 sub TeX {
 	my $self = shift;
+	my $overallCharge=0;
 	my $text = '\mathrm{';
 	foreach my $component (@{$self->{data}}) {
+		if (exists $component->{charge}){
+			$overallCharge += $component->{charge};
+		}
 		$text .= @elements[$component->{atomNum}-1];
 		if ($component->{count} > 1){
 			$text .= '_{' . $component->{count} . '}';
 		}
+	}
+	if ($overallCharge != 0){
+		my $sign = $overallCharge > 0 ? "+" : "-";
+		my $value = '';
+		if (abs($overallCharge) != 1){
+			$value = abs($overallCharge);
+		}
+		$text .= "^{$sign$value}";
 	}
 	$text .= '}';
 	return $text;

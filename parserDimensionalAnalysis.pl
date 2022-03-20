@@ -620,12 +620,17 @@ sub generateExplanation {
 	# this is an options optional parameter
 	my $options = shift;
 
+	my $hasChemicals;
+	if ($options->{hasChemicals}){
+		$hasChemicals = 1;
+	}
+
 	my $explanation = '';
 
 	
 	@startingArray = @{ $startingArrayRef };
 
-	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units});
+	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units},{hasChemicals=>$hasChemicals});
 	my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;
 
 	$startingUnits = $startingArray[0]->{units};
@@ -645,7 +650,7 @@ sub generateExplanation {
 		my $numeratorUnits = '';
 		my $denominatorUnits = '';
 				
-		@unitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($startingArray[0]->{units});
+		@unitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($startingArray[0]->{units},{hasChemicals=>$hasChemicals});
 		foreach $unit (@unitArray){
 			$found = 0;
 			for ($i=0; $i < scalar @finalAnswerUnitArrayCopy; $i++){
