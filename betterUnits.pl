@@ -915,7 +915,7 @@ sub process_unit {
 		}
 	}
 	# return a unit hash.
-  warn %unit_hash;
+  # warn %unit_hash;
 	return(%unit_hash);
 }
 
@@ -940,15 +940,47 @@ sub process_term {
 	
 	my %unit_hash = %$fundamental_units;
 	if ($string) {
+    #warn $string;
+    # First check for chemicals.  Later this can be transformed into a "preprocess" callback function that is
+    # passed here in the options so we can make this more generic and move chemicals out of the units file. 
     
-		#split the numerator or denominator into factors -- the separators are *
 
-	    my @factors = split(/\*/, $string);
+
+		#split the numerator or denominator into factors -- the separators are *
+    # The system will always use * for separating terms.  i.e. after multiplying two numbers with units an asterix is used to separate the terms
+		# A user might use space though... but space is more complicated as it's used inside units too.  Keep these two processes separate.  Check 
+		# for special cases (i.e. chemicals) after separating using asterisk, but BEFORE splitting on spaces.
+	  my @factors = split(/\*/, $string);
     
 		my $f;
-		foreach $f (@factors) {
-      # warn "FACTOR: $f";
+    foreach $f (@factors) {
+      #warn "FACTOR: $f";
+      
+      if ($options->{hasChemicals}){
+        if (!defined &Chemical::Chemical::new){
+          die "You need to load contextChemical.pl if you want to use chemicals as units.";
+        }
+        my $chemical = undef;
+        $chemical = Chemical::Chemical->new($f);
+        if (defined $chemical && scalar @{$chemical->{data}} > 0){
+          my $power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
+          my $unit_base = $chemical->guid();
+          # now check if the $unit_base is in the list before adding it.  Since there are many variations of chemical names, we can only check against a post-processed name.
+          unless ($known_units->{$unit_base}){
+            #warn "add unit $unit_base";
+            BetterUnits::add_unit($unit_base);
+          }
+          # add it to the local copy of fundamental units here
+          $unit_hash{$unit_base} = 1;
+          #warn %unit_hash;
+          $f = '';
+          if (defined $chemical->{leading}){
+            $f = $chemical->{leading};
+          }
 
+          #warn "BetterUnits chem: $unit_base";
+        }
+      } 
       # here we should check to see if there are any unknown units combined with spaces
       # i.e. "mol Fe2+" will fail in process_factor subroutine because it is two units, not one.
       # The trick is to not split units that are technically one (like fluid ounce).  
@@ -957,9 +989,9 @@ sub process_term {
       @unitsNameArray = grep(/\s/, @unitsNameArray);
 	    my $unitsJoined = join '|', @unitsNameArray;
       my @splitUnits = ( $f =~ m/($unitsJoined|\S+)/g );
-      
-      foreach $f (@splitUnits) {
-        my %factor_hash = process_factor($f, $options);
+
+      foreach $s (@splitUnits) {
+        my %factor_hash = process_factor($s, $options);
         # warn "Factor hash";
         # warn $f;
         # warn %factor_hash;
@@ -987,7 +1019,7 @@ sub process_term {
   # foreach my $test (@known_unit_hash_array){
 	# 	warn %$test;
 	# }
-  
+ 
 	return(%unit_hash);
 }
 
@@ -1044,12 +1076,10 @@ sub comparePhysicalQuantity {
 sub add_unit {
   my $unit = shift;
   my $hash = shift;
-  warn "adding $unit";
   
   my $fundamental_units = \%fundamental_units;
 	my $known_units = \%known_units;
-	  
- 
+	
   unless (ref($hash) eq 'HASH') {
     $hash = { 'factor'    => 1,    # this is 1 by default because it's a new "fundamental unit" 
               "$unit"     => 1 };  # this is 1 by default because it's the base.
@@ -1104,26 +1134,6 @@ sub process_factor {
 
   my %unit_hash = %$fundamental_units;
 
-  if ($options->{hasChemicals}){
-    if (!defined &Chemical::Chemical::new){
-      die "You need to load contextChemical.pl if you want to use chemicals as units.";
-    }
-    my $chemical = Chemical::Chemical->new($string);
-    if (defined $chemical && scalar @{$chemical->{data}} > 0){
-      $power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
-      undef $unit_prefix;  # remove any prefix parsed before.
-      $unit_base = $chemical->guid();
-      warn "from: $string plain:  $unit_base";  
-      # now check if the $unit_base is in the list before adding it.  Since there are many variations of chemical names, we can only check against a post-processed name.
-      unless ($known_units->{$unit_base}){
-      #warn "add unit $unit_base";
-        BetterUnits::add_unit($unit_base);
-        # add it to the local copy of fundamental units here
-        $unit_hash{$unit_base} = 1;
-      }
-      #warn "BetterUnits chem: $unit_base";
-    }
-  } 
 
   unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
     ($unit_base) = $unit_name =~ /($unitsJoined)$/;

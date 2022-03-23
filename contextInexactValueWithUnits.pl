@@ -653,13 +653,11 @@ sub TeX {
 #
 sub TeXunits {
   my $units = shift;
-  warn "units: $units";
   $units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
   $units =~ s/\*/\\,/g; 
   $units =~ s/%/\\%/g;
   $units =~ s/μ/\\mu /g;
   $units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
-  warn "units: $units";
   return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
   my $displayMode = $main::displayMode;
   return '{\textstyle\frac{'.$1.'}{'.$2.'}}' if ($displayMode eq 'HTML_tth');
@@ -753,8 +751,9 @@ sub mult {
 	if (defined $left->{context}->flags->get('hasChemicals')){
 	  $newOptions->{hasChemicals} = $left->{context}->flags->get('hasChemicals');
 	} 
-	
+	#warn "BEFORE " . $left->{units} . " WITH " . $right->{units};
 	$newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1, $newOptions);
+	#warn "AFTER MULTIPLY $newUnitString";
 	$result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
 	
 	return $result;
@@ -774,9 +773,9 @@ sub div {
   } 
     
   $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 0, $newOptions);
- 
+  
   $result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
-  $test = $result->{context}->flags->get('hasChemicals');
+  
   return $result;
 }
 
@@ -1006,11 +1005,52 @@ sub process_term_for_stringCombine {
 	#my %unit_hash = %$fundamental_units;
 	if ($string) {
 
-		#split the numerator or denominator into factors -- the separators are * and blank space (assuming it's not part of a known unit)
-	  my @factors = split(/\*/, $string);
+		
+
+		# Split the numerator or denominator into factors -- the separators are * and blank space (assuming it's not part of a known unit)
+		# The system will always use * for separating terms.  i.e. after multiplying two numbers with units an asterix is used to separate the terms
+		# A user might use space though... but space is more complicated as it's used inside units too.  Keep these two processes separate.  Check 
+		# for special cases (i.e. chemicals) after separating using asterisk, but BEFORE splitting on spaces.
+		my @factors = split(/\*/, $string);
 
 		my $f;
 		foreach $f (@factors) {
+
+			if ($options->{hasChemicals}){
+				if (!defined &Chemical::Chemical::new){
+						die "You need to load contextChemical.pl if you want to use chemicals as units.";
+				}
+				my $chemical = Chemical::Chemical->new($f);
+				if (defined $chemical && scalar @{$chemical->{data}} > 0){
+					$power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
+					$unit_prefix = '';  # remove any prefix parsed before.
+					$unit_base = $chemical->guid();
+					
+					# now check if the $unit_base is in the list before adding it.  Since there are many variations of chemical names, we can only check against a post-processed name.
+					unless ($known_units->{$unit_base}){
+						#warn "add unit $unit_base";
+						BetterUnits::add_unit($unit_base);
+					}
+					#warn "special process $f";
+					my %fundamental_units_for_chemical = %BetterUnits::fundamental_units; #make copy of base unit hash
+					#warn %$fundamental_units_for_chemical;
+					$fundamental_units_for_chemical{$unit_base} = 1;
+					#warn %fundamental_units_for_chemical;
+					#warn "isNumerator: $isNumerator";
+					my %unit_name_hash = (name=> $unit_base, unitHash => \%fundamental_units_for_chemical, power=>1);   # $reference_units contains all of the known units.
+		
+					#warn %unit_name_hash;
+					push @known_unit_hash_array, \%unit_name_hash;
+					#warn "chem: $unit_base";
+					$f = '';
+					if (defined $chemical->{leading}){
+						$f = $chemical->{leading};
+						#warn "leading has $f";
+					}
+				}
+			}
+
+
 			# here we should check to see if there are any unknown units combined with spaces
 			# i.e. "mol Fe2+" will fail in process_factor subroutine because it is two units, not one.
 			# The trick is to not split units that are technically one (like fluid ounce).  
@@ -1067,26 +1107,8 @@ sub process_factor_for_stringCombine {
 	my $unit_prefix;
 	$power = 1 unless defined($power);
 	
-	if ($options->{hasChemicals}){
-		if (!defined &Chemical::Chemical::new){
-				die "You need to load contextChemical.pl if you want to use chemicals as units.";
-			}
-			my $chemical = Chemical::Chemical->new($string);
-			if (defined $chemical && scalar @{$chemical->{data}} > 0){
-				$power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
-				$unit_prefix = '';  # remove any prefix parsed before.
-				$unit_base = $chemical->guid();
-				
-		        # now check if the $unit_base is in the list before adding it.  Since there are many variations of chemical names, we can only check against a post-processed name.
-				unless ($known_units->{$unit_base}){
-					#warn "add unit $unit_base";
-					BetterUnits::add_unit($unit_base);
-				}
-				#warn "chem: $unit_base";
-			}
-	}
-
-	unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
+	
+	#unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
 		($unit_base) = $unit_name =~ /($unitsJoined)$/;
 		$unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
 		$unit_prefix =~ s/\s//;
@@ -1094,7 +1116,7 @@ sub process_factor_for_stringCombine {
 		#warn "NAME: $string";
 		#warn "Unit Base: $unit_base";
 		# warn "Unit Prefix: " .$unit_prefix;
-	}
+	#}
 
 	unless (defined($unit_base)){
 		# if not-strict mode, register this unit as a new unit with its own fundamentals

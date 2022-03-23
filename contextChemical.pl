@@ -315,10 +315,16 @@ sub new {
         die "Only implemented one argument.";
     }
 
-    my @chemical = parseValue($x->[0]);
-
-
-	bless {data => \@chemical, context => $context}, $class;
+    my $result = parseValue($x->[0]);
+	$chemical = $result->{chemical};
+	
+	if (defined $result->{leading}){
+		$leading = $result->{leading}; # for units where mol precedes the chemical and we want to return it.
+	} else {
+		$leading = undef;
+	}
+	
+	bless {data => $chemical, leading => $leading, context => $context}, $class;
 }
 
 sub parseValue {
@@ -345,12 +351,20 @@ sub parseValue {
 	my $namesResult = join('|', main::PGsort( $compare, @names));
 	#warn $symbolsResult;
 	my @chemical;
+	my $leadingUnknown = undef;
+	# these are possible words that appear after a chemical.  In a capture group because it is necessary
+	# for certain ions.  i.e. potassium ion (K^+) vs potassium (K).  For others, it's optional but there just in case.
+	my $trailingWords = 'ions|ion|atoms|atom|molecules|molecule|formula units|fu|f\.u\.';
 	# 1. Check if contains names. Case will not matter.
 	# 2. If no names, then case DOES matter and check element symbols
-	while($x =~ /(mono|mon|di|tri|tetra|tetr|penta|pent|hexa|hex|hepta|hept|octa|oct|nona|non|deca|dec)?($namesResult)\s*(\()?(\b(?:VIII|III|VII|II|IV|IX|VI|I|V|X)\b)?(\))?/gi){ # case insensitive
+	# warn "processing $x";
+	while($x =~ /(^.*?)?(mono|mon|di|tri|tetra|tetr|penta|pent|hexa|hex|hepta|hept|octa|oct|nona|non|deca|dec)?($namesResult)\s*(\()?(\b(?:VIII|III|VII|II|IV|IX|VI|I|V|X)\b)?(\))?(?:\s*)?($trailingWords)?/gi){ # case insensitive
 		my $chemicalPiece = {};
 		if ($1){
-			my $lower = lc($1);
+			$leadingUnknown = $1;
+		}
+		if ($2){
+			my $lower = lc($2);
 			if ($lower eq "mono" || $lower eq "mon"){
 				$chemicalPiece->{'prefix'} = 1;
 			} elsif ($lower eq "di"){
@@ -373,12 +387,15 @@ sub parseValue {
 				$chemicalPiece->{'prefix'} = 10;
 			}
 		} 
-		if ($2){
-			$atomNum = %namedRecognitionTargets{$2}->{atomNum};
+		if ($3){
+			$atomNum = %namedRecognitionTargets{$3}->{atomNum};
 			$chemicalPiece->{'atomNum'} = $atomNum;
+			if (exists %namedRecognitionTargets{$3}->{charge}){
+				$chemicalPiece->{charge} = %namedRecognitionTargets{$3}->{charge};
+			}
 		}
-		if ($4){
-			my $upper = uc($4);
+		if ($5){
+			my $upper = uc($5);
 			if ($upper eq "I"){
 				$chemicalPiece->{'charge'} = 1;
 			} elsif ($upper eq "II"){
@@ -401,56 +418,71 @@ sub parseValue {
 				$chemicalPiece->{'charge'} = 10;
 			}
 		}
+		if ($7) {
+			# trailing word present.  For now, we'll track the word ion and add a charge if one is not already present
+			if ($7 =~ /ions|ion/){
+				unless (exists $chemicalPiece->{charge} && exists $standardIons{$chemicalPiece->{atomNum}}){
+					$chemicalPiece->{charge} = $standardIons{$chemicalPiece->{atomNum}};
+				}
+			}
+		}
 		# in case we want to know if parentheses were omitted, we can add options here.
 
 		push @chemical, $chemicalPiece;		
 	}
 	
+	
 	if (scalar @chemical == 0) {
 		
-		while($x =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)(\d*[+-]?)(?:\}?)/g){
+		while($x =~ /(^.*?)?(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)([\d¹²³⁴⁵⁶⁷⁸⁹⁰]*[+\-⁺⁻]?)(?:\}?)/g){
 			my $chemicalPiece = {};
 			if ($1){
-				if (exists $polyatomicFormulaVariations{$1}){
-					$polyatomic = $polyatomicIons{$polyatomicFormulaVariations{$1}};
+				$leadingUnknown = $1;
+			}
+			if ($2){
+				if (exists $polyatomicFormulaVariations{$2}){
+					$polyatomic = $polyatomicIons{$polyatomicFormulaVariations{$2}};
 					$chemicalPiece->{atomNum} = $polyatomic->{atomNum};
 					$chemicalPiece->{polyAtomic} = $polyatomic;
 				} else {
-					my ($index) = grep { $elements[$_] eq $1 } 0 .. (@elements-1);
+					my ($index) = grep { $elements[$_] eq $2 } 0 .. (@elements-1);
 					$chemicalPiece->{atomNum} = $index+1;
 				}
 			}
-			if ($2){
-				$chemicalPiece->{count} = subscriptReverse($2);
+			if ($3){
+				$chemicalPiece->{count} = subscriptReverse($3);
 			} else {
 				$chemicalPiece->{count} = 1;
 			}
-			if ($3) {
+			if ($4) {
 				my $sign = 1;
 				my $value = 1;
-				if (index($3, '+') != -1) {
+				my $temp = superscriptReverse($4);
+				if (index($temp, '+') != -1) {
 					$sign = 1;
-				} elsif (index($3, '-') != -1) {
+				} elsif (index($temp, '-') != -1) {
 					$sign = -1;
 				} 
-				($val) =$3 =~ /(\d)/;
+				($val) =$temp =~ /(\d)/;
 				if (defined $val){
-					$value = superscriptReverse($val);
+					$value = $val;
 				}
 				$chemicalPiece->{charge} = $sign*$value;
 			}
+			#warn %$chemicalPiece;
 
 			push @chemical, $chemicalPiece;
 		}
 		# note: overall charge will be assigned to 2nd component.  There's no mechanism to define charge of overall chemical yet.
-	
+
+
 
 	} else {
 		# Our chemical comes from names.  Let's try to figure out the numbers of each atom.
 		# We will only handle 1 or 2 chemical components (binary max)
+		
 		if (scalar @chemical == 1){
 			$piece = $chemical[0];
-			
 			# is it an ion or elemental?
 			if (!defined $piece->{charge}){
 				if (exists $nonstandardElements{$piece->{atomNum}}){
@@ -482,6 +514,7 @@ sub parseValue {
 					$charge1 = $comp1->{charge};
 				} elsif (exists $standardIons{$comp1->{atomNum}}) {
 					# type I metal
+					
 					$charge1 = $standardIons{$comp1->{atomNum}};
 					$comp1->{charge} = $charge1;
 				} else {
@@ -521,13 +554,14 @@ sub parseValue {
 			warn "Can't handle three component compounds.";
 		}
 	}
-
-	# warn $x;
-	# foreach my $c (@chemical){
-	# 	warn %$c;
-	# }
-	
-	return @chemical;
+	#warn "PARSED UNITS $x";
+	#foreach $chem (@chemical){
+	#		warn %$chem;
+	#}
+	if (defined $leadingUnknown){
+		return {chemical=>\@chemical, leading=>$leadingUnknown};
+	}
+	return {chemical=>\@chemical};
 
 }
 
@@ -574,12 +608,12 @@ sub string {
 		}
 	}
 	if ($overallCharge != 0){
-		my $sign = $overallCharge > 0 ? "+" : "-";
+		my $sign = $overallCharge > 0 ? "⁺" : "⁻"; #these are unicode superscript + and -
 		my $value = '';
 		if (abs($overallCharge) != 1){
 			$value = abs($overallCharge);
 		}
-		$text .= "^{$value$sign}";
+		$text .= superscript("$value$sign");
 	}
 	return $text;
 }
@@ -635,13 +669,13 @@ sub subscriptReverse{
 	$value =~ s/₆/6/g;
 	$value =~ s/₇/7/g;
 	$value =~ s/₈/8/g;
-	$value =~ s/9/₉/g;
+	$value =~ s/₉/9/g;
 	$value =~ s/₀/0/g;
 	return $value;
 }
 
 sub superscript{
-	my $value = shift;
+	my $value = shift;	
 	$value =~ s/1/¹/g;
 	$value =~ s/2/²/g;
 	$value =~ s/3/³/g;
@@ -652,6 +686,8 @@ sub superscript{
 	$value =~ s/8/⁸/g;
 	$value =~ s/9/⁹/g;
 	$value =~ s/0/⁰/g;
+	$value =~ s/\+/⁺/g;
+	$value =~ s/\-/⁻/g;
 	return $value;
 }
 
@@ -667,6 +703,8 @@ sub superscriptReverse{
 	$value =~ s/⁸/8/g;
 	$value =~ s/⁹/9/g;
 	$value =~ s/⁰/0/g;
+	$value =~ s/⁺/+/g;
+	$value =~ s/⁻/-/g;
 	return $value;
 }
 
