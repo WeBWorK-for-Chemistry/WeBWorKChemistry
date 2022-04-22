@@ -199,15 +199,14 @@ sub new {
 	# }
 	Value::Error("You must provide a ".$self->name) unless defined($num);
 	
-	if (ref $num eq "ARRAY"){
-		my $t = join( ',', @$num );;
-		#warn "Array: $t";
-	} else {
-		#warn "Value: $num";		
-	}
-	if (ref $num eq "ARRAY") {
-		#warn "From Array: $units";
-	} else {
+	# if (ref $num eq "ARRAY"){
+	# 	my $t = join( ',', @$num );;
+	# 	#warn "Array: $t";
+	# } else {
+	# 	#warn "Value: $num";		
+	# }
+
+	unless (ref $num eq "ARRAY") {
 		(my $tempnum,$units) = splitUnits($num) unless $units;
 		if (defined $tempnum){
 			$num = $tempnum;
@@ -405,10 +404,18 @@ sub splitUnits {
 	#my $regex = qr/^(\d*?[\.,]?\d*?(?:e|\s?[x|\*]\s?10\^)[+-]?\d*|\d*[\.,]?\d*)(.*)$/mp;
 
 	if ($string =~ /(\d+?[\.]?\d*?(?:e|\s?[x|\*]\s?10\^)[+-]?\d+|\d*[\.]\d*|\d*)(.*)/g){
-		#warn $1;
-		#warn $2;
 		$val = $1;
 		$units = $2;
+		if (!$val && $units){
+			#if there are units, assume there's a 1 in front if not there.  i.e. a student could put 'mL' only in a denominator answer blank for density. 
+			$val = 1;
+		}
+		if (!$vale && !$units){
+			$val = 0;
+		}
+	} else {
+		$val = 0;
+		$units = '';  
 	}
 	#warn "Going to match: >$string<";
 	#warn "$num2";
@@ -600,17 +607,17 @@ sub compareValuesWithUnits {
 		$message  .= "Incorrect sig figs.  ";
 	}
 	# grade units!          
-	warn "GRADING $self and $student";
+	#warn "GRADING $self and $student";
 	if (compareUnitHash($self->{units_ref}, $student->{units_ref} )){
 		$currentCredit += $creditUnits;
 	} else {
 		$message .= "Incorrect units.  ";
 	}
-	warn $self;
-	warn %{$self->{units_ref}};
-	warn $student;
-	warn %{$student->{units_ref}};
-	warn "credit: $currentCredit  $message";
+	# warn $self;
+	# warn %{$self->{units_ref}};
+	# warn $student;
+	# warn %{$student->{units_ref}};
+	# warn "credit: $currentCredit  $message";
 	
 	
 	return [$currentCredit, $message];
