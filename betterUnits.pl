@@ -326,6 +326,10 @@ our %known_units = ('m'  => {
                            'factor'    => 0.001,
                            'm'         => 3
                           },
+                  'liter'  => {
+                           'factor'    => 0.001,
+                           'm'         => 3
+                          },
                  'cc'  => {
                            'factor'    => 1E-6,
                            'm'         => 3,
@@ -359,6 +363,10 @@ our %known_units = ('m'  => {
                            'm'         => 3
                           },
         'pint'  => {
+                           'factor'    => 0.000473176473,
+                           'm'         => 3
+                          },
+        'pints' => {
                            'factor'    => 0.000473176473,
                            'm'         => 3
                           },
@@ -427,6 +435,14 @@ our %known_units = ('m'  => {
 #
                   
                   'g'  => {
+                           'factor'    => 0.001,
+                           'kg'        => 1
+                          },
+                  'gram'  => {
+                           'factor'    => 0.001,
+                           'kg'        => 1
+                          },
+                  'grams'  => {
                            'factor'    => 0.001,
                            'kg'        => 1
                           },
@@ -832,7 +848,28 @@ our %prefixes = (
 	'f' => {'name' => 'femto', 'exponent' => -15} ,
 	'a' => {'name' => 'atto', 'exponent' => -18} ,
 	'z' => {'name' => 'zepto', 'exponent' => -21} ,
-	'y' => {'name' => 'yocto', 'exponent' => -24} 
+	'y' => {'name' => 'yocto', 'exponent' => -24} ,
+  
+  'yotta' => {'name' => 'yotta', 'exponent' => 24} ,
+	'zetta' => {'name' => 'zetta', 'exponent' => 21} ,
+	'exa' => {'name' => 'exa', 'exponent' => 18} ,
+	'peta' => {'name' => 'peta', 'exponent' => 15} ,
+	'tera' => {'name' => 'tera', 'exponent' => 12} ,
+	'giga' => {'name' => 'giga', 'exponent' => 9} ,
+	'mega' => {'name' => 'mega', 'exponent' => 6} ,
+	'kilo' => {'name' => 'kilo', 'exponent' => 3} ,
+	'hecto' => {'name' => 'hecto', 'exponent' => 2} ,
+	'deka' => {'name' => 'deka', 'exponent' => 1} ,
+	'deci' => {'name' => 'deci', 'exponent' => -1} ,
+	'centi' => {'name' => 'centi', 'exponent' => -2} ,
+	'milli' => {'name' => 'milli', 'exponent' => -3} ,
+	'micro' => {'name' => 'micro', 'exponent' => -6} ,
+	'nano' => {'name' => 'nano', 'exponent' => -9} ,
+	'pico' => {'name' => 'pico', 'exponent' => -12} ,
+	'femto' => {'name' => 'femto', 'exponent' => -15} ,
+	'atto' => {'name' => 'atto', 'exponent' => -18} ,
+	'zepto' => {'name' => 'zepto', 'exponent' => -21} ,
+	'yocto' => {'name' => 'yocto', 'exponent' => -24} 
 );
 
 
@@ -1127,6 +1164,8 @@ sub process_factor {
 
 	my @unitsNameArray = keys %$known_units;
 	my $unitsJoined = join '|', @unitsNameArray;
+
+  warn $unitsJoined;
   
   my $unit_base;
   my $unit_prefix;
@@ -1143,11 +1182,9 @@ sub process_factor {
   # warn $unit_base;
   # warn $unit_prefix;
   # warn $unitsJoined;
-	
-	
-  
-	
-    # if chemicals present, check to see if this is a chemical.  Include powers as they may be charges instead, so just pass the whole string.
+
+
+  # if chemicals present, check to see if this is a chemical.  Include powers as they may be charges instead, so just pass the whole string.
     
   unless (defined($unit_base)){  
     
@@ -1160,6 +1197,7 @@ sub process_factor {
 	
   
   $prefixExponent = 0;
+  warn %prefixes;
   if ( defined($unit_prefix) && $unit_prefix ne ''){
     if (exists($prefixes{$unit_prefix})){
       $prefixExponent = $prefixes{$unit_prefix}->{'exponent'};
