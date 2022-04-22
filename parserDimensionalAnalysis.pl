@@ -104,7 +104,6 @@ sub asDimensionalAnalysis {
 				# some conversions would have to be manually entered... i.e. lb to g... previous method would require gravity acceleration 
 				# to be figured into the conversion because they're technically not the same physical quantities.  Need to compare physical
 				# quantities first to see if they could be exact.
-
 				if (BetterUnits::comparePhysicalQuantity($numerator->{units_ref}, $denominator->{units_ref})){
 					my $studentInverseRatio = $denominator->{inexactValue} / $numerator->{inexactValue};
 					my $ratio = $numerator->{units_ref}->{factor} / $denominator->{units_ref}->{factor};

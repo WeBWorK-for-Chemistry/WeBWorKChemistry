@@ -330,6 +330,10 @@ our %known_units = ('m'  => {
                            'factor'    => 0.001,
                            'm'         => 3
                           },
+                  'liters'  => {
+                           'factor'    => 0.001,
+                           'm'         => 3
+                          },
                  'cc'  => {
                            'factor'    => 1E-6,
                            'm'         => 3,
@@ -1094,7 +1098,7 @@ sub comparePhysicalQuantity {
 	my $u;
   
 	foreach $u (keys %$first) {
-		if ( $u ne 'factor') {
+		if ( $u ne 'factor') {      
 			if (!defined $first->{$u} && !defined $second->{$u}){
 				next;
 			} elsif (!defined $first->{$u} || !defined $second->{$u}){
@@ -1158,19 +1162,20 @@ sub process_factor {
 	} else {
     $options->{known_units} = $known_units;
   }
-
-  #warn $string;
+  
 	my ($unit_name,$power) = split(/\^/, $string);
 
 	my @unitsNameArray = keys %$known_units;
-	my $unitsJoined = join '|', @unitsNameArray;
+
+  @unitNamesArray2 = main::PGsort(sub {length($_[0]) > length($_[1])}, @unitsNameArray);
+  #warn @unitNamesArray2;
+	my $unitsJoined = join '|', @unitNamesArray2;
   
   my $unit_base;
   my $unit_prefix;
   $power = 1 unless defined($power);
 
   my %unit_hash = %$fundamental_units;
-
 
   unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
     ($unit_base) = $unit_name =~ /($unitsJoined)$/;
@@ -1185,7 +1190,6 @@ sub process_factor {
   # if chemicals present, check to see if this is a chemical.  Include powers as they may be charges instead, so just pass the whole string.
     
   unless (defined($unit_base)){  
-    
     # if not-strict mode, register this unit as a new unit with its own fundamentals
     BetterUnits::add_unit($unit_name);
     # need to get a new copy of the fundamental units hash
@@ -1200,7 +1204,8 @@ sub process_factor {
     if (exists($prefixes{$unit_prefix})){
       $prefixExponent = $prefixes{$unit_prefix}->{'exponent'};
     } else {
-      warn "Unit Prefix unrecognizable: $unit_prefix";
+      
+      #warn "Unit Prefix unrecognizable: $unit_prefix";
     }
   }
   my %unit_name_hash = %{$known_units->{$unit_base}};   # $reference_units contains all of the known units.
@@ -1222,7 +1227,6 @@ sub process_factor {
       $unit_hash{$u} = $fundamental_unit*$power; # calculate the power of the fundamental unit in the unit
     }
   }
-
 	%unit_hash;
 }
 
