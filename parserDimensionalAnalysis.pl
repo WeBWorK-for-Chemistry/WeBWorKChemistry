@@ -161,7 +161,8 @@ sub asDimensionalAnalysis {
 				if ($givenScore != 0 && $givenScore != 1){
 					$message .= "Most likely you have a significant figures problem.";
 				}
-				if ($given->{units} ne $studentGiven->{units}) {
+				if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($given->{units_ref}, $studentGiven->{units_ref}) == 0) {
+				#if ($given->{units} ne $studentGiven->{units}) {
 					$givenScore*=0.5;  # half-credit b/c missing units.
 					$message .= "Your units are incorrect.";	
 				}				
@@ -423,16 +424,20 @@ sub asEquality {
 			$studentRatio;
 			
 			# Equalities MUST have units.  They are pointless without them.  So only grade if the units are there.
-			if ($studentArray[0]->{units} eq $correctArray[0]->{units} && $studentArray[1]->{units} eq $correctArray[1]->{units}) {
+			#if ($studentArray[0]->{units} eq $correctArray[0]->{units} && $studentArray[1]->{units} eq $correctArray[1]->{units}) {
+			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[0]->{units_ref}, $correctArray[0]->{units_ref}) == 1
+			 && InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[1]->{units_ref}, $correctArray[1]->{units_ref}) == 1) {
 
 				$studentRatio = $studentArray[0]->{inexactValue}/$studentArray[1]->{inexactValue};
 				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
 				push @scores, $result;
 				push @scores, $result;
 				return \@scores;
-				
+			}
 
-			} elsif ($studentArray[1]->{units} eq $correctArray[0]->{units} && $studentArray[0]->{units} eq $correctArray[1]->{units}) {
+#			} elsif ($studentArray[1]->{units} eq $correctArray[0]->{units} && $studentArray[0]->{units} eq $correctArray[1]->{units}) {
+			elsif (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[1]->{units_ref}, $correctArray[0]->{units_ref}) == 1
+			 && InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[0]->{units_ref}, $correctArray[1]->{units_ref}) == 1) {
 
 				$studentRatio = $studentArray[1]->{inexactValue}/$studentArray[0]->{inexactValue};
 				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
@@ -571,7 +576,9 @@ sub asPairOfConversionFactors {
 				#needs to go backwards here because we're deleting items from the array 
 				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) {  
 				
-					if ($studentArray[$i]->{units} eq $correctArray[$j]->{units} && $correctArray[$j+1]->{units} eq $studentArray[$i+1]->{units}) {
+#					if ($studentArray[$i]->{units} eq $correctArray[$j]->{units} && $correctArray[$j+1]->{units} eq $studentArray[$i+1]->{units}) {
+					if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[$i]->{units_ref}, $correctArray[$j]->{units_ref}) == 1
+					&& InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[$i+1]->{units_ref}, $correctArray[$j+1]->{units_ref}) == 1) {
 						$scoreNum = $correctArray[$j]->{inexactValue}->compareValue($studentArray[$i]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
 						if ($scoreNum != 0 && $scoreNum != 1) {
 							$ansHash->setMessage($i+1,"Most likely you have a significant figures problem.");
