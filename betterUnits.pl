@@ -1164,8 +1164,6 @@ sub process_factor {
 
 	my @unitsNameArray = keys %$known_units;
 	my $unitsJoined = join '|', @unitsNameArray;
-
-  warn $unitsJoined;
   
   my $unit_base;
   my $unit_prefix;
@@ -1197,7 +1195,7 @@ sub process_factor {
 	
   
   $prefixExponent = 0;
-  warn %prefixes;
+  
   if ( defined($unit_prefix) && $unit_prefix ne ''){
     if (exists($prefixes{$unit_prefix})){
       $prefixExponent = $prefixes{$unit_prefix}->{'exponent'};
