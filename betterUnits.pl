@@ -454,6 +454,22 @@ our %known_units = ('m'  => {
                            'factor'    => 1000,
                            'kg'        => 1
                           },
+                  'lb'  => {
+                           'factor'    => 0.45359237,
+                           'kg'        => 1
+                          },
+                  'lbs'  => {
+                           'factor'    => 0.45359237,
+                           'kg'        => 1
+                          },
+                  'pound'  => {
+                           'factor'    => 0.45359237,
+                           'kg'        => 1
+                          },
+                  'pounds'  => {
+                           'factor'    => 0.45359237,
+                           'kg'        => 1
+                          },
 # ENGLISH MASS
 # slug -- slug
 # firkin	-- (FFF system) 90 lb, mass of a firkin of water
@@ -489,7 +505,7 @@ our %known_units = ('m'  => {
 # FORCE
 # N      -- Newton
 # dyne   -- dyne
-# lb     -- pound
+# lbf     -- pound-force
 # ton    -- ton
 #
                  'N'  => {
@@ -505,13 +521,13 @@ our %known_units = ('m'  => {
                            'kg'        => 1,
                            's'         => -2
                           },
-                 'lb'  => {
+                 'lbf'  => {
                            'factor'    => 4.4482216152605,
                            'm'         => 1,
                            'kg'        => 1,
                            's'         => -2
                           },
-                'lbs'  => {
+                'pound-force'  => {
                            'factor'    => 4.4482216152605,
                            'm'         => 1,
                            'kg'        => 1,
@@ -526,7 +542,7 @@ our %known_units = ('m'  => {
 # ENERGY
 # J      -- Joule
 # erg    -- erg
-# lbf    -- foot pound
+# ft-lbf    -- foot pound
 # kt	 -- kiloton (of TNT)
 # Mt	 -- megaton (of TNT)
 # cal    -- calorie
@@ -546,7 +562,7 @@ our %known_units = ('m'  => {
                            'kg'        => 1,
                            's'         => -2
                           },
-                'lbf'  => {
+                'ft-lbf'  => {
                            'factor'    => 1.35582,
                            'm'         => 2,
                            'kg'        => 1,
