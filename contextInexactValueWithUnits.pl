@@ -230,7 +230,7 @@ sub new {
 	#$temp1 = $temp[1];
 	#warn "Trying to make:  $temp0 $temp1";
 	$num = $self->makeValue($num,context=>$context);
-	#warn "result is $num";
+	
 
 	# store a copy of fundamental units on self
 	$num->{fundamental_units} = \%fundamental_units;
@@ -644,7 +644,7 @@ sub TeX {
   my $self = shift;
   #$n = InexactValue::InexactValue::string($self);
   $n = $self->{inexactValue};
-  #warn "$n";
+
   $n =~ s/(?:E|x10\^)\+?(-?)0*([^)]*?)$/\\times 10^{$1$2}/gi; # convert E notation to x10^(...)
   #warn "$n";
 	

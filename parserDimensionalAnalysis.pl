@@ -427,8 +427,13 @@ sub asEquality {
 			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[0]->{units_ref}, $correctArray[0]->{units_ref}) == 1
 			 && InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[1]->{units_ref}, $correctArray[1]->{units_ref}) == 1) {
 
+					# warn $studentArray[0];
+					# warn $studentArray[0]->{units};
+					# warn $correctArray[1];
+					# warn $correctArray[1]->{units};
 				$studentRatio = $studentArray[0]->{inexactValue}/$studentArray[1]->{inexactValue};
 				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+				# warn $result;
 				push @scores, $result;
 				push @scores, $result;
 				return \@scores;
@@ -458,9 +463,10 @@ sub asEquality {
 				$score = 0;
 				#warn scalar @correctArray;
 				for ($j = scalar @correctArray - 1; $j >= 0; $j--) {
-					#warn $studentArray[$i];
-					#warn $studentArray[$i]->{units};
-					#warn $correctArray[$j];
+					# warn $studentArray[$i];
+					# warn $studentArray[$i]->{units};
+					# warn $correctArray[$j];
+					# warn $correctArray[$j]->{units};
 					if ($studentArray[$i]->{units} eq $correctArray[$j]->{units}){
 						my $correctValue = $correctArray[$j];
 						$score = $correctValue->{inexactValue}->compareValue($studentArray[$i]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
