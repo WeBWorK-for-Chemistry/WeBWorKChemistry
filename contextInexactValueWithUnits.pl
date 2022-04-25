@@ -208,6 +208,7 @@ sub new {
 
 	unless (ref $num eq "ARRAY") {
 		(my $tempnum,$units) = splitUnits($num) unless $units;
+		
 		if (defined $tempnum){
 			$num = $tempnum;
 		}
@@ -225,12 +226,14 @@ sub new {
 	if ($units){
 		Value::Error("Your units can only contain one division") if $units =~ m!/.*/!;
 	}
+
+		
 	#@temp = @$num;
 	#$temp0 = $temp[0];
 	#$temp1 = $temp[1];
 	#warn "Trying to make:  $temp0 $temp1";
 	$num = $self->makeValue($num,context=>$context);
-	
+
 
 	# store a copy of fundamental units on self
 	$num->{fundamental_units} = \%fundamental_units;
@@ -403,14 +406,23 @@ sub splitUnits {
 	#my ($num,$units) = $string =~ m!^(.*?(?:[)}\]0-9a-z]|\d\.))\s*($unitPattern)\s*$!;
 	#my $regex = qr/^(\d*?[\.,]?\d*?(?:e|\s?[x|\*]\s?10\^)[+-]?\d*|\d*[\.,]?\d*)(.*)$/mp;
 
-	if ($string =~ /(\d+?[\.]?\d*?(?:e|\s?[x|\*]\s?10\^)[+-]?\d+|\d*[\.]\d*|\d*)(.*)/g){
+	# this has all the groups 
+	#  ^((?:10\^[+\-]?\d+)|(?:[+\-]?(\d*)(\.?)(\d*)(?:(?:e|E|(?:\s*?(?:X|x|\*)\s*?10\^))([+\-]?)(\d*))?))(.*)$
+
+	# original one that broke with 10^4 cm
+	#  ((?:10\^[+-]?\d+)|(?:\d+?[\.]?\d*?(?:e|E|\s?[x|\*]\s?10\^)[+-]?\d+|\d*[\.]\d*|\d*))(.*)
+
+
+	
+	if ($string =~ /^((?:10\^[+\-]?\d+)|(?:[+\-]?\d*\.?\d*(?:(?:e|E|(?:\s*?(?:X|x|\*)\s*?10\^))[+\-]?\d*)?))(.*)$/g){
 		$val = $1;
 		$units = $2;
+
 		if (!$val && $units){
 			#if there are units, assume there's a 1 in front if not there.  i.e. a student could put 'mL' only in a denominator answer blank for density. 
 			$val = 1;
 		}
-		if (!$vale && !$units){
+		if (!$val && !$units){
 			$val = 0;
 		}
 	} else {
