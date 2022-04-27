@@ -613,7 +613,6 @@ sub string {
 sub roundingHack {
 	my $self = shift;
 	my $s = shift;
-	
 	return main::Round($s,20);
 	#Round($val, +for decimal/-for other way);
 	# floating point rounding causes errors

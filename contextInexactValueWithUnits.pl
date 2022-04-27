@@ -437,7 +437,9 @@ sub splitUnits {
 	if ($units) {
 		#while ($units =~ s/$unitSpace/$1*$2/) {};
 		#$units =~ s/ //g;  # Why did I remove spaces here?  this conflicts with units like "fl oz" which have a space.  I don't want to force having a '-' dash between them yet.
-							# This might break something else, but we'll remove it for now.						
+							# This might break something else, but we'll remove it for now.					
+	    $units =~ s/^\s+//;  # removes leading whitespace if present
+	    $units =~ s/\s+$//;  # removes trailing whitespace if present
 		$units =~ s/\*\*/^/g; #replace Perl exponent notation (**) with standard computer caret notation (^)
 	}
 	#warn "$units";
@@ -646,7 +648,9 @@ sub string {
   # warn "Class is $cla";
   # warn ref($self);
   if (defined $self->{units}){
-    return InexactValue::InexactValue::string($self) . ' ' . $self->{units};
+	  $units = $self->{units};
+	  $units =~ s/^\s+//;  # removes leading whitespace if present
+    return InexactValue::InexactValue::string($self) . ' ' . $units;
   } else {
     return InexactValue::InexactValue::string($self);
   }
@@ -672,6 +676,7 @@ sub TeX {
 #
 sub TeXunits {
   my $units = shift;
+  $units =~ s/^\s+//;  # removes leading whitespace if present
   $units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
   $units =~ s/\*/\\,/g; 
   $units =~ s/%/\\%/g;

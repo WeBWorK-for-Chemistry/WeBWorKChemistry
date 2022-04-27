@@ -106,179 +106,179 @@ our %polyatomicFormulaVariations = (
 
 our %polyatomicIons = (
 	'acetate'=> {
-		'atomNum'=> (8,8,6,6,1,1,1),
+		'atomNum'=> [8,8,6,6,1,1,1],
 		'charge'=>-1,
 		'TeX'=>'CH_3COO^-',
 		'SMILES'=>'CC(=O)[O-]'
 	},
 	'bromate'=> {
-		'atomNum'=> (35,8,8,8),
+		'atomNum'=> [35,8,8,8],
 		'charge'=>-1,
 		'TeX'=>'BrO_3^-',
 		'SMILES'=>'[O-][Br+2]([O-])[O-]'
 	},
 	'chlorate'=> {
-		'atomNum'=> (17,8,8,8),
+		'atomNum'=> [17,8,8,8],
 		'charge'=>-1,
 		'TeX'=>'ClO_3^-',
 		'SMILES'=>'O=Cl(=O)[O-]'
 	},
 	'chlorite'=> {
-		'atomNum'=> (17,8,8),
+		'atomNum'=> [17,8,8],
 		'charge'=>-1,
 		'TeX'=>'ClO_2^-',
 		'SMILES'=>'[O-][Cl+][O-]'
 	},
 	'cyanide'=> {
-		'atomNum'=> (7,6),
+		'atomNum'=> [7,6],
 		'charge'=>-1,
 		'TeX'=>'CN^-',
 		'SMILES'=>'[C-]#N'
 	},
 	'dihydrogen phosphate'=> {
-		'atomNum'=> (15,8,8,8,8,1,1),
+		'atomNum'=> [15,8,8,8,8,1,1],
 		'charge'=>-1,
 		'TeX'=>'H_2PO_4^-',
 		'SMILES'=>'OP(=O)(O)[O-]'
 	},
 	'hydrogen carbonate'=> {
-		'atomNum'=> (8,8,8,6,1),
+		'atomNum'=> [8,8,8,6,1],
 		'charge'=>-1,
 		'TeX'=>'HCO_3^-',
 		'SMILES'=>'OC([O-])=O'
 	},
 	'hydrogen sulfate'=> {
-		'atomNum'=> (16,8,8,8,1),
+		'atomNum'=> [16,8,8,8,1],
 		'charge'=>-1,
 		'TeX'=>'HSO_4^-',
 		'SMILES'=>'O[S](=O)(=O)[O-]'
 	},
 	'hydroxide'=> {
-		'atomNum'=> (8,1),
+		'atomNum'=> [8,1],
 		'charge'=>-1,
 		'TeX'=>'OH^-',
 		'SMILES'=>'[OH-]'
 	},
 	'hypochlorite'=> {
-		'atomNum'=> (17,8),
+		'atomNum'=> [17,8],
 		'charge'=>-1,
 		'TeX'=>'ClO^-',
 		'SMILES'=>'[O-]Cl'
 	},
 	'nitrate'=> {
-		'atomNum'=> (8,8,8,7),
+		'atomNum'=> [8,8,8,7],
 		'charge'=>-1,
 		'TeX'=>'NO_3^-',
 		'SMILES'=>'[N+](=O)([O-])[O-]'
 	},
 	'nitrite'=> {
-		'atomNum'=> (8,8,7),
+		'atomNum'=> [8,8,7],
 		'charge'=>-1,
 		'TeX'=>'NO_2^-',
 		'SMILES'=>'N(=O)[O-]'
 	},
 	'perchlorate'=> {
-		'atomNum'=> (17,8,8,8,8),
+		'atomNum'=> [17,8,8,8,8],
 		'charge'=>-1,
 		'TeX'=>'ClO_4^-',
 		'SMILES'=>'[O-][Cl+3]([O-])([O-])[O-]'
 	},
 	'permanganate'=> {
-		'atomNum'=> (25,8,8,8,8),
+		'atomNum'=> [25,8,8,8,8],
 		'charge'=>-1,
 		'TeX'=>'MnO_4^-',
 		'SMILES'=>'[O-][Mn](=O)(=O)=O'
 	},
 
 	'carbonate'=> {
-		'atomNum'=> (8,8,8,6),
+		'atomNum'=> [8,8,8,6],
 		'charge'=>-2,
 		'TeX'=>'CO_3^{2-}',
 		'SMILES'=>'C(=O)([O-])[O-]'
 	},
 	'chromate'=> {
-		'atomNum'=> (24,8,8,8,8),
+		'atomNum'=> [24,8,8,8,8],
 		'charge'=>-2,
 		'TeX'=>'CrO_4^{2-}',
 		'SMILES'=>'[O-][Cr](=O)(=O)[O-]'
 	},
 	'dichromate'=> {
-		'atomNum'=> (24,24,8,8,8,8,8,8,8),
+		'atomNum'=> [24,24,8,8,8,8,8,8,8],
 		'charge'=>-2,
 		'TeX'=>'Cr_2O_7^{2-}',
 		'SMILES'=>'O=[Cr](=O)([O-])O[Cr](=O)(=O)[O-]'
 	},
 	'hydrogen phosphate'=> {
-		'atomNum'=> (15,8,8,8,8,1),
+		'atomNum'=> [15,8,8,8,8,1],
 		'charge'=>-2,
 		'TeX'=>'HPO_4^{2-}',
 		'SMILES'=>'OP(=O)([O-])[O-]'
 	},
 	'monohydrogen phosphate'=> {
-		'atomNum'=> (15,8,8,8,8,1),
+		'atomNum'=> [15,8,8,8,8,1],
 		'charge'=>-2,
 		'TeX'=>'HPO_4^{2-}',
 		'SMILES'=>'OP(=O)([O-])[O-]'
 	},
 	'oxalate'=> {
-		'atomNum'=> (8,8,8,8,6,6),
+		'atomNum'=> [8,8,8,8,6,6],
 		'charge'=>-2,
 		'TeX'=>'C_2O_4^{2-}',
 		'SMILES'=>'C(=O)(C(=O)[O-])[O-]'
 	},
 	'peroxide'=> {
-		'atomNum'=> (8,8),
+		'atomNum'=> [8,8],
 		'charge'=>-2,
 		'TeX'=>'O_2^{2-}',
 		'SMILES'=>'[O-][O-]'
 	},
 	'silicate'=> {
-		'atomNum'=> (14,8,8,8),
+		'atomNum'=> [14,8,8,8],
 		'charge'=>-2,
 		'TeX'=>'SiO_4^{2-}',
 		'SMILES'=>'[O-][Si]([O-])([O-])[O-]'
 	},
 	'sulfate'=> {
-		'atomNum'=> (16,8,8,8,8),
+		'atomNum'=> [16,8,8,8,8],
 		'charge'=>-2,
 		'TeX'=>'SO_4^{2-}',
 		'SMILES'=>'S(=O)(=O)([O-])[O-]'
 	},
 	'sulfite'=> {
-		'atomNum'=> (16,8,8,8),
+		'atomNum'=> [16,8,8,8],
 		'charge'=>-2,
 		'TeX'=>'SO_3^{2-}',
 		'SMILES'=>'[O-]S(=O)[O-]'
 	},
 
 	'arsenate'=> {
-		'atomNum'=> (33,8,8,8),
+		'atomNum'=> [33,8,8,8],
 		'charge'=>-3,
 		'TeX'=>'AsO_4^{3-}',
 		'SMILES'=>'[O-][As+]([O-])([O-])[O-]'
 	},
 	'phosphate'=> {
-		'atomNum'=> (15,8,8,8,8),
+		'atomNum'=> [15,8,8,8,8],
 		'charge'=>-3,
 		'TeX'=>'PO_4^{3-}',
 		'SMILES'=>'[O-]P([O-])([O-])=O'
 	},
 	'phosphite'=> {
-		'atomNum'=> (15,8,8,8),
+		'atomNum'=> [15,8,8,8],
 		'charge'=>-3,
 		'TeX'=>'PO_3^{3-}',
 		'SMILES'=>'[O-]P([O-])([O-])'
 	},
 
 	'ammonium'=> {
-		'atomNum'=> (7,1,1,1,1),
+		'atomNum'=> [7,1,1,1,1],
 		'charge'=>1,
 		'TeX'=>'NH_4^+',
 		'SMILES'=>'[NH4+]'
 	},
 
 	'dimercury'=> {
-		'atomNum'=> (80,80),
+		'atomNum'=> [80,80],
 		'charge'=>2,
 		'TeX'=>'Hg_2^{2+}',
 		'SMILES'=>'[Hg+].[Hg+]'
@@ -286,7 +286,7 @@ our %polyatomicIons = (
 );	
 
 # list elements which naturally appear as diatomic or more...
-our %nonstandardElements = (1=>2,7=>2,8=>2,9=>2,17=>2,35=>2,53=>2,15=>4);
+our %multiAtomElements = (1=>2,7=>2,8=>2,9=>2,17=>2,35=>2,53=>2,15=>4);
 
 our %standardIons = (1=>1,3=>1,4=>2,6=>-4,7=>-3,8=>-2,9=>-1,11=>1,12=>2,13=>3,15=>-3,16=>-2,17=>-1,19=>1,20=>2,30=>2,31=>3,34=>-2,35=>-1,37=>1,38=>2,47=>1,48=>2,49=>3,52=>-2,53=>-1,55=>1,56=>2);
 
@@ -358,7 +358,7 @@ sub parseValue {
 	# 1. Check if contains names. Case will not matter.
 	# 2. If no names, then case DOES matter and check element symbols
 	# warn "processing $x";
-	while($x =~ /(^.*?)?(mono|mon|di|tri|tetra|tetr|penta|pent|hexa|hex|hepta|hept|octa|oct|nona|non|deca|dec)?($namesResult)\s*(\()?(\b(?:VIII|III|VII|II|IV|IX|VI|I|V|X)\b)?(\))?(?:\s*)?($trailingWords)?/gi){ # case insensitive
+	while($x =~ /(.*?)(mono|mon|di|tri|tetra|tetr|penta|pent|hexa|hex|hepta|hept|octa|oct|nona|non|deca|dec)?($namesResult)(?:\s*)(?:\()?(\b(?:VIII|III|VII|II|IV|IX|VI|I|V|X)\b)?(?:\))?(?:\s*)($trailingWords)?/gi){ # case insensitive
 		my $chemicalPiece = {};
 		if ($1){
 			$leadingUnknown = $1;
@@ -390,12 +390,12 @@ sub parseValue {
 		if ($3){
 			$atomNum = %namedRecognitionTargets{$3}->{atomNum};
 			$chemicalPiece->{'atomNum'} = $atomNum;
-			if (exists %namedRecognitionTargets{$3}->{charge}){
+			if (!$2 && exists %namedRecognitionTargets{$3}->{charge}){
 				$chemicalPiece->{charge} = %namedRecognitionTargets{$3}->{charge};
 			}
 		}
-		if ($5){
-			my $upper = uc($5);
+		if ($4){
+			my $upper = uc($4);
 			if ($upper eq "I"){
 				$chemicalPiece->{'charge'} = 1;
 			} elsif ($upper eq "II"){
@@ -418,9 +418,9 @@ sub parseValue {
 				$chemicalPiece->{'charge'} = 10;
 			}
 		}
-		if ($7) {
+		if ($5) {
 			# trailing word present.  For now, we'll track the word ion and add a charge if one is not already present
-			if ($7 =~ /ions|ion/){
+			if ($5 =~ /ions|ion/){
 				unless (exists $chemicalPiece->{charge} && exists $standardIons{$chemicalPiece->{atomNum}}){
 					$chemicalPiece->{charge} = $standardIons{$chemicalPiece->{atomNum}};
 				}
@@ -433,31 +433,39 @@ sub parseValue {
 	
 	
 	if (scalar @chemical == 0) {
-		
-		while($x =~ /(^.*?)?(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)([\d¹²³⁴⁵⁶⁷⁸⁹⁰]*[+\-⁺⁻]?)(?:\}?)/g){
+		# formula units will always have no spaces, so first split the leading units (if any) from the formula
+		@arr = split ' ', $x;
+		#assume last piece is formula
+		$y = $arr[scalar @arr - 1];
+		splice @arr, scalar @arr - 1, 1;
+		$leadingUnknown = join ' ', @arr;
+		while($y =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)([\d¹²³⁴⁵⁶⁷⁸⁹⁰]*[+\-⁺⁻]?)(?:\}?)/g){
 			my $chemicalPiece = {};
 			if ($1){
-				$leadingUnknown = $1;
-			}
-			if ($2){
-				if (exists $polyatomicFormulaVariations{$2}){
-					$polyatomic = $polyatomicIons{$polyatomicFormulaVariations{$2}};
-					$chemicalPiece->{atomNum} = $polyatomic->{atomNum};
-					$chemicalPiece->{polyAtomic} = $polyatomic;
+				if (exists $polyatomicFormulaVariations{$1}){
+					if (exists $polyatomicIons{$polyatomicFormulaVariations{$1}}){
+						my $name = $polyatomicFormulaVariations{$1};
+						my $polyatomicIonsRef = \%polyatomicIons;
+						my $polyatomic = $polyatomicIonsRef->{$name};
+						$chemicalPiece->{atomNum} = $polyatomic->{atomNum};
+						$chemicalPiece->{polyAtomicName} = $polyatomicFormulaVariations{$1};
+						$chemicalPiece->{polyAtomic} = $polyatomic;
+						#warn %$chemicalPiece;
+					}
 				} else {
-					my ($index) = grep { $elements[$_] eq $2 } 0 .. (@elements-1);
+					my ($index) = grep { $elements[$_] eq $1 } 0 .. (@elements-1);
 					$chemicalPiece->{atomNum} = $index+1;
 				}
 			}
-			if ($3){
-				$chemicalPiece->{count} = subscriptReverse($3);
+			if ($2){
+				$chemicalPiece->{count} = subscriptReverse($2);
 			} else {
 				$chemicalPiece->{count} = 1;
 			}
-			if ($4) {
+			if ($3) {
 				my $sign = 1;
 				my $value = 1;
-				my $temp = superscriptReverse($4);
+				my $temp = superscriptReverse($3);
 				if (index($temp, '+') != -1) {
 					$sign = 1;
 				} elsif (index($temp, '-') != -1) {
@@ -475,7 +483,98 @@ sub parseValue {
 		}
 		# note: overall charge will be assigned to 2nd component.  There's no mechanism to define charge of overall chemical yet.
 
+		# now let's determine if we have an ionic compound so that we can assign charges , only necessary if binary
+		if (scalar @chemical == 2){
+			my $comp1 = $chemical[0];
+			my $comp2 = $chemical[1];
+			my $comp1Cat = $elementProperties{$comp1->{atomNum}}->{cat};
+			my $comp2Cat = $elementProperties{$comp2->{atomNum}}->{cat};
+			unless (defined $comp1Cat){
+				if (exists $comp1->{polyAtomic}){
+					if ($comp1->{polyAtomic}->{charge} > 0){
+						$comp1Cat = 2;
+					} else {
+						$comp1Cat = 0; #non-metal
+					}
+				}
+			}
+			unless (defined $comp2Cat){
+				if (exists $comp2->{polyAtomic}){
+					if ($comp2->{polyAtomic}->{charge} > 0){
+						$comp2Cat = 2;
+					} else {
+						$comp2Cat = 0; #non-metal
+					}
+				}
+			}
+			
+			if (($comp1Cat == 0 && $comp2Cat == 2) || ($comp1Cat == 2 && $comp2Cat == 0)){
+				# ionic
+				my $chargesDetermined=0;
+				my $charge1;
+				my $charge2;
 
+				# need to lookup standard charges, but have to also make sure that ratios support them.
+				# 1.  find standard charges
+				# 2.  compare ratios with charges and see if they total zero
+				# 3.  adjust metal charge if type II to match ratio
+				# 4.  adjust non-metal otherwise.  i.e. oxygen might be peroxide. 
+
+				if (exists $standardIons{$comp1->{atomNum}}) {
+					$charge1 = $standardIons{$comp1->{atomNum}};
+				} 
+				if ( ! defined $charge1 && exists $comp1->{polyAtomic}){
+					#try polyatomic
+					$charge1 = $comp1->{polyAtomic}->{charge};
+				}
+				if (exists $standardIons{$comp2->{atomNum}}) {
+					$charge2 = $standardIons{$comp2->{atomNum}};
+				} 
+				if (! defined $charge2 && exists $comp2->{polyAtomic}){
+					#try polyatomic
+					$charge2 = $comp2->{polyAtomic}->{charge};
+				}
+
+				# if metal is Type II
+				if (!$chargesDetermined && !$charge1){
+					$charge1 = abs($comp2->{count} * $charge2 / $comp1->{count});
+					$comp1->{charge} = $charge1;
+					$chargesDetermined = 1;
+				}
+
+				if ($charge1 && $charge2){ 
+					if ($comp1->{count} * $charge1 + $comp2->{count} * $charge2 == 0){
+						$chargesDetermined=1;
+						$comp1->{charge} = $charge1;
+						$comp2->{charge} = $charge2;
+					}
+					else
+					{
+						# charges + count don't add up to a neutral molecule
+						# check for unique polyatomics like peroxide.... need a list.
+						# peroxide check
+						if ($comp2->{atomNum} == 8 && $comp2->{count} == 2) {
+							my $peroxide = %polyatomicIons{'peroxide'};
+							if ($comp1->{count} * $charge1 + 1 * $peroxide->{charge} == 0){
+								$chargesDetermined=1;
+								$comp1->{charge} = $charge1;
+								$comp2->{atomNum} = $peroxide->{atomNum};
+								$comp2->{charge}= $peroxide->{charge};
+								$comp2->{count} = 1;
+							}
+						}
+						#warn "peroxide maybe?";
+					}
+				} else {
+					warn "STILL NO CHARGES";
+				}
+
+
+				# $lcmultiple = lcm($charge1,$charge2);
+				# $comp1->{count}= abs($lcmultiple/$charge1);
+				# $comp2->{count} = abs($lcmultiple/$charge2);
+			}
+		}
 
 	} else {
 		# Our chemical comes from names.  Let's try to figure out the numbers of each atom.
@@ -485,8 +584,8 @@ sub parseValue {
 			$piece = $chemical[0];
 			# is it an ion or elemental?
 			if (!defined $piece->{charge}){
-				if (exists $nonstandardElements{$piece->{atomNum}}){
-					$piece->{count} = $nonstandardElements{$piece->{atomNum}};
+				if (exists $multiAtomElements{$piece->{atomNum}}){
+					$piece->{count} = $multiAtomElements{$piece->{atomNum}};
 				} else {
 					$piece->{count} = 1;
 				}
@@ -503,9 +602,19 @@ sub parseValue {
 			my $comp2 = $chemical[1];
 			my $comp1Cat = $elementProperties{$comp1->{atomNum}}->{cat};
 			my $comp2Cat = $elementProperties{$comp2->{atomNum}}->{cat};
+			unless (defined $comp2Cat){
+				if (exists $comp2->{charge}){
+					if ($comp2->{charge} > 0){
+						$comp2Cat = 2;
+					} else {
+						$comp2Cat = 0; #non-metal
+					}
+				}
+			}
 			
 			if (($comp1Cat == 0 && $comp2Cat == 2) || ($comp1Cat == 2 && $comp2Cat == 0)){
 				# ionic
+				#warn 'ionic! ' . $comp1->{atomNum} . '  ' . $comp2->{atomNum} ;
 				my $charge1;
 				my $charge2;
 
@@ -520,7 +629,6 @@ sub parseValue {
 				} else {
 					# shouldn't really be here.
 					warn "There was no way to determine the charge of the metal. Was the roman numeral missing?";
-					#$charge1 = $standardIons{$comp1->{atomNum}};
 				}
 				if (exists $comp2->{charge}) {
 					$charge2 = $comp2->{charge};
@@ -533,18 +641,19 @@ sub parseValue {
 				}
 
 				$lcmultiple = lcm($charge1,$charge2);
-				$comp1->{count}= abs($lcmultiple/$charge1);
-				$comp2->{count} = abs($lcmultiple/$charge2);
-
+				if ($charge1 && $charge2){
+					$comp1->{count}= abs($lcmultiple/$charge1);
+					$comp2->{count} = abs($lcmultiple/$charge2);
+				}
 			} else {
 				# assume covalent for rest
 				if (exists $comp1->{prefix}){
-					$comp1->{count} = {$comp1}->{prefix};
+					$comp1->{count} = $comp1->{prefix};
 				} else {
 					$comp1->{count} = 1;
 				}
 				if (exists $comp2->{prefix}){
-					$comp2->{count} = {$comp2}->{prefix};
+					$comp2->{count} = $comp2->{prefix};
 				} else {
 					warn "This shouldn't happen.  Second elements must always have a prefix.";
 					$comp2->{count} = 1;
