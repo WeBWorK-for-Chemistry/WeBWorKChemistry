@@ -1045,6 +1045,7 @@ sub process_term_for_stringCombine {
 						die "You need to load contextChemical.pl if you want to use chemicals as units.";
 				}
 				my $chemical = Chemical::Chemical->new($f);
+
 				if (defined $chemical && scalar @{$chemical->{data}} > 0){
 					$power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
 					$unit_prefix = '';  # remove any prefix parsed before.

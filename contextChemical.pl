@@ -85,7 +85,8 @@ our %polyatomicFormulaVariations = (
 	'C2O4' => 'oxalate',
 	'C_2O_4' => 'oxalate',
 	# Not going to watch for peroxide since it is indistinguishable from plain oxygen.  Will find it when comparing charges.
-	#'O2' => 'peroxide',
+	'O2' => 'peroxide',
+	'O_2' => 'peroxide',
 	'SiO3' => 'silicate',
 	'SiO_3' => 'silicate',
 	'SO4' => 'sulfate',
@@ -250,6 +251,12 @@ our %polyatomicIons = (
 		'TeX'=>'SO_3^{2-}',
 		'SMILES'=>'[O-]S(=O)[O-]'
 	},
+	'peroxide'=> {
+		'atomNum'=> [8,8],
+		'charge'=>-2,
+		'TeX'=>'O_2^{2-}',
+		'SMILES'=>'[O-][O-]'
+	},
 
 	'arsenate'=> {
 		'atomNum'=> [33,8,8,8],
@@ -302,6 +309,8 @@ our %namedRecognitionTargets = ('hydrogen' => {'atomNum' => 1},'helium' => {'ato
 # merge polyatomics into namedRecognitionTargets
 %namedRecognitionTargets = (%namedRecognitionTargets, %polyatomicIons);
 
+our %romanNumerals = (1=> 'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=> 'IX', 10=>'X');
+our %prefixesCovalent = (1=> 'mono', 2=>'di', 3=>'tri', 4=>'tetra', 5=>'penta', 6=>'hexa', 7=>'hepta', 8=>'octa', 9=> 'nona', 10=>'deca');
 
 sub new {
   	#warn "new";
@@ -324,7 +333,7 @@ sub new {
 		$leading = undef;
 	}
 	
-	bless {data => $chemical, leading => $leading, context => $context}, $class;
+	bless {data => $chemical, bonding => $result->{bonding}, leading => $leading, namePreferred => $result->{namePreferred}, context => $context}, $class;
 }
 
 sub parseValue {
@@ -333,6 +342,8 @@ sub parseValue {
 	#no warnings "numeric";
 	my @result;
 	$result[1] = 0;
+
+	my $namePreferred=0;
 
     my $compare = sub { 
 	   return length($_[1]) < length($_[0]) if length($_[0]) != length($_[1]); 
@@ -352,6 +363,10 @@ sub parseValue {
 	#warn $symbolsResult;
 	my @chemical;
 	my $leadingUnknown = undef;
+
+	# 0=unknown, 1=ionic, 2=covalent (used for the purpose of writing formulas and names)
+	my $bonding=0;
+	
 	# these are possible words that appear after a chemical.  In a capture group because it is necessary
 	# for certain ions.  i.e. potassium ion (K^+) vs potassium (K).  For others, it's optional but there just in case.
 	my $trailingWords = 'ions|ion|atoms|atom|molecules|molecule|formula units|fu|f\.u\.';
@@ -510,6 +525,7 @@ sub parseValue {
 			
 			if (($comp1Cat == 0 && $comp2Cat == 2) || ($comp1Cat == 2 && $comp2Cat == 0)){
 				# ionic
+				$bonding = 1;
 				my $chargesDetermined=0;
 				my $charge1;
 				my $charge2;
@@ -573,10 +589,13 @@ sub parseValue {
 				# $lcmultiple = lcm($charge1,$charge2);
 				# $comp1->{count}= abs($lcmultiple/$charge1);
 				# $comp2->{count} = abs($lcmultiple/$charge2);
+			} else {
+				$bonding=2;
 			}
 		}
 
 	} else {
+		$namePreferred = 1;
 		# Our chemical comes from names.  Let's try to figure out the numbers of each atom.
 		# We will only handle 1 or 2 chemical components (binary max)
 		
@@ -614,6 +633,7 @@ sub parseValue {
 			
 			if (($comp1Cat == 0 && $comp2Cat == 2) || ($comp1Cat == 2 && $comp2Cat == 0)){
 				# ionic
+				$bonding = 1;
 				#warn 'ionic! ' . $comp1->{atomNum} . '  ' . $comp2->{atomNum} ;
 				my $charge1;
 				my $charge2;
@@ -647,6 +667,7 @@ sub parseValue {
 				}
 			} else {
 				# assume covalent for rest
+				$bonding = 2;
 				if (exists $comp1->{prefix}){
 					$comp1->{count} = $comp1->{prefix};
 				} else {
@@ -668,9 +689,9 @@ sub parseValue {
 	#		warn %$chem;
 	#}
 	if (defined $leadingUnknown){
-		return {chemical=>\@chemical, leading=>$leadingUnknown};
+		return {chemical=>\@chemical, leading=>$leadingUnknown, namePreferred=>$namePreferred, bonding=>$bonding};
 	}
-	return {chemical=>\@chemical};
+	return {chemical=>\@chemical, namePreferred=>$namePreferred, bonding=>$bonding};
 
 }
 
@@ -703,18 +724,141 @@ sub guid {
 	return $self->string();
 }
 
+sub compareAtomNums {
+	my $a1r = shift;
+	my $a2r = shift;
+	if (ref($a1r) eq 'ARRAY' && ref($a2r) ne 'ARRAY'){
+		return 0;
+	}
+	if (ref($a1r) ne 'ARRAY' && ref($a2r) eq 'ARRAY'){
+		return 0;
+	}
+	if (ref($a1r) ne 'ARRAY' && ref($a2r) ne 'ARRAY'){
+		return $a1r eq $a2r;
+	}
+
+	my @a1 = @$a1r; #create copy of array
+	my @a2 = @$a2r;
+	if (scalar @a1 != scalar @a2){
+		return 0;
+	}
+	
+	my $found=0;
+	for (my $i=scalar @a1 - 1; $i>=0; $i--){
+		for (my $j=scalar @a2 -1; $j>=0; $j--){
+			if ($a1[$i] == $a2[$j]){
+
+				splice(@a2, $j,1);
+				splice(@a1, $i,1);								
+				last;
+			}
+		}
+	}
+
+	if (scalar @a1 == 0 && scalar @a2 == 0){
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 sub string {
 	my $self = shift;
 	my $text = '';
 	my $overallCharge=0;
+	my $namePreferred = $self->{namePreferred};
+
+	my $index=0;
 	foreach my $component (@{$self->{data}}) {
-		if (exists $component->{charge}){
-			$overallCharge += $component->{charge};
+		if ($namePreferred){
+			# write name!
+			my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
+				&& ((exists $component->{charge}) 
+					? ((exists $namedRecognitionTargets{$_}->{charge}) ? $namedRecognitionTargets{$_}->{charge} == $component->{charge} : 0 ) 
+					: ((exists $namedRecognitionTargets{$_}->{charge}) ? 0 : 1)) } 
+				keys %namedRecognitionTargets;
+			if (scalar @allMatches > 0){
+				if (scalar @allMatches > 1){
+					warn "There shouldn't be more than 1 match. ";
+				}
+				$match = $allMatches[0];
+				if ($text =~ /\S$/g){
+					$text .= " ";
+				}
+				#if covalent, use prefix
+				if ($self->{bonding} == 2){
+					# only use it if not 1 for 1st element
+					if ($index > 0 || $component->{count} > 1){
+						$text .= $prefixesCovalent{$component->{count}};
+					}
+				}
+				# If covalent and 2nd component
+				# need to use the ide version of the nonmetal.  This algorithm only gets the element name since it has no charge.
+				if ($self->{bonding} == 2 && $index == 1){
+					my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
+						&&  exists $namedRecognitionTargets{$_}->{charge} } 
+						keys %namedRecognitionTargets;
+					if (scalar @allMatches > 1){
+						warn "There shouldn't be more than 1 match. ";
+					}
+					$match = $allMatches[0];
+					$text .= $match;
+				} else {
+					$text .= $match;
+				}
+			} else {
+				# no matches.  sodium in sodium chloride won't match because "sodium" has no charge as the default element,
+				# but the compound version does.  Need to relax charge restrictions
+				# Only metal ions here.
+				my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) } 
+				keys %namedRecognitionTargets;
+				if (scalar @allMatches > 0){
+					if (scalar @allMatches > 1){
+						warn "There shouldn't be more than 1 match. ";
+					}
+					$match = $allMatches[0];
+					if ($text =~ /\S$/g){
+						$text .= " ";
+					}
+					$text .= "$match";
+				}
+				# check if type II metal by checking if metal has common ion (type I).  If type II, add roman numeral charge
+				# we can ignore polyatomics (they have an array for atomic number)
+				if (ref($component->{atomNum}) ne 'ARRAY'){
+					if (!exists $standardIons{$component->{atomNum}}){
+						#warn $match . ' is type II';
+						$text .= ' (' . $romanNumerals{$component->{charge}} . ')';
+					}
+				}
+				$component->{atomNum}
+			}
+		} else {
+			# write formula!
+			
+			if (exists $component->{charge}) {
+				$overallCharge += $component->{charge} * $component->{count};
+			}
+			if (ref($component->{atomNum}) eq 'ARRAY'){
+
+				$polyatomic = $component->{polyAtomic}->{TeX};
+				$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
+				$polyatomic =~ s/\_//g;
+				$polyatomic = subscript($polyatomic);
+				if ($component->{count} > 1){
+					$text .= "($polyatomic)";
+				} else {
+					$text .= $polyatomic;
+				}
+
+			}else{
+				$text .= @elements[$component->{atomNum}-1];
+			}
+			if ($component->{count} > 1) {
+				$text .= subscript($component->{count});
+			}
 		}
-		$text .= @elements[$component->{atomNum}-1];
-		if ($component->{count} > 1){
-			$text .= subscript($component->{count});
-		}
+
+		$index++;
 	}
 	if ($overallCharge != 0){
 		my $sign = $overallCharge > 0 ? "⁺" : "⁻"; #these are unicode superscript + and -
@@ -730,25 +874,110 @@ sub string {
 
 sub TeX {
 	my $self = shift;
-	my $overallCharge=0;
 	my $text = '\mathrm{';
+	my $overallCharge=0;
+	my $namePreferred = $self->{namePreferred};
+
+	my $index=0;
 	foreach my $component (@{$self->{data}}) {
-		if (exists $component->{charge}){
-			$overallCharge += $component->{charge};
+		if ($namePreferred){
+			# write name!
+			my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
+				&& ((exists $component->{charge}) 
+					? ((exists $namedRecognitionTargets{$_}->{charge}) ? $namedRecognitionTargets{$_}->{charge} == $component->{charge} : 0 ) 
+					: ((exists $namedRecognitionTargets{$_}->{charge}) ? 0 : 1)) } 
+				keys %namedRecognitionTargets;
+			if (scalar @allMatches > 0){
+				if (scalar @allMatches > 1){
+					warn "There shouldn't be more than 1 match. ";
+				}
+				$match = $allMatches[0];
+				if ($text =~ /\S$/g){
+					$text .= '\ ';
+				}
+				#if covalent, use prefix
+				if ($self->{bonding} == 2){
+					# only use it if not 1 for 1st element
+					if ($index > 0 || $component->{count} > 1){
+						$text .= $prefixesCovalent{$component->{count}};
+					}
+				}
+				# If covalent and 2nd component
+				# need to use the ide version of the nonmetal.  This algorithm only gets the element name since it has no charge.
+				if ($self->{bonding} == 2 && $index == 1){
+					my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
+						&&  exists $namedRecognitionTargets{$_}->{charge} } 
+						keys %namedRecognitionTargets;
+					if (scalar @allMatches > 1){
+						warn "There shouldn't be more than 1 match. ";
+					}
+					$match = $allMatches[0];
+					$text .= $match;
+				} else {
+					$text .= $match;
+				}
+			} else {
+				# no matches.  sodium in sodium chloride won't match because "sodium" has no charge as the default element,
+				# but the compound version does.  Need to relax charge restrictions
+				# Only metal ions here.
+				my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) } 
+				keys %namedRecognitionTargets;
+				if (scalar @allMatches > 0){
+					if (scalar @allMatches > 1){
+						warn "There shouldn't be more than 1 match. ";
+					}
+					$match = $allMatches[0];
+					if ($text =~ /\S$/g){
+						$text .= '\ ';
+					}
+					$text .= "$match";
+				}
+				# check if type II metal by checking if metal has common ion (type I).  If type II, add roman numeral charge
+				# we can ignore polyatomics (they have an array for atomic number)
+				if (ref($component->{atomNum}) ne 'ARRAY'){
+					if (!exists $standardIons{$component->{atomNum}}){
+						#warn $match . ' is type II';
+						$text .= '\ (' . $romanNumerals{$component->{charge}} . ')';
+					}
+				}
+				$component->{atomNum}
+			}
+		} else {
+			# write formula!
+			
+			if (exists $component->{charge}) {
+				$overallCharge += $component->{charge} * $component->{count};
+			}
+			if (ref($component->{atomNum}) eq 'ARRAY'){
+
+				$polyatomic = $component->{polyAtomic}->{TeX};
+				$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
+				
+				if ($component->{count} > 1){
+					$text .= "($polyatomic)";
+				} else {
+					$text .= $polyatomic;
+				}
+
+			}else{
+				$text .= @elements[$component->{atomNum}-1];
+			}
+			if ($component->{count} > 1) {
+				$text .= '_{' . $component->{count} . '}';
+			}
 		}
-		$text .= @elements[$component->{atomNum}-1];
-		if ($component->{count} > 1){
-			$text .= '_{' . $component->{count} . '}';
-		}
+
+		$index++;
 	}
 	if ($overallCharge != 0){
-		my $sign = $overallCharge > 0 ? "+" : "-";
+		my $sign = $overallCharge > 0 ? "+" : "-"; 
 		my $value = '';
 		if (abs($overallCharge) != 1){
 			$value = abs($overallCharge);
 		}
-		$text .= "^{$sign$value}";
+		$text .= "^{$value$sign}";
 	}
+
 	$text .= '}';
 	return $text;
 }

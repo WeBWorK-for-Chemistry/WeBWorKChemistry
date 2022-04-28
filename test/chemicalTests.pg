@@ -17,7 +17,7 @@ loadMacros(
 	"PGstandard.pl",     # Standard macros for PG language
 	"MathObjects.pl",
 	"PGML.pl",
-	"contextChemical.pl",
+	"contextChemical.pl"
 );
 
 
@@ -42,7 +42,12 @@ Context("Chemical");
 	['calcium nitrate', {pieces=>[[20,1,2],[[8,8,8,7],2,-1]]}],
 	['dinitrogen monoxide', {pieces=>[[7,2,0],[8,1,0]]}],
 	['calcium peroxide', {pieces=>[[20,1,2],[[8,8],1,-2]]}],
-	['CaO_2', {pieces=>[[20,1,2],[[8,7],1,-2]]}],
+	['CaO_2', {pieces=>[[20,1,2],[[8,8],1,-2]]}],
+	['Fe3+', {pieces=> [[26,1,3]]}],
+	['Fe^3+', {pieces=> [[26,1,3]]}],
+	['Fe+3', {pieces=> [[26,1,3]]}],
+	['Fe^+3', {pieces=> [[26,1,3]]}],
+	['Fe^{3+}', {pieces=> [[26,1,3]]}],
 	
 );
 
@@ -68,6 +73,9 @@ $html = '
 		<th>Input</th>
 		<th>Pieces</th>
 		<th>Chemical</th>
+		<th>String</th>
+		<th>TeX</th>
+		<th>TeX Raw</th>
 		<th>Error</th>
 	</tr>
 ';
@@ -101,6 +109,10 @@ sub compareArrays {
 	}
 	return 1;
 }
+
+
+#$test =Chemical::Chemical::compareAtomNums([8,8,6],[8,8,6]);
+#warn $test;
 
 foreach $dataItem (@testData) {
 	$success=1;
@@ -161,6 +173,10 @@ foreach $dataItem (@testData) {
 	$html .= '</table>';
 	$html .= "</td>";
 	
+	$html .= '<td>'. $testValue->string() . '</td>';
+	$html .= '<td>$$'. $testValue->TeX() . '$$</td>';
+	$html .= '<td>'. $testValue->TeX() . '</td>';
+
 	$html .= "<td>";
 	if ($success){
 		$html .='';
