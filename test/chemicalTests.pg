@@ -52,7 +52,10 @@ Context("Chemical");
 	['NO_3^2-', {pieces=> [[[8,8,8,7],1,-2]]}],
 	['nitrate', {pieces=> [[[8,8,8,7],1,-1]]}],
 	['nitrate ion', {pieces=> [[[8,8,8,7],1,-1]]}],
-	
+	['nitrite', {pieces=> [[[8,8,7],1,-1]]}],
+	['NO_2^-', {pieces=> [[[8,8,7],1,-1]]}],
+	['NO_2', {pieces=> [[7,1,0],[8,2,0]]}],
+	['nitrogen dioxide', {pieces=> [[7,1,0],[8,2,0]]}],
 );
 
 $html = '

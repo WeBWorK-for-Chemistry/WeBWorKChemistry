@@ -70,6 +70,8 @@ our %polyatomicFormulaVariations = (
 	'ClO' => 'hypochlorite',
 	'NO3' => 'nitrate',
 	'NO_3' => 'nitrate',
+	'NO2' => 'nitrite',
+	'NO_2' => 'nitrite',
 	'ClO4' => 'perchlorate',
 	'ClO_4' => 'perchlorate',
 	'MnO4' => 'permanganate',
@@ -128,7 +130,8 @@ our %polyatomicIons = (
 		'atomNum'=> [17,8,8],
 		'charge'=>-1,
 		'TeX'=>'ClO_2^-',
-		'SMILES'=>'[O-][Cl+][O-]'
+		'SMILES'=>'[O-][Cl+][O-]',
+		'alternate'=> [{atomNum=>17,count=>1},{atomNum=>8,count=>2}]
 	},
 	'cyanide'=> {
 		'atomNum'=> [7,6],
@@ -176,7 +179,8 @@ our %polyatomicIons = (
 		'atomNum'=> [8,8,7],
 		'charge'=>-1,
 		'TeX'=>'NO_2^-',
-		'SMILES'=>'N(=O)[O-]'
+		'SMILES'=>'N(=O)[O-]',
+		'alternate'=> [{atomNum=>7,count=>1},{atomNum=>8,count=>2}]
 	},
 	'perchlorate'=> {
 		'atomNum'=> [17,8,8,8,8],
@@ -249,7 +253,8 @@ our %polyatomicIons = (
 		'atomNum'=> [16,8,8,8],
 		'charge'=>-2,
 		'TeX'=>'SO_3^{2-}',
-		'SMILES'=>'[O-]S(=O)[O-]'
+		'SMILES'=>'[O-]S(=O)[O-]',
+		'alternate'=> [{atomNum=>16,count=>1},{atomNum=>8,count=>3}]
 	},
 	'peroxide'=> {
 		'atomNum'=> [8,8],
@@ -635,6 +640,22 @@ sub parseValue {
 			} else {
 				$bonding=2;
 			}
+		} elsif (scalar @chemical == 1) {  # from formula
+			# Need some disambiguation here.  NO_2 will identify as nitrite immediately.  But it could be nitrogen dioxide (neutral)
+			# The {similar} key on {polyatomic} will list the neutral version of the polyatomic ion formula.	
+			
+			if (exists $chemical[0]->{polyAtomic}){
+				warn "here!";
+				unless (defined $chemical[0]->{charge}){
+					warn "here 2!";
+					if (exists $chemical[0]->{polyAtomic}->{alternate}){
+						warn "found";
+						$newChemical = $chemical[0]->{polyAtomic}->{alternate};
+						@chemical = @$newChemical;
+					}
+				}
+			}
+
 		}
 
 	} else {
@@ -852,13 +873,8 @@ sub string {
 				if ($text =~ /\S$/g){
 					$text .= " ";
 				}
-				#if covalent, use prefix
-				if ($self->{bonding} == 2){
-					# only use it if not 1 for 1st element
-					if ($index > 0 || $component->{count} > 1){
-						$text .= $prefixesCovalent{$component->{count}};
-					}
-				}
+
+				my $elementName = '';
 				# If covalent and 2nd component
 				# need to use the ide version of the nonmetal.  This algorithm only gets the element name since it has no charge.
 				if ($self->{bonding} == 2 && $index == 1){
@@ -869,10 +885,29 @@ sub string {
 						warn "There shouldn't be more than 1 match. ";
 					}
 					$match = $allMatches[0];
-					$text .= $match;
+					$elementName = $match;
 				} else {
-					$text .= $match;
+					$elementName = $match;
 				}
+
+				#if covalent, use prefix
+				if ($self->{bonding} == 2){
+					# only use it if not 1 for 1st element
+					if ($index > 0 || $component->{count} > 1){
+						my $prefix = $prefixesCovalent{$component->{count}};
+						# check if ending of prefix and beginning of element are a letter combination where a vowel must be dropped
+						# i.e. mono oxide => monoxide,  tetra oxide => tetroxide
+						# this happens with mono, tetra, penta, hexa (this one is weird), septa, octa, nona, deca
+						# only if element begins with 'o'
+						if ($elementName =~ /^o/){
+							$prefix =~ s/[ao]$//g;
+						}
+						$text .= $prefix;
+					}
+				} 
+
+				$text .= $elementName;
+				
 			} else {
 				# no matches.  sodium in sodium chloride won't match because "sodium" has no charge as the default element,
 				# but the compound version does.  Need to relax charge restrictions
@@ -970,13 +1005,8 @@ sub TeX {
 				if ($text =~ /\S$/g){
 					$text .= '\ ';
 				}
-				#if covalent, use prefix
-				if ($self->{bonding} == 2){
-					# only use it if not 1 for 1st element
-					if ($index > 0 || $component->{count} > 1){
-						$text .= $prefixesCovalent{$component->{count}};
-					}
-				}
+
+				my $elementName = '';
 				# If covalent and 2nd component
 				# need to use the ide version of the nonmetal.  This algorithm only gets the element name since it has no charge.
 				if ($self->{bonding} == 2 && $index == 1){
@@ -987,10 +1017,29 @@ sub TeX {
 						warn "There shouldn't be more than 1 match. ";
 					}
 					$match = $allMatches[0];
-					$text .= $match;
+					$elementName = $match;
 				} else {
-					$text .= $match;
+					$elementName = $match;
 				}
+
+				#if covalent, use prefix
+				if ($self->{bonding} == 2){
+					# only use it if not 1 for 1st element
+					if ($index > 0 || $component->{count} > 1){
+						my $prefix = $prefixesCovalent{$component->{count}};
+						# check if ending of prefix and beginning of element are a letter combination where a vowel must be dropped
+						# i.e. mono oxide => monoxide,  tetra oxide => tetroxide
+						# this happens with mono, tetra, penta, hexa (this one is weird), septa, octa, nona, deca
+						# only if element begins with 'o'
+						if ($elementName =~ /^o/){
+							$prefix =~ s/[ao]$//g;
+						}
+						$text .= $prefix;
+					}
+				} 
+
+				$text .= $elementName;
+
 			} else {
 				# no matches.  sodium in sodium chloride won't match because "sodium" has no charge as the default element,
 				# but the compound version does.  Need to relax charge restrictions
@@ -1289,9 +1338,13 @@ sub grade {
 					$totalScore += $matchCount/(scalar @$first); # 
 				}
 
-				$firstCharge += $firstCopy[$i]->{charge};
-				$secondCharge += $secondCopy[$i]->{charge};
-		
+				if (defined $firstCopy[$i]->{charge}){
+					$firstCharge += $firstCopy[$i]->{charge};
+				}
+				if (defined $secondCopy[$j]->{charge}){
+					$secondCharge += $secondCopy[$j]->{charge};
+				}
+
 				splice(@secondCopy, $j, 1);
 				splice(@firstCopy, $i, 1);
 				if ($j != $i){
