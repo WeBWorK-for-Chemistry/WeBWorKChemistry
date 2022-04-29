@@ -1,0 +1,85 @@
+##DESCRIPTION
+##  Chemical formula and name writing 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+
+## Date('4/28/2022')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "contextChemical.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+$rand_num_generator = new PGrandom();
+
+Context("Chemical");
+
+#Context("Chemical")->flags->set('requireFormula' => 1,'requireName' => 0);   # Set only if you require an answer to be a formula.
+                                                                              # This is global, so if you want both in multiple parts
+                                                                              # set it on the object directly as an option.
+                                                                              # You cannot set both options or it will die.
+
+#Context("Chemical")->flags->set(disorderPenalty => 0);  # default is 0.5.  Set to multiply x fraction by total score, if out of order. (i.e. ClNa)
+
+#Context("Chemical")->flags->set(matchAtomicNumber => 0.5);  # default is 0.5.  Fraction that piece is worth for getting the correct element (or polyatomic).
+#Context("Chemical")->flags->set(matchCount => 0.5);  # default is 0.5.  Fraction that piece is worth for using the correct subscript.
+
+# For charged items, the overall charge is calculated and compared to the provided answer.
+Context("Chemical")->flags->set(chargePenalty => 0.5);   # default is 0.5.  Charge is graded only for the whole chemical. 
+                                                         # Set to multiply x fraction by total score.
+
+
+$chem1 = Chemical("calcium chloride", {requireFormula=>1});  # options are not required if using the global flag parameter.
+
+$chem2 = Chemical("FeCl3", {requireName=>1});  
+
+$chem3 = Chemical("nitrate", {requireFormula=>1});  
+
+
+
+##############################################################
+#
+#  Problem
+#
+#
+
+# Print problem number and point value (weight) for the problem
+#TEXT(beginproblem());
+
+
+BEGIN_PGML
+
+Write the formula for the following chemical names:
+
+[`[$chem1] `] [________]{$chem1}
+
+[`[$chem3] `] [________]{$chem3}
+
+Write the names for the following chemical formulas:
+
+[`[$chem2] `] [________________]{$chem2}
+
+END_PGML
+
+BEGIN_PGML_SOLUTION
+
+END_PGML_SOLUTION
+
+
+
+ENDDOCUMENT();        

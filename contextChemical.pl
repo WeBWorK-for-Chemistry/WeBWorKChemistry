@@ -317,13 +317,40 @@ sub new {
     my $self = shift; my $class = ref($self) || $self;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
     my $x = shift; $x = [$x,@_] if scalar(@_) > 0; 
+
+	my $options = shift;
+
     $x = [$x] unless ref($x) eq 'ARRAY';
     my $argCount = @$x;
 
-    unless ($argCount == 1){
-        die "Only implemented one argument.";
-    }
+    # unless ($argCount > 2){
+    #     die "Only one or two arguments.";
+    # }
 
+	my $requireFormula=0;
+	my $requireName=0;
+
+	# a problem may require an answer as a formula or a name
+	if (defined($self->context->flags->get('requireFormula'))){
+		$requireFormula = $self->context->flags->get('requireFormula');
+	}
+	if (exists $options->{requireFormula}) {
+		$requireFormula = $options->{requireFormula};
+	}
+
+	if (defined($self->context->flags->get('requireName'))){
+		$requireName = $self->context->flags->get('requireName');
+	}
+	if (exists $options->{requireName}) {
+		$requireName = $options->{requireName};
+	}
+
+	if ($requireFormula && $requireName){
+		die "You can't set both formula and name as required.";
+	}
+
+	my $outputType = $requireName ? 1 : ($requireFormula ? 2 : 0);
+	
     my $result = parseValue($x->[0]);
 	$chemical = $result->{chemical};
 	
@@ -333,17 +360,22 @@ sub new {
 		$leading = undef;
 	}
 	
-	bless {data => $chemical, bonding => $result->{bonding}, leading => $leading, namePreferred => $result->{namePreferred}, context => $context}, $class;
+	bless {data => $chemical, bonding => $result->{bonding}, leading => $leading, nameInputed => $result->{nameInputed}, outputType=> $outputType , context => $context}, $class;
 }
 
 sub parseValue {
   
 	my $x = shift;
+	
+	#warn '/' . $x . '/';
+	if (! defined $x || $x eq '' || $x =~ /^\s*$/) {
+		return {chemical=>[], nameInputed=>0, bonding=>0};
+	}
 	#no warnings "numeric";
 	my @result;
 	$result[1] = 0;
-
-	my $namePreferred=0;
+	
+	my $nameInputed=0;
 
     my $compare = sub { 
 	   return length($_[1]) < length($_[0]) if length($_[0]) != length($_[1]); 
@@ -373,7 +405,8 @@ sub parseValue {
 	# 1. Check if contains names. Case will not matter.
 	# 2. If no names, then case DOES matter and check element symbols
 	# warn "processing $x";
-	while($x =~ /(.*?)(mono|mon|di|tri|tetra|tetr|penta|pent|hexa|hex|hepta|hept|octa|oct|nona|non|deca|dec)?($namesResult)(?:\s*)(?:\()?(\b(?:VIII|III|VII|II|IV|IX|VI|I|V|X)\b)?(?:\))?(?:\s*)($trailingWords)?/gi){ # case insensitive
+	
+	while($x =~ /(.*?)(mono|mon|di|tri|tetra|tetr|penta|pent|hexa|hex|hepta|hept|octa|oct|nona|non|deca|dec)?($namesResult)(?:\s*)(?:\()?(\b(?:VIII|III|VII|II|IV|IX|VI|I|V|X)\b)?(?:\))?(?:\s*)($trailingWords)?/gi) {  # case insensitive
 		my $chemicalPiece = {};
 		if ($1){
 			$leadingUnknown = $1;
@@ -407,7 +440,12 @@ sub parseValue {
 			$chemicalPiece->{'atomNum'} = $atomNum;
 			if (!$2 && exists %namedRecognitionTargets{$3}->{charge}){
 				$chemicalPiece->{charge} = %namedRecognitionTargets{$3}->{charge};
+				# warn "Charge: " . $chemicalPiece->{charge};
+				# warn "For Atom: " . $chemicalPiece->{atomNum};
 			}
+			if (exists $polyatomicIons{$3}){
+				$chemicalPiece->{polyAtomic} = $polyatomicIons{$3};
+			} 
 		}
 		if ($4){
 			my $upper = uc($4);
@@ -436,7 +474,8 @@ sub parseValue {
 		if ($5) {
 			# trailing word present.  For now, we'll track the word ion and add a charge if one is not already present
 			if ($5 =~ /ions|ion/){
-				unless (exists $chemicalPiece->{charge} && exists $standardIons{$chemicalPiece->{atomNum}}){
+				unless (exists $chemicalPiece->{charge} 
+					|| exists $standardIons{$chemicalPiece->{atomNum}} ){
 					$chemicalPiece->{charge} = $standardIons{$chemicalPiece->{atomNum}};
 				}
 			}
@@ -448,13 +487,17 @@ sub parseValue {
 	
 	
 	if (scalar @chemical == 0) {
+
 		# formula units will always have no spaces, so first split the leading units (if any) from the formula
 		@arr = split ' ', $x;
+
 		#assume last piece is formula
 		$y = $arr[scalar @arr - 1];
+
 		splice @arr, scalar @arr - 1, 1;
 		$leadingUnknown = join ' ', @arr;
-		while($y =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)([\d¹²³⁴⁵⁶⁷⁸⁹⁰]*[+\-⁺⁻]?)(?:\}?)/g){
+
+		while($y =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)([\d¹²³⁴⁵⁶⁷⁸⁹⁰]*[+\-⁺⁻]?)(?:\}?)/g) {
 			my $chemicalPiece = {};
 			if ($1){
 				if (exists $polyatomicFormulaVariations{$1}){
@@ -496,8 +539,8 @@ sub parseValue {
 
 			push @chemical, $chemicalPiece;
 		}
+		
 		# note: overall charge will be assigned to 2nd component.  There's no mechanism to define charge of overall chemical yet.
-
 		# now let's determine if we have an ionic compound so that we can assign charges , only necessary if binary
 		if (scalar @chemical == 2){
 			my $comp1 = $chemical[0];
@@ -595,7 +638,7 @@ sub parseValue {
 		}
 
 	} else {
-		$namePreferred = 1;
+		$nameInputed = 1;
 		# Our chemical comes from names.  Let's try to figure out the numbers of each atom.
 		# We will only handle 1 or 2 chemical components (binary max)
 		
@@ -689,9 +732,9 @@ sub parseValue {
 	#		warn %$chem;
 	#}
 	if (defined $leadingUnknown){
-		return {chemical=>\@chemical, leading=>$leadingUnknown, namePreferred=>$namePreferred, bonding=>$bonding};
+		return {chemical=>\@chemical, leading=>$leadingUnknown, nameInputed=>$nameInputed, bonding=>$bonding};
 	}
-	return {chemical=>\@chemical, namePreferred=>$namePreferred, bonding=>$bonding};
+	return {chemical=>\@chemical, nameInputed=>$nameInputed, bonding=>$bonding};
 
 }
 
@@ -762,15 +805,39 @@ sub compareAtomNums {
 	}
 }
 
+sub asNameString {
+	my $self =shift;
+	return $self->string({'asName'=>1});
+}
+sub asNameTeX {
+	my $self =shift;
+	return $self->TeX({'asName'=>1});
+}
+sub asFormulaString {
+	my $self =shift;
+	return $self->string({'asFormula'=>1});
+}
+sub asFormulaTeX {
+	my $self =shift;
+	return $self->TeX({'asFormula'=>1});
+}
+
 sub string {
 	my $self = shift;
+	my $options = shift;
 	my $text = '';
 	my $overallCharge=0;
-	my $namePreferred = $self->{namePreferred};
+	my $nameOutput = $self->{nameInputed};
+	if (exists $options->{asFormula}){
+		$nameOutput = 0;
+	}
+	if (exists $options->{asName}){
+		$nameOutput = 1;
+	}
 
 	my $index=0;
 	foreach my $component (@{$self->{data}}) {
-		if ($namePreferred){
+		if ($nameOutput){
 			# write name!
 			my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
 				&& ((exists $component->{charge}) 
@@ -839,7 +906,8 @@ sub string {
 				$overallCharge += $component->{charge} * $component->{count};
 			}
 			if (ref($component->{atomNum}) eq 'ARRAY'){
-
+				# warn %$component;
+				# warn @{ $component->{atomNum} };
 				$polyatomic = $component->{polyAtomic}->{TeX};
 				$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
 				$polyatomic =~ s/\_//g;
@@ -874,13 +942,20 @@ sub string {
 
 sub TeX {
 	my $self = shift;
+	my $options = shift;
 	my $text = '\mathrm{';
 	my $overallCharge=0;
-	my $namePreferred = $self->{namePreferred};
+	my $nameOutput = $self->{nameInputed};
+	if (exists $options->{asFormula}){
+		$nameOutput = 0;
+	}
+	if (exists $options->{asName}){
+		$nameOutput = 1;
+	}
 
 	my $index=0;
 	foreach my $component (@{$self->{data}}) {
-		if ($namePreferred){
+		if ($nameOutput){
 			# write name!
 			my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
 				&& ((exists $component->{charge}) 
@@ -1051,10 +1126,26 @@ sub cmp_class {"Chemical"}
 
 sub cmp {
 	my $self = shift;
+	#warn %$self;
+	my $outputType=$self->{outputType};  # 1 is required name, 2 is required formula
+	
+	my $correct_ans;
+	my $correct_ans_latex_string;
+	if ($outputType == 1){
+		$correct_ans = $self->asNameString;
+		$correct_ans_latex_string = $self->asNameTeX;
+	} elsif ($outputType == 2){
+		$correct_ans = $self->asFormulaString;
+		$correct_ans_latex_string = $self->asFormulaTeX;
+
+	} else {
+		$correct_ans = $self->string;
+		$correct_ans_latex_string = $self->TeX;
+	}
 
 	my $cmp = $self->SUPER::cmp(
-		correct_ans => $self->string,
-		correct_ans_latex_string =>  $self->TeX,
+		correct_ans => $correct_ans,
+		correct_ans_latex_string =>  $correct_ans_latex_string,
 		@_
 	);  
 
@@ -1063,7 +1154,15 @@ sub cmp {
 		my $ans = shift;
 		$answerBlank = 0;
 		
+		$test = $ans->{student_ans} ;
+		if (!$test){
+			#warn "EMPTY";
+			$ans->{student_ans} = "";
+		}
+
 		$answerBlank = $self->new($ans->{student_ans});
+
+		#warn "ANSWER BLANK:  " . $answerBlank->string ;
 		# if ($ans->{student_ans} eq ''){
 		# 	#$inexactStudent = $self->new(0,$inf);  #blank answer is zero with infinite sf
 		# } else {
@@ -1084,7 +1183,37 @@ sub cmp {
 
 sub cmp_parse {
 	my $self = shift; my $ans = shift;
-	
+
+	my $outputType= $ans->{correct_value}->{outputType};  # 1 is required name, 2 is required formula
+	# if (defined($self->context->flags->get('requireFormula'))){
+	# 	$requireFormula = $self->context->flags->get('requireFormula');
+	# 	$outputType = 2;
+	# }
+	# if (defined($self->context->flags->get('requireName'))){
+	# 	$requireName = $self->context->flags->get('requireName');
+	# 	$outputType = 1;
+	# }
+	# if ($requireFormula && $requireName){
+	# 	die "You can't set both formula and name as required.";
+	# }
+
+	my $disorderPenalty = 0.5; # percentage of total.  This should be used for ionic.  Maybe for covalent.
+	if (defined($self->context->flags->get('disorderPenalty'))){
+		$disorderPenalty = $self->context->flags->get('disorderPenalty');
+	}
+	my $matchAtomicNumber=0.5;
+	if (defined($self->context->flags->get('matchAtomicNumber'))){
+		$matchAtomicNumber = $self->context->flags->get('matchAtomicNumber');
+	}
+	my $matchCount=0.5;
+	if (defined($self->context->flags->get('matchCount'))){
+		$matchCount = $self->context->flags->get('matchCount');
+	}
+	my $chargePenalty=0.5;
+	if (defined($self->context->flags->get('chargePenalty'))){
+		$chargePenalty = $self->context->flags->get('chargePenalty');
+	}
+
 	my $correct = $ans->{correct_value};
 	my $student = $ans->{student_value};
 	$ans->{_filter_name} = "Chemcial answer checker";
@@ -1094,7 +1223,11 @@ sub cmp_parse {
 
 	$currentCredit = 0;
 
-	$currentCredit = grade($correct->{data},$student->{data});
+	$currentCredit = grade(
+		$correct, 
+		$student, 
+		{outputType=>$outputType, disorderPenalty=>$disorderPenalty, matchAtomicNumber=>$matchAtomicNumber, matchCount=>$matchCount, chargePenalty=>$chargePenalty}
+	);
 		
 	$ans->score($currentCredit);
 
@@ -1102,9 +1235,26 @@ sub cmp_parse {
 }
 
 sub grade {
-	my $first = shift;
-	my $second = shift;
+	my $correct = shift;
+	my $student = shift;
+	my $options = shift;
+	my $first = $correct->{data};
+	my $second = $student->{data};
+	my $outputType = $options->{outputType};
 
+	if (scalar @$second == 0){
+		#warn "HERE";
+		return 0;
+	}
+
+	# formula required but student gave name
+	if ($outputType == 2 && $student->{nameInputed}){
+		return 0;
+	}
+	# # name required but student gave formula
+	if ($outputType == 1 && $student->{nameInputed} == 0){
+		return 0;
+	}
 	# Anything that has more or fewer elements than the correct value is all wrong.
 	if (scalar @$first != scalar @$second){
 		return 0;
@@ -1115,35 +1265,46 @@ sub grade {
 
 	my $totalScore = 0;
 	# score per component.  this should be modifiable via context
-	my $matchAtomNum=0.5;
-	my $matchCount=0.5;
-	my $disorderPenalty = 0.5; # percentage of total.  This should be used for ionic.  Should be optional for covalent.
+	my $matchAtomNum=$options->{matchAtomicNumber};
+	my $matchCount= $options->{matchCount};
+	my $chargePenalty= $options->{chargePenalty};
+	my $disorderPenalty = $options->{disorderPenalty};
 
 	my $isDisordered = 0;
 
-	my $studentIndex=0;
-	foreach my $component (@secondCopy){ 
-		my ($index) = grep { $firstCopy[$_]->{atomNum} == $component->{atomNum} } 0 .. (@firstCopy-1);
-		if (defined $index){
-			# match!  add grade
-			$totalScore += $matchAtomNum/(scalar @$first);
+	my $firstCharge=0;
+	my $secondCharge=0;
 
-			#if isDisordered is still not set, let's check that they have the same index position
-			if (!isDisordered && ($studentIndex != $index)){
-				$isDisordered=1;
-			}
-			
-			# now check count
-			if ($component->{count} == @firstCopy[$index]->{count}){
-				# same number!
-				$totalScore += $matchCount/(scalar @$first);
-			}
+	# order matters for chemical formula (and names)
+	# option for partial credit if correct, but out of order
 
-			# remove the match from the array so it can't match again
-			splice @firstCopy, $index, 1;
+	for (my $j=scalar @secondCopy - 1; $j >= 0; $j--){
+		for (my $i=scalar @firstCopy - 1; $i >= 0; $i--){
+			if (compareAtomNums($secondCopy[$j]->{atomNum}, $firstCopy[$i]->{atomNum})){
+				
+				$totalScore += $matchAtomNum/(scalar @$first);
+				# now check count
+				if ($secondCopy[$j]->{count} == @firstCopy[$i]->{count}){
+					# same number!
+					$totalScore += $matchCount/(scalar @$first); # 
+				}
+
+				$firstCharge += $firstCopy[$i]->{charge};
+				$secondCharge += $secondCopy[$i]->{charge};
+		
+				splice(@secondCopy, $j, 1);
+				splice(@firstCopy, $i, 1);
+				if ($j != $i){
+					$isDisordered = 1;
+				}
+				last;
+			}
 		}
-		$studentIndex+=1;
+	}
 
+	# overall charge!
+	if ($firstCharge != $secondCharge){
+		$totalScore *= $chargePenalty;
 	}
 
 	if ($isDisordered){
