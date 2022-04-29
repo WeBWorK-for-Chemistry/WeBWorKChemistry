@@ -87,14 +87,14 @@ sub conversionEQ {
 
 install_weighted_grader();
 
-Context("Numeric");
+
 Context("InexactValueWithUnits");
 Context()->flags->set('hasChemicals' => 1); # needed to have chemicals in units be recognized and formatted properly
 
-$given = InexactValueWithUnits("1.5", 'mol FeCl_3');
+$given = InexactValueWithUnits("1.5", 'g (NH_4)_2SO_4');
 
-$n1 = InexactValueWithUnits(['3',Inf], 'mol Cl^-'); # make this exact (infinite s.f.)
-$d1 = InexactValueWithUnits(['1', Infinity], 'mol FeCl_3'); # make this exact (infinite s.f.)
+$n1 = InexactValueWithUnits(['1',Inf], 'mol'); # make this exact (infinite s.f.)
+$d1 = InexactValueWithUnits('132', 'g'); # make this exact (infinite s.f.)
 
 $answer = $given * $n1 / $d1;
 
@@ -104,7 +104,7 @@ $problem = 3;
 
 $texProblem = '[`' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}`]';
 
-#$solution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+$solution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
 # use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
 ##############################################
 #[@ conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10)) @]*

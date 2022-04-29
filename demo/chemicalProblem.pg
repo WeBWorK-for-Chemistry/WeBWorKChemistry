@@ -52,6 +52,8 @@ $chem3 = Chemical("nitrate", {requireFormula=>1});
 
 $chem4 = Chemical("N_2O_4", {requireName=>1});  
 
+$chem5 = Chemical("NO", {requireName=>1});  
+
 
 ##############################################################
 #
@@ -76,6 +78,8 @@ Write the names for the following chemical formulas:
 [`[$chem2] `] [________________]{$chem2}
 
 [`[$chem4] `] [________________]{$chem4}
+
+[`[$chem5] `] [________________]{$chem5}
 
 END_PGML
 

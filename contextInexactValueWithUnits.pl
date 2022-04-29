@@ -88,6 +88,8 @@ sub cmp_class {'Inexact Value with Units'};
 my $strictUnits = 1;
 my $hasChemicals= 0;
 
+our $unitTranslation = {};
+
 sub new {
 	my $self = shift; my $class = ref($self) || $self;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
@@ -171,40 +173,13 @@ sub new {
 			}
 			else{
 				BetterUnits::add_unit($newUnit);
-				#my %op = %{$options->{known_units}};
-  				#warn "$_ $op{$_}\n" for (keys %op);
-				#warn %fundamental_units;
+
 			}
 		}
 	} 
 
-	# %fun = $BetterUnits::known_units;
-    #   warn "$_ $fun{$_}\n" for (keys %fun);
-	# #second from the value
-	# if (defined($options->{newUnit})) {
-	# 	my @newUnits;
-	# 	if (ref($options->{newUnit}) eq 'ARRAY') {
-	# 		@newUnits = @{$options->{newUnit}};
-	# 	} else {
-	# 		@newUnits = ($options->{newUnit});
-	# 	}
 
-	# 	foreach my $newUnit (@newUnits) {
-	# 		if (ref($newUnit) eq 'HASH') {
-	# 			$self->add_unit($newUnit->{name}, $newUnit->{conversion});
-	# 		} else {
-	# 			$self->add_unit($newUnit);
-	# 		}
-	# 	}
-	# }
 	Value::Error("You must provide a ".$self->name) unless defined($num);
-	
-	# if (ref $num eq "ARRAY"){
-	# 	my $t = join( ',', @$num );;
-	# 	#warn "Array: $t";
-	# } else {
-	# 	#warn "Value: $num";		
-	# }
 
 	unless (ref $num eq "ARRAY") {
 		(my $tempnum,$units) = splitUnits($num) unless $units;
@@ -219,19 +194,12 @@ sub new {
 	if ($strictUnits){
 
 	}
-	
-	#warn "Trying to make:  $num";
 
-	#Value::Error("You must provide units for your ".$self->name) unless $units;
 	if ($units){
 		Value::Error("Your units can only contain one division") if $units =~ m!/.*/!;
 	}
 
 		
-	#@temp = @$num;
-	#$temp0 = $temp[0];
-	#$temp1 = $temp[1];
-	#warn "Trying to make:  $temp0 $temp1";
 	$num = $self->makeValue($num,context=>$context);
 
 
@@ -239,49 +207,24 @@ sub new {
 	$num->{fundamental_units} = \%fundamental_units;
 	$num->{known_units} = {};
 
-	# register a new unit/s if needed
-	# first from the context (global)
-	# if (defined($self->context->flags->get('newUnit'))){
-
-	# 	my $newUnit =$self->context->flags->get('newUnit');
-	# 	if (ref($newUnit) eq 'ARRAY') {
-	# 		@newUnits = @{$newUnit};
-	# 	} else {
-	# 		@newUnits = ($newUnit);
-	# 	}
-
-	# 	foreach my $newUnit (@newUnits) {
-	# 		if (ref($newUnit) eq 'HASH') {
-	# 			$self->add_unit($num, $newUnit->{name}, $newUnit->{conversion});
-				
-	# 		} elsif (ref($newUnit) eq 'ARRAY') {
-	# 			# create the unit hash manually and set it the same for all units in the array as they all mean the same thing
-	# 			@sameUnits = @{$newUnit};
-	# 			my $unitFundamentIdentical = '';
-	# 			foreach my $sameUnit (@sameUnits) {
-	# 				if ($unitFundamentIdentical eq ''){
-	# 					$unitFundamentIdentical = $sameUnit;
-	# 				} 
-	# 				my $unitHash = {	'factor' 	=> 1,
-	# 									"$unitFundamentIdentical"     => 1 } ;
-					 
-	# 				$self->add_unit($num, $sameUnit, $unitHash);
-	# 				#$BetterUnits::fundamental_units{$unitFundamentIdentical} = 0;
-	# 				#warn %known_units;
-
-	# 			}
-	# 			#warn "$_ $BetterUnits::known_units{$_}\n" for (keys %BetterUnits::known_units);
-	# 		} else {
-	# 			$self->add_unit($num, $newUnit);
-	# 		}
-	# 	}
-	# } 
-	
-	
-#warn "$units WTH" ;
-
 	my %Units = $units ? getUnits($units) : %fundamental_units;
+
 	#warn %Units;
+
+	# This is a hack to get proper formating for chemicals as units.  Since units are stored in plain text (not as Chemical objects), we need
+	# to get their proper formats when the unit parsing is done.  Since that only returns a unit_hash, we're piggybacking on that and removing it
+	# when present.
+	if (exists $Units{piggybackUnit}){
+		$piggybackUnit = $Units{piggybackUnit};
+		delete $Units{piggybackUnit};
+
+		foreach my $k (keys %$piggybackUnit){
+			#warn %{ $piggybackUnit->{$k}};
+			$unitTranslation{$k} = $piggybackUnit->{$k};
+
+			#warn %{ $unitTranslation{$k}};
+		}
+	}
 
 	#warn "$_ $Units{$_}\n" for (keys %Units);
 	#quick loop to remove fundamental units that are zero
@@ -318,24 +261,26 @@ sub new {
 
 # copied from Units.pm
 sub getUnits {
-  my $units = shift;
-  my $options = {};
-  if ($fundamental_units) {
-    $options->{fundamental_units} = $fundamental_units;
-  }
-  if ($known_units) {
-    $options->{known_units} = $known_units;
-  }
-  if ($hasChemicals){
-	  $options->{hasChemicals} = 1;
-  }
+	my $units = shift;
+	my $options = {};
+	if ($fundamental_units) {
+		$options->{fundamental_units} = $fundamental_units;
+	}
+	if ($known_units) {
+		$options->{known_units} = $known_units;
+	}
+	if ($hasChemicals){
+		$options->{hasChemicals} = 1;
+	}
 
-  my %Units = BetterUnits::evaluate_units($units,$options);
-  if ($Units{ERROR}) {
-    $Units{ERROR} =~ s/ at ([^ ]+) line \d+(\n|.)*//;
-    $Units{ERROR} =~ s/^UNIT ERROR:? *//;
-  }
-  return %Units;
+	my %Units = BetterUnits::evaluate_units($units,$options);
+	# check if chemicals among them
+	
+	if ($Units{ERROR}) {
+		$Units{ERROR} =~ s/ at ([^ ]+) line \d+(\n|.)*//;
+		$Units{ERROR} =~ s/^UNIT ERROR:? *//;
+	}
+	return %Units;
 }
 
 # borrowed from NumberWithUnits.pm
@@ -638,33 +583,61 @@ sub compareValuesWithUnits {
 }
 
 sub string {
-  my $self = shift;
-  #return $self;
-  #   $val = $self->value;
-  # $sigs = $self->sigFigs;
-  # $cla = ref($self);
-  # warn "Value is $val";
-  # warn "SigFigs are $sigs";
-  # warn "Class is $cla";
-  # warn ref($self);
-  if (defined $self->{units}){
-	  $units = $self->{units};
-	  $units =~ s/^\s+//;  # removes leading whitespace if present
-    return InexactValue::InexactValue::string($self) . ' ' . $units;
-  } else {
-    return InexactValue::InexactValue::string($self);
-  }
+	my $self = shift;
+	#return $self;
+	#   $val = $self->value;
+	# $sigs = $self->sigFigs;
+	# $cla = ref($self);
+	# warn "Value is $val";
+	# warn "SigFigs are $sigs";
+	# warn "Class is $cla";
+	# warn ref($self);
+	if (defined $self->{units}){
+		$units = $self->{units};
+		$units =~ s/^\s+//;  # removes leading whitespace if present
+
+		# check if any units can be "translated".  i.e. chemical units that need to be formated properly;
+		foreach my $k (keys %unitTranslation){
+			my $special = %unitTranslation{$k};
+			my $leading = '';
+			if (exists $special->{leading}){
+				$leading = $special->{leading};
+			}
+			my $s = $leading . ' ' . $special->string();
+			$units =~ s/\Q$k/$s/;
+		}
+		
+		return InexactValue::InexactValue::string($self) . ' ' . $units;
+	} else {
+		return InexactValue::InexactValue::string($self);
+	}
 }
 
 sub TeX {
-  my $self = shift;
-  #$n = InexactValue::InexactValue::string($self);
-  $n = $self->{inexactValue};
+	my $self = shift;
+	#$n = InexactValue::InexactValue::string($self);
+	$n = $self->{inexactValue};
 
-  $n =~ s/(?:E|x10\^)\+?(-?)0*([^)]*?)$/\\times 10^{$1$2}/gi; # convert E notation to x10^(...)
-  #warn "$n";
-	
-  return $n . '\ ' . TeXunits($self->{units});
+	$n =~ s/(?:E|x10\^)\+?(-?)0*([^)]*?)$/\\times 10^{$1$2}/gi; # convert E notation to x10^(...)
+	#warn "$n";
+
+	if (defined $self->{units}){
+			$units = $self->{units};
+		# check if any units can be "translated".  i.e. chemical units that need to be formated properly;
+		foreach my $k (keys %unitTranslation){
+			my $special = %unitTranslation{$k};
+			my $leading = '';
+			if (exists $special->{leading}){
+				$leading = $special->{leading};
+			}
+			my $s = $leading . ' ' . $special->TeX();
+			$units =~ s/\Q$k/$s/;
+		}
+
+		return $n . '\ ' . TeXunits($units);
+	} else {
+		return $n;
+	}
 }
 
 # Adapted from NumberWithUnits.pm original which fails to add spaces in units that have a space.
@@ -675,17 +648,17 @@ sub TeX {
 #   and make a \frac out of fractions)
 #
 sub TeXunits {
-  my $units = shift;
-  $units =~ s/^\s+//;  # removes leading whitespace if present
-  $units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
-  $units =~ s/\*/\\,/g; 
-  $units =~ s/%/\\%/g;
-  $units =~ s/μ/\\mu /g;
-  $units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
-  return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
-  my $displayMode = $main::displayMode;
-  return '{\textstyle\frac{'.$1.'}{'.$2.'}}' if ($displayMode eq 'HTML_tth');
-  return '{\textstyle\frac{\rm\mathstrut '.$1.'}{\rm\mathstrut '.$2.'}}';
+	my $units = shift;
+	$units =~ s/^\s+//;  # removes leading whitespace if present
+	$units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
+	$units =~ s/\*/\\,/g; 
+	$units =~ s/%/\\%/g;
+	$units =~ s/μ/\\mu /g;
+	$units =~ s/ /\\,/g;  # example: adds space between 'fl oz'
+	return '{\rm '.$units.'}' unless $units =~ m!^(.*)/(.*)$!;
+	my $displayMode = $main::displayMode;
+	return '{\textstyle\frac{'.$1.'}{'.$2.'}}' if ($displayMode eq 'HTML_tth');
+	return '{\textstyle\frac{\rm\mathstrut '.$1.'}{\rm\mathstrut '.$2.'}}';
 }
 
 
@@ -710,15 +683,15 @@ sub convertTo {
 
 
 sub add {
-  my ($self,$l,$r,$other) = InexactValueWithUnits::InexactValueWithUnits::checkOpOrderWithPromote(@_);
-  $leftPos = $l->leastSignificantPosition();    
-  $rightPos = $r->leastSignificantPosition();
-  $leftMostPosition = $self->basicMin($leftPos, $rightPos);
-  $newValue = $l->valueAsNumber() + $r->valueAsNumber();
-  $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
-  #my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
-  #Value::Error("error is $units");
-  return $self->new([$newValue, $newSigFigs], $self->{units});
+	my ($self,$l,$r,$other) = InexactValueWithUnits::InexactValueWithUnits::checkOpOrderWithPromote(@_);
+	$leftPos = $l->leastSignificantPosition();    
+	$rightPos = $r->leastSignificantPosition();
+	$leftMostPosition = $self->basicMin($leftPos, $rightPos);
+	$newValue = $l->valueAsNumber() + $r->valueAsNumber();
+	$newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
+	#my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
+	#Value::Error("error is $units");
+	return $self->new([$newValue, $newSigFigs], $self->{units});
 }
 
 sub sub {

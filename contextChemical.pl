@@ -47,7 +47,7 @@ our @elements = (
     );
 
 our %polyatomicFormulaVariations = (
-	'C2H3O2'=>'acetate',
+	'C2H3O2' => 'acetate',
 	'C_2H_3O_2' =>'acetate',
 	'CH_3COO' =>'acetate',
 	'CH3COO' => 'acetate',
@@ -106,6 +106,19 @@ our %polyatomicFormulaVariations = (
 	# Not going to watch for dimercury since it is indistinguishable from plain mercury.  Will find it when comparing charges.
 	#'Hg2' => 'dimercury',
 );
+
+my %additionalVariants= ();
+foreach my $p (keys %polyatomicFormulaVariations){
+	my $newKey = subscript($p);
+	
+	$newKey =~ s/_//g;
+	unless (exists $additionalVariants{$newKey}){
+		
+		$additionalVariants{$newKey} = $polyatomicFormulaVariations{$p};
+	}
+}
+%polyatomicFormulaVariations = (%polyatomicFormulaVariations, %additionalVariants);
+
 
 our %polyatomicIons = (
 	'acetate'=> {
@@ -332,6 +345,7 @@ sub new {
     #     die "Only one or two arguments.";
     # }
 
+
 	my $requireFormula=0;
 	my $requireName=0;
 
@@ -358,6 +372,11 @@ sub new {
 	
     my $result = parseValue($x->[0]);
 	$chemical = $result->{chemical};
+
+	
+	# foreach $t (@$chemical){
+	# 	warn %$t;
+	# }
 	
 	if (defined $result->{leading}){
 		$leading = $result->{leading}; # for units where mol precedes the chemical and we want to return it.
@@ -394,7 +413,9 @@ sub parseValue {
 
 	my @symbols = (@elements, keys %polyatomicFormulaVariations);
 
-	my $symbolsResult = join('|', main::PGsort( $compare,@symbols));
+	#foreach my $t (keys %additionalVariants){
+	$symbolsResult = join('|', main::PGsort( $compare, @symbols));
+
 	my @names = keys %namedRecognitionTargets;
 	my $namesResult = join('|', main::PGsort( $compare, @names));
 	#warn $symbolsResult;
@@ -445,14 +466,15 @@ sub parseValue {
 			$chemicalPiece->{'atomNum'} = $atomNum;
 			if (!$2 && exists %namedRecognitionTargets{$3}->{charge}){
 				$chemicalPiece->{charge} = %namedRecognitionTargets{$3}->{charge};
-				# warn "Charge: " . $chemicalPiece->{charge};
-				# warn "For Atom: " . $chemicalPiece->{atomNum};
+				
 			}
 			if (exists $polyatomicIons{$3}){
 				$chemicalPiece->{polyAtomic} = $polyatomicIons{$3};
 			} 
+			
 		}
 		if ($4){
+			
 			my $upper = uc($4);
 			if ($upper eq "I"){
 				$chemicalPiece->{'charge'} = 1;
@@ -501,7 +523,7 @@ sub parseValue {
 
 		splice @arr, scalar @arr - 1, 1;
 		$leadingUnknown = join ' ', @arr;
-
+		
 		while($y =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)([\d¹²³⁴⁵⁶⁷⁸⁹⁰]*[+\-⁺⁻]?)(?:\}?)/g) {
 			my $chemicalPiece = {};
 			if ($1){
@@ -547,6 +569,11 @@ sub parseValue {
 		
 		# note: overall charge will be assigned to 2nd component.  There's no mechanism to define charge of overall chemical yet.
 		# now let's determine if we have an ionic compound so that we can assign charges , only necessary if binary
+		if (scalar @chemical == 4){
+			warn "WOOW";
+			warn $x;
+		}
+
 		if (scalar @chemical == 2){
 			my $comp1 = $chemical[0];
 			my $comp2 = $chemical[1];
@@ -638,6 +665,7 @@ sub parseValue {
 				# $comp1->{count}= abs($lcmultiple/$charge1);
 				# $comp2->{count} = abs($lcmultiple/$charge2);
 			} else {
+				
 				$bonding=2;
 			}
 		} elsif (scalar @chemical == 1) {  # from formula
@@ -645,11 +673,9 @@ sub parseValue {
 			# The {similar} key on {polyatomic} will list the neutral version of the polyatomic ion formula.	
 			
 			if (exists $chemical[0]->{polyAtomic}){
-				warn "here!";
 				unless (defined $chemical[0]->{charge}){
-					warn "here 2!";
 					if (exists $chemical[0]->{polyAtomic}->{alternate}){
-						warn "found";
+						#warn "found";
 						$newChemical = $chemical[0]->{polyAtomic}->{alternate};
 						@chemical = @$newChemical;
 					}
@@ -663,7 +689,7 @@ sub parseValue {
 		# Our chemical comes from names.  Let's try to figure out the numbers of each atom.
 		# We will only handle 1 or 2 chemical components (binary max)
 		
-		if (scalar @chemical == 1){
+		if (scalar @chemical == 1) {
 			$piece = $chemical[0];
 			# is it an ion or elemental?
 			if (!defined $piece->{charge}){
@@ -677,7 +703,7 @@ sub parseValue {
 				$piece->{count} = 1;
 			}
 
-		} elsif (scalar @chemical == 2){
+		} elsif (scalar @chemical == 2) {
 			# binary compound... is it covalent or ionic? while we could check for charges or prefixes, remember that students could be putting in VERY wrong answers,
 			# so we need to go back to basics and just see if it's a metal/non-metal combination for ionic or other for covalent.  This is not going to work for identifying the 
 			# type of compound (semiconductors and stuff on the borders), but it will work for names to formulas.
@@ -685,6 +711,15 @@ sub parseValue {
 			my $comp2 = $chemical[1];
 			my $comp1Cat = $elementProperties{$comp1->{atomNum}}->{cat};
 			my $comp2Cat = $elementProperties{$comp2->{atomNum}}->{cat};
+			unless (defined $comp1Cat){
+				if (exists $comp1->{charge}){
+					if ($comp1->{charge} > 0){
+						$comp1Cat = 2;
+					} else {
+						$comp1Cat = 0; #non-metal
+					}
+				}
+			}
 			unless (defined $comp2Cat){
 				if (exists $comp2->{charge}){
 					if ($comp2->{charge} > 0){
@@ -731,6 +766,7 @@ sub parseValue {
 				}
 			} else {
 				# assume covalent for rest
+				
 				$bonding = 2;
 				if (exists $comp1->{prefix}){
 					$comp1->{count} = $comp1->{prefix};
@@ -740,7 +776,7 @@ sub parseValue {
 				if (exists $comp2->{prefix}){
 					$comp2->{count} = $comp2->{prefix};
 				} else {
-					warn "This shouldn't happen.  Second elements must always have a prefix.";
+					#warn "This shouldn't happen. If it does, it is a student mistake and will create an unexpected molecule.";
 					$comp2->{count} = 1;
 				}
 			}
@@ -785,7 +821,7 @@ sub gcd {
 sub guid {
 	# for now, we'll use the string as the guid, but this won't work for future versions where isomers can be distinguished.
 	my $self = shift;
-	return $self->string();
+	return $self->string({asFormula=>1});
 }
 
 sub compareAtomNums {
@@ -943,13 +979,16 @@ sub string {
 			if (ref($component->{atomNum}) eq 'ARRAY'){
 				# warn %$component;
 				# warn @{ $component->{atomNum} };
+				#warn @{ $component->{atomNum}};
 				$polyatomic = $component->{polyAtomic}->{TeX};
 				$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
 				$polyatomic =~ s/\_//g;
 				$polyatomic = subscript($polyatomic);
 				if ($component->{count} > 1){
+					#warn 'more than 1  ' . $polyatomic;
 					$text .= "($polyatomic)";
 				} else {
+					#warn 'only 1  ' . $polyatomic;
 					$text .= $polyatomic;
 				}
 
@@ -959,6 +998,7 @@ sub string {
 			if ($component->{count} > 1) {
 				$text .= subscript($component->{count});
 			}
+			#warn $text;
 		}
 
 		$index++;
