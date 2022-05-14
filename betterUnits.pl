@@ -803,12 +803,21 @@ our %known_units = ('m'  => {
 												 },
 								
 # BIOLOGICAL & CHEMICAL UNITS
-# mmol	-- milli mole
-# micromol	-- micro mole
-# nanomol	-- nano mole
+# mmol	-- milli mole  		<-- this is covered by prefix now
+# micromol	-- micro mole	<-- this is covered by prefix now
+# nanomol	-- nano mole	<-- this is covered by prefix now
+# mole -- spelled out mol
 # kat	-- katal, catalytic activity
 #
-							 
+							 	'mole' => {
+													 'factor'    => 1,
+													 'mol'       => 1
+												 },
+								'moles' => {
+													 'factor'    => 1,
+													 'mol'       => 1
+												 },
+								
 								'kat' => {
 													 'factor'    => 1,
 													 'mol'       => 1,
