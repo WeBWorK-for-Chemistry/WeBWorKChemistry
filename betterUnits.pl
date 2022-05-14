@@ -816,13 +816,50 @@ our %known_units = ('m'  => {
 								'moles' => {
 													 'factor'    => 1,
 													 'mol'       => 1
-												 },
-								
+												 },				
 								'kat' => {
 													 'factor'    => 1,
 													 'mol'       => 1,
 													 's'         => -1,
 												 },
+# this may be temporary
+								'molecule' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'molecules' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'atom' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'atoms' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'ion' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'ions' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'formula unit' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'formula units' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+								'f.u.' => {
+													 'factor'    => 1.66053906717384666E-24,
+													 'mol'       => 1
+												 },
+
 
 # ASTRONOMICAL UNITS
 # kpc	-- kilo parsec
