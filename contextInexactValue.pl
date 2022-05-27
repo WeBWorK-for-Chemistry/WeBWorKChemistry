@@ -73,7 +73,7 @@ sub new {
 	$x = [$x] unless ref($x) eq 'ARRAY';
 	# Value::Error("Can't convert ARRAY of length %d to %s",scalar(@{$x}),Value::showClass($self))
 	#   unless (scalar(@{$x}) == 1);
-
+	
 	my $argCount = @$x;
 	my $sigFigCount = 0;
 	my $isScientificNotation = false;
@@ -526,15 +526,19 @@ sub string {
 				return '0';
 			}
 		} else { # val greater than one
+		
 			# need to show using decimal only if digits are not more than 20 orders of magnitude
 			# get position of first digit
 			@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
 			if (defined $esplit[1]) { #if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
 				$firstPosition = abs($esplit[1]);
+				
 				if ($firstPosition < 20) {
 					# try printing part of number without decimal
-					$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
-
+					#$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
+					# There was a major bug here.  Using sprintf actually rounds when all we want is to truncate the decimal part.
+					$nondecimalPartAbs = int(abs($self->roundingHack($valAsNumber)));
+					#warn abs($self->roundingHack($valAsNumber));
 					$sign = $valAsNumber >= 0;
 					# if there are more sig figs than the whole part of the number
 					if ($self->sigFigs() > length($nondecimalPartAbs)) {
@@ -557,7 +561,6 @@ sub string {
 						}
 
 					} else {
-						
 						# There are not enough significant figures.  
 						# Need to see if trailing zeros will let us write a simple decimal number
 						# Loop through digits going from ones place to higher (backwards)
