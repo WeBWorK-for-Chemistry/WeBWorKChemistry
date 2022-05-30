@@ -105,6 +105,7 @@ sub asDimensionalAnalysis {
 				# to be figured into the conversion because they're technically not the same physical quantities.  Need to compare physical
 				# quantities first to see if they could be exact.
 				if (BetterUnits::comparePhysicalQuantity($numerator->{units_ref}, $denominator->{units_ref})){
+					
 					my $studentInverseRatio = $denominator->{inexactValue} / $numerator->{inexactValue};
 					my $ratio = $numerator->{units_ref}->{factor} / $denominator->{units_ref}->{factor};
 					my $a = $ratio+0;
@@ -192,7 +193,7 @@ sub asDimensionalAnalysis {
 				# warn %{$numerator->{units_ref}};
 				# warn %{$correctArray[1]->{units_ref}};
 				# warn %{$denominator->{units_ref}};
-				$res = BetterUnits::compareUnitRefs($correctArray[1]->{units_ref},$denominator->{units_ref});
+				#$res = BetterUnits::compareUnitRefs($correctArray[1]->{units_ref},$denominator->{units_ref});
 				#warn "They match?  $res";
 				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) { 
 					# check for matching units on both parts, then check for matching value (with tolerance)

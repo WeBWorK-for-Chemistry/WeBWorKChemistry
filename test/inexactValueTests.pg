@@ -37,7 +37,8 @@
       ['2000 cm^3', {value=> 2000, sf=> 1, units=> 'cm^3', unitHash=> {factor=>0.000001, 'm' => 3} , string=>'2000 cm^3', TeX=>'2000\ {\rm cm^{3}}'}],
       ['0.00000004 g mL^-1', {value=> 0.00000004, sf=> 1, units=> 'g mL^-1', string=>'0.00000004 g mL^-1', TeX=>'0.00000004\ {\rm g\,mL^{-1}}'}],
       ['9.97 cm^3', {value=> 9.97, sf=> 3, units=> 'cm^3', unitHash=> {factor=>0.000001, 'm' => 3} , string=>'9.97 cm^3', TeX=>'9.97\ {\rm cm^{3}}'}],
-      ['12.0 Kg', {value=> 12, sf=> 3, units=> 'kg', string=>'12.0 kg', TeX=>'12.0\ {\rm kg}'}],
+      ['12.0 kg', {value=> 12, sf=> 3, units=> 'kg',unitHash=> {factor=>1, 'kg' => 1}, string=>'12.0 kg', TeX=>'12.0\ {\rm kg}'}],
+      ['12.0 Kg', {value=> 12, sf=> 3, units=> 'Kg',unitHash=> {factor=>0.001, 'kg' => 1}, string=>'12.0 Kg', TeX=>'12.0\ {\rm Kg}'}],
    );
 
    $html = '

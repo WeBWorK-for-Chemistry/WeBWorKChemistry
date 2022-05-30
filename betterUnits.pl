@@ -1112,7 +1112,8 @@ sub process_term {
 			# Adding a dash is fine, but if a user adds a custom unit with spaces, we want to honor it.
 			my @unitsNameArray = keys %$known_units;
 			@unitsNameArray = grep(/\s/, @unitsNameArray);
-			my $unitsJoined = join '|', @unitsNameArray;
+			@unitsNamesArray2 = main::PGsort(sub {length($_[0]) > length($_[1])}, @unitsNameArray);
+			my $unitsJoined = join '|', @unitsNamesArray2;
 			my @splitUnits = ( $f =~ m/($unitsJoined|\S+)/g );
 
 			foreach $s (@splitUnits) {
