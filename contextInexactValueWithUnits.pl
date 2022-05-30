@@ -1130,10 +1130,10 @@ sub process_factor_for_stringCombine {
 	$prefixExponent = 0;
 	# warn "prefix exponent: ".$prefixExponent;
 	if ( defined($unit_prefix) && $unit_prefix ne '') {
-			if (exists($prefixes->{$unit_prefix})){
+		if (exists($prefixes->{$unit_prefix})){
 			$prefixExponent = $prefixes->{$unit_prefix}->{'exponent'};
 		} else {
-			warn "Unit Prefix unrecognizable: $unit_prefix";
+			#warn "Unit Prefix unrecognizable: $unit_prefix";
 		}
 	}
 	unless ($isNumerator) {
