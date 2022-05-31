@@ -138,6 +138,7 @@ sub asDimensionalAnalysis {
 					$studentCalc /= $studentArray[$i];
 				}
 			}
+			warn $studentCalc;
 			$ansHash->setMessage(scalar @studentArray,"Your dimensional analysis returns this value: $studentCalc");
 
 			# Time to grade dimensional analysis!

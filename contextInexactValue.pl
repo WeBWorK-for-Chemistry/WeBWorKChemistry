@@ -34,6 +34,7 @@ sub Init {
 		failOnValueWrong => 1,  # ignore sig figs (and any further credit) 
 														# if value is wrong
 	);
+	
 
 	#
 	#  Hook into the Value package lookup mechanism
@@ -79,16 +80,15 @@ sub new {
 	my $isScientificNotation = false;
 	# Tolerance is useful when asking students to record an inexact value from an analog instrument (i.e. ruler).  The last digit will always vary by a little bit.
 	# While a relative value of tolerance is ok, it's easier to use absolute tolerance since we know approximately how much the last digit will very.
-	my %options = (
+	my $options = {
 		tolerance => 0, 
-		tolType => 'absolute'
-	);
+		tolType => 'absolute',
+		scientificNotationThreshold => 6, # can be set to 20 if problem requires conversion from standard to sci and we need to force standard
+	};
 
 	#	$tolerance = 0;          # zero tolerance by default
 	#	$tolType = 'absolute';   # absolute tolerance if not zero
 	
-
-
 	my $matchNumber = '';
 
 	if ($argCount >= 2) {
@@ -100,7 +100,7 @@ sub new {
 
 		if (ref $x->[1] eq ref {}){
 			# 2nd arg is an options hash
-			$options = $x->[1];
+			$options = {%{$x->[1]}, %$options};
 		} else {
 			# check for infinity string first
 			if (ref $x->[1] eq 'Value::Infinity') {
@@ -206,7 +206,7 @@ sub new {
 	$s->preferScientificNotation($isScientificNotation);
 	$s->{isInexact} = 1;
 	$s->{precedence}{'InexactValue'} = 3;
-	$s->{options} = \%options;
+	$s->{options} = $options;
 	return $s;
 }
 
@@ -497,9 +497,10 @@ sub string {
 			@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
 			if (defined $esplit[1]) { #if we make zero scientific, it won't work...
 				$firstNonZeroPosition = abs($esplit[1]);
-
-				# if position plus required sigfigs is not more than 20 digits (limit for floating point errors)
-				if (@firstNonZeroPosition - 1 + $self->sigFigs() <= 20){
+				$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
+				# if position plus required sigfigs is not more than 20 digits (limit for floating point errors) 
+				# This is not correct, that's just the max... We'll just casually convert to sci notation if smaller than threshold
+				if ($firstNonZeroPosition - 1 + $self->sigFigs() <= $scientificNotationThreshold){
 					# ok to show as standard notation
 					$digits = $firstNonZeroPosition - 1 + $self->sigFigs();
 					return sprintf("%.${digits}f", $self->roundingHack($valAsNumber));
@@ -527,13 +528,16 @@ sub string {
 			}
 		} else { # val greater than one
 		
-			# need to show using decimal only if digits are not more than 20 orders of magnitude
+			# need to show using decimal only if digits are not more than 6 orders of magnitude
+			# this is now set by options parameter via scientificNotationThreshold
 			# get position of first digit
 			@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
-			if (defined $esplit[1]) { #if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
+			if (defined $esplit[1]) { 
+				$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
+				#if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
 				$firstPosition = abs($esplit[1]);
-				
-				if ($firstPosition < 20) {
+				#warn $valAsNumber;
+				if ($firstPosition < $scientificNotationThreshold) {
 					# try printing part of number without decimal
 					#$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
 					# There was a major bug here.  Using sprintf actually rounds when all we want is to truncate the decimal part.
@@ -598,6 +602,13 @@ sub string {
 							}
 							
 						}
+					}
+				} else {
+					$digits = $self->sigFigs() - 1;
+					if ($preventClean) {
+						return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+					} else {
+						return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 					}
 				}
 			} else {

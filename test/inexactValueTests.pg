@@ -32,13 +32,14 @@
       ['1.200e-3 cm', {value=> 0.0012, sf=> 4, units=> 'cm', string=>'1.200x10^-3 cm', TeX=>'1.200\times 10^{-3}\ {\rm cm}'}],
       ['1.200*10^-3 cm', {value=> 0.0012, sf=> 4, units=> 'cm', string=>'1.200x10^-3 cm', TeX=>'1.200\times 10^{-3}\ {\rm cm}'}],
       ['1.200 * 10^-3 cm', {value=> 0.0012, sf=> 4, units=> 'cm', string=>'1.200x10^-3 cm', TeX=>'1.200\times 10^{-3}\ {\rm cm}'}],
-      ['0.00000004 g/mL', {value=> 0.00000004, sf=> 1, units=> 'g/mL', string=>'0.00000004 g/mL', TeX=>'0.00000004\ {\textstyle\frac{\rm\mathstrut g}{\rm\mathstrut mL}}'}],
-      ['0.00000004g/mL', {value=> 0.00000004, sf=> 1, units=> 'g/mL', string=>'0.00000004 g/mL', TeX=>'0.00000004\ {\textstyle\frac{\rm\mathstrut g}{\rm\mathstrut mL}}'}],
+      ['0.00000000004 g/mL', {value=> 0.00000000004, sf=> 1, units=> 'g/mL', string=>'4x10^-11 g/mL', TeX=>'4\times 10^{-11}\ {\textstyle\frac{\rm\mathstrut g}{\rm\mathstrut mL}}'}],
+      ['0.00000004g/mL', {value=> 0.00000004, sf=> 1, units=> 'g/mL', string=>'4x10^-8 g/mL', TeX=>'4\times 10^{-8}\ {\textstyle\frac{\rm\mathstrut g}{\rm\mathstrut mL}}'}],
       ['2000 cm^3', {value=> 2000, sf=> 1, units=> 'cm^3', unitHash=> {factor=>0.000001, 'm' => 3} , string=>'2000 cm^3', TeX=>'2000\ {\rm cm^{3}}'}],
-      ['0.00000004 g mL^-1', {value=> 0.00000004, sf=> 1, units=> 'g mL^-1', string=>'0.00000004 g mL^-1', TeX=>'0.00000004\ {\rm g\,mL^{-1}}'}],
+      ['0.00000004 g mL^-1', {value=> 0.00000004, sf=> 1, units=> 'g mL^-1', string=>'4x10^-8 g mL^-1', TeX=>'4\times 10^{-8}\ {\rm g\,mL^{-1}}'}],
       ['9.97 cm^3', {value=> 9.97, sf=> 3, units=> 'cm^3', unitHash=> {factor=>0.000001, 'm' => 3} , string=>'9.97 cm^3', TeX=>'9.97\ {\rm cm^{3}}'}],
       ['12.0 kg', {value=> 12, sf=> 3, units=> 'kg',unitHash=> {factor=>1, 'kg' => 1}, string=>'12.0 kg', TeX=>'12.0\ {\rm kg}'}],
       ['12.0 Kg', {value=> 12, sf=> 3, units=> 'Kg',unitHash=> {factor=>0.001, 'kg' => 1}, string=>'12.0 Kg', TeX=>'12.0\ {\rm Kg}'}],
+      ['120000000000000 kg', {value=> 120000000000000, sf=> 2, units=> 'kg',unitHash=> {factor=>1, 'kg' => 1}, string=>'1.2x10^14 kg', TeX=>'1.2\times 10^{14}\ {\rm kg}'}],
    );
 
    $html = '
