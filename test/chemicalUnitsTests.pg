@@ -28,7 +28,7 @@ Context("InexactValueWithUnits");
 Context()->flags->set('hasChemicals' => 1);
 
 @data = (
-	['12.0 mol FeCl3', {value=> 12, sf=> 3, units=> 'mol FeCl3', unitHash=>{factor=>1, 'mol'=>1, 'FeCl₃'=>1},string=>'12.0 mol FeCl3', TeX=>'12.0\ {\rm mol\,FeCl3}'}],
+	['12.0 mol FeCl3', {value=> 12, sf=> 3, units=> 'mol FeCl3', unitHash=>{factor=>1, 'mol'=>1, 'FeCl₃'=>1},string=>'12.0 mol FeCl₃', TeX=>'12.0\ {\rm mol\,\mathrm{FeCl_{3}}}'}],
 	['0.020 mol FeCl3', {value=> 0.02, sf=> 2, units=> 'mol FeCl3', unitHash=>{factor=>1, 'mol'=>1, 'FeCl₃'=>1},string=>'0.020 mol FeCl3', TeX=>'0.020\ {\rm mol\,FeCl3}'}],
 	['0.030 mol Fe^{3+}', {value=> 0.03, sf=> 2, units=> 'mol Fe^{3+}', unitHash=>{factor=>1, 'mol'=>1, 'Fe³⁺'=>1},string=>'0.030 mol Fe^{3+}', TeX=>'0.030\ {\rm mol\,Fe^{3+}}'}],
 	['0.030 mol Cl^-', {value=> 0.03, sf=> 2, units=> 'mol Cl^-', unitHash=>{factor=>1, 'mol'=>1, 'Cl⁻'=>1},string=>'0.030 mol Cl^-', TeX=>'0.030\ {\rm mol\,Fe^{3+}}'}],

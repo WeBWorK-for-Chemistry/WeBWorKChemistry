@@ -324,8 +324,22 @@ our %namedRecognitionTargets = ('hydrogen' => {'atomNum' => 1},'helium' => {'ato
 	'nitride'=>{'atomNum'=>7,'charge'=>-3},'phosphide'=>{'atomNum'=>15,'charge'=>-3},'arsenide'=>{'atomNum'=>33,'charge'=>-3},'antimonide'=>{'atomNum'=>51,'charge'=>-3},
 	'hydride'=>{'atomNum'=>1,'charge'=>-1}
 	);
+
+our %commonNames = (
+	'water' => {
+		'chemical'=> [{'atomNum'=>1,'count'=>2,'charge'=>0},{'atomNum'=>8,'count'=>1,'charge'=>0}],
+		'TeX'=>'H_2O',
+		'SMILES'=>'O'
+	},
+	'ammonia' => {
+		'chemical'=> [{'atomNum'=>7,'count'=>1,'charge'=>0},{'atomNum'=>1,'count'=>3,'charge'=>0}],
+		'TeX'=>'NH_3',
+		'SMILES'=>'N'
+	}
+);
+
 # merge polyatomics into namedRecognitionTargets
-%namedRecognitionTargets = (%namedRecognitionTargets, %polyatomicIons);
+%namedRecognitionTargets = (%namedRecognitionTargets, %polyatomicIons, %commonNames);
 
 our %romanNumerals = (1=> 'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=> 'IX', 10=>'X');
 our %prefixesCovalent = (1=> 'mono', 2=>'di', 3=>'tri', 4=>'tetra', 5=>'penta', 6=>'hexa', 7=>'hepta', 8=>'octa', 9=> 'nona', 10=>'deca');
@@ -384,7 +398,14 @@ sub new {
 		$leading = undef;
 	}
 	
-	bless {data => $chemical, bonding => $result->{bonding}, leading => $leading, nameInputed => $result->{nameInputed}, outputType=> $outputType , context => $context}, $class;
+	if (defined $result->{commonName}){
+		$commonName = $result->{commonName}; # for units where mol precedes the chemical and we want to return it.
+	} else {
+		$commonName = undef;
+	}
+
+
+	bless {data => $chemical, bonding => $result->{bonding}, leading => $leading, nameInputed => $result->{nameInputed}, commonName=>$commonName, outputType=> $outputType , context => $context}, $class;
 }
 
 sub parseValue {
@@ -424,6 +445,9 @@ sub parseValue {
 
 	# 0=unknown, 1=ionic, 2=covalent (used for the purpose of writing formulas and names)
 	my $bonding=0;
+
+	# We'll use this to break out of all parsing and just replace the name with the prestored chemical.
+	my $commonName=0;
 	
 	# these are possible words that appear after a chemical.  In a capture group because it is necessary
 	# for certain ions.  i.e. potassium ion (K^+) vs potassium (K).  For others, it's optional but there just in case.
@@ -471,6 +495,11 @@ sub parseValue {
 			if (exists $polyatomicIons{$3}){
 				$chemicalPiece->{polyAtomic} = $polyatomicIons{$3};
 			} 
+			if (exists $commonNames{$3}){
+				@chemical = @{$commonNames{$3}->{chemical}};
+				$commonName = $3;
+				last;
+			}
 			
 		}
 		if ($4){
@@ -549,11 +578,11 @@ sub parseValue {
 			}
 			if ($3) {
 				my $sign = 1;
-				my $value = 1;
+				my $value = 1;  #if charge exists, default charge 1
 				my $temp = superscriptReverse($3);
-				if (index($temp, '+') != -1) {
+				if (index($temp, '+') != -1) {  # if contains a + sign, then $sign is 1
 					$sign = 1;
-				} elsif (index($temp, '-') != -1) {
+				} elsif (index($temp, '-') != -1) {  #if contains a - sign, then $sign is -1
 					$sign = -1;
 				} 
 				($val) =$temp =~ /(\d)/;
@@ -562,15 +591,13 @@ sub parseValue {
 				}
 				$chemicalPiece->{charge} = $sign*$value;
 			}
-			#warn %$chemicalPiece;
-
 			push @chemical, $chemicalPiece;
 		}
 		
 		# note: overall charge will be assigned to 2nd component.  There's no mechanism to define charge of overall chemical yet.
 		# now let's determine if we have an ionic compound so that we can assign charges , only necessary if binary
 		if (scalar @chemical == 4){
-			warn "WOOW";
+			warn "WOW we can't do this one.";
 			warn $x;
 		}
 
@@ -665,7 +692,7 @@ sub parseValue {
 				# $comp1->{count}= abs($lcmultiple/$charge1);
 				# $comp2->{count} = abs($lcmultiple/$charge2);
 			} else {
-				
+				#covalent! (not ionic)
 				$bonding=2;
 			}
 		} elsif (scalar @chemical == 1) {  # from formula
@@ -689,110 +716,116 @@ sub parseValue {
 		# Our chemical comes from names.  Let's try to figure out the numbers of each atom.
 		# We will only handle 1 or 2 chemical components (binary max)
 		
-		if (scalar @chemical == 1) {
-			$piece = $chemical[0];
-			# is it an ion or elemental?
-			if (!defined $piece->{charge}){
-				if (exists $multiAtomElements{$piece->{atomNum}}){
-					$piece->{count} = $multiAtomElements{$piece->{atomNum}};
+		# return immediately if this is from a common name
+		unless ($commonName) {
+			if (scalar @chemical == 1) {
+				$piece = $chemical[0];
+				# is it an ion or elemental?
+				if (!defined $piece->{charge}){
+					if (exists $multiAtomElements{$piece->{atomNum}}){
+						$piece->{count} = $multiAtomElements{$piece->{atomNum}};
+					} else {
+						$piece->{count} = 1;
+					}
 				} else {
+					# it's got a charge, so default count 1.  This will work with Hg2 2+ because that's counted as a polyatomic
 					$piece->{count} = 1;
 				}
-			} else {
-				# it's got a charge, so default count 1.  This will work with Hg2 2+ because that's counted as a polyatomic
-				$piece->{count} = 1;
-			}
 
-		} elsif (scalar @chemical == 2) {
-			# binary compound... is it covalent or ionic? while we could check for charges or prefixes, remember that students could be putting in VERY wrong answers,
-			# so we need to go back to basics and just see if it's a metal/non-metal combination for ionic or other for covalent.  This is not going to work for identifying the 
-			# type of compound (semiconductors and stuff on the borders), but it will work for names to formulas.
-			my $comp1 = $chemical[0];
-			my $comp2 = $chemical[1];
-			my $comp1Cat = $elementProperties{$comp1->{atomNum}}->{cat};
-			my $comp2Cat = $elementProperties{$comp2->{atomNum}}->{cat};
-			unless (defined $comp1Cat){
-				if (exists $comp1->{charge}){
-					if ($comp1->{charge} > 0){
-						$comp1Cat = 2;
-					} else {
-						$comp1Cat = 0; #non-metal
+			} elsif (scalar @chemical == 2) {
+				# binary compound... is it covalent or ionic? while we could check for charges or prefixes, remember that students could be putting in VERY wrong answers,
+				# so we need to go back to basics and just see if it's a metal/non-metal combination for ionic or other for covalent.  This is not going to work for identifying the 
+				# type of compound (semiconductors and stuff on the borders), but it will work for names to formulas.
+				my $comp1 = $chemical[0];
+				my $comp2 = $chemical[1];
+				my $comp1Cat = $elementProperties{$comp1->{atomNum}}->{cat};
+				my $comp2Cat = $elementProperties{$comp2->{atomNum}}->{cat};
+				unless (defined $comp1Cat){
+					if (exists $comp1->{charge}){
+						if ($comp1->{charge} > 0){
+							$comp1Cat = 2;
+						} else {
+							$comp1Cat = 0; #non-metal
+						}
 					}
 				}
-			}
-			unless (defined $comp2Cat){
-				if (exists $comp2->{charge}){
-					if ($comp2->{charge} > 0){
-						$comp2Cat = 2;
-					} else {
-						$comp2Cat = 0; #non-metal
+				unless (defined $comp2Cat){
+					if (exists $comp2->{charge}){
+						if ($comp2->{charge} > 0){
+							$comp2Cat = 2;
+						} else {
+							$comp2Cat = 0; #non-metal
+						}
 					}
 				}
-			}
-			
-			if (($comp1Cat == 0 && $comp2Cat == 2) || ($comp1Cat == 2 && $comp2Cat == 0)){
-				# ionic
-				$bonding = 1;
-				#warn 'ionic! ' . $comp1->{atomNum} . '  ' . $comp2->{atomNum} ;
-				my $charge1;
-				my $charge2;
-
-				if (exists $comp1->{charge}) {
-					# type II metal (got charge from roman numeral)
-					$charge1 = $comp1->{charge};
-				} elsif (exists $standardIons{$comp1->{atomNum}}) {
-					# type I metal
-					
-					$charge1 = $standardIons{$comp1->{atomNum}};
-					$comp1->{charge} = $charge1;
-				} else {
-					# shouldn't really be here.
-					warn "There was no way to determine the charge of the metal. Was the roman numeral missing?";
-				}
-				if (exists $comp2->{charge}) {
-					$charge2 = $comp2->{charge};
-				} elsif (exists $standardIons{$comp2->{atomNum}}) {
-					$charge2 = $standardIons{$comp2->{atomNum}};
-					$comp2->{charge} = $charge2;
-				} else {
-					# shouldn't really be here.
-					warn "There was no way to determine the charge of the nonmetal. Artificial non-metal maybe?";
-				}
-
-				$lcmultiple = lcm($charge1,$charge2);
-				if ($charge1 && $charge2){
-					$comp1->{count}= abs($lcmultiple/$charge1);
-					$comp2->{count} = abs($lcmultiple/$charge2);
-				}
-			} else {
-				# assume covalent for rest
 				
-				$bonding = 2;
-				if (exists $comp1->{prefix}){
-					$comp1->{count} = $comp1->{prefix};
+				if (($comp1Cat == 0 && $comp2Cat == 2) || ($comp1Cat == 2 && $comp2Cat == 0)){
+					# ionic
+					$bonding = 1;
+					#warn 'ionic! ' . $comp1->{atomNum} . '  ' . $comp2->{atomNum} ;
+					my $charge1;
+					my $charge2;
+
+					if (exists $comp1->{charge}) {
+						# type II metal (got charge from roman numeral)
+						$charge1 = $comp1->{charge};
+					} elsif (exists $standardIons{$comp1->{atomNum}}) {
+						# type I metal
+						
+						$charge1 = $standardIons{$comp1->{atomNum}};
+						$comp1->{charge} = $charge1;
+					} else {
+						# shouldn't really be here.
+						warn "There was no way to determine the charge of the metal. Was the roman numeral missing?";
+					}
+					if (exists $comp2->{charge}) {
+						$charge2 = $comp2->{charge};
+					} elsif (exists $standardIons{$comp2->{atomNum}}) {
+						$charge2 = $standardIons{$comp2->{atomNum}};
+						$comp2->{charge} = $charge2;
+					} else {
+						# shouldn't really be here.
+						warn "There was no way to determine the charge of the nonmetal. Artificial non-metal maybe?";
+					}
+
+					$lcmultiple = lcm($charge1,$charge2);
+					if ($charge1 && $charge2){
+						$comp1->{count}= abs($lcmultiple/$charge1);
+						$comp2->{count} = abs($lcmultiple/$charge2);
+					}
 				} else {
-					$comp1->{count} = 1;
+					# assume covalent for rest
+					
+					$bonding = 2;
+					if (exists $comp1->{prefix}){
+						$comp1->{count} = $comp1->{prefix};
+					} else {
+						$comp1->{count} = 1;
+					}
+					if (exists $comp2->{prefix}){
+						$comp2->{count} = $comp2->{prefix};
+					} else {
+						#warn "This shouldn't happen. If it does, it is a student mistake and will create an unexpected molecule.";
+						$comp2->{count} = 1;
+					}
 				}
-				if (exists $comp2->{prefix}){
-					$comp2->{count} = $comp2->{prefix};
-				} else {
-					#warn "This shouldn't happen. If it does, it is a student mistake and will create an unexpected molecule.";
-					$comp2->{count} = 1;
-				}
+			} else {
+				warn "Can't handle three component compounds.";
 			}
-		} else {
-			warn "Can't handle three component compounds.";
 		}
 	}
-	#warn "PARSED UNITS $x";
-	#foreach $chem (@chemical){
-	#		warn %$chem;
-	#}
-	if (defined $leadingUnknown){
-		return {chemical=>\@chemical, leading=>$leadingUnknown, nameInputed=>$nameInputed, bonding=>$bonding};
-	}
-	return {chemical=>\@chemical, nameInputed=>$nameInputed, bonding=>$bonding};
+	
+	$result = {chemical=>\@chemical, nameInputed=>$nameInputed, bonding=>$bonding};
 
+	if (defined $leadingUnknown){
+		$result->{leading} = $leadingUnknown;
+		#return {chemical=>\@chemical, leading=>$leadingUnknown, nameInputed=>$nameInputed, bonding=>$bonding};
+	}
+	if ($commonName){
+		$result->{commonName} = $commonName;
+	}
+	#return {chemical=>\@chemical, nameInputed=>$nameInputed, bonding=>$bonding};
+	return $result;
 }
 
 sub lcm {
@@ -827,6 +860,10 @@ sub guid {
 sub compareAtomNums {
 	my $a1r = shift;
 	my $a2r = shift;
+	if (!defined($a1r) || !defined($a2r)){
+		return 0;
+	}
+	
 	if (ref($a1r) eq 'ARRAY' && ref($a2r) ne 'ARRAY'){
 		return 0;
 	}
@@ -891,6 +928,10 @@ sub string {
 	if (exists $options->{asName}){
 		$nameOutput = 1;
 	}
+	if ($nameOutput == 1 && defined $self->{commonName}){
+		return $self->{commonName};
+	}
+
 
 	my $index=0;
 	foreach my $component (@{$self->{data}}) {
@@ -1027,6 +1068,10 @@ sub TeX {
 	if (exists $options->{asName}){
 		$nameOutput = 1;
 	}
+	if ($nameOutput == 1 && defined $self->{commonName}){
+		return '\mathrm{' . $self->{commonName} . '}';
+	}
+
 
 	my $index=0;
 	foreach my $component (@{$self->{data}}) {
