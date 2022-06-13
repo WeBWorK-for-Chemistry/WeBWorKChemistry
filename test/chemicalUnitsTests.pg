@@ -195,7 +195,7 @@ $n1 = InexactValueWithUnits($data[0]->[0]);
 $n2 = InexactValueWithUnits($data[1]->[0]);
 $n3 = InexactValueWithUnits($data[2]->[0]);
 
-$html .= processResult($data[0]->[0] . " / " . $data[1]->[0], $n1/$n2, {});
+$html .= processResult($data[0]->[0] . " / " . $data[1]->[0], $n1/$n2, {value=> 600, sf=> 2, units=> '', unitHash=>{factor=>1},string=>'6.0x10^2 ', TeX=>'6.0\times 10^{2}\ {\rm }'});
 $html .= processResult($data[1]->[0] . " / " . $data[2]->[0], $n2/$n3, {});
 
 $html .= '</table>';
