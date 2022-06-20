@@ -111,10 +111,11 @@ sub new {
 		}
 
 		if ($argCount > 2)
-		{			
+		{	
 			foreach ( keys%{ $x->[2] } ){
-				$options{ $_ } = $x->[2]->{ $_ } ; 
+				$options->{ $_ } = $x->[2]->{ $_ } ; 
 			}
+			
 		}
 
 		if (exists $options->{isScientificNotation}){
@@ -265,10 +266,15 @@ sub make {
 	my $isScientificNotation = false;
 	my $matchNumber = '';
 
-	my %options = (
-		tolerance => 0.000001, 
-		tolType => 'absolute'
-	);
+	# my %options = (
+	# 	tolerance => 0.000001, 
+	# 	tolType => 'absolute'
+	# );
+	my $options = {
+		tolerance => 0, 
+		tolType => 'absolute',
+		scientificNotationThreshold => 6, # can be set to 20 if problem requires conversion from standard to sci and we need to force standard
+	};
 
 	if ($argCount >= 2) {
 		# two arguments mean that a plain number with an explicit number of significant figures has been provided
@@ -293,7 +299,7 @@ sub make {
 		if ($argCount > 2)
 		{			
 			foreach ( keys%{ $self->[2] } ){
-				$options{ $_ } = $self->[2]->{ $_ } ; 
+				$options->{ $_ } = $self->[2]->{ $_ } ; 
 			}
 		}
 
@@ -1706,6 +1712,7 @@ sub compareValue {
 	my $tolType = $self->{options}{tolType};
 
 	if ($tolerance == 0) {
+		warn "it's wrong!";
 		my $transformedCorrect = $self->new($self->valueAsNumber, $min);
 		my $transformedStudent = $self->new($student->valueAsNumber, $min);
 		if ($transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber){
