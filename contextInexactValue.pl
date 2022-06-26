@@ -144,14 +144,12 @@ sub new {
 		#($isSimpleExponent, $expVal) = $x->[0] =~ /((?:^10\^(\+?-?\d+)))/;
 		#if ($isSimpleExponent) {
 		#	# do the math...
-		#	warn "exponent!";
 		#	$matchNumber =  10**$expVal;
 		#	
 		#} 
 
 		# replace fancier scientific notation with plain 'e' so the computer recognizes it
 		#$matchNumber =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
-		#warn $matchNumber;
 		# split into coefficient and rest is scientific notation 
 		my @parts = split(/e/, $matchNumber);
 		
@@ -213,7 +211,6 @@ sub new {
 
 sub getValue {
 	my $x = shift;
-	#no warnings "numeric";
 	my @result;
 	$result[1] = 0;
 	
@@ -381,7 +378,7 @@ sub make {
 	$s->preferScientificNotation($isScientificNotation);
 	$s->{isInexact} = 1;
 	$s->{precedence}{'InexactValue'} = 3;
-	$s->{options} = \%options;
+	$s->{options} = $options;
 	return $s;
 }
 
@@ -405,7 +402,6 @@ sub valueAsNumber {
 	my $self = shift;
 	
 	@valArray = $self->value;# + 0;
-	#warn "ValueAsNumber: " . ($valArray[0] + 0);
 	$valAsNumber = $valArray[0] + 0;
 	return $valAsNumber;
 }
@@ -478,7 +474,6 @@ sub string {
 				return sprintf("%.${decimals}e", $self->roundingHack($valAsNumber));
 			}
 		} else {
-			# warn $valAsNumber;
 			if ($decimals == $inf){
 				return $self->cleanSciText(sprintf("%e", $valAsNumber));
 			}else {
@@ -516,14 +511,12 @@ sub string {
 					if ($preventClean) {
 						# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
 						if ($digits > 20) {
-							#warn "digits greater than 20 (no clean) $valAsNumber";
 							return sprintf("%e", $self->roundingHack($valAsNumber));
 						}
 						return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
 					} else {
 						# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
 						if ($digits > 20) {
-							#warn "digits greater than 20 $valAsNumber";
 							return $self->cleanSciText(sprintf("%e", $self->roundingHack($valAsNumber)));
 						}
 						return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
@@ -1712,7 +1705,7 @@ sub compareValue {
 	my $tolType = $self->{options}{tolType};
 
 	if ($tolerance == 0) {
-		warn "it's wrong!";
+		#warn "it's wrong!";
 		my $transformedCorrect = $self->new($self->valueAsNumber, $min);
 		my $transformedStudent = $self->new($student->valueAsNumber, $min);
 		if ($transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber){

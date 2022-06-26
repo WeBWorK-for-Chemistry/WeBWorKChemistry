@@ -963,7 +963,6 @@ sub evaluate_units {
 	$output{'ERROR'}=$@ if $@;
 	%output;
 
-	#warn %output;
 }
 
 sub process_unit {
@@ -974,10 +973,6 @@ sub process_unit {
 
 	# $fund = $options->{known_units};
 	# %op = %$fund;
-	# warn "decoding options";
-	# warn "$_ $op{$_}\n" for (keys %op);
-	# warn "end options";
-	# warn $string;
 	my $fundamental_units = \%fundamental_units;
 	my $known_units = \%known_units;
 

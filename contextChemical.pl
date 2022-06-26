@@ -597,8 +597,8 @@ sub parseValue {
 		# note: overall charge will be assigned to 2nd component.  There's no mechanism to define charge of overall chemical yet.
 		# now let's determine if we have an ionic compound so that we can assign charges , only necessary if binary
 		if (scalar @chemical == 4){
-			warn "WOW we can't do this one.";
-			warn $x;
+			#warn "WOW we can't do this one.";
+			#warn $x;
 		}
 
 		if (scalar @chemical == 2){
@@ -684,7 +684,7 @@ sub parseValue {
 						#warn "peroxide maybe?";
 					}
 				} else {
-					warn "STILL NO CHARGES";
+					#warn "STILL NO CHARGES";
 				}
 
 
@@ -776,7 +776,7 @@ sub parseValue {
 						$comp1->{charge} = $charge1;
 					} else {
 						# shouldn't really be here.
-						warn "There was no way to determine the charge of the metal. Was the roman numeral missing?";
+						#warn "There was no way to determine the charge of the metal. Was the roman numeral missing?";
 					}
 					if (exists $comp2->{charge}) {
 						$charge2 = $comp2->{charge};
@@ -785,7 +785,7 @@ sub parseValue {
 						$comp2->{charge} = $charge2;
 					} else {
 						# shouldn't really be here.
-						warn "There was no way to determine the charge of the nonmetal. Artificial non-metal maybe?";
+						#warn "There was no way to determine the charge of the nonmetal. Artificial non-metal maybe?";
 					}
 
 					$lcmultiple = lcm($charge1,$charge2);
@@ -810,7 +810,7 @@ sub parseValue {
 					}
 				}
 			} else {
-				warn "Can't handle three component compounds.";
+				#warn "Can't handle three component compounds.";
 			}
 		}
 	}
@@ -944,7 +944,7 @@ sub string {
 				keys %namedRecognitionTargets;
 			if (scalar @allMatches > 0){
 				if (scalar @allMatches > 1){
-					warn "There shouldn't be more than 1 match. ";
+					#warn "There shouldn't be more than 1 match. ";
 				}
 				$match = $allMatches[0];
 				if ($text =~ /\S$/g){
@@ -959,7 +959,7 @@ sub string {
 						&&  exists $namedRecognitionTargets{$_}->{charge} } 
 						keys %namedRecognitionTargets;
 					if (scalar @allMatches > 1){
-						warn "There shouldn't be more than 1 match. ";
+						#warn "There shouldn't be more than 1 match. ";
 					}
 					$match = $allMatches[0];
 					$elementName = $match;
@@ -993,7 +993,7 @@ sub string {
 				keys %namedRecognitionTargets;
 				if (scalar @allMatches > 0){
 					if (scalar @allMatches > 1){
-						warn "There shouldn't be more than 1 match. ";
+						#warn "There shouldn't be more than 1 match. ";
 					}
 					$match = $allMatches[0];
 					if ($text =~ /\S$/g){
@@ -1084,7 +1084,7 @@ sub TeX {
 				keys %namedRecognitionTargets;
 			if (scalar @allMatches > 0){
 				if (scalar @allMatches > 1){
-					warn "There shouldn't be more than 1 match. ";
+					#warn "There shouldn't be more than 1 match. ";
 				}
 				$match = $allMatches[0];
 				if ($text =~ /\S$/g){
@@ -1099,7 +1099,7 @@ sub TeX {
 						&&  exists $namedRecognitionTargets{$_}->{charge} } 
 						keys %namedRecognitionTargets;
 					if (scalar @allMatches > 1){
-						warn "There shouldn't be more than 1 match. ";
+						#warn "There shouldn't be more than 1 match. ";
 					}
 					$match = $allMatches[0];
 					$elementName = $match;
@@ -1133,7 +1133,7 @@ sub TeX {
 				keys %namedRecognitionTargets;
 				if (scalar @allMatches > 0){
 					if (scalar @allMatches > 1){
-						warn "There shouldn't be more than 1 match. ";
+						#warn "There shouldn't be more than 1 match. ";
 					}
 					$match = $allMatches[0];
 					if ($text =~ /\S$/g){

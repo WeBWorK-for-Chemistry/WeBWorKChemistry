@@ -163,13 +163,8 @@ sub new {
 					my $unitHash = {	'factor' 	=> 1,
 										"$unitFundamentIdentical"     => 1 } ;
 					$knownUnits->{$sameUnit} = $unitHash;
-					#warn $sameUnit;
-					#warn $unitHash;
 					$BetterUnits::fundamental_units{$unitFundamentIdentical} = 0;
-					#warn %known_units;
-
 				}
-				#warn "$_ $BetterUnits::known_units{$_}\n" for (keys %BetterUnits::known_units);
 			}
 			else{
 				BetterUnits::add_unit($newUnit);
@@ -914,10 +909,6 @@ sub compareUnitHash {
       delete $cmp{$key};
     }
     if (%cmp) {
-	  #warn "LEFT: " . join(',',%left);
-	  #warn "RIGHT: " . join(',',%right);
-      #warn "LEFTOVER: " . join(',',%cmp);
-      #warn 'was not correct';
       return 0;
     } else {
       my %cmp = map { $_ => 1 } keys %right;
@@ -927,15 +918,8 @@ sub compareUnitHash {
 		delete $cmp{$key};
 	  }  
 	  if (%cmp){
-		#warn "LEFT: " . join(',',%left);
-		#warn "RIGHT: " . join(',',%right);
-		#warn "LEFTOVER: " . join(',',%cmp);
-		#warn 'was not correct';
 		return 0;
 	  } else {
-		#warn "LEFT: " . join(',',%left);
-		#warn "RIGHT: " . join(',',%right);
-		#warn "Correct";
       	return 1;
 	  }
     }
@@ -1026,24 +1010,16 @@ sub process_term_for_stringCombine {
 					
 					# now check if the $unit_base is in the list before adding it.  Since there are many variations of chemical names, we can only check against a post-processed name.
 					unless ($known_units->{$unit_base}){
-						#warn "add unit $unit_base";
 						BetterUnits::add_unit($unit_base);
 					}
-					#warn "special process $f";
 					my %fundamental_units_for_chemical = %BetterUnits::fundamental_units; #make copy of base unit hash
-					#warn %$fundamental_units_for_chemical;
 					$fundamental_units_for_chemical{$unit_base} = 1;
-					#warn %fundamental_units_for_chemical;
-					#warn "isNumerator: $isNumerator";
 					my %unit_name_hash = (name=> $unit_base, unitHash => \%fundamental_units_for_chemical, power=>1);   # $reference_units contains all of the known units.
 		
-					#warn %unit_name_hash;
 					push @known_unit_hash_array, \%unit_name_hash;
-					#warn "chem: $unit_base";
 					$f = '';
 					if (defined $chemical->{leading}){
 						$f = $chemical->{leading};
-						#warn "leading has $f";
 					}
 				}
 			}
@@ -1096,42 +1072,30 @@ sub process_factor_for_stringCombine {
   	}
 
 	# %op = %$known_units;
-	# warn $known_units;
-	# warn "$_ $op{$_}\n" for (keys %op);
 	my ($unit_name,$power) = split(/\^/, $string);
 	my @unitsNameArray = keys %$known_units;
 	@unitNamesArray2 = main::PGsort(sub {length($_[0]) > length($_[1])}, @unitsNameArray);
 	my $unitsJoined = join '|', @unitNamesArray2;
-	#warn $unitsJoined;
 	
 	my $unit_base;
 	my $unit_prefix;
 	$power = 1 unless defined($power);
 	
 	
-	#unless ( defined($unit_base) && defined( $known_units->{$unit_base} )  ) {
-		($unit_base) = $unit_name =~ /($unitsJoined)$/;
-		$unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
-		$unit_prefix =~ s/\s//;
-		#warn $unitsJoined;
-		#warn "NAME: $string";
-		#warn "Unit Base: $unit_base";
-		# warn "Unit Prefix: " .$unit_prefix;
-	#}
+	($unit_base) = $unit_name =~ /($unitsJoined)$/;
+	$unit_prefix = $unit_name =~ s/\s*($unitsJoined)\s*$//r;
+	$unit_prefix =~ s/\s//;
 
 	unless (defined($unit_base)){
 		# if not-strict mode, register this unit as a new unit with its own fundamentals
-		#warn "add unit $unit_name";
 		
 		BetterUnits::add_unit($unit_name);
 		$unit_base = $unit_name;
 		$unit_prefix = '';
-		#warn "unknown $unit_base";
 		#die "UNIT ERROR Unrecognizable unit: |$unit_base|";
 	}
 	
 	$prefixExponent = 0;
-	# warn "prefix exponent: ".$prefixExponent;
 	if ( defined($unit_prefix) && $unit_prefix ne '') {
 		if (exists($prefixes->{$unit_prefix})){
 			$prefixExponent = $prefixes->{$unit_prefix}->{'exponent'};
@@ -1158,21 +1122,14 @@ sub process_factor_for_stringCombine {
 	#quick loop to remove fundamental units that are zero
 	@keys = (keys %unit_hash);
 	for ($i=scalar @keys -1;$i>=0; $i--){
-		#warn 'searching '.$keys[$i] . ':  '.%unit_hash{$keys[$i]};
 		if ($unit_hash{$keys[$i]} == 0){
-		#	warn 'got one';
 			delete $unit_hash{$keys[$i]};
 		}
 	}
 
 	my %unit_name_hash = (name=> $unit_prefix.$unit_base, unitHash => \%unit_hash, power=>$power);   # $reference_units contains all of the known units.
-	#warn %unit_name_hash;
 	return %unit_name_hash;
 	
-	# } else {
-	# 	die "UNIT ERROR Unrecognizable unit: |$unit_base|";
-	# }
-	#return @known_unit_hash_array;
 }
 
 sub checkOpOrderWithPromote {
