@@ -89,6 +89,8 @@ sub asDimensionalAnalysis {
 			}
 
 			# check pairs of values in conversion factors to see if they must be exact or not.
+			# adding in 'hasChemicals' option:  pairs of mol values will be exact, too.
+			# WARNING: a mole value with an energy value will have moles exact, too, but this doesn't fix that.  
 			for ($i = $factorIndexStart; $i < scalar @studentArray - 1; $i+=2) {
 				$numerator = $studentArray[$i];
 				$denominator = $studentArray[$i+1];
@@ -125,11 +127,20 @@ sub asDimensionalAnalysis {
 							$studentArray[$i+1] = InexactValueWithUnits::InexactValueWithUnits->new([$denominator->valueAsNumber,9**9**9], $denominator->{units});
 						}
 					} 
+				} elsif (BetterUnits::isMolarRatio($numerator->{units_ref}, $denominator->{units_ref})) {
+					if ($numerator->sigFigs != 9**9**9){
+						$studentArray[$i] = InexactValueWithUnits::InexactValueWithUnits->new([$numerator->valueAsNumber,9**9**9], $numerator->{units});
+					}
+					if ($denominator->sigFigs != 9**9**9){
+						$studentArray[$i+1] = InexactValueWithUnits::InexactValueWithUnits->new([$denominator->valueAsNumber,9**9**9], $denominator->{units});
+					}
 				}
 			}
 
+			# warn $studentCalc;
 			# calculate answer using student dimensional analysis finally
 			for ($i = $factorIndexStart; $i < scalar @studentArray - 1; $i++){
+				# warn $studentArray[$i];
 				if ($i % 2 == $factorIndexStart){
 					# numerator, so multiply
 					$studentCalc *= $studentArray[$i];
@@ -137,7 +148,10 @@ sub asDimensionalAnalysis {
 					# denominator, so divide
 					$studentCalc /= $studentArray[$i];
 				}
+				# warn $studentCalc;
+				# warn 'next';
 			}
+
 			$ansHash->setMessage(scalar @studentArray,"Your dimensional analysis returns this value: $studentCalc");
 
 			# Time to grade dimensional analysis!
@@ -146,7 +160,6 @@ sub asDimensionalAnalysis {
 			# conversion, then the student will be marked wrong on the conversion work.
 			my $count=1;
 			my $studentGiven;
-
 			
 			if ($gradeGiven) {
 				# We actually have to grade the given value of the problem.  Make sure 
@@ -186,8 +199,12 @@ sub asDimensionalAnalysis {
 				$studentRatio = $numerator->{inexactValue} / $denominator->{inexactValue};  
 
 				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) { 
+					# simplify conversion factors first
+					#warn %{$numerator->{units_ref}};
+					#warn %{$denominator->{units_ref}};
+					#BetterUnits::simplifyConversionFactorUnits($numerator->{units_ref},$denominator->{units_ref});
+
 					# check for matching units on both parts, then check for matching value (with tolerance)
-					#if ($correctArray[$j]->{units} eq $numerator->{units} && $correctArray[$j+1]->{units} eq $denominator->{units}){
 					if (BetterUnits::compareUnitRefs($correctArray[$j]->{units_ref},$numerator->{units_ref}) && BetterUnits::compareUnitRefs($correctArray[$j+1]->{units_ref},$denominator->{units_ref})){
 						# if answer is an exact number (like 12 inches in 1 ft), student's input of 12 will automatically be inexact, so just tolerate sig fig "errors" if answer is exact
 						$numeratorCreditSigFigs = 0.5;
@@ -716,6 +733,100 @@ sub generateExplanation {
 
 	return  $explanation;
 
+}
+
+main::HEADER_TEXT(<<EOF);
+<style>
+.dimensionalAnalysis {
+	display: flex;
+	align-items: center;
+}
+.dimensionalAnalysis > div {
+	text-align: center;
+}
+.dimensionalAnalysisFractionBar {
+	line-height: 1px;
+	width: 100%;
+	border-bottom: 1px solid black;
+	margin-bottom: 4px;
+}
+.dimensionalAnalysisMath {
+	padding: 1em;
+}
+</style>  
+EOF
+
+sub generateProblemLaTeX {
+	my $start = shift;
+	my $colsref = shift;
+	my $n = scalar @{$colsref};
+	my $end = shift;
+	my $tex;
+	$tex .= '$ ';# . $start->TeX();
+	$tex .= $start->TeX;
+	for ($i=0; $i < $n; $i+=2) {
+		$tex .= '\times';
+		$tex .= '\frac';
+		$tex .= '{\hspace{2cm}}';
+		$tex .= '{\hspace{2cm}}';
+	}
+	$tex .= ' = ';
+	$tex .='\fbox{\phantom{placeholder}}';
+	$tex .= ' $';
+	return $tex;
+}
+
+sub generateProblemHTML {
+	my $start = shift;
+	my $colsref = shift;
+	my $n = scalar @{$colsref};
+	my $end = shift;
+	my $html;
+	$html .= '';
+	$html .= '<div class="dimensionalAnalysis">';
+	$html .= '<div>';
+	$html .= '$$ ' . $start->TeX . ' $$';  #this forces the number to display as LaTeX 
+	$html .= '</div>';
+	for ($i=0; $i < $n; $i+=2) {
+		$html .= '<div class="dimensionalAnalysisMath">';
+			$html .= main::math_ev3('\times');
+		$html .= '</div>';
+		$html .= '<div class="dimensionalAnalysisCol">';
+			$html .= '<div>';
+				$html .= $colsref->[$i];
+			$html .= '</div>';       
+			$html .= '<div class="dimensionalAnalysisFractionBar">';
+				$html .= '<svg height="1" width="40">';
+					$html .= '<desc>per</desc>';
+				$html .= '</svg>';
+			$html .= '</div>';       
+			$html .= '<div>';
+				$html .= $colsref->[$i+1];
+			$html .= '</div>';       
+		$html .= '</div>';
+	}
+	
+	$html .= '<div  class="dimensionalAnalysisMath">';
+		$html .= main::math_ev3('{}={}');
+	$html .= '</div>';
+	$html .= '<div>';
+		$html .= $end;
+	$html .= '</div>';
+	$html .= '</div>';
+	$html .= '';
+	return $html;
+}
+
+
+sub generateProblem {
+
+	my $start = shift;
+	my $colsref = shift;
+	my $n = scalar @{$colsref};
+	my $end = shift;
+	
+	return main::MODES(HTML=>generateProblemHTML($start, $colsref, $end), TeX=>generateProblemLaTeX($start, $colsref, $end));
+	
 }
 
 

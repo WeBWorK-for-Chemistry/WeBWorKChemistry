@@ -1064,7 +1064,9 @@ sub process_term {
 		my $f;
 		foreach $f (@factors) {
 			#warn "FACTOR: $f";
-			
+			# trim whitespace from $f
+			#warn '/' . $f . '/';
+			#$f =~ s/^\s+|\s+$//g;
 			if ($options->{hasChemicals}){
 				if (!defined &Chemical::Chemical::new){
 					die "You need to load contextChemical.pl if you want to use chemicals as units.";
@@ -1142,8 +1144,25 @@ sub process_term {
 	# foreach my $test (@known_unit_hash_array){
 	# 	warn %$test;
 	# }
-	#warn %unit_hash;
 	return(%unit_hash);
+}
+
+# This will cancel out qualitative units that are already the same
+sub simplifyConversionFactorUnits {
+	my $n = shift;
+	#my %numerator = %$n;
+	my $d = shift;
+	#my %denominator = %$d;
+	for my $key (keys %$d){
+		if ($key ne 'factor'){
+			if (exists($n->{$key})){
+				warn "key exists: $key";
+				delete $n->{$key};
+				delete $d->{$key};
+			}
+		}
+	}
+	
 }
 
 sub compareUnitRefs {
@@ -1167,10 +1186,6 @@ sub compareUnitRefs {
 		}
 	}
 	return $equal;
-
-	foreach $u (keys %$first){
-
-	}
 }
 
 sub comparePhysicalQuantity {  
@@ -1195,6 +1210,21 @@ sub comparePhysicalQuantity {
 	}
 	return $equal;
 }
+
+sub isMolarRatio {  
+	my $first = shift;
+	my $second = shift;
+	my $equal = 1;
+	my $u;
+	
+	if (exists($first->{'mol'}) && exists($second->{'mol'})){
+		return 1;
+	} else {
+		return 0;
+	}
+		
+}
+
 
 sub add_unit {
 	my $unit = shift;

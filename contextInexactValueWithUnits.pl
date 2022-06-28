@@ -579,29 +579,31 @@ sub compareValuesWithUnits {
 
 sub string {
 	my $self = shift;
-	#return $self;
-	#   $val = $self->value;
-	# $sigs = $self->sigFigs;
-	# $cla = ref($self);
-	# warn "Value is $val";
-	# warn "SigFigs are $sigs";
-	# warn "Class is $cla";
-	# warn ref($self);
+
 	if (defined $self->{units}){
 		$units = $self->{units};
 		$units =~ s/^\s+//;  # removes leading whitespace if present
 
 		# check if any units can be "translated".  i.e. chemical units that need to be formated properly;
+
 		foreach my $k (keys %unitTranslation){
+			#warn '/' . $k . '/';
+			#warn 'before: ' . $units;
 			my $special = %unitTranslation{$k};
 			my $leading = '';
-			if (exists $special->{leading}){
+			my $s;
+			if (exists $special->{leading} && $special->{leading} ne ''){
+				#warn 'leading: ' . $special->{leading} . '<';
 				$leading = $special->{leading};
+				$s = $leading . ' ' . $special->string();
+			} else {
+				$s = $special->string();
 			}
-			my $s = $leading . ' ' . $special->string();
+			
 			$units =~ s/\Q$k/$s/;
+			#warn 'after: ' . $units;
 		}
-		
+
 		return InexactValue::InexactValue::string($self) . ' ' . $units;
 	} else {
 		return InexactValue::InexactValue::string($self);
@@ -617,19 +619,8 @@ sub TeX {
 	#warn "$n";
 
 	if (defined $self->{units}){
-			$units = $self->{units};
-		# check if any units can be "translated".  i.e. chemical units that need to be formated properly;
-		foreach my $k (keys %unitTranslation){
-			my $special = %unitTranslation{$k};
-			my $leading = '';
-			if (exists $special->{leading}){
-				$leading = $special->{leading};
-			}
-			my $s = $leading . ' ' . $special->TeX();
-			$units =~ s/\Q$k/$s/;
-		}
-
-		return $n . '\ ' . TeXunits($units);
+		$units = $self->{units};
+		return $n . '\\ ' . TeXunits($units);
 	} else {
 		return $n;
 	}
@@ -644,6 +635,27 @@ sub TeX {
 #
 sub TeXunits {
 	my $units = shift;
+
+	# check if any units can be "translated".  i.e. chemical units that need to be formated properly;
+	foreach my $k (keys %unitTranslation){
+		#warn 'before: ' . $units;
+		my $special = %unitTranslation{$k};
+		#warn 'special: ';
+		#warn $special;
+		my $leading = '';
+		my $s;
+		if (exists $special->{leading} && $special->{leading} ne ''){
+			#warn 'leading: ' . $special->{leading} . '<';
+			$leading = $special->{leading};
+			$s = $leading . '\\,' . $special->TeX();
+		} else {
+			$s = $special->TeX();
+		}
+		#my $s = $leading . '\\,' . $special->TeX();
+		
+		$units =~ s/\Q$k/$s/;
+		#warn 'after: ' . $units;
+	}
 	$units =~ s/^\s+//;  # removes leading whitespace if present
 	$units =~ s/\^\(?([-+]?\d+)\)?/^{$1}/g; # fixes exponents
 	$units =~ s/\*/\\,/g; 
@@ -765,121 +777,159 @@ sub div {
   } 
     
   $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 0, $newOptions);
-  
+  #warn "AFTER Divide $newUnitString";
   $result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
   
   return $result;
 }
 
 sub combineStringUnitsCleanly {
-  my $left = shift;
-  my $right = shift;
-  my $isMultiply= shift;
-  my $options = shift;
+	my $left = shift;
+	my $right = shift;
+	my $isMultiply= shift;
+	my $options = shift;
 
-  if ($hasChemicals){
-	  #warn "HAS CHEMICALS!!!!";
-	  $options->{hasChemicals} = 1;
-  }
+	if ($hasChemicals){
+		# warn "HAS CHEMICALS!!!!  $left {$isMultiply} $right";
+		$options->{hasChemicals} = 1;
+	}
+	
 
-  my @unitArrayLeft = process_unit_for_stringCombine($left, $options);
-  my @unitArrayRight = process_unit_for_stringCombine($right, $options);
+	my @unitArrayLeft = process_unit_for_stringCombine($left, $options);
+	my @unitArrayRight = process_unit_for_stringCombine($right, $options);
+	# warn 'left: ' . $left;
+	# foreach (@unitArrayLeft){
+	# 	warn %$_;
+	# }
+	# warn 'right: ' . $right;
+	# foreach (@unitArrayRight){
+	# 	warn %$_;
+	# }
+	
+	my $newUnitString = '';
+	my @numerator;
+	my @denominator;
 
-  my $newUnitString = '';
-  my @numerator;
-  my @denominator;
+	$debug='';
+	foreach $key (@unitArrayLeft) {
+		$debug = $debug . $key; #"$key => $unitArrayLeft{$key}\n";
+	}
+	
+	# need to see if any units on the right match units on the left.
+	# the tricky part is that ft won't match foot by name, so we need to compare what they're made of
+	# if they're the same, we'll take the name that occurs left in the list.
+	my @usedR = ();
+	for ($l=0; $l < scalar(@unitArrayLeft); $l++ ) {
+		$leftMatch=0;
+		for ($r=0; $r < scalar(@unitArrayRight); $r++) {
 
-  $debug='';
-  foreach $key (@unitArrayLeft) {
-    $debug = $debug . $key; #"$key => $unitArrayLeft{$key}\n";
-  }
-  
-  # need to see if any units on the right match units on the left.
-  # the tricky part is that ft won't match foot by name, so we need to compare what they're made of
-  # if they're the same, we'll take the name that occurs left in the list.
-  my @usedR = ();
-  for ($l=0; $l < scalar(@unitArrayLeft); $l++ ) {
-    $leftMatch=0;
-    for ($r=0; $r < scalar(@unitArrayRight); $r++) {
-
-      if (compareUnitHash(@unitArrayLeft[$l]->{unitHash},@unitArrayRight[$r]->{unitHash})){
-        
-        $leftMatch = 1;
-        push @usedR, $r;
-        # same units on both sides!
-        # now combine them
-        my $power=0;
-        if ($isMultiply){
-          $power = $unitArrayLeft[$l]->{power} + $unitArrayRight[$r]->{power};
-        } else{
-          $power = $unitArrayLeft[$l]->{power} - $unitArrayRight[$r]->{power};
-        }
-        if ($power != 0){
-          my %newUnitHash = %{$unitArrayLeft[$l]};
-          if ($power > 0){
-            $newUnitHash{power} = $power;
-            push @numerator, \%newUnitHash;
-          } else {
-            $newUnitHash{power} = $power * -1;  #change it back to positive
-            push @denominator, \%newUnitHash;
-          }
-        }
-      }
-    }
-    if ($leftMatch==0){
-      #no match for left unit, just put it into the new unit
-      my %newUnitHash = %{$unitArrayLeft[$l]};
-      if (%newUnitHash{power} > 0){
-        push @numerator, \%newUnitHash;
-      } else {
-        $newUnitHash{power} = %newUnitHash{power} * -1;  #change it back to positive
-        push @denominator, \%newUnitHash;
-      }
-    }
-  }
+			if (compareUnitHash($unitArrayLeft[$l]->{unitHash},$unitArrayRight[$r]->{unitHash})){
+				# warn 'matched!';
+				# warn %{$unitArrayLeft[$l]};
+				# warn %{$unitArrayRight[$r]};
+				$leftMatch = 1;
+				push @usedR, $r;
+				# same units on both sides!
+				# now combine them
+				my $power=0;
+				if ($isMultiply) {
+					$power = $unitArrayLeft[$l]->{power} + $unitArrayRight[$r]->{power};
+				} else{
+					$power = $unitArrayLeft[$l]->{power} - $unitArrayRight[$r]->{power};
+				}
+				if ($power != 0) {
+					my %newUnitHash = %{$unitArrayLeft[$l]};
+					if ($power > 0){
+						$newUnitHash{power} = $power;
+						push @numerator, \%newUnitHash;
+					} else {
+						$newUnitHash{power} = $power * -1;  #change it back to positive
+						push @denominator, \%newUnitHash;
+					}
+				}
+			}
+		}
+		if ($leftMatch==0){
+			#no match for left unit, just put it into the new unit
+			my %newUnitHash = %{$unitArrayLeft[$l]};
+			if (%newUnitHash{power} > 0){
+				push @numerator, \%newUnitHash;
+			} else {
+				$newUnitHash{power} = %newUnitHash{power} * -1;  #change it back to positive
+				push @denominator, \%newUnitHash;
+			}
+		}
+	}
+	@usedR = main::PGsort(sub { $_[0] > $_[1]}, @usedR); 
+	foreach (@usedR){
+		splice(@unitArrayRight, $_, 1);
+	}
   # now that we've scanned for similar units and combined those, any unused units from the right go into the new unit
-  for ($r=0;$r < scalar @unitArrayRight; $r++){
-    if (scalar (@usedR) == 0 || $usedR[0] != $r ){
-      #no match for right unit, so put it into the new unit
+	for ($r=0;$r < scalar @unitArrayRight; $r++){
+		#if (scalar (@usedR) == 0 || $usedR[0] != $r ){
+			#no match for right unit, so put it into the new unit
 
-      my %newUnitHash = %{$unitArrayRight[$r]};
-	  
-      if (%newUnitHash{power} > 0){
-        if ($isMultiply){
-          push @numerator, \%newUnitHash;
-        } else {
-          push @denominator, \%newUnitHash;
-        }
-      } else {        
-        $newUnitHash{power} = %newUnitHash{power} * -1;  #change it back to positive
-        if ($isMultiply){
-          push @denominator, \%newUnitHash;
-        } else {
-          push @numerator, \%newUnitHash;
-        }
-      }
-    }else {
-      shift @usedR;
-    }
-  } 
+			my %newUnitHash = %{$unitArrayRight[$r]};
+			
+			if (%newUnitHash{power} > 0){
+				if ($isMultiply){
+					push @numerator, \%newUnitHash;
+				} else {
+					push @denominator, \%newUnitHash;
+				}
+			} else {        
+				$newUnitHash{power} = %newUnitHash{power} * -1;  #change it back to positive
+				if ($isMultiply){
+					push @denominator, \%newUnitHash;
+				} else {
+					push @numerator, \%newUnitHash;
+				}
+			}
+		#} else {
+		#	shift @usedR;
+		#}
+	} 
 
-  for (local $a=0;$a< scalar(@numerator); $a++){
-    if ($a > 0){
-      $newUnitString = $newUnitString . '*';
-    }
-    $newUnitString = $newUnitString . $numerator[$a]->{name} . ($numerator[$a]->{power} == 1 ? '' : "^${numerator[$a]->{power}}");
-  }
-  if (scalar @denominator > 0){
-    $newUnitString =  $newUnitString . '/';
-  }
-  for (local $a=0;$a< scalar(@denominator); $a++){
-    if ($a > 0){
-      $newUnitString = $newUnitString . '*';
-    }
-    $newUnitString = $newUnitString . $denominator[$a]->{name} . ($denominator[$a]->{power} == 1 ? '' : "^${denominator[$a]->{power}}");
-  }
-
-  return $newUnitString;
+	# We should sort the units before converting to plain string.  If 'hasChemicals' in options, those should go last.
+	#  foreach (@numerator){
+	#  	warn 'numer:';
+	#  	warn %$_;
+	#  }
+	@numerator = main::PGsort(sub { (exists($_[0]->{isQualitative})? 0 : 1) > (exists($_[1]->{isQualitative}) ? 0 : 1)}, @numerator); 
+	#  foreach (@numerator){
+	#  	warn 'denom:';
+	# 	warn %$_;
+	#  }
+	@denominator = main::PGsort(sub { (exists($_[0]->{isQualitative})? 0 : 1) > (exists($_[1]->{isQualitative}) ? 0 : 1)}, @denominator); 
+	
+	# #warn @numerator; 
+	for (local $a=0;$a< scalar(@numerator); $a++){
+		#warn '/' . $numerator[$a]->{name} . '/';
+		if ($a > 0){
+			$newUnitString = $newUnitString . '*';
+		}
+		if (exists($numerator[$a]->{isQualitative})){  # put qualitative units in parentheses so that powers are not interpreted into the unit name itself
+			$newUnitString = $newUnitString .'(' . $numerator[$a]->{name} . ')' . ($numerator[$a]->{power} == 1 ? '' : "^${numerator[$a]->{power}}");
+		}else{
+			$newUnitString = $newUnitString . $numerator[$a]->{name} . ($numerator[$a]->{power} == 1 ? '' : "^${numerator[$a]->{power}}");
+		}
+	}
+	if (scalar @denominator > 0){
+		$newUnitString =  $newUnitString . '/';
+	}
+	for (local $a=0;$a< scalar(@denominator); $a++){
+			#warn %{$denominator[$a]};
+		if ($a > 0){
+			$newUnitString = $newUnitString . '*';
+		}
+		if (exists($denominator[$a]->{isQualitative})){  # put qualitative units in parentheses so that powers are not interpreted into the unit name itself
+			$newUnitString = $newUnitString .'(' . $denominator[$a]->{name} . ')' . ($denominator[$a]->{power} == 1 ? '' : "^${denominator[$a]->{power}}");
+		} else {
+			$newUnitString = $newUnitString . $denominator[$a]->{name} . ($denominator[$a]->{power} == 1 ? '' : "^${denominator[$a]->{power}}");
+		}
+	}
+	#warn $newUnitString;
+	return $newUnitString;
 }
 
 # We use this to compare two unit hashes to test for equality.  Can't compare references.
@@ -1001,10 +1051,24 @@ sub process_term_for_stringCombine {
 				if (!defined &Chemical::Chemical::new){
 						die "You need to load contextChemical.pl if you want to use chemicals as units.";
 				}
+				# While this will never be used as a standard input by students, calculations with qualitative chemical name units can sometimes
+				# pick up temporary powers.  i.e.  1.36 g Fe * (1 mol Fe / 55.85 g Fe) in the conversion of grams of iron to moles of iron.
+				# While putting Fe in the molar mass is not necessary at all, it is not incorrect, either, and well within the realm of possibilities
+				# for student answers.  Internally, we'll surround qualitative units with parentheses () so that it is easier to discover powers.
+				# Otherwise, those powers will be interpreted as part of the unit itself.
+
+				($qualUnit, $qualUnitPower) = $f =~ /\((.*)\)(?:\^(.*))?/g;
+				if (defined $qualUnit){
+					$f = $qualUnit;
+				}
+				
 				my $chemical = Chemical::Chemical->new($f);
 
 				if (defined $chemical && scalar @{$chemical->{data}} > 0){
 					$power = 1; # reset power to 1 since it might have picked up a chemical charge as the power.
+					if (defined($qualUnitPower)){
+						$power = $qualUnitPower;
+					}
 					$unit_prefix = '';  # remove any prefix parsed before.
 					$unit_base = $chemical->guid();
 					
@@ -1014,8 +1078,7 @@ sub process_term_for_stringCombine {
 					}
 					my %fundamental_units_for_chemical = %BetterUnits::fundamental_units; #make copy of base unit hash
 					$fundamental_units_for_chemical{$unit_base} = 1;
-					my %unit_name_hash = (name=> $unit_base, unitHash => \%fundamental_units_for_chemical, power=>1);   # $reference_units contains all of the known units.
-		
+					my %unit_name_hash = (name=> $unit_base, unitHash => \%fundamental_units_for_chemical, power=>$power, isQualitative=>1);   # $reference_units contains all of the known units.
 					push @known_unit_hash_array, \%unit_name_hash;
 					$f = '';
 					if (defined $chemical->{leading}){
@@ -1052,7 +1115,6 @@ sub process_factor_for_stringCombine {
 	my $string = shift;
 	my $isNumerator = shift;
 	#split the factor into unit and powers
-
 	my $options = shift;
 
 	my $fundamental_units = \%BetterUnits::fundamental_units;

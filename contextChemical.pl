@@ -1059,7 +1059,7 @@ sub string {
 sub TeX {
 	my $self = shift;
 	my $options = shift;
-	my $text = '\mathrm{';
+	my $text = '\\mathrm{';
 	my $overallCharge=0;
 	my $nameOutput = $self->{nameInputed};
 	if (exists $options->{asFormula}){
@@ -1069,7 +1069,7 @@ sub TeX {
 		$nameOutput = 1;
 	}
 	if ($nameOutput == 1 && defined $self->{commonName}){
-		return '\mathrm{' . $self->{commonName} . '}';
+		return '\\mathrm{' . $self->{commonName} . '}';
 	}
 
 
@@ -1087,8 +1087,9 @@ sub TeX {
 					#warn "There shouldn't be more than 1 match. ";
 				}
 				$match = $allMatches[0];
-				if ($text =~ /\S$/g){
-					$text .= '\ ';
+				
+				if ($index > 0 && $text =~ /\S$/g){
+					$text .= '\\ ';
 				}
 
 				my $elementName = '';
@@ -1137,7 +1138,7 @@ sub TeX {
 					}
 					$match = $allMatches[0];
 					if ($text =~ /\S$/g){
-						$text .= '\ ';
+						$text .= '\\ ';
 					}
 					$text .= "$match";
 				}
@@ -1146,7 +1147,7 @@ sub TeX {
 				if (ref($component->{atomNum}) ne 'ARRAY'){
 					if (!exists $standardIons{$component->{atomNum}}){
 						#warn $match . ' is type II';
-						$text .= '\ (' . $romanNumerals{$component->{charge}} . ')';
+						$text .= '\\ (' . $romanNumerals{$component->{charge}} . ')';
 					}
 				}
 				$component->{atomNum}
@@ -1254,6 +1255,8 @@ sub superscriptReverse{
 	$value =~ s/⁻/-/g;
 	return $value;
 }
+
+
 
 
 sub cmp_class {"Chemical"}
