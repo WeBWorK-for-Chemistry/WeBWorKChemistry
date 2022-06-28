@@ -604,6 +604,9 @@ sub string {
 					}
 				} else {
 					$digits = $self->sigFigs() - 1;
+					if ($digits eq "Inf"){
+						return sprintf("%.0f", $self->roundingHack($valAsNumber));
+					} 
 					if ($preventClean) {
 						return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
 					} else {

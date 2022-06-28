@@ -486,6 +486,7 @@ sub parseValue {
 			}
 		} 
 		if ($3){
+			$chemicalPiece->{name} = $3;
 			$atomNum = %namedRecognitionTargets{$3}->{atomNum};
 			$chemicalPiece->{'atomNum'} = $atomNum;
 			if (!$2 && exists %namedRecognitionTargets{$3}->{charge}){
@@ -955,14 +956,18 @@ sub string {
 				# If covalent and 2nd component
 				# need to use the ide version of the nonmetal.  This algorithm only gets the element name since it has no charge.
 				if ($self->{bonding} == 2 && $index == 1){
-					my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
-						&&  exists $namedRecognitionTargets{$_}->{charge} } 
-						keys %namedRecognitionTargets;
-					if (scalar @allMatches > 1){
-						#warn "There shouldn't be more than 1 match. ";
+					if (exists($component->{name})){
+						$elementName = $component->{name};
+					}else {
+						my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
+							&&  exists $namedRecognitionTargets{$_}->{charge} } 
+							keys %namedRecognitionTargets;
+						if (scalar @allMatches > 1){
+							#warn "There shouldn't be more than 1 match. ";
+						}
+						$match = $allMatches[0];
+						$elementName = $match;
 					}
-					$match = $allMatches[0];
-					$elementName = $match;
 				} else {
 					$elementName = $match;
 				}
@@ -970,7 +975,17 @@ sub string {
 				#if covalent, use prefix
 				if ($self->{bonding} == 2){
 					# only use it if not 1 for 1st element
-					if ($index > 0 || $component->{count} > 1){
+					if (exists($component->{prefix})){
+						my $prefix = $prefixesCovalent{$component->{prefix}};
+						# check if ending of prefix and beginning of element are a letter combination where a vowel must be dropped
+						# i.e. mono oxide => monoxide,  tetra oxide => tetroxide
+						# this happens with mono, tetra, penta, hexa (this one is weird), septa, octa, nona, deca
+						# only if element begins with 'o'
+						if ($elementName =~ /^o/){
+							$prefix =~ s/[ao]$//g;
+						}
+						$text .= $prefix;
+					} elsif ($index > 0 || $component->{count} > 1){
 						my $prefix = $prefixesCovalent{$component->{count}};
 						# check if ending of prefix and beginning of element are a letter combination where a vowel must be dropped
 						# i.e. mono oxide => monoxide,  tetra oxide => tetroxide
@@ -1096,14 +1111,18 @@ sub TeX {
 				# If covalent and 2nd component
 				# need to use the ide version of the nonmetal.  This algorithm only gets the element name since it has no charge.
 				if ($self->{bonding} == 2 && $index == 1){
-					my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
-						&&  exists $namedRecognitionTargets{$_}->{charge} } 
-						keys %namedRecognitionTargets;
-					if (scalar @allMatches > 1){
-						#warn "There shouldn't be more than 1 match. ";
+					if (exists($component->{name})){
+						$elementName = $component->{name};
+					}else {
+						my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) 
+							&&  exists $namedRecognitionTargets{$_}->{charge} } 
+							keys %namedRecognitionTargets;
+						if (scalar @allMatches > 1){
+							#warn "There shouldn't be more than 1 match. ";
+						}
+						$match = $allMatches[0];
+						$elementName = $match;
 					}
-					$match = $allMatches[0];
-					$elementName = $match;
 				} else {
 					$elementName = $match;
 				}
@@ -1111,7 +1130,18 @@ sub TeX {
 				#if covalent, use prefix
 				if ($self->{bonding} == 2){
 					# only use it if not 1 for 1st element
-					if ($index > 0 || $component->{count} > 1){
+
+					if (exists($component->{prefix})){
+						my $prefix = $prefixesCovalent{$component->{prefix}};
+						# check if ending of prefix and beginning of element are a letter combination where a vowel must be dropped
+						# i.e. mono oxide => monoxide,  tetra oxide => tetroxide
+						# this happens with mono, tetra, penta, hexa (this one is weird), septa, octa, nona, deca
+						# only if element begins with 'o'
+						if ($elementName =~ /^o/){
+							$prefix =~ s/[ao]$//g;
+						}
+						$text .= $prefix;
+					} elsif ($index > 0 || $component->{count} > 1){
 						my $prefix = $prefixesCovalent{$component->{count}};
 						# check if ending of prefix and beginning of element are a letter combination where a vowel must be dropped
 						# i.e. mono oxide => monoxide,  tetra oxide => tetroxide
@@ -1375,6 +1405,7 @@ sub grade {
 	my $correct = shift;
 	my $student = shift;
 	my $options = shift;
+ 
 	my $first = $correct->{data};
 	my $second = $student->{data};
 	my $outputType = $options->{outputType};
@@ -1420,10 +1451,19 @@ sub grade {
 			if (compareAtomNums($secondCopy[$j]->{atomNum}, $firstCopy[$i]->{atomNum})){
 				
 				$totalScore += $matchAtomNum/(scalar @$first);
+				# if second element and not polyatomic, make sure ending was "ide"
+				if ($correct->{bonding} != 0 && $i == 1  && exists($secondCopy[$j]->{name}) && !($secondCopy[$j]->{name} =~ /ide$/)){
+					#warn "doesn't end with ide";
+					$totalScore -= $matchAtomNum/(scalar @$first);
+				}
+
 				# now check count
 				if ($secondCopy[$j]->{count} == @firstCopy[$i]->{count}){
 					# same number!
-					$totalScore += $matchCount/(scalar @$first); # 
+					# if covalent and first element, make sure no prefix was recorded if only 1 of them.
+					unless ($correct->{bonding} == 2 && $i == 0  && exists($secondCopy[$j]->{prefix}) && $secondCopy[$j]->{prefix}==1){
+						$totalScore += $matchCount/(scalar @$first); 
+					} 
 				}
 
 				if (defined $firstCopy[$i]->{charge}){

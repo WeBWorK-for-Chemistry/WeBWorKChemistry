@@ -1,0 +1,2 @@
+- use /(?<!(?:#\s)|(?:#\s\s)|(?:#\s\s\s)|#)warn/ regex to find any warn statements that haven't been removed.  These will crash production WeBWorK problems that have warnings disabled.
+

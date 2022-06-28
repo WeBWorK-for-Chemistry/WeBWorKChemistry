@@ -43,7 +43,6 @@ Context("Chemical");
 Context("Chemical")->flags->set(chargePenalty => 0.5);   # default is 0.5.  Charge is graded only for the whole chemical. 
                                                          # Set to multiply x fraction by total score.
 
-
 $chem1 = Chemical("calcium chloride", {requireFormula=>1});  # options are not required if using the global flag parameter.
 
 $chem2 = Chemical("FeCl3", {requireName=>1});  
@@ -86,7 +85,5 @@ END_PGML
 BEGIN_PGML_SOLUTION
 
 END_PGML_SOLUTION
-
-
 
 ENDDOCUMENT();        
