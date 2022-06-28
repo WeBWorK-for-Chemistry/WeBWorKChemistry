@@ -1156,7 +1156,7 @@ sub simplifyConversionFactorUnits {
 	for my $key (keys %$d){
 		if ($key ne 'factor'){
 			if (exists($n->{$key})){
-				warn "key exists: $key";
+				#warn "key exists: $key";
 				delete $n->{$key};
 				delete $d->{$key};
 			}
