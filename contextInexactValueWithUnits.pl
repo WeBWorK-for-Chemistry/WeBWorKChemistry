@@ -612,6 +612,8 @@ sub string {
 
 sub TeX {
 	my $self = shift;
+	my $options = shift;
+	my $cancel = exists($options->{shouldCancel});
 	#$n = InexactValue::InexactValue::string($self);
 	$n = $self->{inexactValue};
 
@@ -620,6 +622,9 @@ sub TeX {
 
 	if (defined $self->{units}){
 		$units = $self->{units};
+		if ($cancel) {
+			return $n . '\\ \\cancel{' . TeXunits($units) . '}';
+		}
 		return $n . '\\ ' . TeXunits($units);
 	} else {
 		return $n;

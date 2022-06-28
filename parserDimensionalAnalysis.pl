@@ -631,7 +631,8 @@ sub generateExplanation {
 		$explanation .= @startingArray[1]->TeX;
 		$explanation .= '}';
 	} else {
-		
+		#$explanation .= @startingArray[0]->TeX({shouldCancel=>1});
+
 		my $val = $startingArray[0]->{inexactValue};
 		my $numeratorUnits = '';
 		my $denominatorUnits = '';
@@ -644,15 +645,17 @@ sub generateExplanation {
 					# Same so do NOT cancel out.
 					splice(@finalAnswerUnitArrayCopy,$i,1);
 					if ($unit->{power} > 0) {
-						$numeratorUnits .= $unit->{name};
+						$numeratorUnits .= '\\mathrm{' . $unit->{name};
 						if ($unit->{power} > 1){
 							$numeratorUnits .= '^{'.$unit->{power}.'}';
 						}
+						$numeratorUnits .= '}';
 					} else {
-						$denominatorUnits .= $unit->{name};
+						$denominatorUnits .= '\\mathrm{' . $unit->{name};
 						if ($unit->{power} < -1){
 							$denominatorUnits .= '^{'.abs($unit->{power}).'}';
 						}
+						$denominatorUnits .= '}';
 					}
 					$found=1;
 					last;
@@ -661,19 +664,19 @@ sub generateExplanation {
 			if ($found==0){
 				
 				if ($unit->{power} > 0) {
-					$numeratorUnits .= '\cancel{\rm ';
+					$numeratorUnits .= '\\cancel{\\mathrm{';
 					$numeratorUnits .= $unit->{name};
 					if ($unit->{power} > 1){
 						$numeratorUnits .= '^{'.$unit->{power}.'}';
 					}
-					$numeratorUnits .= '}';
+					$numeratorUnits .= '}}';
 				} else {
-					$denominatorUnits .= '\cancel{\rm ';
+					$denominatorUnits .= '\\cancel{\\mathrm{';
 					$denominatorUnits .= $unit->{name};
 					if ($unit->{power} < -1){
 						$denominatorUnits .= '^{'.abs($unit->{power}).'}';
 					}
-					$denominatorUnits .= '}';
+					$denominatorUnits .= '}}';
 				}
 			}
 		}
@@ -681,7 +684,7 @@ sub generateExplanation {
 		if ($denominatorUnits eq ''){
 			$explanation .= $val .$numeratorUnits;
 		} else{
-			$explanation .= '\frac{' .$val. $numeratorUnits . '}{' .'1'. $denominatorUnits . '}';
+			$explanation .= '\\frac{' .$val. $numeratorUnits . '}{' .'1'. $denominatorUnits . '}';
 		}
 		
 	}
@@ -709,8 +712,8 @@ sub generateExplanation {
 				if ($isDenominator){
 					$explanation .= '{'. $conversionFactors[$i]->TeX . '}';
 				} else {
-					$explanation .= '\times';
-					$explanation .= '\frac{' . $conversionFactors[$i]->TeX . '}';
+					$explanation .= '\\times';
+					$explanation .= '\\frac{' . $conversionFactors[$i]->TeX . '}';
 				}
 				$found=1;
 				last;
@@ -719,10 +722,12 @@ sub generateExplanation {
 		#doesn't match units with answer, so cancel it.
 		if ($found == 0){
 			if ($isDenominator){
-				$explanation .= '{'. $conversionFactors[$i]->{inexactValue} . '\cancel{\rm '. $conversionFactors[$i]->{units} . '}}';
+				$explanation .= '{' . $conversionFactors[$i]->TeX({shouldCancel=>1}) . '}';
+				#$explanation .= '{'. $conversionFactors[$i]->{inexactValue} . '\cancel{\rm '. $conversionFactors[$i]->{units} . '}}';
 			} else {
-				$explanation .= '\times';
-				$explanation .= '\frac{' . $conversionFactors[$i]->{inexactValue} . '\cancel{\rm ' . $conversionFactors[$i]->{units} . '}}';
+				$explanation .= '\\times';
+				$explanation .= '\\frac{' . $conversionFactors[$i]->TeX({shouldCancel=>1}) . '}';
+				#$explanation .= '\frac{' . $conversionFactors[$i]->{inexactValue} . '\cancel{\rm ' . $conversionFactors[$i]->{units} . '}}';
 			}
 		}
 	}
