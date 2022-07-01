@@ -556,7 +556,9 @@ sub string {
 
 					} elsif ($self->sigFigs() == length($nondecimalPartAbs)) {
 						# no decimal, but there are exactly the right number of digits in non-decimal part
-						# must check if number ends in zero; if so, we need a decimal point at the end.          
+						# must check if number ends in zero; if so, we need a decimal point at the end.  
+						# BUG: using $nondecimalPartAbs from before causes 55.5 with 2 sf to round to 55 only.
+						$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
 						if (substr($nondecimalPartAbs,-1) == 0) {
 							return ($sign ? '' : '-') . $nondecimalPartAbs . '.';
 						} else {
