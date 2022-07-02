@@ -250,7 +250,14 @@ our %known_units = ('m'  => {
 # nm   -- nanometer
 # A    -- Angstrom
 #
-								 
+								'meters'  => {
+													 'factor'    => 1,
+													 'm'         => 1
+													},
+								'meter'  => {
+													 'factor'    => 1,
+													 'm'         => 1
+													},
 						 'micron'  => {
 													 'factor'    => 1E-6,
 													 'm'         => 1
