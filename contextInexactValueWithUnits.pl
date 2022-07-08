@@ -173,7 +173,6 @@ sub new {
 		}
 	} 
 
-
 	Value::Error("You must provide a ".$self->name) unless defined($num);
 
 	unless (ref $num eq "ARRAY") {

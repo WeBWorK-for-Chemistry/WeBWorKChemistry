@@ -159,7 +159,7 @@ sub new {
 		$decimalPartsSize = @decimalParts;
 		
 		# convert first decimalPart to number and see if it is zero
-		$firstPartAsNumber = $decimalParts[0] + 0;
+		my $firstPartAsNumber = $decimalParts[0] + 0;
 		my $isFirstZero = ($firstPartAsNumber == 0);
 			
 		if ($decimalPartsSize == 2)
@@ -167,7 +167,7 @@ sub new {
 			# has decimal, get no of sig figs in first part, convert to number, then back to string, then get length
 			$absFirstPartAsNumber = abs($firstPartAsNumber);
 			$sigFigCount = ($isFirstZero ? 0 : length("$absFirstPartAsNumber"));
-
+			
 			# get no of sig figs in second part if not empty (i.e. 25.  decimal point at end)
 			unless ($decimalParts[1] eq "")
 			{
@@ -220,14 +220,15 @@ sub getValue {
 	($result[0]) = $x =~ /((?:10\^\+?-?\d+)|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
 	unless (defined $result[0]) { 
 		$temp = $x;
-			Value::Error("Can't convert this to a value. $temp  ");
+		$result[0] = 0;
+			#Value::Error("Can't convert this to a value. $temp  ");
 	}
 	
 	# find out if this is standard notation or scientific notation
 	# /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
 	# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
 	$result[1] = $x =~ /((?:10\^\+?-?\d+)|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
-	
+
 	($isSimpleExponent, $expVal) = $x =~ /((?:^10\^(\+?-?\d+)))/;
 	if ($isSimpleExponent) {
 		# do the math...
@@ -240,7 +241,6 @@ sub getValue {
 	
 	# split into coefficient and rest is scientific notation 
 	#my @parts = split(/e/, $matchNumber);
-
 	return @result;
 }
 
@@ -371,9 +371,9 @@ sub make {
 			} 
 		}
 	}
-
+	
 	my $s = bless {data => [$matchNumber], context => $context}, $class;
-
+	
 	$s->sigFigs($sigFigCount);
 	$s->preferScientificNotation($isScientificNotation);
 	$s->{isInexact} = 1;
@@ -383,11 +383,11 @@ sub make {
 }
 
 sub sigFigs {
-		my ($self, $value) = @_;
-		if (@_ == 2) {
-				$self->{sigFigs} = $value;
-		} 
-		return $self->{sigFigs};
+	my ($self, $value) = @_;
+	if (@_ == 2) {
+		$self->{sigFigs} = $value;
+	} 
+	return $self->{sigFigs};
 }
 
 sub preferScientificNotation {
@@ -455,7 +455,6 @@ sub string {
 	my $self = shift;
 	my $preventClean = shift;
 	my $forceScientific = shift;
-
 	if ($self->sigFigs() == 0){
 		return 'zero sig figs';
 	}
@@ -463,7 +462,6 @@ sub string {
 	@valArray = $self->value;# + 0;
 	$valAsNumber = $valArray[0];
 	
-
 	if ($self->preferScientificNotation() || $forceScientific) {
 		$decimals = $self->sigFigs() - 1;
 		
@@ -486,10 +484,12 @@ sub string {
 
 	} else {
 		if ($valAsNumber == 0){
+			
 			if ($self->sigFigs() == $inf) {
 				return "0";
 			} else {
-				return sprintf("%.${self->sigFigs()}f", $valAsNumber);
+				#warn sprintf("%." . ($self->sigFigs()) . "f", $valAsNumber);
+				return sprintf("%." . ($self->sigFigs()) . "f", $valAsNumber);
 			}
 		}
 		elsif (abs($valAsNumber) < 1) { # val less than one
@@ -504,7 +504,7 @@ sub string {
 				if ($firstNonZeroPosition - 1 + $self->sigFigs() <= $scientificNotationThreshold){
 					# ok to show as standard notation
 					$digits = $firstNonZeroPosition - 1 + $self->sigFigs();
-					return sprintf("%.${digits}f", $self->roundingHack($valAsNumber));
+					return sprintf("%.${digits}f", main::Round($valAsNumber, $digits));
 				} else {
 					# must show as sci notation
 					$digits = $self->sigFigs() - 1;
@@ -513,7 +513,7 @@ sub string {
 						if ($digits > 20) {
 							return sprintf("%e", $self->roundingHack($valAsNumber));
 						}
-						return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+						return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
 					} else {
 						# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
 						if ($digits > 20) {
@@ -535,20 +535,18 @@ sub string {
 				$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
 				#if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
 				$firstPosition = abs($esplit[1]);
-				#warn $valAsNumber;
+
 				if ($firstPosition < $scientificNotationThreshold) {
 					# try printing part of number without decimal
 					#$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
 					# There was a major bug here.  Using sprintf actually rounds when all we want is to truncate the decimal part.
 					$nondecimalPartAbs = int(abs($self->roundingHack($valAsNumber)));
-					#warn abs($self->roundingHack($valAsNumber));
 					$sign = $valAsNumber >= 0;
 					# if there are more sig figs than the whole part of the number
 					if ($self->sigFigs() > length($nondecimalPartAbs)) {
 						# there is definitely a decimal, count how many places
 						$fixedDecimal = $self->sigFigs() - length($nondecimalPartAbs);
 						# redo convert value to fixed decimal place
-						#warn "fixedDecimal: " . $fixedDecimal;
 						if ($fixedDecimal eq "Inf"){
 							return sprintf("%.0f", $self->roundingHack($valAsNumber));
 						} 
@@ -1444,8 +1442,6 @@ sub mult {
 	}
 
 	$minSf = $left->minSf($left, $right);
-	# warn 'left: ' . $left->$valueAsNumber();
-	# warn 'right: ' . $right->$valueAsNumber();
 	return $self->new($left->valueAsNumber() * $right->valueAsNumber(), $minSf);
 }
 
@@ -1458,8 +1454,6 @@ sub div {
 	}
 
 	$minSf = $self->minSf($l, $r);
-	# warn 'left: ' . $left->$valueAsNumber();
-	# warn 'right: ' . $right->$valueAsNumber();
 	return $self->new($l->valueAsNumber() / $r->valueAsNumber(), $minSf);
 }
 
@@ -1524,7 +1518,6 @@ sub cmp_class {"Inexact Value"}
 # sub cmp_preprocess {
 #   my $self = shift; my $ans = shift;
 #   #$inexactStudent=0;
-#   warn "student value is: " . ref($ans->{student_value});
 #   if (defined $ans->{student_value}) {
 #     $ans->{preview_latex_string} = $ans->{student_value}->TeX;
 #     $ans->{student_ans} = $self->quoteHTML($ans->{student_value}->string);
@@ -1534,7 +1527,6 @@ sub cmp_class {"Inexact Value"}
 # }
 
 # sub cmp_defaults {
-#   warn "defualts!";  
 #   return (
 #   Value::Real->cmp_defaults(@_),
 #   typeMatch => 'InexactValue::InexactValue',
@@ -1543,7 +1535,6 @@ sub cmp_class {"Inexact Value"}
 
 sub typeMatch {
 	my $self = shift;  my $other = shift;
-	#warn 'oh, it does check types';
 	return 1 unless ref($other);
 	$self->type eq $other->type && !$other->isFormula;
 }
@@ -1581,8 +1572,7 @@ sub cmp {
 sub cmp_parse {
 	my $self = shift; my $ans = shift;
 	$ans->{_filter_name} = "InexactValue answer checker";
-		
-	#warn "in evaluator: " . ref($ans->{correct_value});
+	
 	#$ans->{correct_value}->cmp_parse($ans);
 
 	my $correct = $ans->{correct_value};
@@ -1597,7 +1587,7 @@ sub cmp_parse {
 
 	$currentCredit = 0;
 
-	# warn $student;
+	
 	# Edge case of entering zero.  This is not perfect.  Theoretically, we could have zero with sig figs... but skip for now.
 	if ($student->valueAsNumber == 0){
 		if ($correct->valueAsNumber == 0){
@@ -1634,13 +1624,7 @@ sub cmp_parse {
 	
 	# my $transformedCorrect = $self->new($correct->valueAsNumber, $min);
 	# my $transformedStudent = $self->new($student->valueAsNumber, $min);
-	# # warn $transformedCorrect->valueAsRoundedNumber;
-	# # warn $transformedStudent->valueAsRoundedNumber;
-	# # warn $transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber ? "true" : "false";
-	# # warn $correct->sigFigs == $student->sigFigs ? "true" : "false";
-	# # warn $creditValue;
-	# # warn $creditSF;
-	# # warn $failOnValueWrong;
+	
 	# # WHAT ABOUT ROUNDING ERRORS??? NEED ANOTHER CHECK FOR SLIGHT VARIATIONS... TO COME!
 	# if ($transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber){
 	# 	# numbers match, now check sig figs
@@ -1710,7 +1694,6 @@ sub compareValue {
 	my $tolType = $self->{options}{tolType};
 
 	if ($tolerance == 0) {
-		#warn "it's wrong!";
 		my $transformedCorrect = $self->new($self->valueAsNumber, $min);
 		my $transformedStudent = $self->new($student->valueAsNumber, $min);
 		if ($transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber){
