@@ -158,6 +158,10 @@ sub new {
 		my @decimalParts = split(/,|\./, $parts[0], -1); 
 		$decimalPartsSize = @decimalParts;
 		
+		# first see if first part is empty string... if so, convert to a zero otherwise next step fails
+		if ($decimalParts[0] eq ''){
+			$decimalParts[0] = 0;
+		}
 		# convert first decimalPart to number and see if it is zero
 		my $firstPartAsNumber = $decimalParts[0] + 0;
 		my $isFirstZero = ($firstPartAsNumber == 0);
