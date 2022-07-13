@@ -58,7 +58,7 @@ package InexactValue::InexactValue;
 
 our @ISA = qw(Value);
 
-# practical definition for infinity for sig fig count
+# practical definition for infinity for sig fig count, can also use MathObject Infinity.
 my $inf    = 9**9**9;  
 
 sub new {
@@ -221,7 +221,7 @@ sub getValue {
 	# verify the string contains a number we can match
 	#($matchNumber) = $x->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
 	# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
-	($result[0]) = $x =~ /((?:10\^\+?-?\d+)|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
+	($result[0]) = $x =~ /((?:10\^\+?-?\d+)|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|X|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|X|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
 	unless (defined $result[0]) { 
 		$temp = $x;
 		$result[0] = 0;
@@ -231,7 +231,7 @@ sub getValue {
 	# find out if this is standard notation or scientific notation
 	# /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
 	# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
-	$result[1] = $x =~ /((?:10\^\+?-?\d+)|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
+	$result[1] = $x =~ /((?:10\^\+?-?\d+)|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|X|\*)\s?10(?:\^|\*\*)-|\s?(?:x|X|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|X|\*)\s?10(?:\^|\*\*))\d+)/;
 
 	($isSimpleExponent, $expVal) = $x =~ /((?:^10\^(\+?-?\d+)))/;
 	if ($isSimpleExponent) {
@@ -241,7 +241,8 @@ sub getValue {
 	} 
 
 	# replace fancier scientific notation with plain 'e' so the computer recognizes it
-	$result[0] =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
+	$result[0] =~ s/\s?(?:x|X|\*)\s?10(?:\^|\*\*)/e/;
+	$result[0] =~ s/E/e/;
 	
 	# split into coefficient and rest is scientific notation 
 	#my @parts = split(/e/, $matchNumber);
@@ -281,9 +282,7 @@ sub make {
 		# two arguments mean that a plain number with an explicit number of significant figures has been provided
 		@result = getValue($x->[0]);
 		$isScientificNotation = $result[1];
-		$matchNumber = $result[0]; #$x->[0];
-		#$isScientificNotation = $self->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
-		#$matchNumber = $self->[0];
+		$matchNumber = $result[0]; 
 		
 		if (ref $self->[1] eq ref {}){
 			# 2nd arg is an options hash
@@ -487,138 +486,137 @@ sub string {
 		}   
 
 	} else {
-		if ($valAsNumber == 0){
-			
-			if ($self->sigFigs() == $inf) {
-				return "0";
-			} else {
-				#warn sprintf("%." . ($self->sigFigs()) . "f", $valAsNumber);
-				return sprintf("%." . ($self->sigFigs()) . "f", $valAsNumber);
+		if ($self->sigFigs() == Infinity){
+			return $valAsNumber; # no modification for a number with infinity sig figs.  No reason to write more zeros.
+								 # There's no way to show it has inifinite sig figs.
+		} else {
+
+			if ($valAsNumber == 0){
+				return sprintf("%." . ($self->sigFigs()-1) . "f", $valAsNumber);
 			}
-		}
-		elsif (abs($valAsNumber) < 1) { # val less than one
-			# get position of first significant digit i.e. 0.00000001 <= eigth place after decimal
-			# by converting it to sci notation and get the abs of the exponent
-			@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
-			if (defined $esplit[1]) { #if we make zero scientific, it won't work...
-				$firstNonZeroPosition = abs($esplit[1]);
-				$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
-				# if position plus required sigfigs is not more than 20 digits (limit for floating point errors) 
-				# This is not correct, that's just the max... We'll just casually convert to sci notation if smaller than threshold
-				if ($firstNonZeroPosition - 1 + $self->sigFigs() <= $scientificNotationThreshold){
-					# ok to show as standard notation
-					$digits = $firstNonZeroPosition - 1 + $self->sigFigs();
-					return sprintf("%.${digits}f", main::Round($valAsNumber, $digits));
-				} else {
-					# must show as sci notation
-					$digits = $self->sigFigs() - 1;
-					if ($preventClean) {
-						# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
-						if ($digits > 20) {
-							return sprintf("%e", $self->roundingHack($valAsNumber));
-						}
-						return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
+			elsif (abs($valAsNumber) < 1) { # val less than one
+				# get position of first significant digit i.e. 0.00000001 <= eigth place after decimal
+				# by converting it to sci notation and get the abs of the exponent
+				@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
+				if (defined $esplit[1]) { #if we make zero scientific, it won't work...
+					$firstNonZeroPosition = abs($esplit[1]);
+					$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
+					# if position plus required sigfigs is not more than 20 digits (limit for floating point errors) 
+					# This is not correct, that's just the max... We'll just casually convert to sci notation if smaller than threshold
+					if ($firstNonZeroPosition - 1 + $self->sigFigs() <= $scientificNotationThreshold){
+						# ok to show as standard notation
+						$digits = $firstNonZeroPosition - 1 + $self->sigFigs();
+						return sprintf("%.${digits}f", main::Round($valAsNumber, $digits));
 					} else {
-						# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
-						if ($digits > 20) {
-							return $self->cleanSciText(sprintf("%e", $self->roundingHack($valAsNumber)));
-						}
-						return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
-					}
-				}
-			} else {
-				return '0';
-			}
-		} else { # val greater than one
-		
-			# need to show using decimal only if digits are not more than 6 orders of magnitude
-			# this is now set by options parameter via scientificNotationThreshold
-			# get position of first digit
-			@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
-			if (defined $esplit[1]) { 
-				$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
-				#if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
-				$firstPosition = abs($esplit[1]);
-
-				if ($firstPosition < $scientificNotationThreshold) {
-					# try printing part of number without decimal
-					#$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
-					# There was a major bug here.  Using sprintf actually rounds when all we want is to truncate the decimal part.
-					$nondecimalPartAbs = int(abs($self->roundingHack($valAsNumber)));
-					$sign = $valAsNumber >= 0;
-					# if there are more sig figs than the whole part of the number
-					if ($self->sigFigs() > length($nondecimalPartAbs)) {
-						# there is definitely a decimal, count how many places
-						$fixedDecimal = $self->sigFigs() - length($nondecimalPartAbs);
-						# redo convert value to fixed decimal place
-						if ($fixedDecimal eq "Inf"){
-							return sprintf("%.0f", $self->roundingHack($valAsNumber));
-						} 
-						return sprintf("%.${fixedDecimal}f", $self->roundingHack($valAsNumber));
-
-					} elsif ($self->sigFigs() == length($nondecimalPartAbs)) {
-						# no decimal, but there are exactly the right number of digits in non-decimal part
-						# must check if number ends in zero; if so, we need a decimal point at the end.  
-						# BUG: using $nondecimalPartAbs from before causes 55.5 with 2 sf to round to 55 only.
-						$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
-						if (substr($nondecimalPartAbs,-1) == 0) {
-							return ($sign ? '' : '-') . $nondecimalPartAbs . '.';
+						# must show as sci notation
+						$digits = $self->sigFigs() - 1;
+						if ($preventClean) {
+							# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
+							# if ($digits > 20) {
+							# 	return sprintf("%e", $self->roundingHack($valAsNumber));
+							# }
+							return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
 						} else {
-							return ($sign ? '' : '-') . $nondecimalPartAbs;
+							# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
+							# if ($digits > 20) {
+							# 	return $self->cleanSciText(sprintf("%e", $self->roundingHack($valAsNumber)));
+							# }
+							return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 						}
+					}
+				} else {
+					return '0';
+				}
+			} else { # val greater than one
+			
+				# need to show using decimal only if digits are not more than 6 orders of magnitude
+				# this is now set by options parameter via scientificNotationThreshold
+				# get position of first digit
+				@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
+				if (defined $esplit[1]) { 
+					$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
+					#if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
+					$firstPosition = abs($esplit[1]);
 
-					} else {
-						# There are not enough significant figures.  
-						# Need to see if trailing zeros will let us write a simple decimal number
-						# Loop through digits going from ones place to higher (backwards)
+					if ($firstPosition < $scientificNotationThreshold) {
+						# try printing part of number without decimal
+						#$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
+						# There was a major bug here.  Using sprintf actually rounds when all we want is to truncate the decimal part.
+						$nondecimalPartAbs = int(abs($self->roundingHack($valAsNumber)));
+						$sign = $valAsNumber >= 0;
+						# if there are more sig figs than the whole part of the number
+						if ($self->sigFigs() > length($nondecimalPartAbs)) {
+							# there is definitely a decimal, count how many places
+							$fixedDecimal = $self->sigFigs() - length($nondecimalPartAbs);
+							# redo convert value to fixed decimal place
+							# if ($fixedDecimal eq "Inf"){
+							# 	return sprintf("%.0f", $self->roundingHack($valAsNumber));
+							# } 
+							return sprintf("%.${fixedDecimal}f", $self->roundingHack($valAsNumber));
 
-						# testing if pre-rounding to whole number works better for this...
-						# the problem is that without the pre-rounding, a number like 1996 rounded to 1 sig fig should be 2000
-						# but the algorithm thought there weren't enough zeros to show 1 sig fig with 1996.  So we have to do the rounding here, 
-						# then test. 
-						$digits = $self->sigFigs() - 1;         
-						$nondecimalPartAbs = sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
-						$nondecimalPartAbs = sprintf("%.0f", abs($nondecimalPartAbs));
+						} elsif ($self->sigFigs() == length($nondecimalPartAbs)) {
+							# no decimal, but there are exactly the right number of digits in non-decimal part
+							# must check if number ends in zero; if so, we need a decimal point at the end.  
+							# BUG: using $nondecimalPartAbs from before causes 55.5 with 2 sf to round to 55 only.
+							$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
+							if (substr($nondecimalPartAbs,-1) == 0) {
+								return ($sign ? '' : '-') . $nondecimalPartAbs . '.';
+							} else {
+								return ($sign ? '' : '-') . $nondecimalPartAbs;
+							}
 
-						$firstNonZeroDigitIndex = 0;
-						for ($i = length($nondecimalPartAbs) - 1; $i >= 0; $i--)
-						{
+						} else {
+							# There are not enough significant figures.  
+							# Need to see if trailing zeros will let us write a simple decimal number
+							# Loop through digits going from ones place to higher (backwards)
+
+							# testing if pre-rounding to whole number works better for this...
+							# the problem is that without the pre-rounding, a number like 1996 rounded to 1 sig fig should be 2000
+							# but the algorithm thought there weren't enough zeros to show 1 sig fig with 1996.  So we have to do the rounding here, 
+							# then test. 
+							$digits = $self->sigFigs() - 1;         
+							$nondecimalPartAbs = sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+							$nondecimalPartAbs = sprintf("%.0f", abs($nondecimalPartAbs));
+
+							$firstNonZeroDigitIndex = 0;
+							for ($i = length($nondecimalPartAbs) - 1; $i >= 0; $i--) {
 								if (substr($nondecimalPartAbs, $i, 1) ne '0')
 								{
-										last;
+									last;
 								}
 								$firstNonZeroDigitIndex++;
-						}
-						if ((length($nondecimalPartAbs) - $firstNonZeroDigitIndex) == $self->sigFigs()) {
-							# we have just trailing zeros to make the sigfigs match without reverting 
-							# to scientific notation
-							return ($sign ? '' : '-') . $nondecimalPartAbs;
-
-						} else {
-							# have to use scientific, there's no way to write the number using standard notation
-							$digits = $self->sigFigs() - 1;
-
-							if ($preventClean) {
-								return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
-							} else {
-								return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 							}
-							
+							if ((length($nondecimalPartAbs) - $firstNonZeroDigitIndex) == $self->sigFigs()) {
+								# we have just trailing zeros to make the sigfigs match without reverting 
+								# to scientific notation
+								return ($sign ? '' : '-') . $nondecimalPartAbs;
+
+							} else {
+								# have to use scientific, there's no way to write the number using standard notation
+								$digits = $self->sigFigs() - 1;
+
+								if ($preventClean) {
+									return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+								} else {
+									return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
+								}
+								
+							}
+						}
+					} else {
+						$digits = $self->sigFigs() - 1;
+						# if ($digits eq "Inf"){
+						# 	return sprintf("%.0f", $self->roundingHack($valAsNumber));
+						# } 
+						if ($preventClean) {
+							return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+						} else {
+							return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 						}
 					}
 				} else {
-					$digits = $self->sigFigs() - 1;
-					if ($digits eq "Inf"){
-						return sprintf("%.0f", $self->roundingHack($valAsNumber));
-					} 
-					if ($preventClean) {
-						return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
-					} else {
-						return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
-					}
+					return "0";
 				}
-			} else {
-				return "0";
 			}
 		}
 	}
@@ -630,6 +628,7 @@ sub string {
 	return $r;
 }
 
+# THIS IS NOT FUNCTIONAL.  LEAVING IT HERE UNTIL WE CAN REMOVE IT FROM OTHER PLACES.
 sub roundingHack {
 	my $self = shift;
 	my $s = shift;

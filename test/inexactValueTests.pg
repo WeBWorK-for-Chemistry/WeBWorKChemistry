@@ -1,194 +1,176 @@
-   ##DESCRIPTION
-   ##  Inexact Value with Units Tests
-   ##ENDDESCRIPTION
+##DESCRIPTION
+##  Inexact Value Tests
+##ENDDESCRIPTION
 
-   ##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
 
-   ## Date('2/15/2021')
-   ## Author('Lee McPherson')
-   ## Institution('Portland Community College')
-
-
-   ########################################################################
-
-   DOCUMENT();      
-
-   loadMacros(
-      "PGstandard.pl",     # Standard macros for PG language
-      "MathObjects.pl",
-      "PGML.pl",
-      "contextInexactValue.pl",
-      "betterUnits.pl",
-      "contextInexactValueWithUnits.pl"
-   );
+## Date('2/15/2021')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
 
 
-   Context("InexactValueWithUnits");
+########################################################################
 
-   @data = (
-      ['12.0 cm', {value=> 12, sf=> 3, units=> 'cm', string=>'12.0 cm', TeX=>'12.0\ {\rm cm}'}],
-      ['0.0120 cm', {value=> 0.012, sf=> 3, units=> 'cm', string=>'0.0120 cm', TeX=>'0.0120\ {\rm cm}'}],
-      ['1.200x10^-3 cm', {value=> 0.0012, sf=> 4, units=> 'cm', string=>'1.200x10^-3 cm', TeX=>'1.200\times 10^{-3}\ {\rm cm}'}],
-      ['1.200e-3 cm', {value=> 0.0012, sf=> 4, units=> 'cm', string=>'1.200x10^-3 cm', TeX=>'1.200\times 10^{-3}\ {\rm cm}'}],
-      ['1.200*10^-3 cm', {value=> 0.0012, sf=> 4, units=> 'cm', string=>'1.200x10^-3 cm', TeX=>'1.200\times 10^{-3}\ {\rm cm}'}],
-      ['1.200 * 10^-3 cm', {value=> 0.0012, sf=> 4, units=> 'cm', string=>'1.200x10^-3 cm', TeX=>'1.200\times 10^{-3}\ {\rm cm}'}],
-      ['0.00000000004 g/mL', {value=> 0.00000000004, sf=> 1, units=> 'g/mL', string=>'4x10^-11 g/mL', TeX=>'4\times 10^{-11}\ {\textstyle\frac{\rm\mathstrut g}{\rm\mathstrut mL}}'}],
-      ['0.00000004g/mL', {value=> 0.00000004, sf=> 1, units=> 'g/mL', string=>'4x10^-8 g/mL', TeX=>'4\times 10^{-8}\ {\textstyle\frac{\rm\mathstrut g}{\rm\mathstrut mL}}'}],
-      ['2000 cm^3', {value=> 2000, sf=> 1, units=> 'cm^3', unitHash=> {factor=>0.000001, 'm' => 3} , string=>'2000 cm^3', TeX=>'2000\ {\rm cm^{3}}'}],
-      ['0.00000004 g mL^-1', {value=> 0.00000004, sf=> 1, units=> 'g mL^-1', string=>'4x10^-8 g mL^-1', TeX=>'4\times 10^{-8}\ {\rm g\,mL^{-1}}'}],
-      ['9.97 cm^3', {value=> 9.97, sf=> 3, units=> 'cm^3', unitHash=> {factor=>0.000001, 'm' => 3} , string=>'9.97 cm^3', TeX=>'9.97\ {\rm cm^{3}}'}],
-      ['12.0 kg', {value=> 12, sf=> 3, units=> 'kg',unitHash=> {factor=>1, 'kg' => 1}, string=>'12.0 kg', TeX=>'12.0\ {\rm kg}'}],
-      ['12.0 Kg', {value=> 12, sf=> 3, units=> 'Kg',unitHash=> {factor=>0.001, 'kg' => 1}, string=>'12.0 Kg', TeX=>'12.0\ {\rm Kg}'}],
-      ['120000000000000 kg', {value=> 120000000000000, sf=> 2, units=> 'kg',unitHash=> {factor=>1, 'kg' => 1}, string=>'1.2x10^14 kg', TeX=>'1.2\times 10^{14}\ {\rm kg}'}],
-   );
+DOCUMENT();      
 
-   $html = '
-   <style>
-   table#results {
-      border: 1px double black;
-      border-collapse: collapse;
-      }
-   table#results th, table#results td {  
-      border: 1px solid black;
-      border-collapse: collapse;
-   }
-   .wrong {
-      background:salmon;
-   }
-   .unknown{
-      background:gray;
-   }
-   </style>
-   <table id="results">
-      <tr>
-         <th>Input</th>
-         <th>Value</th>
-         <th>SigFigs</th>
-         <th>Units</th>
-         <th>Unit Hash</th>
-         <th>String</th>
-         <th>TeX</th>
-         <th>TeX Raw</th>
-         <th>Error</th>
-      </tr>
-      ';
+loadMacros(
+	"PGstandard.pl",     # Standard macros for PG language
+	"MathObjects.pl",
+	"PGML.pl",
+	"contextInexactValue.pl"
+);
 
-   sub hashPrint {
-      $hashRef = shift;
-      %hash = %$hashRef;
-      $output='';
-      while(my($k, $v) = each %hash) { 
-         $output .= "$k: $v<br/>";
-      }
-      return $output;
-   }
+Context("InexactValue");
 
-   foreach $dataItem (@data){
-      $success=1;
-      $errorMessage='';
-      
-      $html .= "<tr>";
-      $testString = $dataItem->[0];
-      $expected = $dataItem->[1];
-      $testValue = InexactValueWithUnits($testString);
-      $html .= "<td>$testString</td>";
+@data = (
+	['1', {value=> 1, sf=> 1, string=>'1', TeX=>'1'}],
+	['12.0', {value=> 12, sf=> 3, string=>'12.0', TeX=>'12.0'}],
+	['0.0120', {value=> 0.012, sf=> 3, string=>'0.0120', TeX=>'0.0120'}],
+	['.0120', {value=> 0.012, sf=> 3, string=>'0.0120', TeX=>'0.0120'}],
+	['1.200x10^-3', {value=> 0.0012, sf=> 4, string=>'1.200x10^-3', TeX=>'1.200\times 10^{-3}'}],
+	['1.200X10^-3', {value=> 0.0012, sf=> 4, string=>'1.200x10^-3', TeX=>'1.200\times 10^{-3}'}],
+	['1.200e-3', {value=> 0.0012, sf=> 4, string=>'1.200x10^-3', TeX=>'1.200\times 10^{-3}'}],
+	['1.200E-3', {value=> 0.0012, sf=> 4, string=>'1.200x10^-3', TeX=>'1.200\times 10^{-3}'}],
+	['1.200*10^-3', {value=> 0.0012, sf=> 4, string=>'1.200x10^-3', TeX=>'1.200\times 10^{-3}'}],
+	['1.200 * 10^-3', {value=> 0.0012, sf=> 4, string=>'1.200x10^-3', TeX=>'1.200\times 10^{-3}'}],
+	['0.00000000004', {value=> 0.00000000004, sf=> 1, string=>'4x10^-11', TeX=>'4\times 10^{-11}'}],
+	['0.00000004', {value=> 0.00000004, sf=> 1, string=>'4x10^-8', TeX=>'4\times 10^{-8}'}],
+	['2000', {value=> 2000, sf=> 1, string=>'2000', TeX=>'2000'}],
+	['2000.', {value=> 2000, sf=> 4, string=>'2000.', TeX=>'2000.'}],
+	['9.97', {value=> 9.97, sf=> 3, string=>'9.97', TeX=>'9.97'}],
+	['12.0', {value=> 12, sf=> 3, string=>'12.0', TeX=>'12.0'}],
+	['120000000000000', {value=> 120000000000000, sf=> 2, string=>'1.2x10^14', TeX=>'1.2\times 10^{14}'}],
+	['0', {value=> 0, sf=> Infinity, string=>'0', TeX=>'0'}],
+	[[0,1], {value=> 0, sf=> 1, string=>'0', TeX=>'0'}],
+	[[0,2], {value=> 0, sf=> 2, string=>'0.0', TeX=>'0.0'}],
+	[[1,5], {value=> 1, sf=> 5, string=>'1.0000', TeX=>'1.0000'}],
+	[[0.01,2], {value=> 0.01, sf=> 2, string=>'0.010', TeX=>'0.010'}],
+	[[0.0145,2], {value=> 0.0145, sf=> 2, string=>'0.015', TeX=>'0.015'}],
+	[[2.54,Infinity], {value=> 2.54, sf=> Infinity, string=>'2.54', TeX=>'2.54'}],
 
-      if ($expected->{value} == $testValue->{inexactValue}->valueAsNumber){
-         $html .= "<td>";
-      } else {
-         $html .= "<td class='wrong'>";
-         $errorMessage .= "Expected value: " . $expected->{value} . "<br/>";
-         $success=0;
-      }
-      $html .= $testValue->{inexactValue}->valueAsNumber . "</td>";
+);
 
-      if ($expected->{sf} == $testValue->{sigFigs}){
-         $html .= "<td>";
-      } else {
-         $html .= "<td class='wrong'>";
-         $errorMessage .= "Expected value: " . $expected->{sf} . "<br/>";
-         $success=0;
-      }
-      $html .= $testValue->sigFigs . "</td>";
+$html = '
+<style>
+table#results {
+	border: 1px double black;
+	border-collapse: collapse;
+	}
+table#results th, table#results td {  
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+.wrong {
+	background:salmon;
+}
+.unknown{
+	background:gray;
+}
+</style>
+<table id="results">
+	<tr>
+		<th>Input</th>
+		<th>Value</th>
+		<th>SigFigs</th>
+		<th>String</th>
+		<th>TeX</th>
+		<th>TeX Raw</th>
+		<th>Error</th>
+	</tr>
+	';
 
-      if ($expected->{units} eq $testValue->{units}){
-         $html .= "<td>";
-      } else {
-         $html .= "<td class='wrong'>";
-         $errorMessage .= "Expected value: " . $expected->{units} . "<br/>";
-         $success=0;
-      }
-      $html .= $testValue->{units} . "</td>";
+sub hashPrint {
+	$hashRef = shift;
+	%hash = %$hashRef;
+	$output='';
+	while(my($k, $v) = each %hash) { 
+		$output .= "$k: $v<br/>";
+	}
+	return $output;
+}
 
-      if ($expected->{unitHash}){
-         if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($testValue->{units_ref}, $expected->{unitHash})) {
-         #if ($expected->{units} eq $testValue->{units}){
-            $html .= "<td>";
-         } else {
-            $html .= "<td class='wrong'>";
-            $errorMessage .= "Expected value: " . hashPrint($expected->{unitHash}) . "<br/>";
-            $success=0;
-         }
-      } else{
-            $html .= "<td class='unknown'>";
-        
-      }
-      $html .= hashPrint($testValue->{units_ref}) . "</td>";
-      
-      $stringA = $expected->{string};
-      $stringB = $testValue->string();
-      if ($stringA eq $stringB){
-         $html .= "<td>";
-      } else {
-         
-         $html .= "<td class='wrong'>";
-         $errorMessage .= "Expected value: " . $expected->{string} . "<br/>";
-         $success=0;
-      }
-      $html .=  $testValue->string . "</td>";
+foreach $dataItem (@data){
+	$success=1;
+	$errorMessage='';
+	
+	$html .= "<tr>";
+	$testString = $dataItem->[0];
+	$expected = $dataItem->[1];
+	
+	if (ref($testString) eq 'ARRAY'){
+		$testValue = InexactValue($testString->[0], $testString->[1]);
+		$testString = '[' . $testString->[0] . ', ' . $testString->[1] . ']';
+	} else {
+		$testValue = InexactValue($testString);
+	}
+	
+	$html .= "<td>$testString</td>";
 
-      if ($expected->{TeX} eq $testValue->TeX){
-         $html .= "<td>";
-      } else {
-         $html .= "<td class='wrong'>";
-         $errorMessage .= "Expected value: " . '$$' . $expected->{TeX} . '$$' . "<br/>";
-         $success=0;
-      }
-      $html .= '$$'. $testValue->TeX . '$$' . "</td>";
+	if ($expected->{value} == $testValue->valueAsNumber()){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{value} . "<br/>";
+		$success=0;
+	}
+	$html .= $testValue->valueAsNumber() . "</td>";
 
-   #warn length($expected->{TeX});
-   #warn length($testValue->TeX);
-      if ($expected->{TeX} eq $testValue->TeX){
-         $html .= "<td>";
-      } else {
-         $html .= "<td class='wrong'>";
-         $errorMessage .= "Expected value: " . $expected->{TeX} . "<br/>";
-         $success=0;
-      }
-      $html .=  $testValue->TeX  . "</td>";
+	if ($expected->{sf} == $testValue->{sigFigs}){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{sf} . "<br/>";
+		$success=0;
+	}
+	$html .= $testValue->sigFigs . "</td>";
 
+	$stringA = $expected->{string};
+	$stringB = $testValue->string();
+	if ($stringA eq $stringB){
+		$html .= "<td>";
+	} else {
+		
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{string} . "<br/>";
+		$success=0;
+	}
+	$html .=  $testValue->string . "</td>";
 
-      $html .= "<td>";
-      if ($success){
-         $html .='';
-      } else {
-         $html .= $errorMessage;
-      } 
-      $html .= "</td>";
-      $html .= "</tr>";
-   }
+	if ($expected->{TeX} eq $testValue->TeX){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . '$$' . $expected->{TeX} . '$$' . "<br/>";
+		$success=0;
+	}
+	$html .= '$$'. $testValue->TeX . '$$' . "</td>";
 
+	if ($expected->{TeX} eq $testValue->TeX){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{TeX} . "<br/>";
+		$success=0;
+	}
+	$html .=  $testValue->TeX  . "</td>";
 
-   # Print problem number and point value (weight) for the problem
-   #TEXT(beginproblem());
+	$html .= "<td>";
+	if ($success){
+		$html .='';
+	} else {
+		$html .= $errorMessage;
+	} 
+	$html .= "</td>";
+	$html .= "</tr>";
+}
 
-   $html .= '</table>';
+$html .= '</table>';
 
-   BEGIN_PGML
+BEGIN_PGML
 
-   [$html]***
+[$html]***
 
-   END_PGML
+END_PGML
 
 
-   ENDDOCUMENT();        
+ENDDOCUMENT();
