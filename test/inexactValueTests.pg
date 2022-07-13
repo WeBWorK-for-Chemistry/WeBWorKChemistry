@@ -106,7 +106,8 @@ foreach $dataItem (@data){
 	
 	$html .= "<td>$testString</td>";
 
-	if ($expected->{value} == $testValue->valueAsNumber()){
+	# floating point errors cause == to not work sometimes.  Easier to compare by string equivalent as they both are numbers and should convert to the same.
+	if ($expected->{value} eq $testValue->valueAsNumber()){
 		$html .= "<td>";
 	} else {
 		$html .= "<td class='wrong'>";
