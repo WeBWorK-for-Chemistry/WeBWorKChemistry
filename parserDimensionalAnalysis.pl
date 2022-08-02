@@ -198,14 +198,21 @@ sub asDimensionalAnalysis {
 				$denominatorScore=0;
 				$studentRatio = $numerator->{inexactValue} / $denominator->{inexactValue};  
 
+				# going to compare simplified units via division of factors
+				$studentDiv = $numerator/$denominator;
+
 				for ($j = scalar @correctArray - 2; $j >= 0; $j-=2) { 
 					# simplify conversion factors first
 					#warn %{$numerator->{units_ref}};
 					#warn %{$denominator->{units_ref}};
 					#BetterUnits::simplifyConversionFactorUnits($numerator->{units_ref},$denominator->{units_ref});
 
+					# for comparing simplified units
+					$answerDiv = $correctArray[$j] / $correctArray[$j+1];
+
 					# check for matching units on both parts, then check for matching value (with tolerance)
-					if (BetterUnits::compareUnitRefs($correctArray[$j]->{units_ref},$numerator->{units_ref}) && BetterUnits::compareUnitRefs($correctArray[$j+1]->{units_ref},$denominator->{units_ref})){
+					#if (BetterUnits::compareUnitRefs($correctArray[$j]->{units_ref},$numerator->{units_ref}) && BetterUnits::compareUnitRefs($correctArray[$j+1]->{units_ref},$denominator->{units_ref})){
+					if (BetterUnits::compareUnitRefs($answerDiv->{units_ref},$studentDiv->{units_ref})) {
 						# if answer is an exact number (like 12 inches in 1 ft), student's input of 12 will automatically be inexact, so just tolerate sig fig "errors" if answer is exact
 						$numeratorCreditSigFigs = 0.5;
 						$numeratorCreditValue = 0.5;

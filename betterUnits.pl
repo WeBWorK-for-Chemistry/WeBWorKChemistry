@@ -1195,6 +1195,30 @@ sub compareUnitRefs {
 	return $equal;
 }
 
+sub compareConversionFactorUnitRefs {
+	my $numerator1 = shift;
+	my $denominator1 = shift;
+	my $numerator2 = shift;
+	my $denominator2 = shift;
+
+	my $equal = 1;
+	if (%a != %b){
+		$equal = 0;  # do not have same # of keys
+	} else {
+		# https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare#:~:text=Compare%20is%20not%20a%20detailed%20enough%20phrase%20when,don%27t%20have%20the%20same%20number%20of%20keysn%22%3B%20%7D
+		my %cmp = map { $_ => 1 } keys %a;
+		for my $key (keys %b) {
+				last unless exists $cmp{$key};
+				last unless $a{$key} eq $b{$key};
+				delete $cmp{$key};
+		}
+		if (%cmp){
+			$equal = 0;
+		}
+	}
+	return $equal;
+}
+
 sub comparePhysicalQuantity {  
 	my $first = shift;
 	my $second = shift;
