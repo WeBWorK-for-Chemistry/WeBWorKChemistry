@@ -1,0 +1,131 @@
+##DESCRIPTION
+##  Rates of Reaction 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'kinetics', 'rates')
+
+## Date('8/9/2022')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "niceTables.pl",
+   "contextChemical.pl",
+   "contextInexactValue.pl",
+   "contextInexactValueWithUnits.pl",
+   "parserDimensionalAnalysis.pl",
+   "parserMultiAnswer.pl",
+   "weightedGrader.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+$rand_num_generator = new PGrandom();
+
+Context("InexactValue");
+
+$coefA = 4;
+$coefB = 5;
+$coefC = $rand_num_generator->random(1,4,1);
+$coefD = $rand_num_generator->random(1,3,1);
+
+$volume = $rand_num_generator->random(1.25,3,0.25);
+
+$endTime = InexactValue('2.50e2');
+
+$startA = InexactValue('3.00');
+$endA = InexactValue('1.00');
+
+$endC = ($startA - $endA)*$coefC/$coefA;
+$endD = ($startA - $endA)*$coefD/$coefA;
+
+$rateA = -1*($endA-$startA)/$volume/($endTime);  # - (final - initial) / volume / change in time
+$rateD = ($endD)/$volume/($endTime);
+$rateRxn = $rateD * 1/$coefD;
+##############################################################
+#
+#  Problem
+#
+#
+
+BEGIN_PGML
+
+Consider the reaction:  [`\ce{[$coefA]A + [$coefB]B -> [$coefC == 1 ? '' : $coefC]C + [$coefD == 1 ? '' : $coefD]D}`]
+
+The reaction above was carried out in a container with *a volume of [$volume] L*.  
+The table below displays some data relating to that experiment.
+
+[@ 
+DataTable([
+[['Time (s)',headerrow=>1],'Moles A','Moles C', 'Moles D'],
+[PGML('[`0.00`]'),PGML('[`[$startA]`]'),PGML('[`0.00`]'),PGML('[`0.00`]')],
+[PGML('[`[$endTime]`]'),PGML('[`[$endA]`]'),PGML('[___]{$endC}'),PGML('[___]{$endD}')],
+],
+midrules=>1 ,
+tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]* 
+
+A.  *Fill in the missing entries in the table.*
+
+B.  What is the rate of consumption of A? [_______]{$rateA} M/s
+
+C.  What is the rate of production of D? [_______]{$rateD} M/s
+
+D.  What is the rate of the reaction? [_______]{$rateRxn} M/s
+
+END_PGML
+$diff = $startA - $endA;
+
+$solEndC = "\mathrm{$diff\,mol\,A \times \frac{$coefC \,mol\,C}{$coefA \,mol\,A} = {$endC}\,mol\,C\,formed}";
+$solEndD = "\mathrm{$diff\,mol\,A \times \frac{$coefD \,mol\,D}{$coefA \,mol\,A} = {$endD}\,mol\,D\,formed}";
+
+$solRateA = "\frac{-\Delta[\mathrm{A}]}{\Delta t} = \mathrm{\frac{-\frac{-$diff \,mol}{$volume \,L}}{$endTime \,s}} = $rateA \,\mathrm{M/s}";
+
+$solRateD = "\frac{\Delta[\mathrm{D}]}{\Delta t} = \mathrm{\frac{\frac{$endD \,mol}{$volume \,L}}{$endTime \,s}} = $rateD \,\mathrm{M/s}";
+
+$solRateRxn = "\frac{-1}{$coefA}\frac{\Delta[\mathrm{A}]}{\Delta t} = \frac{1}{$coefD}\frac{\Delta[\mathrm{D}]}{\Delta t} = $rateRxn \,\mathrm{M/s}";
+
+BEGIN_PGML_SOLUTION
+### First, calculate the change in A moles.
+
+[``\mathrm{[$startA]\,mol\,A - [$endA]\,mol\,A = [$startA - $endA]\,mol\,A\,reacted}``]
+
+[``[$solEndC]``]
+
+[``[$solEndD]``]
+
+### Rate of consumption of A:
+
+[``[$solRateA]``]
+
+Moles of A are negative, because it's describing the direction of change.  It's losing moles A. 
+That cancels out with the negative from the rate of _consumption_ definition.
+
+### Rate of formation of D:
+
+[``[$solRateD]``]
+
+### Rate of reaction:
+
+[``[$solRateRxn]``]
+
+Either calculation will give you the correct answer.  You could even do it with C if you calculate the 
+rate of formation of C first.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        

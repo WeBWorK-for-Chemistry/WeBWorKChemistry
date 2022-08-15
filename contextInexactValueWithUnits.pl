@@ -475,6 +475,7 @@ sub cmp_parse {
 	$creditValue = $self->getFlag("creditValue");
 	$creditUnits = $self->getFlag("creditUnits");
 	$failOnValueWrong = $self->getFlag("failOnValueWrong");
+	$anyPrefix = $self->getFlag("anyPrefix");
 
 	$ans->score(0); # assume failure
 	$self->context->clearError();
@@ -488,16 +489,45 @@ sub cmp_parse {
 			"penaltyRoundingError"=>$penaltyRoundingError,
 			"creditValue"=>$creditValue,
 			"creditUnits"=>$creditUnits,
-			"failOnValueWrong"=>$failOnValueWrong
+			"failOnValueWrong"=>$failOnValueWrong,
+			"anyPrefix"=>$anyPrefix
 		});
 	
 	my @resultArr = @$result;
+
 	$currentCredit = shift @resultArr;
 	$message = shift @resultArr;
-
 	$ans->score($currentCredit);
 
 	return $ans;
+}
+sub compareValuesAnyPrefix {
+	my $self = shift;
+	my $student = shift;
+	my $options = shift;
+
+	my $creditValue = $options->{"creditValue"};
+
+	
+	my $result = BetterUnits::compareBaseUnits($student->{units_ref}, $self->{units_ref});
+	
+	$multiplier = BetterUnits::convertUnitHash($student->{units_ref}, $self->{units_ref});
+	if ($multiplier == 1){ 
+		# without this check, the units check for credit might false positive.
+		# i.e. answer is 23 J and user just forgets units: "23"
+		# This will give a multiplier of "1" and be correct for the units check.  
+		# We force it incorrect here.
+		return 0;
+	}
+	$multiplier2 = InexactValueWithUnits::InexactValueWithUnits->new([$multiplier,Inf],'');
+	my $converted = $multiplier2 * $student ;
+	
+	%optCopy = %$options;
+	# do the value compare again, but make sure we're not stuck in a loop
+	$optCopy{'anyPrefix'} = 0;
+	$result = $self->{inexactValue}->compareValue($converted->{inexactValue}, \%optCopy);
+
+	return $result;
 }
 
 sub compareValuesWithUnits {
@@ -511,13 +541,21 @@ sub compareValuesWithUnits {
 	my $creditValue = $options->{"creditValue"};
 	my $creditUnits = $options->{"creditUnits"};
 	my $failOnValueWrong = $options->{"failOnValueWrong"};
+	my $anyPrefix = $options->{"anyPrefix"};
 	my $currentCredit = 0;
 	my $message = '';
+	my $anyPrefixUnitCorrection = false;
+
+
+	my $valueCompare = $self->{inexactValue}->compareValue($student->{inexactValue}, $options);
 	
-	if ($self->{inexactValue}->valueAsRoundedNumber() == $student->{inexactValue}->valueAsRoundedNumber()) {
-		# numbers match, now check sig figs
-		$currentCredit += $creditValue;
-		
+	if ($anyPrefix && !$valueCompare){
+		$valueCompare = $self->compareValuesAnyPrefix($student, $options);
+	}
+
+	if ($valueCompare){
+		$currentCredit+= $valueCompare;
+
 	} else {
 		# use the possible rounding error calculations to compute an "acceptable" range for potential student answers
 		if (defined $roundingErrorPossibles) {
@@ -554,25 +592,23 @@ sub compareValuesWithUnits {
 	# grade sig figs amount anyways 
 	# CAUTION!  If correct answer is exact, then disregard sig figs because students have no way to force system to recognize an 'exact' value.  
 	# Exact values are ver context-dependent.
-	if ($self->sigFigs() == Inf || $self->sigFigs() == $student->sigFigs()){
-		$currentCredit += $creditSF;
-	} else {
-		$message  .= "Incorrect sig figs.  ";
-	}
+	# if ($self->sigFigs() == Inf || $self->sigFigs() == $student->sigFigs()){
+	# 	$currentCredit += $creditSF;
+	# } else {
+	# 	$message  .= "Incorrect sig figs.  ";
+	# }
 	# grade units!          
 	#warn "GRADING $self and $student";
+	# warn %{$self->{units_ref}};
+	# warn %{$student->{units_ref}};
 	if (compareUnitHash($self->{units_ref}, $student->{units_ref} )){
+		$currentCredit += $creditUnits;
+	} elsif ($anyPrefix && $self->compareValuesAnyPrefix($student, $options)) {
 		$currentCredit += $creditUnits;
 	} else {
 		$message .= "Incorrect units.  ";
 	}
-	# warn $self;
-	# warn %{$self->{units_ref}};
-	# warn $student;
-	# warn %{$student->{units_ref}};
-	# warn "credit: $currentCredit  $message";
-	
-	
+
 	return [$currentCredit, $message];
 }
 
@@ -679,14 +715,14 @@ sub convertTo {
 	my $unitTo = shift;
 
 	$region = 'us';
-	if ($self->context->flags->get('unitRegion') eq 'uk'){
+	if (defined($self->context->flags->get('unitRegion')) && $self->context->flags->get('unitRegion') eq 'uk'){
 		$region = 'uk';
 	}
 	unless (defined $self->{units}){
 		Value::Error("The value provided doesn't contain any units so cannot be converted.");
 	}
 
-	my $multiplier = BetterUnits::convertUnit($unitFrom,$unitTo, {region=> $region});
+	my $multiplier = BetterUnits::convertUnit($unitFrom, $unitTo, {region=> $region});
 	$t2 = $self->{inexactValue} * $multiplier;
 	$t = $self->new([$t2->value, $t2->sigFigs], $unitTo);
 	return $t;
@@ -787,6 +823,35 @@ sub div {
   return $result;
 }
 
+sub power {
+	# best rule: the error is equal to the error of the exponent times 
+	#       the value of the exponential
+	# rule for intro chem: (used here!)
+	# count decimals in exponent and use that for answer sig figs
+	# If power is exact, then keep original sig figs.
+	
+	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
+
+	my $decimalPortionOfExponent = abs($r->valueAsRoundedNumber()) - sprintf('%.f',abs($r->valueAsRoundedNumber()));
+		
+	my $shortCutToCountSigFigs = $self->new("$decimalPortionOfExponent");
+	my $powerResult = $l->valueAsNumber()**$r->valueAsNumber();
+	#warn $r->{units};
+	$newUnitString = BetterUnits::unitsToPower($l->{units_ref}, $r->valueAsRoundedNumber);
+	#warn $newUnitString;
+
+	if ($r->sigFigs() == Inf){
+		return $self->new([$powerResult, $l->sigFigs()], $newUnitString);
+	}
+	elsif ($l->sigFigs() < $shortCutToCountSigFigs->sigFigs()){
+		return $self->new([$powerResult, $l->sigFigs()], $newUnitString);
+	} else {
+		return $self->new([$powerResult, $shortCutToCountSigFigs->sigFigs()], $newUnitString);
+	}
+
+}
+
+
 sub combineStringUnitsCleanly {
 	my $left = shift;
 	my $right = shift;
@@ -828,9 +893,9 @@ sub combineStringUnitsCleanly {
 		for ($r=0; $r < scalar(@unitArrayRight); $r++) {
 
 			if (compareUnitHash($unitArrayLeft[$l]->{unitHash},$unitArrayRight[$r]->{unitHash})){
-				# warn 'matched!';
 				# warn %{$unitArrayLeft[$l]};
-				# warn %{$unitArrayRight[$r]};
+				#  warn %{$unitArrayLeft[$l]->{unitHash}};
+				#  warn %{$unitArrayRight[$r]->{unitHash}};
 				$leftMatch = 1;
 				push @usedR, $r;
 				# same units on both sides!
@@ -938,46 +1003,52 @@ sub combineStringUnitsCleanly {
 
 # We use this to compare two unit hashes to test for equality.  Can't compare references.
 sub compareUnitHash {
-  my $leftref = shift;
-  #my %left = %{$leftref->{unitHash}};
-  my %left = %$leftref;
-  my $rightref = shift;
-  #my %right = %$rightref->{unitHash}};
-  my %right = %$rightref;
+	my $leftref = shift;
+	#my %left = %{$leftref->{unitHash}};
+	my %left = %$leftref;
+	my $rightref = shift;
+	#my %right = %$rightref->{unitHash}};
+	my %right = %$rightref;
 
-  
-  # from https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare
-  # same number of keys?
-  if (%left != %right) {
-    # warn 'not equal not correct';
-	# should never be called unless error in code
-	#warn "LEFT: " . join(',',%left);
-	#warn "RIGHT: " . join(',',%right);
-	#warn "not equal at all";
-    return 0;
-  } else {
-    my %cmp = map { $_ => 1 } keys %left;
-    for my $key (keys %right) {
-      last unless exists $cmp{$key};
-      last unless $left{$key} eq $right{$key};
-      delete $cmp{$key};
-    }
-    if (%cmp) {
-      return 0;
-    } else {
-      my %cmp = map { $_ => 1 } keys %right;
-	  for my $key (keys %left) {
-		last unless exists $cmp{$key};
-		last unless $left{$key} eq $right{$key};
-		delete $cmp{$key};
-	  }  
-	  if (%cmp){
+	# Since we're storing the parsed units in this hash item, let's remove it from the temporary hash
+	# so that we can compare with a student made hash that may not have the parsed item in it yet.
+	delete($left{'parsed'});
+	delete($right{'parsed'});
+
+	# from https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare
+	# same number of keys?
+	if (%left != %right) {
+		# WHAT ABOUT EQUIVALENT UNITS?  i.e. M vs mol/L ??
+
+		# warn 'not equal not correct';
+		# should never be called unless error in code
+		#warn "LEFT: " . join(',',%left);
+		#warn "RIGHT: " . join(',',%right);
+		#warn "not equal at all";
 		return 0;
-	  } else {
-      	return 1;
-	  }
-    }
-  }
+	} else {
+		my %cmp = map { $_ => 1 } keys %left;
+		for my $key (keys %right) {
+			last unless exists $cmp{$key};
+			last unless $left{$key} eq $right{$key};
+			delete $cmp{$key};
+		}
+		if (%cmp) {
+			return 0;
+		} else {
+			my %cmp = map { $_ => 1 } keys %right;
+			for my $key (keys %left) {
+				last unless exists $cmp{$key};
+				last unless $left{$key} eq $right{$key};
+				delete $cmp{$key};
+			}  
+			if (%cmp){
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	}
 }
 
 # This will create an array that contains the string value of the unit, the found "known" unit hash,
@@ -1199,18 +1270,33 @@ sub process_factor_for_stringCombine {
 }
 
 sub checkOpOrderWithPromote {
-  my ($l,$r,$flag) = @_; $r = $l->promote($r);
+  my ($l,$r,$flag) = @_; 
+  #warn $flag;
+  $r = $l->promote($r);
   if ($flag) {return ($l,$r,$l,$r)} else {return ($l,$l,$r,$r)}
 }
 
-# this is mostly the same as the Value version, but this creates an "infinite SF" Inexact Value
-# when the value being promoted is not already an Inexact Value.  Only works with reals and numbers.
+# this is mostly the same as the Value version, but this creates an infinite sig fig and no unit InexactValueWithUnits
+# when the value being promoted is not already an Inexact Value with Units.  Only works with reals and numbers.
 sub promote {
-  my $self = shift; my $class = ref($self) || $self;
-  my $context = (Value::isContext($_[0]) ? shift : $self->context);
-  my $x = (scalar(@_) ? shift : $self);
-  return $x->inContext($context) if ref($x) eq $class && scalar(@_) == 0;
-  return $self->new($context,$x,$inf,@_);
+
+	my $self = shift; my $class = ref($self) || $self;
+	#   my $r = shift;
+	#   warn $r;
+	my $context = (Value::isContext($_[0]) ? shift : $self->context);
+	unless (scalar(@_)){
+		warn "empty!";
+	}
+	my $x = (scalar(@_) ? shift : $self);
+	# warn 'Class: '. $class;
+	# warn 'Self:'.$self;
+	# warn 'Context: '.$context;
+	# warn 'x: '.$x;
+
+	return $x->inContext($context) if ref($x) eq $class && scalar(@_) == 0;
+	$s = $self->new([$x,Inf], '', @_);
+	# warn ref($s);
+	return $s;
 }
 
 

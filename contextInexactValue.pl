@@ -1490,6 +1490,8 @@ sub log {
 	my $self = shift;
 	my $sigFigs = $self->sigFigs();
 	my $logResult = log($self->valueAsNumber())/log(10);
+	# warn "DOING REGULAR LOG";
+	# warn $logResult;
 	if (abs($logResult) < 1){
 		return $self->new($logResult, $sigFigs);
 
@@ -1500,6 +1502,34 @@ sub log {
 			return $self->new(sprintf('%.f',$logResult) + $shortCutToCountSigFigs);
 		} else {
 			return $self->new(sprintf('%.f',$logResult) - $shortCutToCountSigFigs);
+		}
+	}
+}
+
+sub ln {
+	# best rule:  the error is equal to the error of the argument 
+	#             divided by the argument
+	# rule for intro chem: (used here!)
+	# count total sig figs in argument and use as decimal count for answer
+	my $self = shift;
+	my $sigFigs = $self->sigFigs();
+	my $logResult = log($self->valueAsNumber());
+	# warn "DOING natural log";
+
+	if (abs($logResult) < 1){
+		return $self->new($logResult, $sigFigs);
+
+	} else {
+		my $decimalPortion = abs($logResult) - int(abs($logResult));
+		my $shortCutToCountSigFigs = new InexactValue::InexactValue($decimalPortion, $sigFigs);
+		# warn $logResult;
+		# warn int(abs($logResult));
+		# warn $shortCutToCountSigFigs;
+		if ($logResult > 0){
+			# warn $self->new(sprintf('%.f',$logResult) + $shortCutToCountSigFigs);
+			return new InexactValue::InexactValue(sprintf('%.f',$logResult) + $shortCutToCountSigFigs);
+		} else {
+			return new InexactValue::InexactValue(sprintf('%.f',$logResult) - $shortCutToCountSigFigs);
 		}
 	}
 }

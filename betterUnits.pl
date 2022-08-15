@@ -814,6 +814,7 @@ our %known_units = ('m'  => {
 # micromol	-- micro mole	<-- this is covered by prefix now
 # nanomol	-- nano mole	<-- this is covered by prefix now
 # mole -- spelled out mol
+# Molarity -- concentration
 # kat	-- katal, catalytic activity
 #
 							 	'mole' => {
@@ -829,6 +830,11 @@ our %known_units = ('m'  => {
 													 'mol'       => 1,
 													 's'         => -1,
 												 },
+								'M' => {
+													'factor'    => 1000,
+													'mol'       => 1,
+													'm'			=> -3
+								},
 # this may be temporary
 								'molecule' => {
 													 'factor'    => 1.66053906717384666E-24,
@@ -1010,11 +1016,22 @@ sub process_unit {
 	# warn %denominator_hash;
 
 	my %unit_hash = %$fundamental_units;
+	$unit_hash{'parsed'} = [];  # add an empty array to the hash
+
 	my $u;
 	foreach $u (keys %unit_hash) {
 		if ( $u eq 'factor' ) {
 			# calculate the correction factor for the unit
 			$unit_hash{$u} = $numerator_hash{$u}/$denominator_hash{$u};  
+		} elsif ($u eq 'parsed') {
+			foreach (@{$numerator_hash{$u}}){
+				push @{$unit_hash{$u}}, $_;
+			}
+			foreach (@{$denominator_hash{$u}}){
+			 	$_->{power} = $_->{power} * -1;
+			 	push @{$unit_hash{$u}}, $_;
+			}
+
 		} else {
 			# calculate the power of the fundamental unit in the unit
 			# possibility that new unit is in denominator but not numerator, so check first. Assume zero power for missing fundamental.
@@ -1032,6 +1049,7 @@ sub process_unit {
 
 	# return a unit hash.
 	# warn %unit_hash;
+	
 	return(%unit_hash);
 }
 
@@ -1055,6 +1073,8 @@ sub process_term {
 	}
 	
 	my %unit_hash = %$fundamental_units;
+
+	$unit_hash{'parsed'} = [];  # add an empty array to the hash
 	if ($string) {
 		#warn $string;
 		# First check for chemicals.  Later this can be transformed into a "preprocess" callback function that is
@@ -1131,19 +1151,27 @@ sub process_term {
 						$unit_hash{$u} = $unit_hash{$u} * $factor_hash{$u};  # calculate the correction factor for the unit
 					} elsif ($u eq 'piggybackUnit'){
 							# do nothing;
+					} elsif ($u eq 'parsed') {
+						foreach (@{$factor_hash{$u}}){
+							push @{$unit_hash{$u}}, $_;
+						}
 					} else {
 
 						$unit_hash{$u} = $unit_hash{$u} + $factor_hash{$u}; # calculate the power of the fundamental unit in the unit
 					}
 				}
 				# need to add missing fundamentals if we added new ones in the process_factor method
+				# copy the parsed unit array to the new hash
 				foreach $u (keys %factor_hash){
 					unless (defined %unit_hash{$u}){
 						$unit_hash{$u} = $factor_hash{$u};
 					}
 				}
 				
+
 			}
+
+
 		}
 	}
 	#returns a unit hash.
@@ -1220,6 +1248,31 @@ sub compareConversionFactorUnitRefs {
 }
 
 sub comparePhysicalQuantity {  
+	my $first = shift;
+	my $second = shift;
+	my $equal = 1;
+	my $u;
+	
+	foreach $u (keys %$first) {
+		if ( $u ne 'factor') {      
+			if (!defined $first->{$u} && !defined $second->{$u}){
+				next;
+			} elsif (!defined $first->{$u} || !defined $second->{$u}){
+				$equal=0;
+				last;
+			}
+			$equal = $first->{$u} == $second->{$u};
+			if ($equal == 0){
+				last;
+			}
+		}
+	}
+	return $equal;
+}
+
+# This is to compare units that match other than prefixes.  For grading where any answer is ok
+# as long as the base units match.
+sub compareBaseUnits {
 	my $first = shift;
 	my $second = shift;
 	my $equal = 1;
@@ -1352,19 +1405,56 @@ sub process_factor {
 	foreach $u (keys %unit_hash) {
 		if ( $u eq 'factor' ) {
 			$unit_hash{$u} = ($unit_name_hash{$u}*(10**$prefixExponent))**$power;  # calculate the correction factor for the unit
+		} elsif ($u eq 'parsed'){
+			# shouldn't reach here.
 		} else {
 			my $fundamental_unit = $unit_name_hash{$u};
 			# if (defined $fundamental_unit){
 			#   warn $fundamental_unit . '  ' . $u;
 			#   warn "power:  $power";
 			# }
-			
-			
 			$fundamental_unit = 0 unless defined($fundamental_unit); # a fundamental unit which doesn't appear in the unit need not be defined explicitly
 			$unit_hash{$u} = $fundamental_unit*$power; # calculate the power of the fundamental unit in the unit
 		}
 	}
+	push @{$unit_hash{'parsed'}}, {prefix=>$unit_prefix, base=>$unit_base, power=>$power};
+	#warn %unit_hash;
 	%unit_hash;
+}
+
+sub unitsToPower {
+	$unit_ref = shift;
+	$power = shift;
+	$parsed = $unit_ref->{parsed};
+	#warn $parsed;
+	$unitString = '';
+	#warn %$unit_ref;
+	foreach (@$parsed){
+		#warn 'here';
+		$newPower = $_->{power} * $power;
+		if ($unitString ne ''){
+			$unitString .= '*';
+		}
+		$unitString = $_->{prefix}.$_->{base}.'^'.$newPower;
+	}
+	return $unitString;
+}
+
+sub convertUnitHash {
+	# 1.  Verify that physical quantities are same (same base units + powers) <---- NOT IMPLEMENTED
+	# 2.  Compare factors and generate a multiplier
+
+	my $fromUnitHash = shift;
+	my $toUnitHash = shift;
+	#warn $fromUnit;
+	#warn $toUnit;
+	my $options = shift;
+
+
+	$multiplier = $fromUnitHash->{'factor'}/$toUnitHash->{'factor'};
+	
+	#%unit_hash_from;
+	return $multiplier;
 }
 
 sub convertUnit {
@@ -1393,7 +1483,7 @@ sub convertUnit {
 	if ($region eq 'uk'){
 		@known_units{ keys %known_units_uk } = values %known_units_uk;
 	}
-
+	
 	my ($unit_name_from,$power_from) = split(/\^/, $fromUnit);
 	#warn $unit_name_from;
 	$power_from = 1 unless defined($power_from);
@@ -1417,6 +1507,7 @@ sub convertUnit {
 			}
 		}
 	} else {
+		warn "$unit_name_from";
 		die "UNIT ERROR Unrecognizable unit: |$unit_name_from|";
 	}
 

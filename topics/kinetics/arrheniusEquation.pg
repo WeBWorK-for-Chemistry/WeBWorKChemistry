@@ -1,0 +1,156 @@
+##DESCRIPTION
+##  Rates of Reaction 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'kinetics', 'arrhenius')
+
+## Date('8/9/2022')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "PGauxiliaryFunctions.pl",
+   "PGML.pl",
+   "contextInexactValue.pl",
+   "contextInexactValueWithUnits.pl",
+   "PGgraphmacros.pl"
+);
+
+
+##############################################################
+#
+#  Setup
+#
+#
+#$rand_num_generator = new PGrandom();
+
+Context("InexactValueWithUnits");
+Context()->flags->set(anyPrefix=>1);  # this grades the final answer as ok whatever the prefix. i.e. 1.211 kJ vs 1211 J
+
+$EaValue = random(7001,9999,1);
+$AValue = random(1001,3001,1);
+
+$Ea = InexactValueWithUnits([$EaValue, 4], 'J/mol');
+$A = InexactValueWithUnits([$AValue,4],'');
+$R = InexactValueWithUnits('8.314 J*mol^-1*K^-1');
+
+@temps = (InexactValueWithUnits([1/298,3],'K^-1'), 
+  InexactValueWithUnits([1/320,3],'K^-1'), 
+  InexactValueWithUnits([1/350,3],'K^-1'), 
+  InexactValueWithUnits([1/380,3],'K^-1'), 
+  InexactValueWithUnits([1/420,3],'K^-1'), 
+  InexactValueWithUnits([1/460,3],'K^-1'));
+@lnK = ();
+
+foreach (@temps){
+	$val = ($A->ln) - (($Ea/$R)*$_);
+	push @lnK, $val;
+}
+
+$minT = Inf; #min(@temps);
+$mink = min(@lnK);
+$maxT = -Inf; #max(@temps);
+$maxk = max(@lnK);
+$index=0;
+$minTindex=0;
+$maxTindex=0;
+foreach (@temps){
+  if ($_->valueAsRoundedNumber < $minT){
+    $minT = $_->valueAsRoundedNumber;
+    $minTindex=$index;
+  }
+  if ($_->valueAsRoundedNumber > $maxT){
+    $maxT = $_->valueAsRoundedNumber;
+    $maxTindex=$index;
+  }
+  $index++;
+}
+foreach (@lnK){
+  if ($_->valueAsRoundedNumber > $maxk->valueAsRoundedNumber){
+    $maxk = $_;
+  }
+}
+# warn "minT: " . $minT;
+# warn "mink: " . $mink;
+# warn "maxT: " . $maxT;
+# warn "maxk: " . $maxk;
+$horizontalPadding = ($maxT-$minT)*0.1;
+$verticalPadding = (($maxk-$mink)*0.1)->valueAsRoundedNumber;
+$graph = init_graph($minT-$horizontalPadding, $mink-$verticalPadding, $maxT+ $horizontalPadding, $maxk+$verticalPadding, ticks=>[3,3], axes=>[$minT,$mink], pixels=>[400,400]);
+$graph->moveTo($minT, $lnK[$minTindex]);
+$graph->lineTo($maxT, $lnK[$maxTindex], 'black');
+
+for (my $i=0; $i < scalar(@lnK); $i++){
+#    warn $temps->[$i];
+#    warn $lnK[$i];
+  $circle = open_circle($temps[$i]->valueAsRoundedNumber, $lnK[$i]->valueAsRoundedNumber, 'black');
+#   #warn $circle;
+  $graph->stamps($circle);
+}
+$labelX =new Label(($maxT-$minT)/2 + $minT,$mink - ($verticalPadding*2/3),"1/T (K^-1)", 'black', 'center', 'middle');
+$graph->lb($labelX);
+
+$labelY =new Label($minT - ($horizontalPadding*2/3), ($maxk-$mink)/2 + $mink ,"ln k", 'black', 'center', 'middle', 'vertical');
+$graph->lb($labelY);
+
+$slope = InexactValueWithUnits(['1',Inf],'')*$Ea/$R;
+$intercept = $A->ln;
+$labelEq = new Label(($maxT-$minT)*5/5 + $minT, ($maxk-$mink)*4/5 + $mink, "ln k = $slope*(1/T)(K^-1)+$intercept", 'black', 'right','middle');
+$graph->lb($labelEq); 
+
+$alt0 = "A scatter plot is shown with 1/T (K^-1) on the x-axis with a range of approximately 0.002 to 0.004 and ln K on the 
+y-axis with a range of approximately 0 to 7.   A series of six points falls directly on a straight line fit with a downward, 
+negative slope.  An equation is written on the graph:  ln k = $slope * (1/T)(K^-1) + $intecept";
+##############################################################
+#
+#  Problem
+#
+#
+
+BEGIN_PGML
+Given the linear form of the Arrhenius equation:  [``\ln k = \ln \mathrm{A} - \mathrm{\frac{E_a}{R}\left(\frac{1}{T}\right)}``] 
+and the graph below with the equation for the best-fit line, calculate the energy of activation and the frequency factor for 
+this unknown reaction.  [`` \mathrm{R = 8.314 \frac{J}{K \cdot mol}} ``]
+
+[@ image(insertGraph($graph),width=>350,height=>350,extra_html_tags=>"alt='$alt0'") @]*
+
+_Don't forget appropriate units for [`E_a`]!_
+
+[`\mathrm{E_a}`]:  [____________]{$Ea}
+
+_A has units which are difficult to deduce without more information.  Write it without units._
+
+[`\mathrm{A}`]:   [____________]{$A}
+
+END_PGML
+
+
+BEGIN_PGML_SOLUTION
+
+Since the Arrhenius equation is in linear form ([`y=mx+b`]), the variables [`x`] and [`y`] are represented by [`\frac{1}{\mathrm{T}}`] 
+and [`\ln k`] respectively.
+
+The slope (m) is represented by [`\mathrm{-\frac{E_a}{R}}`] and the y-intercept (b) is represented by [`\ln \mathrm{A}`].
+
+Take the values of the slope and intercept from the graph's straight line fit and solve for the activation energy and then the frequency factor.
+
+[`` [$slope]=\mathrm{-\frac{E_a}{8.314 \frac{J}{K \cdot mol}}}``]
+
+[`` \mathrm{E_a} = [$Ea] ``]
+
+then...
+
+[`` [$intercept]=\mathrm{\ln A} ``]
+
+[`` \mathrm{A} = e^[$intercept] = [$A] ``]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        
