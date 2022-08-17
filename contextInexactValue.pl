@@ -62,7 +62,6 @@ our @ISA = qw(Value);
 my $inf    = 9**9**9;  
 
 sub new {
-
 	my $self = shift; my $class = ref($self) || $self;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	my $x = shift; $x = [$x,@_] if scalar(@_) > 0; # not going to worry about this scenario yet.

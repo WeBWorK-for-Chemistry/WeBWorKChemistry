@@ -40,6 +40,9 @@
       ['12.0 kg', {value=> 12, sf=> 3, units=> 'kg',unitHash=> {factor=>1, 'kg' => 1}, string=>'12.0 kg', TeX=>'12.0\ {\rm kg}'}],
       ['12.0 Kg', {value=> 12, sf=> 3, units=> 'Kg',unitHash=> {factor=>0.001, 'kg' => 1}, string=>'12.0 Kg', TeX=>'12.0\ {\rm Kg}'}],
       ['120000000000000 kg', {value=> 120000000000000, sf=> 2, units=> 'kg',unitHash=> {factor=>1, 'kg' => 1}, string=>'1.2x10^14 kg', TeX=>'1.2\times 10^{14}\ {\rm kg}'}],
+      ['1.30e3 M^-4 s^-1', {value=> 1300, sf=> 3, units=> 'M^-4 s^-1',unitHash=> {factor=>1e-12,'m' => 12,'s'=>-1,'mol'=>-4}, string=>'1.30x10^3 M^-4 s^-1', TeX=>'1.30\times 10^{3}\ {\rm M^{-4}\,s^{-1}}'}],
+      ['1.30e3 1/M^4*s^1', {value=> 1300, sf=> 3, units=> '1/M^4*s^1',unitHash=> {factor=>1e-12,'m' => 12,'s'=>-1,'mol'=>-4}, string=>'1.30x10^3 1/M^4*s^1', TeX=>'1.30\times 10^{3}\ {\textstyle\frac{\rm\mathstrut 1}{\rm\mathstrut M^{4}\,s^{1}}}'}],
+      ['1.30e3 /M^4*s^1', {value=> 1300, sf=> 3, units=> '/M^4*s^1',unitHash=> {factor=>1e-12,'m' => 12,'s'=>-1,'mol'=>-4}, string=>'1.30x10^3 /M^4*s^1', TeX=>'1.30\times 10^{3}\ {\textstyle\frac{\rm\mathstrut }{\rm\mathstrut M^{4}\,s^{1}}}'}],
    );
 
    $html = '

@@ -1,0 +1,209 @@
+##DESCRIPTION
+##  Rates of Reaction 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'kinetics', 'rates')
+
+## Date('8/9/2022')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "niceTables.pl",
+   "contextChemical.pl",
+   "contextInexactValue.pl",
+   "contextInexactValueWithUnits.pl",
+   "parserDimensionalAnalysis.pl",
+   "parserMultiAnswer.pl",
+   "weightedGrader.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+
+$context = Context('Numeric');
+$context->variables->{namePattern} = qr/[a-zA-Z0-9\_\{\}\)\()]*/;
+$context->variables->add('k'=>'Real');
+$context->variables->add('A'=>'Real');
+$context->variables->add('B'=>'Real');
+#$context->variables->add('(A)'=>'Real');
+#$context->variables->add('(B)'=>'Real');
+
+$Aorder = random(1,3,1);
+$Border = random(0,2,1);
+
+$rateLaw = Formula("k*[A]**$Aorder *[B]**$Border")->reduce;
+$rateLaw2 = Formula("k*[A]**$Aorder *[B]**$Border")->reduce;
+
+
+$coefA = random(1,4,1);
+$coefB = random(2,4,1);
+$coefC = random(1,4,1);
+if ($coefA % 2 == 0 && $coefB % 2 == 0 && $coefC % 2 == 0 ){
+	$coefC = 1;
+} elsif ($coefA == 3 && $coefB == 3 && $coefC == 3 ){
+	$coefC = 2;
+}
+Context("InexactValueWithUnits");
+
+$A1 = InexactValueWithUnits([0.1,3], 'M');
+$A2 = InexactValueWithUnits([0.2,3], 'M');
+$A3 = InexactValueWithUnits([0.2,3], 'M');
+$A4 = InexactValueWithUnits([0.4,3], 'M');
+$B1 = InexactValueWithUnits([0.1,3], 'M');
+$B2 = InexactValueWithUnits([0.1,3], 'M');
+$B3 = InexactValueWithUnits([0.2,3], 'M');
+$B4 = InexactValueWithUnits([0.4,3], 'M');
+
+
+$initialRate1 = InexactValueWithUnits([random(0.010, 0.030, 0.001),3], 'M/s');
+$initialRate2 = $initialRate1 * (2**$Aorder);
+$initialRate3 = $initialRate2 * (2**$Border);
+$initialRate4 = $initialRate3 * (2**$Aorder) * (2**$Border);
+
+%translation = (2 => 'doubled', 4=>'quadrupled', 8=>'increased by a factor of eight');
+%translation2 = (0 => 'zero', 1=>'first', 2=>'second', 3=>'third');
+
+$twoOverOneRate = $initialRate2/$initialRate1;
+$threeOverTwoRate = $initialRate3/$initialRate2;
+
+$rateLawAPart = $Aorder > 1 ? '('.$A1->TeX().")^$Aorder" : "(".$A1->TeX().")";
+$rateLawBPart = $Border > 0 ? ($Border > 1 ? '('.$B1->TeX().")^$Border" : '('.$B1->TeX().')') : '';
+
+$simplifiedRateLaw = ($A1**$Aorder)*($B1**$Border);
+
+$k = $initialRate1/$simplifiedRateLaw;
+
+
+
+
+
+
+##############################################################
+#
+#  Problem
+#
+#
+
+BEGIN_PGML
+
+The data below were collected for the following reaction:
+  [```\ce{[$coefA]A + [$coefB]B -> [$coefC == 1 ? '' : $coefC]C}```]
+
+The reaction above was carried out in a container with *a volume of [$volume] L*.  
+The table below displays some data relating to that experiment.
+
+rate law: [```\mathrm{rate} = k[@ $Aorder > 1 ? "[\\mathrm{A}]^$Aorder" : "[\\mathrm{A}]" @]*[@ $Border > 0 ? ($Border > 1 ? "[\\mathrm{B}]^$Border" : '[\\mathrm{B}]') : '' @]* ```]
+
+[@ 
+DataTable([
+[[PGML('[`\mathrm{[A]\, (M)}`]'),headerrow=>1],PGML('[`\mathrm{[B]\, (M)}`]'), PGML('[`\mathrm{Initial\ Rate\, (M/s)}`]')],
+[PGML('[`[$A1->{inexactValue}]`]'),PGML('[`[$B1->{inexactValue}]`]'),PGML('[`[$initialRate1->{inexactValue}]`]')],
+[PGML('[`[$A2->{inexactValue}]`]'),PGML('[`[$B2->{inexactValue}]`]'),PGML('[`[$initialRate2->{inexactValue}]`]')],
+[PGML('[`[$A3->{inexactValue}]`]'),PGML('[`[$B3->{inexactValue}]`]'),PGML('[`[$initialRate3->{inexactValue}]`]')],
+[PGML('[`[$A4->{inexactValue}]`]'),PGML('[`[$B4->{inexactValue}]`]'),PGML('[`[$initialRate4->{inexactValue}]`]')],
+],
+midrules=>1 ,
+tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]* 
+
+*Due to system limitations, use plain parentheses ( ) instead of square brackets \[ \]!*
+
+What is the rate law for this reaction?  
+
+rate = [____________________]{$rateLaw}
+
+What is the rate constant, _k_, for the rate law?
+
+_k_ = [____________________]{$k}
+
+END_PGML
+
+
+
+BEGIN_PGML_SOLUTION
+
+Look at the data table and pick two sets of data (rows) that only change the 
+concentration of ONE reactant.  Ideally, pick one where the concentration only 
+doubles but it's not required.  Row 1 and 2 fit this criteria as \[A\] changes 
+from [$A1] to [$A2], but \[B\] remains constant at [$B1].
+
+Divide one by the other to see how it changes:
+
+[``` \frac{[$A2]}{[$A1]} = [@ $A2/$A1 @]* ```]
+
+The concentration has doubled or increased by a factor of 2.  Now, we have
+ to check how the rate of the reaction has changed when the concentration of
+ A has doubled.  Do the same division with the initial rates:
+
+[``` \frac{[$initialRate2]}{[$initialRate1]} = [$twoOverOneRate] ```]
+
+The rate has [@ $translation{$twoOverOneRate->valueAsNumber} @]*!  What exponent
+would a 2 need in order to become [@ $twoOverOneRate->valueAsNumber @]*?
+
+[``` 2^x = 2^{\color{red}[$Aorder]} = [@ $twoOverOneRate->valueAsNumber @]*```]
+
+A [$Aorder] is needed.  That means the reaction is *[@ $translation2{$Aorder}@]* order* 
+with respect to reactant A.
+
+Now we do the same process for reactant B.  Find two sets of data where only 
+B changes concentration.  Row 2 and 3 fit the criteria.  Now when comparing the 
+concentrations of B:
+
+[``` \frac{[$B2]}{[$B1]} = [@ $B2/$B1 @]* ```]
+
+The concentration has doubled or increased by a factor of 2. Now, we have
+ to check how the rate of the reaction has changed when the concentration
+  of A has doubled.  Do the same division with the initial rates:
+
+[``` \frac{[$initialRate3]}{[$initialRate2]} = [$threeOverTwoRate] ```]
+
+The rate has [@ $translation{$threeOverTwoRate->valueAsNumber} @]*!  What exponent
+would a 2 need in order to become [@ $threeOverTwoRate->valueAsNumber @]*?
+
+[``` 2^x = 2^{\color{red}[$Border]} = [@ $threeOverTwoRate->valueAsNumber @]*```]
+
+A [$Border] is needed.  That means the reaction is *[@ $translation2{$Border}@]* order* 
+with respect to reactant B.
+
+Now let's put it all together into a rate law.  We only include chemical species
+ that actually affect the rate of reaction.  The orders are written as powers 
+ for each of the chemical species. Anything zero-order can be
+ excluded since it mathmatically becomes 1 anyways. A rate constant, _k_, is 
+ always included in front.
+
+[```\mathrm{rate} = k[@ $Aorder > 1 ? "[\\mathrm{A}]^$Aorder" : "[\\mathrm{A}]" @]*[@ $Border > 0 ? ($Border > 1 ? "[\\mathrm{B}]^$Border" : '[\\mathrm{B}]') : '' @]* ```]
+
+Finally, since we know the rate law and we have raw rate data, we can calculate
+ the actual rate contant, _k_, fairly easily.  Pick *any* one of the rows of 
+ data and just plug in the numbers, then solve for _k_.
+
+Using row 1 data:
+
+[```[$initialRate1] = k[$rateLawAPart][$rateLawBPart] ```]
+
+Simplify:
+
+[```[$initialRate1] = k([$simplifiedRateLaw]) ```]
+
+[``` k = \frac{[$initialRate1]}{[$simplifiedRateLaw]} ```]
+
+[``` k = [$k] ```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        

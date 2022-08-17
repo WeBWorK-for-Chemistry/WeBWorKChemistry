@@ -1007,6 +1007,7 @@ sub process_unit {
 	my ($numerator,$denominator) = split( m{/}, $string );
 	# warn "numerator: $numerator";
 	# warn "denominator: $denominator";
+	$numerator = "" if ($numerator eq '1');  # prevent the 1 from getting recognized as anything.
 	$denominator = "" unless defined($denominator);
 
 	my %numerator_hash = process_term($numerator, $options);

@@ -105,7 +105,6 @@ sub new {
 	} else {
 		$options = shift;
 	}
-
 	# this will require units to be defined in betterUnits.
 	# setting to false will cause anything after the number to be added 
 	# as a new unit if not recognized.
@@ -173,6 +172,7 @@ sub new {
 		}
 	} 
 
+
 	Value::Error("You must provide a ".$self->name) unless defined($num);
 
 	unless (ref $num eq "ARRAY") {
@@ -193,9 +193,7 @@ sub new {
 		Value::Error("Your units can only contain one division") if $units =~ m!/.*/!;
 	}
 
-		
 	$num = $self->makeValue($num,context=>$context);
-
 
 	# store a copy of fundamental units on self
 	$num->{fundamental_units} = \%fundamental_units;
@@ -411,9 +409,10 @@ sub makeValue {
 	if (ref($value) eq ARRAY){
 		# this is the case when we want to pass a value with explicit sig figs
 		@arr = @$value;
-		return Value->Package("InexactValue")->new($arr[0], $arr[1]);
+		return InexactValue::InexactValue->new($arr[0], $arr[1]);
+		#return Value->Package("InexactValue")->new($arr[0], $arr[1]);
 	} else {
-		return Value->Package("InexactValue")->new($value);
+		return InexactValue::InexactValue->new($value); # Value->Package("InexactValue")->new($value);
 	}
 }
 
@@ -423,39 +422,40 @@ sub makeValue {
 # }
 
 sub cmp {
-  my $self = shift;
-  my $cmp = $self->SUPER::cmp(
-    correct_ans => $self->string,
-    correct_ans_latex_string =>  $self->TeX,
-    @_
-  );  
-  $cmp->install_pre_filter('erase');
-  $cmp->install_pre_filter(sub {
-    my $ans = shift;
-    $inexactWithUnitsStudent=0;
-    $studentAnswer = $ans->{student_ans};
-    if ($ans->{student_ans} eq ''){
-      $inexactWithUnitsStudent = $self->new([0,9**9**9],'');  #blank answer is zero with infinite sf
-      } else {
-      $inexactWithUnitsStudent = $self->new($ans->{student_ans});
-    }
-	$ans->{student_value} = $inexactWithUnitsStudent;
-	$ans->{preview_latex_string} = $inexactWithUnitsStudent->TeX;#$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
-    $ans->{student_ans} = $inexactWithUnitsStudent->string; #$inexactStudent->string; 
+	my $self = shift;
+	my $cmp = $self->SUPER::cmp(
+		correct_ans => $self->string,
+		correct_ans_latex_string =>  $self->TeX,
+		@_
+	);  
 
-    return $ans;
-  });
+	$cmp->install_pre_filter('erase');
+	$cmp->install_pre_filter(sub {
+		my $ans = shift;
+		$inexactWithUnitsStudent=0;
+		$studentAnswer = $ans->{student_ans};
+		if ($ans->{student_ans} eq ''){
+			$inexactWithUnitsStudent = $self->new([0,9**9**9],'');  #blank answer is zero with infinite sf
+		} else {
+			$inexactWithUnitsStudent = $self->new($ans->{student_ans});
+		}
+		$ans->{student_value} = $inexactWithUnitsStudent;
+		$ans->{preview_latex_string} = $inexactWithUnitsStudent->TeX;#$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
+		$ans->{student_ans} = $inexactWithUnitsStudent->string; #$inexactStudent->string; 
 
-  # REMINDER:  Evaluator should JUST be for equality
-  #           if you need messages for why it's wrong, that MUST go in post-filter
-  #           the reason for this is that MultiAnswer will stop evaluating if there is a message after the individual evaluation
-  
-  return $cmp;
+		return $ans;
+	});
+
+	# REMINDER:  Evaluator should JUST be for equality
+	#           if you need messages for why it's wrong, that MUST go in post-filter
+	#           the reason for this is that MultiAnswer will stop evaluating if there is a message after the individual evaluation
+
+	return $cmp;
 }
 
 sub cmp_parse {
 	my $self = shift; my $ans = shift;
-
+	
 	$studentAnswer = $ans->{student_ans};
 	
 	if ($ans->{student_ans} eq ''){
@@ -876,8 +876,8 @@ sub combineStringUnitsCleanly {
 	# }
 	
 	my $newUnitString = '';
-	my @numerator;
-	my @denominator;
+	my @numerator = ();
+	my @denominator = ();
 
 	$debug='';
 	foreach $key (@unitArrayLeft) {
@@ -971,20 +971,30 @@ sub combineStringUnitsCleanly {
 	#  }
 	@denominator = main::PGsort(sub { (exists($_[0]->{isQualitative})? 0 : 1) > (exists($_[1]->{isQualitative}) ? 0 : 1)}, @denominator); 
 	
-	# #warn @numerator; 
-	for (local $a=0;$a< scalar(@numerator); $a++){
-		#warn '/' . $numerator[$a]->{name} . '/';
-		if ($a > 0){
-			$newUnitString = $newUnitString . '*';
+	if (scalar @numerator > 0){
+		for (local $a=0;$a< scalar(@numerator); $a++){
+			#warn '/' . $numerator[$a]->{name} . '/';
+			if ($a > 0){
+				$newUnitString = $newUnitString . '*';
+			}
+			if (exists($numerator[$a]->{isQualitative})){  # put qualitative units in parentheses so that powers are not interpreted into the unit name itself
+				$newUnitString = $newUnitString .'(' . $numerator[$a]->{name} . ')' . ($numerator[$a]->{power} == 1 ? '' : "^${numerator[$a]->{power}}");
+			}else{
+				$newUnitString = $newUnitString . $numerator[$a]->{name} . ($numerator[$a]->{power} == 1 ? '' : "^${numerator[$a]->{power}}");
+			}
 		}
-		if (exists($numerator[$a]->{isQualitative})){  # put qualitative units in parentheses so that powers are not interpreted into the unit name itself
-			$newUnitString = $newUnitString .'(' . $numerator[$a]->{name} . ')' . ($numerator[$a]->{power} == 1 ? '' : "^${numerator[$a]->{power}}");
-		}else{
-			$newUnitString = $newUnitString . $numerator[$a]->{name} . ($numerator[$a]->{power} == 1 ? '' : "^${numerator[$a]->{power}}");
-		}
+	} else {
+		$newUnitString = '1';
 	}
 	if (scalar @denominator > 0){
 		$newUnitString =  $newUnitString . '/';
+	} else {
+		# Denominator is empty, normally that's fine.  But if numerator is empty, too. i.e. "1"
+		# then that will leave a "1" as the canceled unit instead of showing nothing.
+		# Need to erase everything at this point.
+		if ($newUnitString == '1'){
+			$newUnitString = '';
+		}
 	}
 	for (local $a=0;$a< scalar(@denominator); $a++){
 			#warn %{$denominator[$a]};
@@ -1014,6 +1024,7 @@ sub compareUnitHash {
 	# so that we can compare with a student made hash that may not have the parsed item in it yet.
 	delete($left{'parsed'});
 	delete($right{'parsed'});
+
 
 	# from https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare
 	# same number of keys?
