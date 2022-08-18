@@ -992,7 +992,7 @@ sub combineStringUnitsCleanly {
 		# Denominator is empty, normally that's fine.  But if numerator is empty, too. i.e. "1"
 		# then that will leave a "1" as the canceled unit instead of showing nothing.
 		# Need to erase everything at this point.
-		if ($newUnitString == '1'){
+		if ($newUnitString eq '1'){
 			$newUnitString = '';
 		}
 	}

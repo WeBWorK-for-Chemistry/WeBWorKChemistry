@@ -35,24 +35,41 @@ loadMacros(
 
 Context("InexactValue");
 
-$coefA = 4;
-$coefB = 5;
-$coefC = random(1,4,1);
-$coefD = random(1,3,1);
+@reactionComponents = (
+	[
+		['', 'A', '', 'B', '', 'AB'],
+		['', 'AB', '', 'B', '', 'AB_2'],
+		['', 'A', 2, 'B', '', 'AB_2']
+	],
+	[
+		['', 'A', '', 'B', '', 'AB'],
+		['', 'AB', '', 'A', '', 'A_2B'],
+		[2, 'A', '', 'B', '', 'A_2B']
+	],
+	[
+		['', 'A', '', 'A', '', 'A_2'],
+		['', 'B', '', 'A_2', '', 'A_2B'],
+		[2, 'A', '', 'B', '', 'A_2B']
+	],
+	[
+		['', 'B', '', 'B', '', 'B_2'],
+		['', 'A', '', 'B_2', '', 'AB_2'],
+		['', 'A', 2, 'B', '', 'AB_2']
+	]
+	);
+$version = random(0,3,1);
+$reactions = $reactionComponents[$version];
+$reaction1 = $reactions->[0];
+$reaction2 = $reactions->[1];
+$reaction3 = $reactions->[2];
+$Kc1raw = random(0.01, 9.99, 0.01);
+$Kc3raw = random(0.01, 9.99, 0.01);
 
-$volume = random(1.25,3,0.25);
+$Kc1 = InexactValue($Kc1raw, 2);
+$Kc3 = InexactValue($Kc2raw, 2);
 
-$endTime = InexactValue('2.50e2');
+$Kc2= $Kc3/$Kc1;
 
-$startA = InexactValue('3.00');
-$endA = InexactValue('1.00');
-
-$endC = ($startA - $endA)*$coefC/$coefA;
-$endD = ($startA - $endA)*$coefD/$coefA;
-
-$rateA = -1*($endA-$startA)/$volume/($endTime);  # - (final - initial) / volume / change in time
-$rateD = ($endD)/$volume/($endTime);
-$rateRxn = $rateD * 1/$coefD;
 ##############################################################
 #
 #  Problem
@@ -61,7 +78,9 @@ $rateRxn = $rateD * 1/$coefD;
 
 BEGIN_PGML
 
-Consider the reaction:  [`\ce{[$coefA]A + [$coefB]B -> [$coefC == 1 ? '' : $coefC]C + [$coefD == 1 ? '' : $coefD]D}`]
+Consider the following three equilibrium reactions:  
+
+[`\ce{[$reaction1->[0]][$reaction1->[1]] + [$coefB]B -> [$coefC == 1 ? '' : $coefC]C + [$coefD == 1 ? '' : $coefD]D}`]
 
 The reaction above was carried out in a container with *a volume of [$volume] L*.  
 The table below displays some data relating to that experiment.
