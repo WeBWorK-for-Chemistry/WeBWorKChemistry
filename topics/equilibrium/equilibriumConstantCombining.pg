@@ -37,74 +37,98 @@ Context("InexactValue");
 
 @reactionComponents = (
 	[
-		['', 'A', '', 'B', '', 'AB'],
-		['', 'AB', '', 'B', '', 'AB_2'],
-		['', 'A', 2, 'B', '', 'AB_2']
+		'A + B <=> AB',
+		'AB + B <=> AB_2',
+		'A + 2B <=> AB_2'
 	],
 	[
-		['', 'A', '', 'B', '', 'AB'],
-		['', 'AB', '', 'A', '', 'A_2B'],
-		[2, 'A', '', 'B', '', 'A_2B']
+		'A + B <=> AB',
+		'AB + A <=> A_2B',
+		'2A + B <=> A_2B'
 	],
 	[
-		['', 'A', '', 'A', '', 'A_2'],
-		['', 'B', '', 'A_2', '', 'A_2B'],
-		[2, 'A', '', 'B', '', 'A_2B']
+		'2A <=> A_2',
+		'A_2 + B <=> A_2B',
+		'2A + B <=> A_2B'
 	],
 	[
-		['', 'B', '', 'B', '', 'B_2'],
-		['', 'A', '', 'B_2', '', 'AB_2'],
-		['', 'A', 2, 'B', '', 'AB_2']
+		'2B <=> B_2',
+		'A + B_2 <=> AB_2',
+		'A + 2B <=> AB_2'
+	]
+	);
+	@reactionSolution = (
+	[
+		'A + B <=> \cancel{AB}',
+		'\cancel{AB} + B <=> AB_2',
+		'A + 2B <=> AB_2'
+	],
+	[
+		'A + B <=> \cancel{AB}',
+		'\cancel{AB} + A <=> A_2B',
+		'2A + B <=> A_2B'
+	],
+	[
+		'2A & <=> \cancel{A_2}',
+		'\cancel{A_2} + B & <=> A_2B',
+		'2A + B & <=> A_2B'
+	],
+	[
+		'2B <=> \cancel{B_2}',
+		'A + \cancel{B_2} <=> AB_2',
+		'A + 2B <=> AB_2'
 	]
 	);
 $version = random(0,3,1);
+$missingEq = random(1,3,1);
+
 $reactions = $reactionComponents[$version];
 $reaction1 = $reactions->[0];
 $reaction2 = $reactions->[1];
 $reaction3 = $reactions->[2];
-$Kc1raw = random(0.01, 9.99, 0.01);
-$Kc3raw = random(0.01, 9.99, 0.01);
 
-$Kc1 = InexactValue($Kc1raw, 2);
-$Kc3 = InexactValue($Kc2raw, 2);
+$KcAraw = random(0.01, 9.99, 0.01);
+$KcBraw = random(0.01, 9.99, 0.01);
 
-$Kc2= $Kc3/$Kc1;
+if ($missingEq == 1){
+	$Kc2 = InexactValue($KcAraw, 2);
+	$Kc3 = InexactValue($KcBraw, 2);
+	$Kc1 = $Kc3/$Kc2; 
+	$unknown = $Kc1;
+} elsif ($missingEq == 2){
+	$Kc1 = InexactValue($KcAraw, 2);
+	$Kc3 = InexactValue($KcBraw, 2);
+	$Kc2 = $Kc3/$Kc1; 
+	$unknown = $Kc2;
+} else {
+	$Kc1 = InexactValue($KcAraw, 2);
+	$Kc2 = InexactValue($KcBraw, 2);
+	$Kc3 = $Kc1*$Kc2;
+	$unknown = $Kc3;
+
+}
+
+%ordinal= (1=>'first', 2=>'second', 3=>'third');
+
 
 ##############################################################
 #
 #  Problem
 #
 #
-
 BEGIN_PGML
 
 Consider the following three equilibrium reactions:  
 
-[`\ce{[$reaction1->[0]][$reaction1->[1]] + [$coefB]B -> [$coefC == 1 ? '' : $coefC]C + [$coefD == 1 ? '' : $coefD]D}`]
+[```\begin{align}
+\ce{[@ $reaction1=~tr/&/ /r @]*}\qquad & \mathrm{K_{c} = [$missingEq == 1 ? '?' : $Kc1]} \tag{1}\\
+\ce{[@ $reaction2=~tr/&/ /r @]*}\qquad & \mathrm{K_{c} = [$missingEq == 2 ? '?' : $Kc2]} \tag{2}\\
+\ce{[@ $reaction3=~tr/&/ /r @]*}\qquad & \mathrm{K_{c} = [$missingEq == 3 ? '?' : $Kc3]} \tag{3}
+\end{align}```]
 
-The reaction above was carried out in a container with *a volume of [$volume] L*.  
-The table below displays some data relating to that experiment.
+What is the value of the missing [`\mathrm{K_c}`] for the [$ordinal{$missingEq}] equation?
 
-[@ 
-DataTable([
-[['Time (s)',headerrow=>1],'Moles A','Moles C', 'Moles D'],
-[PGML('[`0.00`]'),PGML('[`[$startA]`]'),PGML('[`0.00`]'),PGML('[`0.00`]')],
-[PGML('[`[$endTime]`]'),PGML('[`[$endA]`]'),PGML('[___]{$endC}'),PGML('[___]{$endD}')],
-],
-midrules=>1 ,
-tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
-captioncss=>'font-variant:small-caps; ',
-columnscss=>[' '],
-);
-@]* 
-
-A.  *Fill in the missing entries in the table.*
-
-B.  What is the rate of consumption of A? [_______]{$rateA} M/s
-
-C.  What is the rate of production of D? [_______]{$rateD} M/s
-
-D.  What is the rate of the reaction? [_______]{$rateRxn} M/s
+[`\mathrm{K_c} = `] [___________]{$unknown}
 
 END_PGML
 $diff = $startA - $endA;
@@ -118,32 +142,30 @@ $solRateD = "\frac{\Delta[\mathrm{D}]}{\Delta t} = \mathrm{\frac{\frac{$endD \,m
 
 $solRateRxn = "\frac{-1}{$coefA}\frac{\Delta[\mathrm{A}]}{\Delta t} = \frac{1}{$coefD}\frac{\Delta[\mathrm{D}]}{\Delta t} = $rateRxn \,\mathrm{M/s}";
 
+$solutionEquations = $reactionSolution[$version];
+
 BEGIN_PGML_SOLUTION
-### First, calculate the change in A moles.
 
-[``\mathrm{[$startA]\,mol\,A - [$endA]\,mol\,A = [$startA - $endA]\,mol\,A\,reacted}``]
+The first two equations can be combined together to produce the third equation.  Add 
+the reactants together, add the products together, then cancel whatever is the same
+on both sides:
 
-[``[$solEndC]``]
+[```\begin{align}
+\ce{[$solutionEquations->[0]]}\tag{1} \\
+\ce{[$solutionEquations->[1]]}\tag{2} \\
+\hline
+\ce{[$solutionEquations->[2]]}\tag{3} 
+\end{align}```]
 
-[``[$solEndD]``]
+What does this mean for the equilibrium constants?  Well, when you add two equations
+together, you have to _multiply_ the equilibrium constants together.  That means that:
 
-### Rate of consumption of A:
+[``` \mathrm{K_{c1} \times K_{c2} = K_{c3}} ```]
 
-[``[$solRateA]``]
+(The equilibrium constants are labeled with with their equation number for clarity.)
 
-Moles of A are negative, because it's describing the direction of change.  It's losing moles A. 
-That cancels out with the negative from the rate of _consumption_ definition.
-
-### Rate of formation of D:
-
-[``[$solRateD]``]
-
-### Rate of reaction:
-
-[``[$solRateRxn]``]
-
-Either calculation will give you the correct answer.  You could even do it with C if you calculate the 
-rate of formation of C first.
+Now that you know the relationship, you can solve for the missing [`\mathrm{K_c}`] by
+substituting in the known [`\mathrm{K_c}`] values and solving.
 
 END_PGML_SOLUTION
 
