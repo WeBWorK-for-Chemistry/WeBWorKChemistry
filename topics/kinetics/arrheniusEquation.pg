@@ -114,19 +114,19 @@ negative slope.  An equation is written on the graph:  ln k = $slope * (1/T)(K^-
 #
 
 BEGIN_PGML
-Given the linear form of the Arrhenius equation:  [``\ln k = \ln \mathrm{A} - \mathrm{\frac{E_a}{R}\left(\frac{1}{T}\right)}``] 
+Given the linear form of the Arrhenius equation:  [``\ln k = \ln A - {\frac{E_a}{R}\left(\frac{1}{T}\right)}``] 
 and the graph below with the equation for the best-fit line, calculate the energy of activation and the frequency factor for 
-this unknown reaction.  [`` \mathrm{R = 8.314 \frac{J}{K \cdot mol}} ``]
+this unknown reaction.  [`` R = 8.314 \mathrm{\frac{J}{K \cdot mol}} ``]
 
 [@ image(insertGraph($graph),width=>350,height=>350,extra_html_tags=>"alt='$alt0'") @]*
 
 _Don't forget appropriate units for [`E_a`]!_
 
-[`\mathrm{E_a}`]:  [____________]{$Ea}
+[`{E_a}`]:  [____________]{$Ea}
 
 _A has units which are difficult to deduce without more information.  Write it without units._
 
-[`\mathrm{A}`]:   [____________]{$A}
+[`{A}`]:   [____________]{$A}
 
 END_PGML
 

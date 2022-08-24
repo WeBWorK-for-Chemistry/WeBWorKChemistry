@@ -67,7 +67,7 @@ $concA = (($concC/$activity)**$coefC/((($concB/$activity)**$coefB)*$Kc))**(1/$co
 
 BEGIN_PGML
 
-The following reaction has a [`\mathrm{K_c}`] of [$Kc] at a certain temperature.
+The following reaction has a [`{K_c}`] of [$Kc] at a certain temperature.
 
 [```\ce{[$coefA == 1 ? '' : $coefA]A + [$coefB == 1 ? '' : $coefB]B <=> [$coefC == 1 ? '' : $coefC]C}```]
 
@@ -87,7 +87,7 @@ BEGIN_PGML_SOLUTION
 Start with the equilibrium expression for the reaction.  Remember, the exponents
 come from the coefficients.  Also, always place products over reactants.
 
-[``` \mathrm{K_c = \frac{[C]^[$coefC]}{[A]^[$coefA][B]^[$coefB]}} ```]
+[``` K_c = \mathrm{\frac{[C]^[$coefC]}{[A]^[$coefA][B]^[$coefB]}} ```]
 
 Re-arrange the equation to solve for \[A\]:
 

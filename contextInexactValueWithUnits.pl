@@ -1,9 +1,6 @@
 loadMacros('MathObjects.pl');
 loadMacros('betterUnits.pl');
 
-#loadMacros('NumberWithUnits.pm');
-
-
 our %fundamental_units = %Units::fundamental_units;
 our %known_units = %Units::known_units;
 
@@ -27,6 +24,14 @@ sub Init {
   $context->operators->clear;
   $context->functions->clear;
   $context->strings->clear;
+
+#   $context->operators->add(
+#      '<'  => {precedence => .5, associativity => 'left', type => 'bin', string => ' < ',
+#               class => 'InexactValueWithUnits::InexactValueWithUnits', eval => 'evalLessThan', combine => 1, perl => '<'},
+
+#      '>'  => {precedence => .5, associativity => 'left', type => 'bin', string => ' > ',
+#               class => 'InexactValueWithUnits::InexactValueWithUnits', eval => 'evalGreaterThan', combine => 1, perl => '>'}
+#   );
 
   #
   #  Don't reduce constant values (so 10^2 won't be replaced by 100)
@@ -851,6 +856,17 @@ sub power {
 
 }
 
+# sub evalLessThan {
+# 	my ($self,$a,$b) = @_; my $context = $self->context;
+# 	warn "HERE!";
+# 	return 0;
+# }
+
+# sub evalGreaterThan {
+# 	my ($self,$a,$b) = @_; my $context = $self->context;
+# 	warn "HERE2!";
+# 	return 0;
+# }
 
 sub combineStringUnitsCleanly {
 	my $left = shift;

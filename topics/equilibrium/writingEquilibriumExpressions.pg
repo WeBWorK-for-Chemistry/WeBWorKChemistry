@@ -30,8 +30,6 @@ loadMacros(
 #
 #
 
-$rand_num_generator = new PGrandom();
-
 $context = Context("Numeric");
 
 @reactionComponents = (
@@ -96,7 +94,6 @@ $denominator = '(' . $reaction->[1] . ')^{' . $reaction->[0] . '}*('. $reaction-
 $answer = Formula($numerator . '/(' . $denominator . ')');
 #warn $answer;
 
-
 ##############################################################
 #
 #  Problem
@@ -105,8 +102,6 @@ $answer = Formula($numerator . '/(' . $denominator . ')');
 
 BEGIN_PGML
 Write the equilibrium constant expression, [`\mathrm{K_c}`], for the following equilibrium:
-
-[$hsh]*
 
 [``` \ce{[$reaction->[0] == 1 ? '' : $reaction->[0]][$reaction->[1]] + [$reaction->[2]][$reaction->[3]] <=> [$reaction->[4]][$reaction->[5]] + [$reaction->[6]][$reaction->[7]] }  ```]
 
@@ -126,7 +121,7 @@ Write the equilibrium constant expression, [`\mathrm{K_c}`], for the following e
 
 **Answer:**
 
-[`\mathrm{K_c}=`] [________________________________________________]{$answer}
+[`{K_c}=`] [________________________________________________]{$answer}
 
 END_PGML
 
@@ -136,6 +131,8 @@ BEGIN_PGML_SOLUTION
 An equilibrium contant expression can be built by multiplying the concentrations of each product
 and dividing by each reactant concentration.  Take the coefficient of each reactant/product and 
 place it as a power for each concentration in the expression. 
+
+[``` K_c = \frac{\mathrm{[products]^{coef}}...}{\mathrm{[reactants]^{coef}}...} ```]
 
 END_PGML_SOLUTION
 

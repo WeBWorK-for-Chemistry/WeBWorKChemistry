@@ -59,14 +59,14 @@ Context("InexactValue");
 	);
 	@reactionSolution = (
 	[
-		'A + B <=> \cancel{AB}',
-		'\cancel{AB} + B <=> AB_2',
-		'A + 2B <=> AB_2'
+		'A + B & <=> \cancel{AB}',
+		'\cancel{AB} + B & <=> AB_2',
+		'A + 2B & <=> AB_2'
 	],
 	[
-		'A + B <=> \cancel{AB}',
-		'\cancel{AB} + A <=> A_2B',
-		'2A + B <=> A_2B'
+		'A + B & <=> \cancel{AB}',
+		'\cancel{AB} + A & <=> A_2B',
+		'2A + B & <=> A_2B'
 	],
 	[
 		'2A & <=> \cancel{A_2}',
@@ -74,9 +74,9 @@ Context("InexactValue");
 		'2A + B & <=> A_2B'
 	],
 	[
-		'2B <=> \cancel{B_2}',
-		'A + \cancel{B_2} <=> AB_2',
-		'A + 2B <=> AB_2'
+		'2B & <=> \cancel{B_2}',
+		'A + \cancel{B_2} & <=> AB_2',
+		'A + 2B & <=> AB_2'
 	]
 	);
 $version = random(0,3,1);
@@ -121,14 +121,14 @@ BEGIN_PGML
 Consider the following three equilibrium reactions:  
 
 [```\begin{align}
-\ce{[@ $reaction1=~tr/&/ /r @]*}\qquad & \mathrm{K_{c} = [$missingEq == 1 ? '?' : $Kc1]} \tag{1}\\
-\ce{[@ $reaction2=~tr/&/ /r @]*}\qquad & \mathrm{K_{c} = [$missingEq == 2 ? '?' : $Kc2]} \tag{2}\\
-\ce{[@ $reaction3=~tr/&/ /r @]*}\qquad & \mathrm{K_{c} = [$missingEq == 3 ? '?' : $Kc3]} \tag{3}
+\ce{[@ $reaction1=~tr/&/ /r @]*}\qquad & {K_{c} = [$missingEq == 1 ? '\,?' : $Kc1]} \tag{1}\\
+\ce{[@ $reaction2=~tr/&/ /r @]*}\qquad & {K_{c} = [$missingEq == 2 ? '\,?' : $Kc2]} \tag{2}\\
+\ce{[@ $reaction3=~tr/&/ /r @]*}\qquad & {K_{c} = [$missingEq == 3 ? '\,?' : $Kc3]} \tag{3}
 \end{align}```]
 
-What is the value of the missing [`\mathrm{K_c}`] for the [$ordinal{$missingEq}] equation?
+What is the value of the missing [`{K_c}`] for the [$ordinal{$missingEq}] equation?
 
-[`\mathrm{K_c} = `] [___________]{$unknown}
+[`{K_c} = `] [___________]{$unknown}
 
 END_PGML
 $diff = $startA - $endA;
@@ -160,12 +160,12 @@ on both sides:
 What does this mean for the equilibrium constants?  Well, when you add two equations
 together, you have to _multiply_ the equilibrium constants together.  That means that:
 
-[``` \mathrm{K_{c1} \times K_{c2} = K_{c3}} ```]
+[``` {K_{c1} \times K_{c2} = K_{c3}} ```]
 
 (The equilibrium constants are labeled with with their equation number for clarity.)
 
-Now that you know the relationship, you can solve for the missing [`\mathrm{K_c}`] by
-substituting in the known [`\mathrm{K_c}`] values and solving.
+Now that you know the relationship, you can solve for the missing [`{K_c}`] by
+substituting in the known [`{K_c}`] values and solving.
 
 END_PGML_SOLUTION
 

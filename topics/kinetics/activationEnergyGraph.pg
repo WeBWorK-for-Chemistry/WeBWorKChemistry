@@ -28,10 +28,9 @@ loadMacros(
 #  Setup
 #
 #
-$rand_num_generator = new PGrandom();
 
 
-$version = $rand_num_generator->random(1,2,1);
+$version = random(1,2,1);
 $mcAnswer = $version == 1 ? 1 : 0;
 
 $ans = [['a','e','c','d','f'],['a', 'f', 'e', 'b', 'c']];
@@ -46,9 +45,9 @@ $popup4 = PopUp($options,$ans->[$version - 1]->[4]);
 
 # $radio = RadioButtons([['\( \mathrm{k_{forward}} \)',PGML('[```\mathrm{k_{reverse}}```]'),PGML('[` \mathrm{k_{forward1}} `]')],'Impossible to tell'],
 #  $mcAnswer, labels=>"123");
-$radioAnswers = ['\( \mathrm{k_{forward} > k_{reverse}} \)',
-	'\( \mathrm{k_{forward} < k_{reverse}} \)',
-	'\( \mathrm{k_{forward} = k_{reverse}} \)'];
+$radioAnswers = ['\( k_{forward} > k_{reverse} \)',
+	'\( {k_{forward} < k_{reverse}} \)',
+	'\( {k_{forward} = k_{reverse}} \)'];
 $radio = RadioButtons([$radioAnswers,
 	'Impossible to tell'],
  $radioAnswers->[$mcAnswer], labels=>"123");
@@ -82,9 +81,9 @@ On the previous reaction profile, find the letter marker that indicates the:
 
 1. position of reactants  [_]{$popup0}
 2. position of products [_]{$popup1}
-3. the activation energy for the forward reaction, [` \mathrm{E_{A,forward}} `] [_]{$popup2}
-4. the activation energy for the reverse reaction, [` \mathrm{E_{A,reverse}} `] [_]{$popup3}
-5. the change in enthalpy for the reaction, [` \mathrm{\Delta H} `] [_]{$popup4}
+3. the activation energy for the forward reaction, [` E_{A,{forward}} `] [_]{$popup2}
+4. the activation energy for the reverse reaction, [` E_{A,{reverse}} `] [_]{$popup3}
+5. the change in enthalpy for the reaction, [` \Delta H `] [_]{$popup4}
 
 6. Which of the following would best represent the values of the rate constants for the forward and reverse reaction?
 

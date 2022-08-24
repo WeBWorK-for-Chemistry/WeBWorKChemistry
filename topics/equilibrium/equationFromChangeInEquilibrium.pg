@@ -151,8 +151,6 @@ sub init_graphEX {
 #
 #
 
-$rand_num_generator = new PGrandom();
-
 Context("Numeric");
 
 $coefA = random(1,5,1);#$rand_num_generator->random(1,5,1);
@@ -248,7 +246,7 @@ to level out at $endC molar at the end.";
 BEGIN_PGML
 Use the data and graph below to determine the balanced chemical equation:
 
-[` \mathrm{[A]_0=[$startA]\,M,[B]_0=[$startB]\,M, [C]_0=[$startC]\,M}`]
+[` \mathrm{[A]_0=[$startA]\,M\qquad [B]_0=[$startB]\,M\qquad [C]_0=[$startC]\,M}`]
 
 [@ image(insertGraph($graph),width=>350,height=>350,extra_html_tags=>"alt='$alt0'") @]*
 
@@ -275,19 +273,19 @@ Next, determine how much they have changed. The negative signs on the reactants 
 positive one even though we're losing reactants.  This will make comparing the three values easier.
 
 
-[`\mathrm{- \Delta[A] = -([$endA]\,M - [$startA]\,M) = [$changeA]\,M}`]
+[```\mathrm{- \Delta[A] = -([$endA]\,M - [$startA]\,M) = [$changeA]\,M}```]
 
-[`\mathrm{- \Delta[B] = -([$endB]\,M - [$startB]\,M) = [$changeB]\,M}`]
+[```\mathrm{- \Delta[B] = -([$endB]\,M - [$startB]\,M) = [$changeB]\,M}```]
 
-[`\mathrm{\Delta[C] = [$endC]\,M - [$startC]\,M = [$changeC]\,M}`]
+[```\mathrm{\Delta[C] = [$endC]\,M - [$startC]\,M = [$changeC]\,M}```]
 
 This forms a ratio!  Simplify the ratio by dividing them all by the smallest of the three:
 
-[``A: \frac{[$changeA]}{[$smallest]} = [$changeA/$smallest] ``]
+[```\mathrm{A}: \frac{[$changeA]}{[$smallest]} = [$changeA/$smallest] ```]
 
-[``B: \frac{[$changeB]}{[$smallest]} = [$changeB/$smallest] ``]
+[```\mathrm{B}: \frac{[$changeB]}{[$smallest]} = [$changeB/$smallest] ```]
 
-[``C: \frac{[$changeC]}{[$smallest]} = [$changeC/$smallest] ``]
+[```\mathrm{C}: \frac{[$changeC]}{[$smallest]} = [$changeC/$smallest] ```]
 
 These are the coefficients for the reactants and products.
 
