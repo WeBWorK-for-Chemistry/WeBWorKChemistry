@@ -1207,7 +1207,13 @@ sub compareUnitRefs {
 	my $second = shift;
 	my %b = %$second;
 	my $equal = 1;
-	if (%a != %b){
+	if (exists($a{'parsed'})){
+		delete($a{'parsed'});
+	}
+	if (exists($b{'parsed'})){
+		delete($b{'parsed'});
+	}
+	if (scalar(keys(%a)) != scalar(keys(%b))){
 		$equal = 0;  # do not have same # of keys
 	} else {
 		# https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare#:~:text=Compare%20is%20not%20a%20detailed%20enough%20phrase%20when,don%27t%20have%20the%20same%20number%20of%20keysn%22%3B%20%7D
@@ -1255,7 +1261,7 @@ sub comparePhysicalQuantity {
 	my $u;
 	
 	foreach $u (keys %$first) {
-		if ( $u ne 'factor') {      
+		if ( $u ne 'factor' && $u ne 'parsed') {      
 			if (!defined $first->{$u} && !defined $second->{$u}){
 				next;
 			} elsif (!defined $first->{$u} || !defined $second->{$u}){

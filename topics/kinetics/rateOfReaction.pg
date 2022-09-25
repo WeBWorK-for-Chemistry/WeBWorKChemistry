@@ -31,7 +31,6 @@ loadMacros(
 #  Setup
 #
 #
-
 Context("InexactValue");
 
 $coefA = 4;

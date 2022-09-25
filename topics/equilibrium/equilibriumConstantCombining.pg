@@ -116,15 +116,18 @@ if ($missingEq == 1){
 #  Problem
 #
 #
+$reaction1f = $reaction1=~tr/&/ /r;
+$reaction2f = $reaction2=~tr/&/ /r;
+$reaction3f = $reaction3=~tr/&/ /r;
 BEGIN_PGML
 
 Consider the following three equilibrium reactions:  
 
-[```\begin{align}
-\ce{[@ $reaction1=~tr/&/ /r @]*}\qquad & {K_{c} = [$missingEq == 1 ? '\,?' : $Kc1]} \tag{1}\\
-\ce{[@ $reaction2=~tr/&/ /r @]*}\qquad & {K_{c} = [$missingEq == 2 ? '\,?' : $Kc2]} \tag{2}\\
-\ce{[@ $reaction3=~tr/&/ /r @]*}\qquad & {K_{c} = [$missingEq == 3 ? '\,?' : $Kc3]} \tag{3}
-\end{align}```]
+[```\begin{aligned}
+\ce{[$reaction1f]}\qquad & {K_{c} = [$missingEq == 1 ? '\,?' : $Kc1]} \\
+\ce{[$reaction2f]}\qquad & {K_{c} = [$missingEq == 2 ? '\,?' : $Kc2]} \\
+\ce{[$reaction3f]}\qquad & {K_{c} = [$missingEq == 3 ? '\,?' : $Kc3]} 
+\end{aligned}```]
 
 What is the value of the missing [`{K_c}`] for the [$ordinal{$missingEq}] equation?
 

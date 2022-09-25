@@ -30,6 +30,12 @@ loadMacros(
 #
 #
 
+# HEADER_TEXT(<<EOF);
+
+# <script type="text/javascript" language="javascript" src="/webwork2_course_files/chem/mathquillChemEditor.js"></script>
+
+# EOF
+
 $context = Context("Numeric");
 
 @reactionComponents = (
@@ -135,5 +141,7 @@ place it as a power for each concentration in the expression.
 [``` K_c = \frac{\mathrm{[products]^{coef}}...}{\mathrm{[reactants]^{coef}}...} ```]
 
 END_PGML_SOLUTION
+
+# TEXT(MODES(HTML=>'<script>window.disableMathQuill()</script>', TeX=>''));
 
 ENDDOCUMENT();        

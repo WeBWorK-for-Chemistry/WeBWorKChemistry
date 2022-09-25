@@ -853,7 +853,6 @@ sub power {
 	} else {
 		return $self->new([$powerResult, $shortCutToCountSigFigs->sigFigs()], $newUnitString);
 	}
-
 }
 
 # sub evalLessThan {
@@ -1044,7 +1043,7 @@ sub compareUnitHash {
 
 	# from https://stackoverflow.com/questions/1273616/how-do-i-compare-two-hashes-in-perl-without-using-datacompare
 	# same number of keys?
-	if (%left != %right) {
+	if (scalar(keys(%left)) != scalar(keys(%right))) {
 		# WHAT ABOUT EQUIVALENT UNITS?  i.e. M vs mol/L ??
 
 		# warn 'not equal not correct';
@@ -1312,7 +1311,7 @@ sub promote {
 	#   warn $r;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	unless (scalar(@_)){
-		warn "empty!";
+		#warn "empty!";
 	}
 	my $x = (scalar(@_) ? shift : $self);
 	# warn 'Class: '. $class;

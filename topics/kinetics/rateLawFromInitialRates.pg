@@ -101,10 +101,7 @@ BEGIN_PGML
 The data below were collected for the following reaction:
   [```\ce{[$coefA]A + [$coefB]B -> [$coefC == 1 ? '' : $coefC]C}```]
 
-The reaction above was carried out in a container with *a volume of [$volume] L*.  
 The table below displays some data relating to that experiment.
-
-rate law: [```\mathrm{rate} = k[@ $Aorder > 1 ? "[\\mathrm{A}]^$Aorder" : "[\\mathrm{A}]" @]*[@ $Border > 0 ? ($Border > 1 ? "[\\mathrm{B}]^$Border" : '[\\mathrm{B}]') : '' @]* ```]
 
 [@ 
 DataTable([
@@ -121,7 +118,7 @@ columnscss=>[' '],
 );
 @]* 
 
-*Due to system limitations, use plain parentheses ( ) instead of square brackets \[ \]!*
+*If MathQuill is not enabled and you get errors when inputing your answer, then try using plain parentheses ( ) instead of square brackets \[ \]!*
 
 What is the rate law for this reaction?  
 

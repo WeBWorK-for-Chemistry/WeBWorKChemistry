@@ -18,27 +18,6 @@ package parser::MultiAnswer;
 
 our %known_units = %BetterUnits::known_units;
 
-# sub asConversionFactor {
-# 	$self = shift;
-# 	return $self->with(
-# 		singleResult => 0,
-# 		allowBlankAnswers=>1,
-# 		checkTypes => 0,
-# #   separator => '/',
-# #   tex_separator => '/',
-# #   tex_format => '\frac{%1s}{%2s}',
-# 		checker => sub {
-# 			my ($correct,$student,$ansHash) = @_;
-# 			# setMessage starts with index 1.
-# 			$ansHash->setMessage(1,'this is a test!!!!!!');
-# 			# $first = shift @$correct;
-# 			# push @$correct, $first;
-# 			return [0.75,0.75];
-# 		}
-# 	);
-# }
-
-
 sub asDimensionalAnalysis {
 	my $self = shift;
 	my $given = shift;
@@ -107,7 +86,6 @@ sub asDimensionalAnalysis {
 				# to be figured into the conversion because they're technically not the same physical quantities.  Need to compare physical
 				# quantities first to see if they could be exact.
 				if (BetterUnits::comparePhysicalQuantity($numerator->{units_ref}, $denominator->{units_ref})){
-					
 					my $studentInverseRatio = $denominator->{inexactValue} / $numerator->{inexactValue};
 					my $ratio = $numerator->{units_ref}->{factor} / $denominator->{units_ref}->{factor};
 					my $a = $ratio+0;
@@ -209,7 +187,6 @@ sub asDimensionalAnalysis {
 
 					# for comparing simplified units
 					$answerDiv = $correctArray[$j] / $correctArray[$j+1];
-
 					# check for matching units on both parts, then check for matching value (with tolerance)
 					#if (BetterUnits::compareUnitRefs($correctArray[$j]->{units_ref},$numerator->{units_ref}) && BetterUnits::compareUnitRefs($correctArray[$j+1]->{units_ref},$denominator->{units_ref})){
 					if (BetterUnits::compareUnitRefs($answerDiv->{units_ref},$studentDiv->{units_ref})) {
@@ -325,6 +302,147 @@ sub asDimensionalAnalysis {
 	);
 }
 
+sub asConversionFactor {
+	my $self = shift;
+	my $given = shift;
+	my $options = shift;	
+
+	return $self->with(
+		singleResult => 0,
+		allowBlankAnswers=>1,
+		checkTypes => 0,
+		checker => sub {
+			my ($correct,$student,$ansHash) = @_;
+
+			my @scores = ();
+
+			my @correctArray = @{$correct};
+			my @studentArray = @{$student};
+
+			unless (scalar @correctArray == 2) {
+				Value::Error('There should only be two answers in this conversion factor.');
+			}
+
+			my $studentCalc = $gradeGiven ? @studentArray[0] : $given;
+
+			for ($i = 0; $i < 2; $i++){
+				if ($studentArray[$i]->isExactZero){
+					# handle if zeros in blanks (assume exact 1 for dimensional analysis)
+					# If we don't do this, we get division by zero errors.  
+					# Plus, intent of blanks in student dimensional analysis is usually 1 mathmatically.
+					# Final answer doesn't matter.
+					$units = $studentArray[$i]->{units};
+					$newValue = Value->Package("InexactValueWithUnits")->new(['1',9**9**9], $units);
+					$studentArray[$i] = $newValue;
+					
+				} elsif ($studentArray[$i]->isOne) {
+					# for student conversion factors, assume a 1 is exact!
+					$units = $studentArray[$i]->{units};
+					$newValue = Value->Package("InexactValueWithUnits")->new(['1',9**9**9], $units);
+					$studentArray[$i] = $newValue;
+				} 				
+			}
+
+			# check both values in conversion factors to see if they must be exact or not.			
+			$numerator = $studentArray[0];
+			$denominator = $studentArray[1];
+			# a simple solution would be to look up the units being used and divide their factors... i.e. ft = 0.3048, in = 0.0254
+			# so ft/in = 12 exactly
+			# now we compare to what the student put.  1 ft / 12 in -> the inverse matches
+			# Second example where NOT exact:  L = 0.001  cup = 0.000236588
+			# L / cup = 4.22675706291
+			# Student might put 1 L / 4.227 cup --- inverse would be 4.227 which is ne to 4.22675706291... so it's NOT exact
+			# Technically, L to cups is never exact.  But if we get precision to this degree, it is probably ok to pretend it is exact.
+			# We're not doing calculations for real-world problems... only education.
+
+			# some conversions would have to be manually entered... i.e. lb to g... previous method would require gravity acceleration 
+			# to be figured into the conversion because they're technically not the same physical quantities.  Need to compare physical
+			# quantities first to see if they could be exact.
+
+			if (BetterUnits::comparePhysicalQuantity($numerator->{units_ref}, $denominator->{units_ref})){
+				
+				my $studentInverseRatio = $denominator->{inexactValue} / $numerator->{inexactValue};
+				my $ratio = $numerator->{units_ref}->{factor} / $denominator->{units_ref}->{factor};
+				$studentInverseRatioAsNumber = $studentInverseRatio->valueAsNumber();
+				# THIS is really strange, but 1000/1 is not the equal in value to 0.001 / 1e-6 
+				# this is equivalent to using the equality 1 L = 1000 mL.
+				# To get around this, we covert to string using the 'eq' operator.
+				if ($ratio eq $studentInverseRatioAsNumber){
+					# they're exact!  convert them to values with infinite sig figs
+					if ($numerator->sigFigs != 9**9**9){
+						$studentArray[0] = InexactValueWithUnits::InexactValueWithUnits->new([$numerator->valueAsNumber,9**9**9], $numerator->{units});
+					}
+					if ($denominator->sigFigs != 9**9**9){
+						$studentArray[1] = InexactValueWithUnits::InexactValueWithUnits->new([$denominator->valueAsNumber,9**9**9], $denominator->{units});
+					}
+				} 
+			}
+			
+			# Grade equality.  Order does not matter.
+			my $count=1;
+			my $studentGiven;
+
+			# What if student supplied inverted conversion factor? i.e. instead of 1 mL / 1e-3 L, they provide 1000 mL / 1 L.
+			# We need to make sure the right units are used, BUT instead of comparing individual values, divide numerator and denominator and compare results.
+			# Assume 2 values for array.  This is an equality.  Must have both sides filled out.
+			if (scalar @studentArray != 2) {
+				push @scores, 0;
+				push @scores, 0;
+				return \@scores;
+			}
+
+			$correctRatio = $correctArray[0]->{inexactValue}/$correctArray[1]->{inexactValue};
+			$studentRatio;
+			
+			# Equalities MUST have units.  They are pointless without them.  So only grade if the units are there.
+			#if ($studentArray[0]->{units} eq $correctArray[0]->{units} && $studentArray[1]->{units} eq $correctArray[1]->{units}) {
+			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[0]->{units_ref}, $correctArray[0]->{units_ref}) == 1
+			 && InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[1]->{units_ref}, $correctArray[1]->{units_ref}) == 1) {
+				$studentRatio = $studentArray[0]->{inexactValue}/$studentArray[1]->{inexactValue};
+				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+				push @scores, $result;
+				push @scores, $result;
+				return \@scores;
+			# } 
+# #			} elsif ($studentArray[1]->{units} eq $correctArray[0]->{units} && $studentArray[0]->{units} eq $correctArray[1]->{units}) {
+# 			elsif (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[1]->{units_ref}, $correctArray[0]->{units_ref}) == 1
+# 			 && InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[0]->{units_ref}, $correctArray[1]->{units_ref}) == 1) {
+# 				$studentRatio = $studentArray[1]->{inexactValue}/$studentArray[0]->{inexactValue};
+# 				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+# 				push @scores, $result;
+# 				push @scores, $result;
+# 				return \@scores;
+
+			} else {
+				push @scores, 0;
+				push @scores, 0;
+				$ansHash->setMessage(1,"Without correct units, the equality is incorrect.");
+				return \@scores;
+			}
+			
+			#$studentValue = shift @studentArray;
+			# # check for matching units on both parts, then check for matching value (with tolerance)
+			# for ($i = 0; $i < scalar @studentArray; $i++) {
+			# 	$score = 0;
+			# 	for ($j = scalar @correctArray - 1; $j >= 0; $j--) {
+			# 		if ($studentArray[$i]->{units} eq $correctArray[$j]->{units}){
+			# 			my $correctValue = $correctArray[$j];
+			# 			$score = $correctValue->{inexactValue}->compareValue($studentArray[$i]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+			# 			if ($score != 0 && $score != 1){
+			# 				$ansHash->setMessage($i+1,"Most likely you have a significant figures problem.");
+			# 			}
+			# 			splice(@correctArray, $j, 1);
+			# 			#delete $correctArray[$j];
+			# 			last;
+			# 		} 
+			# 	}
+			# 	push @scores, $score;
+			# }
+			return \@scores;
+		}
+	);
+}
+
 sub asEquality {
 	my $self = shift;
 	my $given = shift;
@@ -383,6 +501,7 @@ sub asEquality {
 			# quantities first to see if they could be exact.
 
 			if (BetterUnits::comparePhysicalQuantity($left->{units_ref}, $right->{units_ref})){
+				
 				my $studentInverseRatio = $right->{inexactValue} / $left->{inexactValue};
 				my $ratio = $left->{units_ref}->{factor} / $right->{units_ref}->{factor};
 				$studentInverseRatioAsNumber = $studentInverseRatio->valueAsNumber();
@@ -391,7 +510,6 @@ sub asEquality {
 				# To get around this, we covert to string using the 'eq' operator.
 				if ($ratio eq $studentInverseRatioAsNumber){
 					# they're exact!  convert them to values with infinite sig figs
-
 					if ($left->sigFigs != 9**9**9){
 						$studentArray[0] = InexactValueWithUnits::InexactValueWithUnits->new([$left->valueAsNumber,9**9**9], $left->{units});
 					}
@@ -421,18 +539,15 @@ sub asEquality {
 			#if ($studentArray[0]->{units} eq $correctArray[0]->{units} && $studentArray[1]->{units} eq $correctArray[1]->{units}) {
 			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[0]->{units_ref}, $correctArray[0]->{units_ref}) == 1
 			 && InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[1]->{units_ref}, $correctArray[1]->{units_ref}) == 1) {
-
 				$studentRatio = $studentArray[0]->{inexactValue}/$studentArray[1]->{inexactValue};
 				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
 				push @scores, $result;
 				push @scores, $result;
 				return \@scores;
-			}
-
+			} 
 #			} elsif ($studentArray[1]->{units} eq $correctArray[0]->{units} && $studentArray[0]->{units} eq $correctArray[1]->{units}) {
 			elsif (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[1]->{units_ref}, $correctArray[0]->{units_ref}) == 1
 			 && InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($studentArray[0]->{units_ref}, $correctArray[1]->{units_ref}) == 1) {
-
 				$studentRatio = $studentArray[1]->{inexactValue}/$studentArray[0]->{inexactValue};
 				$result = $correctRatio->compareValue($studentRatio,{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
 				push @scores, $result;
@@ -440,7 +555,6 @@ sub asEquality {
 				return \@scores;
 
 			} else {
-
 				push @scores, 0;
 				push @scores, 0;
 				$ansHash->setMessage(1,"Without correct units, the equality is incorrect.");
@@ -448,24 +562,23 @@ sub asEquality {
 			}
 			
 			#$studentValue = shift @studentArray;
-			# check for matching units on both parts, then check for matching value (with tolerance)
-			for ($i = 0; $i < scalar @studentArray; $i++) {
-				$score = 0;
-				for ($j = scalar @correctArray - 1; $j >= 0; $j--) {
-					if ($studentArray[$i]->{units} eq $correctArray[$j]->{units}){
-						my $correctValue = $correctArray[$j];
-						$score = $correctValue->{inexactValue}->compareValue($studentArray[$i]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
-						if ($score != 0 && $score != 1){
-							$ansHash->setMessage($i+1,"Most likely you have a significant figures problem.");
-						}
-						
-						splice(@correctArray, $j, 1);
-						#delete $correctArray[$j];
-						last;
-					}
-				}
-				push @scores, $score;
-			}
+			# # check for matching units on both parts, then check for matching value (with tolerance)
+			# for ($i = 0; $i < scalar @studentArray; $i++) {
+			# 	$score = 0;
+			# 	for ($j = scalar @correctArray - 1; $j >= 0; $j--) {
+			# 		if ($studentArray[$i]->{units} eq $correctArray[$j]->{units}){
+			# 			my $correctValue = $correctArray[$j];
+			# 			$score = $correctValue->{inexactValue}->compareValue($studentArray[$i]->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+			# 			if ($score != 0 && $score != 1){
+			# 				$ansHash->setMessage($i+1,"Most likely you have a significant figures problem.");
+			# 			}
+			# 			splice(@correctArray, $j, 1);
+			# 			#delete $correctArray[$j];
+			# 			last;
+			# 		} 
+			# 	}
+			# 	push @scores, $score;
+			# }
 			return \@scores;
 		}
 	);
