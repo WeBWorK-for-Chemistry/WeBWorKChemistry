@@ -26,9 +26,7 @@ function disableMathQuill2(){
 		inputs[i].id = inputs[i].id.replace(reg, "$1");
 	}
 }
-//$().ready(()=>disableMathQuill2());
-//window.addEventListener("loaded", ()=>disableMathQuill2());
-//disableMathQuill2();
+
 document.addEventListener('readystatechange', (e)=>{
 	if (document.readyState == 'interactive'){
 		const reg = /(?:MaThQuIlL_)(.*)/g;
