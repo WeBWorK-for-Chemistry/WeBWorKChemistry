@@ -464,6 +464,7 @@ sub string {
 	@valArray = $self->value;# + 0;
 	$valAsNumber = $valArray[0];
 	
+	# Only here is scientific required or preferred
 	if ($self->preferScientificNotation() || $forceScientific) {
 		$decimals = $self->sigFigs() - 1;
 
@@ -487,11 +488,12 @@ sub string {
 		}   
 
 	} else {
+		# Usually will be here for most numbers.
 		if ($self->sigFigs() == Infinity){
 			return $valAsNumber; # no modification for a number with infinity sig figs.  No reason to write more zeros.
 								 # There's no way to show it has inifinite sig figs.
 		} else {
-
+			# For any non infinite number (non-scientific normally)
 			if ($valAsNumber == 0){
 				return sprintf("%." . ($self->sigFigs()-1) . "f", $valAsNumber);
 			}
@@ -509,22 +511,20 @@ sub string {
 						$digits = $firstNonZeroPosition - 1 + $self->sigFigs();
 						return sprintf("%.${digits}f", main::Round($valAsNumber, $digits));
 					} else {
-						# must show as sci notation
+						# must show as sci notation b/c won't work or surpasses scientific threshold (i.e. too many zeros after decimal)
 						$digits = $self->sigFigs() - 1;
 						if ($preventClean) {
 							# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
 							# if ($digits > 20) {
 							# 	return sprintf("%e", $self->roundingHack($valAsNumber));
 							# }
-							
-							return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
+							return sprintf("%.${digits}e", main::Round($valAsNumber, $firstNonZeroPosition + $digits));
 						} else {
 							# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
 							# if ($digits > 20) {
 							# 	return $self->cleanSciText(sprintf("%e", $self->roundingHack($valAsNumber)));
 							# }
-							
-							return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
+							return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $firstNonZeroPosition+$digits)));
 						}
 					}
 				} else {
