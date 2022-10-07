@@ -1081,7 +1081,10 @@ sub process_term {
 		# First check for chemicals.  Later this can be transformed into a "preprocess" callback function that is
 		# passed here in the options so we can make this more generic and move chemicals out of the units file. 
 		
+		# MATHQUILL will add parentheses to units that have both numerator and denominator.
+		# We should check for outer parentheses and remove them if they exist.
 
+		$string =~ s/^\((.*)\)$/$1/g;  # will only remove parentheses on outside.
 
 		#split the numerator or denominator into factors -- the separators are *
 		# The system will always use * for separating terms.  i.e. after multiplying two numbers with units an asterix is used to separate the terms
