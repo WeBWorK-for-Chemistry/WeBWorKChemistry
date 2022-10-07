@@ -466,12 +466,15 @@ sub string {
 	
 	if ($self->preferScientificNotation() || $forceScientific) {
 		$decimals = $self->sigFigs() - 1;
-		
+
 		if ($preventClean) {
 			if ($decimals == $inf){
+
 				return sprintf("%e", $self->roundingHack($valAsNumber));
 			} else {
-				return sprintf("%.${decimals}e", $self->roundingHack($valAsNumber));
+				$log = main::floor(log(abs($valAsNumber))/log(10));
+				$rounded = main::Round($valAsNumber,($log*-1) + $decimals);
+				return sprintf("%.${decimals}e", $rounded);
 			}
 		} else {
 			if ($decimals == $inf){
@@ -479,7 +482,6 @@ sub string {
 			}else {
 				$log = main::floor(log(abs($valAsNumber))/log(10));
 				$rounded = main::Round($valAsNumber,($log*-1) + $decimals);
-			
 				return $self->cleanSciText(sprintf("%.${decimals}e", $rounded));
 			}
 		}   
@@ -514,13 +516,15 @@ sub string {
 							# if ($digits > 20) {
 							# 	return sprintf("%e", $self->roundingHack($valAsNumber));
 							# }
+							
 							return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
 						} else {
 							# if digits are infinite, this will throw an error.  For exact values, don't force a number of digits. Just use what is printed normally.
 							# if ($digits > 20) {
 							# 	return $self->cleanSciText(sprintf("%e", $self->roundingHack($valAsNumber)));
 							# }
-							return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
+							
+							return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
 						}
 					}
 				} else {
@@ -536,7 +540,6 @@ sub string {
 					$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
 					#if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
 					$firstPosition = abs($esplit[1]);
-
 					if ($firstPosition < $scientificNotationThreshold) {
 						# try printing part of number without decimal
 						#$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
@@ -573,8 +576,12 @@ sub string {
 							# the problem is that without the pre-rounding, a number like 1996 rounded to 1 sig fig should be 2000
 							# but the algorithm thought there weren't enough zeros to show 1 sig fig with 1996.  So we have to do the rounding here, 
 							# then test. 
-							$digits = $self->sigFigs() - 1;         
-							$nondecimalPartAbs = sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+							$digits = $self->sigFigs() - 1;  
+							       
+							#$nondecimalPartAbs = sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+
+							# negative value for digits because we are rounding non-decimal digits.
+							$nondecimalPartAbs = sprintf("%.${digits}e", main::Round($valAsNumber, -$digits));  
 							$nondecimalPartAbs = sprintf("%.0f", abs($nondecimalPartAbs));
 
 							$firstNonZeroDigitIndex = 0;
@@ -593,11 +600,13 @@ sub string {
 							} else {
 								# have to use scientific, there's no way to write the number using standard notation
 								$digits = $self->sigFigs() - 1;
-
+							
 								if ($preventClean) {
-									return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+									return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
+									#return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
 								} else {
-									return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
+									return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
+									#return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 								}
 								
 							}
@@ -608,9 +617,11 @@ sub string {
 						# 	return sprintf("%.0f", $self->roundingHack($valAsNumber));
 						# } 
 						if ($preventClean) {
-							return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
+							return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
+							#return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
 						} else {
-							return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
+							return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
+							#return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 						}
 					}
 				} else {
@@ -1726,8 +1737,13 @@ sub compareValue {
 	my $tolType = $self->{options}{tolType};
 
 	if ($tolerance == 0) {
+		#warn 'here';
 		my $transformedCorrect = $self->new($self->valueAsNumber, $min);
+		#warn $transformedCorrect;
+		#warn $transformedCorrect->valueAsNumber;
+		#warn $transformedCorrect->valueAsRoundedNumber;
 		my $transformedStudent = $self->new($student->valueAsNumber, $min);
+		#warn $transformedStudent->valueAsRoundedNumber;
 		if ($transformedCorrect->valueAsRoundedNumber == $transformedStudent->valueAsRoundedNumber){
 			$isAnswerValueGood = 1;
 		}
