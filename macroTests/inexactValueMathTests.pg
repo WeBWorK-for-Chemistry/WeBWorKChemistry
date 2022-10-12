@@ -25,7 +25,7 @@ Context("InexactValue");
 @data = (
 	['355 + 150', InexactValue(355,3) + InexactValue(150,2), {value=> 510, sf=> 2}],
 	['5.805e-9 + 4.804e-8', InexactValue(5.805e-9,4) + InexactValue(4.804e-8,4), {value=> 5.385e-8, sf=> 4}],
-	
+	['9100 * 0.6214', InexactValue(9100,2) * InexactValue(0.6214,4), {value=> 5700, sf=> 2}],
 );
 
 $html = '

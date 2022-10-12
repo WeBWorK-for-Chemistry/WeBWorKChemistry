@@ -576,10 +576,12 @@ sub string {
 							# the problem is that without the pre-rounding, a number like 1996 rounded to 1 sig fig should be 2000
 							# but the algorithm thought there weren't enough zeros to show 1 sig fig with 1996.  So we have to do the rounding here, 
 							# then test. 
-							$digits = $self->sigFigs() - 1;  
+							# If number is 3445 with 3 sig figs, we should round to the tens "4-3 = 1" 
+							# for numbers to left of decimal, 0 means round to ones, 1 means round to tens, etc.
+							$digits = length($nondecimalPartAbs) - $self->sigFigs();  
 							       
 							#$nondecimalPartAbs = sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
-
+							
 							# negative value for digits because we are rounding non-decimal digits.
 							$nondecimalPartAbs = sprintf("%.${digits}e", main::Round($valAsNumber, -$digits));  
 							$nondecimalPartAbs = sprintf("%.0f", abs($nondecimalPartAbs));
