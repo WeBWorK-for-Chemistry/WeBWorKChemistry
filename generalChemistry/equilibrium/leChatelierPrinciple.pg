@@ -111,6 +111,11 @@ The reaction in the container...
 
 END_PGML
 
+BEGIN_PGML_HINT
+
+Calculate Q and compare it to K.  
+
+END_PGML_HINT
 
 BEGIN_PGML_SOLUTION
 

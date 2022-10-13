@@ -66,7 +66,7 @@ $K = $kf/$kr;
 
 BEGIN_PGML
 
-Consider the unimolecular reaction:  [```\ce{A <=> B}```]
+Consider the unimolecular reaction where the rate laws for the forward and reverse reaction are both **first order**:  [```\ce{A <=> B}```]
 
 
 If [`k_{\mathrm{forward}}=[$kf]`] and [`k_{\mathrm{reverse}}=[$kr]`] and [`\mathrm{[A]_0 = [$A0]}`] and
@@ -102,6 +102,17 @@ $solRateA = "\frac{-\Delta[\mathrm{A}]}{\Delta t} = \mathrm{\frac{-\frac{-$diff 
 $solRateD = "\frac{\Delta[\mathrm{D}]}{\Delta t} = \mathrm{\frac{\frac{$endD \,mol}{$volume \,L}}{$endTime \,s}} = $rateD \,\mathrm{M/s}";
 
 $solRateRxn = "\frac{-1}{$coefA}\frac{\Delta[\mathrm{A}]}{\Delta t} = \frac{1}{$coefD}\frac{\Delta[\mathrm{D}]}{\Delta t} = $rateRxn \,\mathrm{M/s}";
+
+BEGIN_PGML_HINT
+
+For the rates, first write the rate law for the forward and reverse reaction.  Then, plug in the initial conditions to find the initial rates.
+
+Interpret what those rates actually mean.  How much A and B are left after 1 second?
+
+Finally, there are multiple ways to determine the value of the equilibrium constant.  We do *not* have access to the equilibrium concentrations, 
+so there must be a different way to find K.  
+
+END_PGML_HINT
 
 BEGIN_PGML_SOLUTION
 

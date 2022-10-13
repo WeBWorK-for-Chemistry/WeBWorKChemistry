@@ -250,7 +250,7 @@ Use the data and graph below to determine the balanced chemical equation:
 
 [@ image(insertGraph($graph),width=>350,height=>350,extra_html_tags=>"alt='$alt0'") @]*
 
-Type the equilibrium reaction below.  Just use coefficients and the reactants and products.  *Do NOT add states.*
+Type the equilibrium reaction below.  Just use coefficients and the reactants and products.  *Do NOT add states. i.e. no (g) or (aq)*
 
 **Balanced Reaction:**
 
@@ -263,6 +263,11 @@ $changeB = $startB-$endB;
 $changeC = $endC-$startC;
 
 $smallest = min($changeA,$changeB,$changeC);
+
+BEGIN_PGML_HINT
+Pay attention to what is going down and what is going up.  The changes in concentration are directly related to what the coefficient will be...
+END_PGML_HINT
+
 BEGIN_PGML_SOLUTION
 
 To find the equation, you need to understand how each reactant and product has changed.  Since the 

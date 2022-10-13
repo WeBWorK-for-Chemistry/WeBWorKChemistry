@@ -147,6 +147,16 @@ $solRateRxn = "\frac{-1}{$coefA}\frac{\Delta[\mathrm{A}]}{\Delta t} = \frac{1}{$
 
 $solutionEquations = $reactionSolution[$version];
 
+BEGIN_PGML_HINT
+When you add two equations together, what do you do with their equilibrium constants?  Which two equations do you add together to get the third?
+
+In some special cases, simply adding them together won't give you the third equation.  You'll need to modify the coefficients of a single reaction 
+first so that the reactants and products cancel out properly.  In that case, what do you do to the equilibrium constant of a reaction if 
+you multiply all the coefficients by 2 (for example)?
+
+END_PGML_HINT
+
+
 BEGIN_PGML_SOLUTION
 
 The first two equations can be combined together to produce the third equation.  Add 
