@@ -109,7 +109,7 @@ $answer = Formula($numerator . '/(' . $denominator . ')');
 BEGIN_PGML
 Write the equilibrium constant expression, [`\mathrm{K_c}`], for the following equilibrium:
 
-[``` \ce{[$reaction->[0] == 1 ? '' : $reaction->[0]][$reaction->[1]] + [$reaction->[2]][$reaction->[3]] <=> [$reaction->[4]][$reaction->[5]] + [$reaction->[6]][$reaction->[7]] }  ```]
+[``` \ce{[$reaction->[0] == 1 ? '' : $reaction->[0]][$reaction->[1]](g) + [$reaction->[2]][$reaction->[3]](g) <=> [$reaction->[4]][$reaction->[5]](g) + [$reaction->[6]][$reaction->[7]](g) }  ```]
 
 *Warning!*
 	1. Due to a system limitation, you cannot use square brackets \[ \] to denote concentration.  
@@ -132,13 +132,15 @@ Write the equilibrium constant expression, [`\mathrm{K_c}`], for the following e
 END_PGML
 
 
+
+
 BEGIN_PGML_SOLUTION
 
 An equilibrium contant expression can be built by multiplying the concentrations of each product
 and dividing by each reactant concentration.  Take the coefficient of each reactant/product and 
 place it as a power for each concentration in the expression. 
 
-[``` K_c = \frac{\mathrm{[products]^{coef}}...}{\mathrm{[reactants]^{coef}}...} ```]
+[``` K_c = \frac{\mathrm{[product\,1]^{coef}} \times ...}{\mathrm{[reactant\,1]^{coef}} \times ...} ```]
 
 END_PGML_SOLUTION
 
