@@ -1,3 +1,9 @@
+# Warning!  This repo is not going to be updated.  
+### Macros have been split off to the Macros repo (https://github.com/WeBWorK-for-Chemistry/Macros)
+### Problems for chemistry are now located in the ProblemLibrary repo (https://github.com/WeBWorK-for-Chemistry/ProblemLibrary)
+
+Any other repos found under this "organization" are either original tools made with the intention of doing chemistry work online or forks of other repos that needed modification for other uses.
+
 # WeBWorKChemistry
 WeBWorK scripts for doing problems related to Chemistry (and beyond!)
 
