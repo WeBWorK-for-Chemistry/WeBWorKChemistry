@@ -1,0 +1,120 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl",
+  "contextInexactValue.pl"
+
+);
+
+##############################################
+
+
+
+Context("InexactValue");
+$x1 = random(0,3);
+@element = ('magnesium', 'silicon', 'neon', 'sulfur');
+@row1 = ('^{24}Mg', '^{28}Si', '^{20}Ne', '^{32}S');
+@row2 = ('^{25}Mg', '^{29}Si', '^{21}Ne', '^{33}S');
+@row3 = ('^{26}Mg', '^{30}Si', '^{22}Ne', '^{34}S');
+@mass1 = (23.985, 27.977, 19.992, 31.972);
+@mass2 = (24.986, 28.976, 20.994, 32.971);
+@mass3 = (25.983, 29.974, 21.991, 33.967);
+@abun1 = (78.70, 92.18, 90.48, 95.00);
+@abun2 = (10.13, 4.71, 0.27, 0.76);
+@abun3 = (11.17, 3.12, 9.25, 4.22);
+$imass1 = InexactValue($mass1[$x1], 5);
+$imass2 = InexactValue($mass2[$x1], 5);
+$imass3 = InexactValue($mass3[$x1], 5);
+if ($x1 == 0) {
+    $iabun1 = InexactValue($abun1[$x1], 4);
+    $iabun2 = InexactValue($abun2[$x1], 4);
+    $iabun3 = InexactValue($abun3[$x1], 4);
+    }
+elsif ($x1 == 1) {
+    $iabun1 = InexactValue($abun1[$x1], 4);
+    $iabun2 = InexactValue($abun2[$x1], 3);
+    $iabun3 = InexactValue($abun3[$x1], 3);
+    }
+elsif ($x1 == 2) {
+    $iabun1 = InexactValue($abun1[$x1], 4);
+    $iabun2 = InexactValue($abun2[$x1], 2);
+    $iabun3 = InexactValue($abun3[$x1], 3); 
+    }
+else {
+    $iabun1 = InexactValue($abun1[$x1], 4);
+    $iabun2 = InexactValue($abun2[$x1], 2);
+    $iabun3 = InexactValue($abun3[$x1], 3); 
+    }
+
+$ave = ($imass1*$iabun1 + $imass2*$iabun2 + $imass3*$iabun3)/100;
+   
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Atoms and Subatomic Particles
+
+Calculate the average atomic mass of [$element[$x1]] to the correct number of significant figures.
+
+
+[@ 
+DataTable([
+[['Isotope',headerrow=>1], "Percent  Abundance ($PERCENT)",'Atomic Mass (amu)'],
+[PGML('[`[$row1[$x1]]`]'), PGML('[$iabun1]'), PGML('[$imass1]') ],
+[PGML('[`[$row2[$x1]]`]'), PGML('[$iabun2]'), PGML('[$imass2]'),],
+[PGML('[`[$row3[$x1]]`]') , PGML('[$iabun3]'), PGML('[$imass3]')]],
+midrules=>1 ,
+tablecss=>'border:solid 1px;     border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]*
+
+The average average atomic mass of [$element[$x1]] is [_________]{$ave}.
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+To review how to calculate atomic mass, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151:_Preparatory_Chemistry/05:_The_Nuclei_of_Atoms/5.05:_Atomic_Masses?contentOnly"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[`\frac{1}{100}([$imass1]\times[$iabun1] + [$imass2]\times[$iabun2] + [$imass3]\times[$iabun3]) = [$ave] `]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

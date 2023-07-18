@@ -1,0 +1,218 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+  }
+  .conversionEQ > div {
+    text-align: center;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  </style>  
+EOF
+
+##############################################
+
+sub conversionEQ {
+  my $start = shift;
+  my $colsref = shift;
+  my $n = scalar @{$colsref};
+  my $end = shift;
+  my $html;
+  $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+      $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+      $html .= '<div class="conversionEQmath">';
+         $html .= math_ev3('\times');
+      $html .= '</div>';
+      $html .= '<div class="conversionEQcol">';
+         $html .= '<div>';
+             $html .= $colsref->[$i];
+         $html .= '</div>';       
+         $html .= '<div class="conversionFractionBar">';
+             $html .= '<svg height="1" width="40">';
+                 $html .= '<desc>per</desc>';
+             $html .= '</svg>';
+         $html .= '</div>';       
+         $html .= '<div>';
+             $html .= $colsref->[$i+1];
+         $html .= '</div>';       
+      $html .= '</div>';
+  }
+  $html .= '<div  class="conversionEQmath">';
+      $html .= math_ev3('{}={}');
+  $html .= '</div>';
+  $html .= '<div>';
+      $html .= $end;
+  $html .= '</div>';
+  $html .= '</div>';
+  MODES(HTML=>$html);
+}
+
+install_weighted_grader();
+
+
+
+Context("InexactValueWithUnits");
+
+#Start 1D problem
+$m = InexactValue(52.1,3);
+$given = InexactValueWithUnits( [52.1, 3], 'mL');
+
+$display1 =$m.'`\ cm^3`';
+
+$n1 = InexactValueWithUnits(['1', 9**9**9], 'cm^3'); 
+$d1 = InexactValueWithUnits(['1', 9**9**9], 'mL'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+
+$answer = $given * $n1 / $d1;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+
+#Start 3D problem
+$m2 = InexactValue(52.1,3);
+$given2 = InexactValueWithUnits( [52.1, 3], 'cm^3');
+
+$display1 =$m.'`\ cm^3`';
+
+$n2 = InexactValueWithUnits(['1', 9**9**9], 'm'); 
+$d2 = InexactValueWithUnits(['100', 9**9**9], 'cm'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$n3 = InexactValueWithUnits(['1', 9**9**9], 'm'); 
+$d3 = InexactValueWithUnits(['100', 9**9**9], 'cm'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$n4 = InexactValueWithUnits(['1', 9**9**9], 'm'); 
+$d4 = InexactValueWithUnits(['100', 9**9**9], 'cm'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$answer2 = $given * $n2 / $d2* $n3 / $d3*$n4 / $d4;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma2 = MultiAnswer($n2,$d2,$n3,$d3,$n4,$d4,$answer2)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution2 = DimensionalAnalysis::generateExplanation([$given],[$n2,$d2,$n3,$d3,$n4,$d4],$answer2);
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Unit Conversion - Units with Exponents
+
+Suppose you have 52.1 mL of a certain solution.  
+
+1. What is the volume of this solution in [``\mathrm{cm^3}\ ``]?
+
+    Use the following definition:  
+    
+    [``\mathrm{1\ cm^3 = 1\ mL}``]
+
+
+    [@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+    
+    
+2. What is the volume of this same solution in "cubic meters", [``\mathrm{m^3}\ ``]?   
+    
+    [@conversionEQ($display1,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+    
+
+END_PGML
+
+ ANS($ma->cmp);
+# Without weighting, you could simply use this:
+ ANS($ma2->cmp);
+# each answer blank will be worth the same amount of points.
+
+# Without weighting, you could simply use this:
+# each answer blank will be worth the same amount of points.
+
+
+##############################################
+
+
+BEGIN_PGML_HINT
+
+The general steps in performing dimensional analysis
+
+1.  Identify the "given" information in the problem. Look for a number with units to start this problem with.
+2.  What is the problem asking you to "find"? In other words, what unit will your answer have?
+3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
+4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
+
+
+For more information on unit conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemistry_I_(Southeast)/2%3A_Measurement_and_Problem_Solving/2.5%3A_Problem_Solving_and_Unit_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+
+1. There is a one-to-one relationship between milliliters and cubic centimeters, or vice versa. This relationship is considered to have infinite significant figures. However, the measurement (52.1 mL) contains only 3 significant figures. Refer to the number with the fewest significant figures when determining the number of significant figures for multiplication/division problems.
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+2.  This problem requires you to convert from cm to m. However, the unit has an exponent. Therefore, the conversion factor that you build must also have the same exponent. For this problem, the exponent is 3. In other words, the conversion factor is cubed or used three times.
+
+[```[$dimensionalAnalysisSolution2]```]
+
+*There is a technical issue where the solution generator is crossing off too many units in the numerator for solutions with exponents.  We are in the process of fixing this.*
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
+

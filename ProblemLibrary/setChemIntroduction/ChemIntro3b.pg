@@ -1,0 +1,55 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+ "contextReaction.pl",
+   "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+Context("InexactValue");
+
+$f = InexactValue(0.00016);
+$x = InexactValue(1000);
+ 
+
+######################################
+
+
+BEGIN_PGML
+## Scientific Notation ##
+
+In Chemistry we often have to use scientific notation for very large number and very small numbers.  Later in the quarter, you will learn how to write these numbers and what they mean but we want you to practice entering numbers into WeBWorK right now. 
+
+A number in scientific notation will look like this:  [``1.6 \times 10^{-4}``]
+
+Notice there is a number in front that is between 1 and 9.99, a times sign and then a power of 10.  You will enter this number like this: 1.6 x 10^-4  
+
+Go ahead and enter this number in the box below and hit check answer.  Keep trying until you get a correct answer.  If you are having trouble remember to ask for help.  Copy what is written above exactly.
+
+     [_____]{$f}
+
+Sometimes you will want to enter powers of 10 that are not in full scientific notation.  For example 1000 = [``10^3``].  You would ener this as 10^3.  You will see in the Answer preview that WeBWorK interprets this a [``1 \times 10^3``].  This is a correct intrpretation.  Go ahead and try this below. Enter 10^3 in the box below.  
+
+    [_____]{$x}
+
+
+END_PGML
+
+
+######################################
+
+
+
+ENDDOCUMENT();
+
+

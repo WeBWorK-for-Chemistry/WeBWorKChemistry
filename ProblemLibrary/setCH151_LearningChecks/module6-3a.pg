@@ -1,0 +1,119 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextArbitraryString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "true", "false");
+
+$pop1 = PopUp( [@options], 1);
+$pop2 = PopUp( [@options], 2);
+
+Context("ArbitraryString");
+
+$blank = Compute('polyatomic')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;;
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Polyatomic Ions
+
+1. Fill in the blank: [___________]{$blank} ions are defined as groups of atoms covalently bonded together that collectively act as ions.
+
+    Classify each statement as true or false.
+
+2. I must memorize the names and formulas of the most commonly encountered polyatomic ions.
+ [__]{$pop1}
+
+3. The charge on a phosphate ion is -4 because there are four oxygens covalently bonded to the phosphorus. [__]{$pop2}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.03%3A_Polyatomic_Ions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. Polyatomic ions are defined as groups of atoms covalently bonded together that collectively act as ions.
+
+2. This is true. Check with your instructor for the exact list of polyatomic ions you should memorize.
+
+3.This is false.  You must memorize the names and formulas of the most commonly encountered polyatomic ions. There is not a simple relationship between the charges and number of atoms.
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

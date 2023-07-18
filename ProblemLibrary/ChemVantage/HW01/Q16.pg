@@ -1,0 +1,93 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl",
+"contextChemical.pl"
+);
+
+TEXT(beginproblem);
+
+Context("Chemical");
+
+@chemicalStrings = ( 'mercury',
+'lithium',
+'neon',
+'gold',
+'hydrogen', 'oxygen', 'xenon', 'carbon', 'sulfur', 'fluorine', 'nitrogen' );
+$mc = new_checkbox_multiple_choice();
+@selected = $mc->NchooseK(scalar @chemicalStrings, 5); # choose 5 random out of the list of chemicalStrings
+@correct = ();
+@wrong = ();
+foreach (@selected){
+    my $chemical = Chemical($chemicalStrings[$_]);
+    my $state = $chemical->standardState();
+    if ($state eq "Solid"){
+        push(@correct, $chemical);
+    } else {
+        push(@wrong, $chemical);
+    }
+}
+$mc -> qa( "Which chemical elements are solids at room temperature and standard atmospheric pressure? 
+$BR Select all of the correct answers:", @correct);
+
+$mc -> extra( @wrong );
+
+BEGIN_PGML
+
+[@ $mc -> print_q() @]*  
+[@ $mc -> print_a() @]*
+
+END_PGML
+
+##############################
+
+$showPartialCorrectAnswers = 0;
+
+ANS( checkbox_cmp( $mc->correct_ans() ) );
+
+
+##############################
+$solution = '';
+$solution2 = '<ul>';
+$solution2 = '<ul>';
+$index=0;
+foreach (@correct){
+    if (scalar @correct - 1 == $index){
+        $solution .= 'and ' . $_->string();  
+    } else {
+        $solution .= $_->string() . ', ';
+    }
+    my $mp = $_->meltingPoint() - 273.15;
+    if ($mp == (-1 - 273.15)){
+        $solution2 .= '<li>'. $_->string() . " doesn't have a defined melting point because it sublimes instead of melts, but is a solid at 25°C.</li>";
+    }else{
+        $solution2 .= '<li>' . $_->string() . ' has a melting point of ' . $mp . '°C which is greater than 25°C.</li>';
+    }
+    $index++;
+};
+$solution2 .= '</ul>';
+foreach (@wrong){
+    my $mp = $_->meltingPoint() - 273.15;
+    if ($mp == (-1 - 273.15)){
+        $solution3 .= '<li>'. $_->string() . " is a gas at 25°C.</li>";
+    }else{
+        $solution3 .= '<li>' . $_->string() . ' has a melting point of ' . $mp . '°C which is less than 25°C.</li>';
+    }
+}
+$solution3 .= '</ul>';
+BEGIN_PGML_SOLUTION
+
+[$solution]
+
+[@ $solution2 @]***
+
+Conversely:
+
+[@ $solution3 @]***
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

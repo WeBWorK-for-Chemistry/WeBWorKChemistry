@@ -1,0 +1,154 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+#  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+#  "answerHints.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("InexactValue");
+#Context()->flags->set(
+#  tolerance => 0.02,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+
+@temp = ("temp0.png", "temp1.png", "temp2.png", "temp3.png", "temp4.png", "temp5.png", "temp6.png","temp7.png","temp8.png","temp9.png", "temp10.png", "temp11.png", "temp12.png");
+
+@alttemp  = ("A thermometer contains labels indicating 16, 17, 18 and 19 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway between the 7th and 8th mark after 17." ,
+"A thermometer contains labels indicating 16, 17, 18 and 19 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway after the 9th mark after 17.",
+"A thermometer contains labels indicating 16, 17, 18 and 19 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on the 16.",
+"A thermometer contains labels indicating 16, 17, 18 and 19 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway between the 5th and 6th mark after 18.",
+"A thermometer contains labels indicating 16, 17, 18 and 19 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on the first mark after the 18.",
+"A thermometer contains labels indicating 28, 29, 30 and 31 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends on the 8th mark after the 30.",
+"A thermometer contains labels indicating 28, 29, 30 and 31 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway between the 4th and 5th mark after the 30.",
+"A thermometer contains labels indicating 28, 29, 30 and 31 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway between the 7th amd 8th mark after 29.",
+"A thermometer contains labels indicating 28, 29, 30 and 31 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on the 5th mark after 28.",
+"A thermometer contains labels indicating 98, 99, 100 and 101 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends between the 3rd and 4th marks after 98.",
+"A thermometer contains labels indicating 98, 99, 100 and 101 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on the 9th mark after 98.",
+"A thermometer contains labels indicating 98, 99, 100 and 101 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway between the 1st and 2nd marks after 100.",
+"A thermometer contains labels indicating 98, 99, 100 and 101 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends on the 9th mark after the 100.");
+
+@measurement = (17.75, 16.95, 16.00, 18.55, 18.10, 30.80, 30.45, 29.75, 28.50, 98.35, 98.90, 100.15, 100.90);
+@mstr = ('17.75', '16.95', '16.00', '18.55', '18.10', '30.80', '30.45', '29.75', '28.50', '98.35', '98.90', '100.15', '100.90');
+
+for (0..1) {
+    my $order = random(0,12);
+    redo if $unique{$order}++;
+    push @order, $order;
+ }
+
+my @image;
+
+foreach (0..1) {
+        $y = $order[$_];
+        $image[$_] = $temp[$y];
+        $alt[$_] = $alttemp[$y];
+        $ans[$_] = $measurement[$y];
+        $mstring[$_] = $mstr[$y];
+        if ($ans[$_] > 100) {
+            $sf[$_] = 5;
+            }
+        else {
+           $sf[$_] = 4;
+           }
+      }
+
+$m0 = InexactValue($ans[0], $sf[0], { tolerance => 0.03});
+$m0uncert = $m0->simpleUncertainty;
+$m1 = InexactValue($ans[1], $sf[1], { tolerance => 0.03});
+$m1uncert = $m1->simpleUncertainty;
+$image0 = $image[0];
+$alt0 = $alt[0];
+$image1 = $image[1];
+$alt1 = $alt[1];
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Measuring with a Thermometer
+
+_Measure the temperature shown by each thermometer.  Include the measurement with the correct number of signigficant digits and uncertainty for the units shown.  Place the measurement and uncertainty *in separate boxes* in the answer field._ 
+    
+
+a)  [@ image( $image0, width=>435, height=>269,  
+ extra_html_tags=>"alt='$alt0'"  )@]*
+
+    The thermometer above measures [____]{$m0} +/- [___]{$m0uncert} [``^\circ C  ``].
+
+
+b)  [@ image( $image1, width=>435, height=>269,  
+ extra_html_tags=>"alt='$alt1'"  )@]*
+ 
+    The thermometer above measures [____]{$m1} +/- [___]{$m1uncert} [``^\circ C  ``].
+
+
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+
+To review significant figures and measurement, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+a) The thermometer above measures [$m0] +/- [$m0uncert] [``^\circ C  ``].
+
+b) The thermometer above measures [$m1] +/- [$m1uncert] [``^\circ C  ``].
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

@@ -1,0 +1,54 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+ "contextReaction.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+Context("Reaction");
+
+$f = Formula("Fe_2O_3");
+ 
+
+######################################
+
+
+BEGIN_PGML
+## Chemical Formulas And Preview Answers ##
+
+When entering chemical formulas, you will need to use the format that WeBWorK recognizes.  Instead of subscriping the numbers in formulas, you will type an underscore when you want the next number to be a subscript.  For example, the 2 in the formula [`H_2 O`], the formula for water, is a subscript.  It sits lower than the rest.  The formula for water will be written H_2O in a WeBWorK answer blank. The _ before the 2 tells the computer it is a subscript.  You can usually type that character using the shift and the dash button. 
+
+Sometimes students will intend to enter an expression like [`Fe_2O_3`], but not use the correct notation when typing. WeBWorK wants you to confirm that what you intended to enter is what you actually entered, and so it provides an *Answer Preview* column when you submit any answers. For instance, try the following:
+
+    [`Fe_2O_3`] [_____]{$f}
+
+but try entering it as:
+:       Fe2O3
+which is incorrect. Go ahead and push the _Check Answers_ button. Note how the *Answer Preview* column is showing you what WeBWorK thinks you entered. If you have not entered the answer in the format of a chemical formula you will see nothing in this column.  
+
+Now try entering it as: 
+:       FeO_3
+which is incorrect but is in the format of a chemical formula which is what WeBWorK is expecting here.  Now you will see that a formula shows up in the *Answer Preview*.  
+
+This way you can tell whether your mistake is from entering the formula in a way that WeBWorK cannot read or entering the incorrect answer.  Now try to enter the formula correctly and see the difference.  
+
+The lesson is that if your answer is marked incorrect, along with looking for any feedback messages, you should also look at the *Answer Preview* column and you may see that you have not formatted your answer correctly.
+
+When you are ready, move on to the next question.
+
+END_PGML
+
+
+######################################
+
+
+
+ENDDOCUMENT();
+
+

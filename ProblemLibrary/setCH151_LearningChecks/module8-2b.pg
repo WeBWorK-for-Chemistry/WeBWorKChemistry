@@ -1,0 +1,143 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextChemical.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <script type="text/javascript" language="javascript" src="/webwork2_course_files/chem-sandbox/periodicTable.js"></script>  
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+  }
+  .conversionEQ > div {
+    text-align: center;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  </style>  
+EOF
+
+##############################################
+
+sub conversionEQ {
+  my $start = shift;
+  my $colsref = shift;
+  my $n = scalar @{$colsref};
+  my $end = shift;
+  my $html;
+  $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+      $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+      $html .= '<div class="conversionEQmath">';
+         $html .= math_ev3('\times');
+      $html .= '</div>';
+      $html .= '<div class="conversionEQcol">';
+         $html .= '<div>';
+             $html .= $colsref->[$i];
+         $html .= '</div>';       
+         $html .= '<div class="conversionFractionBar">';
+             $html .= '<svg height="1" width="40">';
+                 $html .= '<desc>per</desc>';
+             $html .= '</svg>';
+         $html .= '</div>';       
+         $html .= '<div>';
+             $html .= $colsref->[$i+1];
+         $html .= '</div>';       
+      $html .= '</div>';
+  }
+  $html .= '<div  class="conversionEQmath">';
+      $html .= math_ev3('{}={}');
+  $html .= '</div>';
+  $html .= '<div>';
+      $html .= $end;
+  $html .= '</div>';
+  $html .= '</div>';
+  MODES(HTML=>$html);
+}
+
+install_weighted_grader();
+
+
+#Context("InexactValueWithUnits");
+Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);
+
+
+
+$Almol = InexactValueWithUnits( ['26.98' , 4], 'g/mol');
+$Alatom = InexactValueWithUnits( ['26.98' , 4], 'amu');
+$Semol = InexactValueWithUnits( ['78.96' , 4], 'g/mol');
+$Seatom = InexactValueWithUnits( ['78.96' , 4], 'amu');
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Molar mass vs amu 
+
+Instructions: Use units of g/mol when reporting molar mass. Use units of amu when reporting the average mass of 1 atom.
+
+Use [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* for the masses needed.  Masses are rounded to the nearest hundredth.
+
+1.  What is the molar mass aluminum? Pay close attention to units! [___________]{$Almol}
+
+2.  What is the average mass of 1 atom of aluminum in a typical sample of aluminum? Pay close attention to units! [___________]{$Alatom}
+
+3. What is the molar mass selenium? Pay close attention to units! [___________]{$Semol}
+
+4. What is the average mass of 1 atom of selenium in a typical sample of selenium? Pay close attention to units! [___________]{$Seatom}
+
+
+END_PGML
+
+
+
+
+##############################################
+
+
+BEGIN_PGML_HINT
+
+
+For more information on counting atoms by the gram, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/08%3A_Counting_Atoms_Ions_and_Molecules"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+
+
+ENDDOCUMENT();
+

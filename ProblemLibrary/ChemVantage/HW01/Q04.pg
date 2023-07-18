@@ -1,0 +1,68 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
+
+$val1 = random(25, 75, 0.1); # generate number from 25.0 to 75.0 including to the 1st decimal place 
+$val2 = random(5.50, 9.50, 0.01); # generate number from 5.50 to 9.50 including to the 2nd decimal place 
+
+$saltMass = InexactValue(sprintf('%.1f', $val1)); # create InexactValue using random value but sprintf guarantees starting value has 1 decimals even if zero
+$waterMass = InexactValue(sprintf('%.2f', $val2)); # create InexactValue using random value but sprintf guarantees starting value has 2 decimals even if zero
+
+$answer = $saltMass / ($saltMass + $waterMass);
+
+BEGIN_PGML
+If [`[$saltMass]`] g of sodium chloride is dissolved in [`[$waterMass]`] kg of water, what is the mass percent of salt in the solution?
+
+[______]{$answer} percent salt
+
+END_PGML
+
+
+############################
+#  Solution
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$saltMassGrams = InexactValueWithUnits($saltMass, 'g');
+$waterMassKilograms = InexactValueWithUnits($waterMass, 'kg');
+$n1 = InexactValueWithUnits(['1000', Inf], 'g');
+$d1 = InexactValueWithUnits(['1', Inf], 'kg');
+$percent = InexactValueWithUnits(['100', Inf], '%');
+
+$waterMassGrams = $waterMassKilograms * $n1 / $d1;
+$massFraction = $saltMassGrams / ($saltMassGrams + $waterMassGrams);
+$massPercent = $massFraction * $percent;
+
+$dimensionalAnalysisConversion = DimensionalAnalysis::generateExplanation([$waterMassKilograms], [$n1, $d1], $waterMassGrams);
+
+BEGIN_PGML_SOLUTION
+### Step 1
+
+First, convert the water's mass to grams so all of the mass units match.  You could also do this problem by converting the salt mass to kilograms instead.
+
+[```[$dimensionalAnalysisConversion]```]
+
+### Step 2
+
+A mass percent is the mass of the item of interest, in this case the salt or solute, divided by the _total_ mass of the solution.   
+
+[``` \frac{[$saltMassGrams]\,\mathrm{solute}}{[$saltMassGrams]\,\mathrm{solute} + [$waterMassGrams]\,\mathrm{solvent}} = [$massFraction] \times [$percent] = [$massPercent]\,\mathrm{salt} ```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

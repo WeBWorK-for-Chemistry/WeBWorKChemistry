@@ -1,0 +1,35 @@
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "contextArbitraryString.pl",
+  "PGML.pl",
+  "PGcourse.pl"
+);
+
+TEXT(beginproblem());
+
+Context("ArbitraryString");
+
+$ans = String("method")->cmp(mathQuillOpts => "disabled",
+    checker => sub {
+          my ($correct,$student,$ans) = @_;
+          $correct = $correct->value; # get perl string from String object
+          $student = $student->value; # ditto
+          # trim whitespace from beginning and end
+          $student =~ s/^~~s+|~~s+$//g; # ~~ is single backslash in a pg file
+          return $student eq $correct;
+        }
+);
+
+BEGIN_PGML
+Enter the correct word or phrase:  
+
+The scientific [_]{$ans}{10} is an approach that allows the continuous refinement of
+scientific laws, hypotheses, and theories by subjecting them to experimental tests.
+
+END_PGML
+
+
+ENDDOCUMENT();

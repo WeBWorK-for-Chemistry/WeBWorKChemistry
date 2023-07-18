@@ -1,0 +1,80 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl",
+"contextChemical.pl"
+);
+
+TEXT(beginproblem);
+
+Context("Chemical");
+@chemicalStrings = ('Ar', 'O_2', 'O_3', 'H_2O_2', 'H_2O', 'He', 'H_2', 'F_2', 'Fe', 'NaCl', 'P_4', 'HF','CO');
+
+$mc = new_checkbox_multiple_choice();
+
+@selected = $mc->NchooseK(scalar @chemicalStrings, 5); # choose 5 random out of the list of chemicalStrings
+@correct = ();
+@wrong = ();
+foreach (@selected){
+    my $chemical = Chemical($chemicalStrings[$_]);
+    if ($chemical->isElement()){
+        push(@correct, $chemical);
+    }else{
+        push(@wrong, $chemical);
+    }
+}
+
+$mc -> qa( "Which of the following are chemical elements? $BR Select all of the correct answer: ", map {'\(' . $_->TeX . '\)'} @correct);
+$mc -> extra( map {'\(' . $_->TeX . '\)'} @wrong );
+
+
+BEGIN_PGML
+
+[@ $mc -> print_q() @]*
+[@ $mc -> print_a() @]*
+
+END_PGML
+
+##############################
+
+$showPartialCorrectAnswers = 0;
+
+ANS( checkbox_cmp( $mc->correct_ans() ) );
+
+
+##############################
+$solution = '';
+$index=0;
+foreach (@correct){
+    if (scalar @correct - 1 == $index){
+        $solution .= '\mathrm{and}\ ' . $_->TeX();  
+    } else {
+        $solution .= $_->TeX() . '\ ';
+    }
+    $index++;
+};
+BEGIN_PGML_SOLUTION
+
+Each element is defined by its atomic number (or number 
+ofprotons in the nuclei), whether it is isolated or combined.
+
+For example, if all of the atoms in a sample of matter have an atomic number of 8, 
+then the sample is a sample of the element oxygen whether it 
+is [`\mathrm{O}`], [`\mathrm{O}_2`], [`\mathrm{O}_3`], or a mixture of these. 
+
+In this problem, the elements are [`[$solution]`] because each contains only one type of atom.
+
+
+
+Citation:  
+*What is an element?*  
+Willard H. Roundy  
+Journal of Chemical Education 1989 66 (9), 729  
+DOI: 10.1021/ed066p729
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

@@ -1,0 +1,152 @@
+##DESCRIPTION
+##  Rates of Reaction 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'kinetics', 'rates')
+
+## Date('8/9/2022')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "niceTables.pl",
+   "contextChemical.pl",
+   "contextInexactValue.pl",
+   "contextInexactValueWithUnits.pl",
+   "parserDimensionalAnalysis.pl",
+   "parserMultiAnswer.pl",
+   "weightedGrader.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+$rand_num_generator = new PGrandom();
+
+Context("InexactValueWithUnits");
+
+$kfRaw = random(0.100,0.500,0.025);
+$krRaw = random(0.100,0.500,0.025);
+if ($kfRaw == $krRaw){
+	$krRaw -= 0.050;
+}
+
+$kf = InexactValueWithUnits([$kfRaw,3], 's^-1');
+$kr = InexactValueWithUnits([$krRaw,3], 's^-1');
+
+$concA0Raw = random(100, 180, 5);
+$concB0Raw = random(100, 180, 5);
+
+$A0 = InexactValueWithUnits([$concA0Raw,3], 'M');
+$B0 = InexactValueWithUnits([$concB0Raw,3], 'M');
+
+$rateA = $kf*$A0;
+$rateB = $kr*$B0;
+
+$A1 = $A0 - ($rateA * InexactValueWithUnits([1,Inf], 's')) + ($rateB * InexactValueWithUnits([1,Inf], 's'));
+$B1 = $B0 - ($rateB * InexactValueWithUnits([1,Inf], 's')) + ($rateA * InexactValueWithUnits([1,Inf], 's'));
+
+$K = $kf/$kr;
+
+##############################################################
+#
+#  Problem
+#
+#
+
+BEGIN_PGML
+
+Consider the unimolecular reaction:  [```\ce{A <=> B}```]
+
+
+If [`k_{\mathrm{forward}}=[$kf]`] and [`k_{\mathrm{reverse}}=[$kr]`] and [`\mathrm{[A]_0 = [$A0]}`] and
+[`\mathrm{[B]_0 = [$B0]}`], what will be the *initial rates* at which *A* and *B* react?  (i.e. how fast
+will each reaction go in the very 1st second?)
+
+	_Don't forget proper units!_
+
+	Rate of forward reaction:  [_______]{$rateA}
+
+	Rate of reverse reaction:  [_______]{$rateB}
+
+
+What will be the concentration of *A* and *B* after 1 second (t = 1s) using the initial rates?
+
+	[`\mathrm{[A]_t =}`]	[_______]{$A1}
+
+	[`\mathrm{[B]_t =}`]	[_______]{$B1}
+
+What is the equilibrium constant, *K*,  for this reaction?
+
+	[`\mathrm{K=}`]	[_______]{$K}
+
+
+END_PGML
+$diff = $startA - $endA;
+
+$solEndC = "\mathrm{$diff\,mol\,A \times \frac{$coefC \,mol\,C}{$coefA \,mol\,A} = {$endC}\,mol\,C\,formed}";
+$solEndD = "\mathrm{$diff\,mol\,A \times \frac{$coefD \,mol\,D}{$coefA \,mol\,A} = {$endD}\,mol\,D\,formed}";
+
+$solRateA = "\frac{-\Delta[\mathrm{A}]}{\Delta t} = \mathrm{\frac{-\frac{-$diff \,mol}{$volume \,L}}{$endTime \,s}} = $rateA \,\mathrm{M/s}";
+
+$solRateD = "\frac{\Delta[\mathrm{D}]}{\Delta t} = \mathrm{\frac{\frac{$endD \,mol}{$volume \,L}}{$endTime \,s}} = $rateD \,\mathrm{M/s}";
+
+$solRateRxn = "\frac{-1}{$coefA}\frac{\Delta[\mathrm{A}]}{\Delta t} = \frac{1}{$coefD}\frac{\Delta[\mathrm{D}]}{\Delta t} = $rateRxn \,\mathrm{M/s}";
+
+BEGIN_PGML_SOLUTION
+
+Equilibrium reactions are _dynamic_.  Both forward and reverse reactions occur 
+whether it is at equilibrium or not.  If we have the current rate constants for the 
+forward and reverse reactions and we know the rate law, we can calculate the rates.  
+
+In this case, it's first order in both directions.  We know because the problem 
+states it is _unimolecular_.  Also, the rate constants have units that imply they 
+are first order.  [`\mathrm{s^{-1} \times M = \frac{M}{s}}`]
+
+[``` rate_{f} = k_{f}[A]```]
+
+[``` rate_{r} = k_{r}[B] ```]
+
+Plug in the initial concentrations and the rate constants and we can solve 
+for the initial rates:
+
+[``` rate_f = ([$kf])([$A0]) = [$rateA] ```]
+
+[``` rate_r = ([$kr])([$B0]) = [$rateB] ```]
+
+We're trying to find the concentration *after* 1 second.  Multiply these
+rates by 1 second and you'll get the change of each concentration after 
+one second:
+
+[``` \Delta [\mathrm{A}]_f = ([$rateA])*(1\,\mathrm{s}) = [$rateA * InexactValueWithUnits([1,Inf], 's')]```]
+
+[``` \Delta [\mathrm{B}]_r = ([$rateB])*(1\,\mathrm{s}) = [$rateB * InexactValueWithUnits([1,Inf], 's')]```]
+
+These are _changes_ so we need to add/subtract from the initial concentrations 
+to find the new concentrations.  This part is tricky!  Remember, if the 
+forward reaction *loses* [$rateA * InexactValueWithUnits([1,Inf], 's')] of A, _stoichiometrically_ we'll *also gain*
+[$rateA * InexactValueWithUnits([1,Inf], 's')] of B!  A similar process happens with the reverse reaction. 
+
+[```\mathrm{[A]}_t = [$A0] - [$rateA * InexactValueWithUnits([1,Inf], 's')] + [$rateB * InexactValueWithUnits([1,Inf], 's')] = [$A1] ```]
+
+[```\mathrm{[B]}_t = [$B0] - [$rateB * InexactValueWithUnits([1,Inf], 's')] +  [$rateA * InexactValueWithUnits([1,Inf], 's')] = [$B1] ```]
+
+The last part requires you to know how rate laws and rate constants are related to 
+equilibrium constants.  The equilibrium constant is equal to the forward rate constant 
+divided by the reverse rate constant.
+
+[``` K = \frac{k_f}{k_r} = \frac{[$kf]}{[$kr]} = [$K] ```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        

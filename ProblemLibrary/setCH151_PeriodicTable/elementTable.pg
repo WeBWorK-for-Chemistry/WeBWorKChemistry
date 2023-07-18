@@ -1,0 +1,114 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+
+);
+
+##############################################
+
+
+
+Context("Numeric");
+Context("ArbitraryString");
+
+@row1 = ('gold-197', 'lead-208', 'potassium-40', 'mercury-202','osmuium-192','uranium-235', 'uranium-238', 'polonium-204', 'radium-226', 'radium-223' );
+@Z1 = (79, 82, 19, 80, 76, 92, 92, 84, 88, 88);
+@A1 = (197, 208, 40, 202, 192, 235, 238, 204, 226, 223);
+$x1 = random(0,9);
+$Zrow1 = $Z1[$x1];
+$Arow1 = $A1[$x1];
+$Nrow1 = $Arow1 - $Zrow1;
+
+@row2 = ('^{133}Cs^{+}', '^{87}Rb^{+}', '^{39}K^{+}', '^{23}Na^{+}', '^{6}Li^{+}');
+@Z2 = (55, 37, 19, 11, 3);
+@A2 = (133, 87, 39, 23, 6);
+$x2 = random(0,4);
+$Zrow2 = $Z2[$x2];
+$Arow2 = $A2[$x2];
+$Nrow2 = $Arow2 - $Zrow2;
+$Erow2 = $Zrow2 - 1;
+
+
+@row3x = ('^{244}_{92}U', '^{232}_{90}Th', '^{147}_{62}Sm', '^{174}_{70}Yb', '^{151}_{63}Eu');
+#@row3y = ('^{244}U', '^{232}Th', '^{147}Sm', '^{174}Yb', '^{151}Eu');
+@Z3 = (92, 90, 62, 70, 63);
+@A3 = (244, 232, 147, 174, 151);
+$x3 = random(0,4);
+$Zrow3 = $Z3[$x3];
+$Arow3 = $A3[$x3];
+$Nrow3 = $Arow3 - $Zrow3;
+$Erow3 = $Zrow3;
+   
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Atoms, Ions, and Subatomic Particles
+
+Complete the following table. 
+
+
+[@ 
+DataTable([
+[['Isotope Symbol ',headerrow=>1],'Atomic Number, Z','Mass Number, A', 'number of protons','number of neutrons', 'number of elctrons'],
+[PGML('[`[$row1[$x1]]`]'), PGML('[___]{$Zrow1}'), PGML('[___]{$Arow1}'), PGML('[___]{$Zrow1}'), PGML('[___]{$Nrow1}'),PGML('[___]{$Zrow1}') ],
+[PGML('[`[$row2[$x2]]`]'),PGML('[___]{$Zrow2}'),PGML('[___]{$Arow2}'), PGML('[___]{$Zrow2}'), PGML('[___]{$Nrow2}'), PGML('[___]{$Erow2}')],
+[PGML('[`[$row3x[$x3]]`]') ,PGML('[___]{$Zrow3}'),PGML('[___]{$Arow3}'), PGML('[___]{$Zrow3}'), PGML('[___]{$Nrow3}'), PGML('[___]{$Erow3}')]],
+midrules=>1 ,
+tablecss=>'border:solid 1px;     border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+align=>'p{50pt}|p{50pt}|p{50pt}|p{50pt}|p{50pt}|p{50pt}',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]*
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+To review isotopes and isotope symbols, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/04%3A_Atoms_and_Elements/4.08%3A_Isotopes_-_When_the_Number_of_Neutrons_Varies"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[`[$row1[$x1]]`]: The atomic number is [$Zrow1]. This is the number of protons.  The mass number is [$Arow1].  The number of neutrons can be calculated by subtracting the number of protons from the mass number.  [$Arow1] - [$Zrow1] = [$Nrow1]  This atom is neutral so the number of protons equals the number of electrons and is [$Zrow1].  
+
+[`[$row2[$x2]]`]: The atomic number is [$Zrow2]. This is the number of protons.  The mass number is [$Arow2].  The number of neutrons can be calculated by subtracting the number of protons from the mass number.  [$Arow2] - [$Zrow2] = [$Nrow2]  This atom has a charge of +1 so the number of protons is one greater than the number of electrons. Therefore the number of electrons is [$Erow2].
+
+[`[$row3[$x3]]`]: The atomic number is [$Zrow3]. This is the number of protons.  The mass number is [$Arow3].  The number of neutrons can be calculated by subtracting the number of protons from the mass number.  [$Arow3] - [$Zrow3] = [$Nrow3]  This atom is neutral so the number of protons equals the number of electrons and is [$Zrow3].  
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

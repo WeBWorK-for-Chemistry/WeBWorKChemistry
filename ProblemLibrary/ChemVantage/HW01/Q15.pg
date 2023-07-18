@@ -1,0 +1,54 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl"
+);
+
+TEXT(beginproblem);
+
+@rowForms = ( 'cities',
+'planets',
+'countries',
+'scientists',
+'continents' );
+$mcRow = new_checkbox_multiple_choice();
+$mcRow -> qa( "Elements in the periodic table have been named in honor of $BR Select all of the correct answers:",
+$rowForms[0], $rowForms[1], $rowForms[2], $rowForms[3], $rowForms[4] );
+$mcRow -> extra(  );
+
+BEGIN_PGML
+
+[@ $mcRow -> print_q() @]*  
+[@ $mcRow -> print_a() @]*
+
+END_PGML
+
+##############################
+
+$showPartialCorrectAnswers = 0;
+
+ANS( checkbox_cmp( $mcRow->correct_ans() ) );
+
+
+##############################
+
+BEGIN_PGML_SOLUTION
+
+All of the above.
+
+For an example of cities, think of berkelium.
+
+For an example of a planet, think of plutonium.
+
+For an example of a country, think of americium.
+
+For an example of a scientist, think of mendelevium.
+
+For an example of a continent, think of europium.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

@@ -1,0 +1,138 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+#  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+#  "answerHints.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("InexactValue");
+#Context()->flags->set(
+#  tolerance => 0.1,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+
+@rulercm = ("ruler10.png", "ruler11.png", "ruler12.png", "ruler13.png", "ruler14.png", "ruler15.png", "ruler16.png");
+
+@altruler  = ("A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and no marks between them.  The gray rectangle starts at 0 cm and ends one third of the way between the 3 and 4 cm marks" , "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and no marks between them.  The gray rectangle starts at 0 cm and ends halfway between the 4 and 5 cm marks", "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and no marks between them.  The gray rectangle starts at 0 cm and ends halfway between the 1 and 2 am marks", "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and no marks between them.  The gray rectangle starts at 0 cm and ends exactly on the 2 cm mark", "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and no marks between them.  The gray rectangle starts at 0 cm and ends about seven tenths of the way between the 2 and 3 cm mark", "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and no marks between them.  The gray rectangle starts at 0 cm and ends halfway between the 5 and 6 cm mark", "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and no marks between them.  The gray rectangle starts at 0 cm and ends exactly on the 4 cm mark");
+
+@measurement = (3.3, 4.5, 1.5, 2.0, 2.7, 5.5, 4.0);
+
+for (0..1) {
+    my $order = random(0,5);
+    redo if $unique{$order}++;
+    push @order, $order;
+ }
+
+my @image;
+
+foreach (0..1) {
+        $y = $order[$_];
+        $image[$_] = $rulercm[$y];
+        $alt[$_] = $altruler[$y];
+        $ans[$_] = $measurement[$y];
+      }
+
+$m0 = InexactValue($ans[0], 2, { tolerance => 0.2});
+$m0uncert = $m0->simpleUncertainty;
+$m1 = InexactValue($ans[1], 2, { tolerance => 0.2});
+$m1uncert = $m1->simpleUncertainty;
+$image0 = $image[0];
+$alt0 = $alt[0];
+$image1 = $image[1];
+$alt1 = $alt[1];
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Measuring with a Ruler
+
+_Measure the strip of magnesium above each ruler.  Include the measurement with the correct number of signigficant digits and uncertainty for the units shown (centimeters).  Place the measurement and uncertainty *in separate boxes* in the answer field.  Notice that the smallest markings on these rulers are in centimeters.  The first example has been done for you._
+
+Example: [@ image( "ruler16.png", width=>516, height=>225,extra_html_tags=>"alt='gray rectangle starts at 0 cm and ends exactly on the 5th small mark after the 5 cm mark'"  )@]*
+
+    The magnesium strip above measures *4.0* +/- *0.1* cm.
+    
+    
+
+a)  [@ image( $image0, width=>516, height=>225,  
+ extra_html_tags=>"alt='$alt0'"  )@]*
+
+    The magnesium strip above measures [____]{$m0} +/- [___]{$m0uncert} cm.
+
+
+b)  [@ image( $image1, width=>516, height=>225,  
+ extra_html_tags=>"alt='$alt1'"  )@]*
+ 
+    The magnesium strip above measures [____]{$m1} +/- [___]{$m1uncert} cm.
+
+
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+
+To review significant figures and measurement, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+a) The magnesium strip above measures [$m0] +/- [$m0uncert] cm.
+
+b) The magnesium strip above measures [$m1] +/- [$m1uncert] cm.
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

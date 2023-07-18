@@ -1,0 +1,146 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextArbitraryString.pl",
+  "unorderedAnswer.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("ArbitraryString");
+
+
+
+$answer1 = Compute("independent");
+$answer2 = Compute("dependent");
+$answer3 = Compute("controlled");
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Experimental Design
+
+_List the three types of variables._
+
+
+1. [______________]
+
+2. [______________]
+
+3. [______________]
+
+
+END_PGML
+############################################################
+# Answers
+
+$showPartialCorrectAnswers = 1;
+
+#$showPartialCorrectAnswers = 0;
+install_problem_grader(~~&std_problem_grader);
+
+
+UNORDERED_ANS( 
+$answer1->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/~~bvariables~~b//g;
+               $student =~ s/~~bvariable~~b//g;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            }), 
+$answer2->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/~~bvariables~~b//g;
+               $student =~ s/~~bvariable~~b//g;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            }), 
+$answer3->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/~~bvariables~~b//g;
+               $student =~ s/~~bvariable~~b//g;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            }),
+);
+############################################################
+BEGIN_PGML_HINT
+
+Review:
+
+- A theory is a well-supported explanation of observations.
+
+- A scientific law is a statement that summarizes the relationship between variables.
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/01%3A_Introduction_to_Chemistry_and_the_Scientific_Method/1.05%3A_Experimental_Design"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+

@@ -1,0 +1,61 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "PGchoicemacros.pl"
+);
+
+TEXT(beginproblem());
+
+@correct = ( 'corrosion of steel','combustion of gasoline', 'digestion of food', 'burning paper');
+@correctExplanation = (
+  'Iron atoms inside the steel are now ions that form a compound with oxygen.', 
+  'Gasoline molecules react with oxygen to form carbon dioxide and water.',
+  'Food in your stomach and intestines is transformed into energy and waste material.',
+  'Paper (cellulose) reacts with oxygen to make carbon dioxide and water (and probably soot/carbon as well).');
+
+@wrong = ('evaporation of alcohol', 'vibration of a violin string', 'mixing sand with water', 'freezing water', 'breaking glass');
+$mc = new_checkbox_multiple_choice();
+@indices = $mc->NchooseK(scalar @wrong, 3); # choose 3 random out of the list
+@selectedWrong = ();
+foreach (@indices){
+    push(@selectedWrong, $wrong[$_]);
+}
+@indices = $mc->NchooseK(scalar @correct, 2); # choose 2 random out of the list
+@selectedCorrect = ();
+foreach (@indices){
+    push(@selectedCorrect, $correct[$_]);
+}
+$mc -> qa( "An example of a chemical change is $BR Select all of the correct answers:", @selectedCorrect);
+$mc -> extra( @selectedWrong );
+
+BEGIN_PGML
+
+[@ $mc -> print_q() @]*
+[@ $mc -> print_a() @]*
+
+END_PGML
+
+$showPartialCorrectAnswers = 0;
+
+ANS( checkbox_cmp( $mc->correct_ans() ) );
+
+#######################################################
+$explain1 = $correctExplanation[$indices[0]];
+$explain2 = $correctExplanation[$indices[1]];
+BEGIN_PGML_SOLUTION
+
+Chemical changes will alter the particles (atoms, molecules, or ions) that make up those substances.  Physical changes do not.  
+
+The correct answers are [$selectedCorrect[0]] and [$selectedCorrect[1]].  These are the only changes that affect the 
+composition of those substance.  The molecules that make up those substances are not the same after the change.
+
+[$explain1]
+
+[$explain2]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

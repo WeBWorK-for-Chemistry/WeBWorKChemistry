@@ -1,0 +1,123 @@
+##DESCRIPTION
+##  Rates of Reaction 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'kinetics', 'arrhenius')
+
+## Date('8/9/2022')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "PGauxiliaryFunctions.pl",
+   "PGML.pl",
+   "contextInexactValue.pl",
+   "contextInexactValueWithUnits.pl",
+   "MathObjects.pl",
+   "parserRadioButtons.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+
+$context = Context("InexactValueWithUnits");
+
+$reactantsCount = random(1,2,1);
+$productsCount = random(1,2,1);
+@species = ('A','B','C','D');
+
+@reactants=();
+@reactantCoefficients=();
+@products=();
+@productCoefficients=();
+
+$reaction = '';
+$pressures = '';
+
+$K = InexactValueWithUnits([random(0.1,10, 0.1)*(10**random(-2,3,1)), 2], '');  #unitless
+
+$Q = InexactValueWithUnits([1, Inf], '');  #unitless
+
+for($i=0;$i<$reactantsCount;$i++){
+	my $value = random(0.10, 0.60, 0.01);
+	my $reactant = InexactValueWithUnits([$value, 2], 'atm');
+	push @reactants, $reactant;
+	$pressures .= ($i > 0 ? '\qquad ' : '').'P_\mathrm{'.$species[$i].'}='.$reactant->TeX;
+	my $coefficient = random(1,3,1);
+	push @reactantCoefficients, $coefficient;
+
+	$reaction .= ($i > 0 ? ' + ' : '') . ($coefficient > 1 ? $coefficient : '') . $species[$i] . '(g)';
+
+	$Q = $Q / (($reactant/InexactValueWithUnits([1,Inf],'atm'))**$coefficient);
+}
+
+$reaction .= ' <=> ';
+
+for($i=0;$i<$productsCount;$i++){
+	my $value = random(0.10, 0.60, 0.01);
+	my $product = InexactValueWithUnits([$value, 2], 'atm');
+	push @products, $product;
+	$pressures .= '\qquad '.'P_\mathrm{'.$species[$reactantsCount + $i].'}='.$product->TeX;
+	my $coefficient = random(1,3,1);
+	push @reactantCoefficients, $coefficient;
+
+	$reaction .= ($i > 0 ? ' + ' : '') . ($coefficient > 1 ? $coefficient : '') . $species[$reactantsCount + $i] . '(g)';
+
+	$Q = $Q * (($product/InexactValueWithUnits([1,Inf],'atm'))**$coefficient);
+}
+
+@choices = ('will shift to the left and make more reactants.', 'will shift to the right and make more products.', 'is at equilibrium.' );
+
+if ($Q->valueAsRoundedNumber() < $K->valueAsRoundedNumber()){
+	$answer = 1;
+} elsif ($Q->valueAsRoundedNumber() > $K->valueAsRoundedNumber()){
+	$answer = 0;
+}else {
+	$answer = 2;
+}
+
+$radio = RadioButtons([@choices,
+	'impossible to tell.'],
+ $choices[$answer]);
+
+##############################################################
+#
+#  Problem
+#
+#
+
+BEGIN_PGML
+
+[``` \ce{[$reaction]} \qquad K_p = \mathrm{[$K]} ```]
+
+The chemical components listed in the reaction above are mixed in a container with 
+the following partial pressures:
+
+[``[$pressures]``]
+
+
+The reaction in the container... 
+
+[_______]{$radio}
+
+END_PGML
+
+
+BEGIN_PGML_SOLUTION
+
+An equilibrium contant expression can be built by multiplying the concentrations of each product
+and dividing by each reactant concentration.  Take the coefficient of each reactant/product and 
+place it as a power for each concentration in the expression. 
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        

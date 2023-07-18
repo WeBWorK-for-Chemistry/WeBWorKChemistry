@@ -1,0 +1,137 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1(not reported)
+## Problem1(8.1.12)
+## Author()
+## Institution()
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "AnswerFormatHelp.pl",
+  "parserPopUp.pl",
+  "PGcourse.pl",
+  "niceTables.pl",
+  "contextInexactValue.pl"
+);
+
+############################################################
+# Header
+############################################################
+
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);
+Context()->flags->set(creditSigFigs=>1);
+Context()->flags->set(creditValue=>0);
+
+$sf1 = 1;
+$sf2 = 2;
+
+$val1 = 0.0342;
+$ans11 = InexactValue($val1, $sf1);
+$ans12 = InexactValue($val1, $sf2);
+
+
+$val2 = 252;
+$ans21 = InexactValue($val2, $sf1);
+$ans22 = InexactValue($val2, $sf2);
+
+$val3 = 37.1;
+$ans31 = InexactValue($val3, $sf1);
+$ans32 = InexactValue($val3, $sf2);
+
+$val4 = 55.5;
+$ans41 = InexactValue($val4, $sf1);
+$ans42 = InexactValue($val4, $sf2);
+
+$val5 = 7.89;
+$ans51 = InexactValue($val5, $sf1);
+$ans52 = InexactValue($val5, $sf2);
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Rounding and Significant Figures
+
+_In the following table, round each number to the given number of significant figures._ 
+
+[@ 
+DataTable([
+[['Number ',headerrow=>1],'1 significant figure ','2 significant figures'],
+[PGML('`[$val1]`'),PGML('[_____]{$ans11}'),PGML('[_____]{$ans12}')],
+[PGML('`[$val2]`'),PGML('[_____]{$ans21}'),PGML('[_____]{$ans22}')],
+[PGML('`[$val3]`'),PGML('[_____]{$ans31}'),PGML('[_____]{$ans32}')], 
+[PGML('`[$val4]`'),PGML('[_____]{$ans41}'),PGML('[_____]{$ans42}')],
+[PGML('`[$val5]`'),PGML('[_____]{$ans51}'),PGML('[_____]{$ans52}')]],
+midrules=>1 ,
+tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]* 
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Rounding Off Numbers
+
+To round a number, first decide how many significant figures the number should have. Once you know that, round to that many digits, starting from the left. If the number immediately to the right of the last significant digit is less than 5, it is dropped and the value of the last significant digit remains the same. *If the number immediately to the right of the last significant digit is greater than or equal to 5, the last significant digit is increased by 1.*
+
+
+To review the rules of significant figures, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+
+############################################################
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+[@ 
+DataTable([
+[['Number ',headerrow=>1],'1 significant figure ','2 significant figures'],
+[PGML('`[$val1]`'),PGML('[$ans11]'),PGML('[$ans12]')],
+[PGML('`[$val2]`'),PGML('[$ans21]'),PGML('[$ans22]')],
+[PGML('`[$val3]`'),PGML('[$ans31]'),PGML('[$ans32]')], 
+[PGML('`[$val4]`'),PGML('[$ans41]'),PGML('[$ans42]')],
+[PGML('`[$val5]`'),PGML('[$ans51]'),PGML('[$ans52]')]],
+midrules=>1 ,
+tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]* 
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+ENDDOCUMENT();

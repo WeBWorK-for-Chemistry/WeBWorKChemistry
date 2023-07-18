@@ -1,0 +1,75 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
+
+$val1 = random(35, 55, 0.1); # generate number from 35.0 to 55.0 including to the 1st decimal place 
+$val2 = random(55, 75, 0.1); # generate number from 55.0 to 75.0 including to the 1st decimal place 
+$val3 = random(20, 30, 0.1); # generate number from 20.0 to 30.0 including to the 1st decimal place 
+
+$liquid = InexactValue(sprintf('%.1f', $val1));
+$percentAlcohol = InexactValue(sprintf('%.1f', $val2));
+$reducedLiquid = InexactValue(sprintf('%.1f', $val3));
+
+$answer = ($liquid - $reducedLiquid) - (($liquid - $reducedLiquid)*$percentAlcohol/100);
+
+BEGIN_PGML
+A liquid mixture of water and alcohol initially weighing [`[$liquid]`] g is left to evaporate. The vapor consists of [`[$percentAlcohol]`]% alcohol by mass. 
+When the mass of liquid has been reduced to [`[$reducedLiquid]`] g, what is the mass of water that evaporated?
+
+[______]{$answer} g
+
+END_PGML
+
+
+
+############################
+#  Solution
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$liquidGrams = InexactValueWithUnits($liquid, 'g');
+$reducedLiquidGrams = InexactValueWithUnits($reducedLiquid, 'g');
+$fractionAlcohol = InexactValue($percentAlcohol/100);
+
+$step1 = $liquidGrams - $reducedLiquidGrams;
+$step2 = $step1 * $fractionAlcohol;
+$step3 = $step1 - $step2;
+
+BEGIN_PGML_SOLUTION
+### Step 1
+
+Find the total mass that has evaporated.
+
+[``` [$liquidGrams] - [$reducedLiquidGrams] = [$step1]_{\mathrm{vapor}} ```]
+
+### Step 2
+
+Calculate the mass of alcohol in the vapor (of both water and alcohol) using the % alcohol by mass.
+
+[``` \left( [$step1]_{\mathrm{vapor}}\right) \left( [$fractionAlcohol]\right) = [$step2]_{\mathrm{alcohol}} ```]
+
+### Step 3
+
+Subtract the mass of alcohol from the vapor mass.
+
+[``` [$step1]_{\mathrm{vapor}} - [$step2]_{\mathrm{alcohol}} = [$step3]_{\mathrm{water}} ```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

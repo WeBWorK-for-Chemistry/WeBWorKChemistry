@@ -1,0 +1,46 @@
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "contextArbitraryString.pl",
+  "PGML.pl",
+  "PGcourse.pl"
+);
+
+TEXT(beginproblem());
+
+Context("ArbitraryString");
+
+$ans = String("mass")->cmp(mathQuillOpts => "disabled",
+    checker => sub {
+        my ($correct,$student,$ans) = @_;
+          $correct = $correct->value; # get perl string from String object
+          $student = $student->value; # ditto
+          # trim whitespace from beginning and end
+          $student =~ s/^~~s+|~~s+$//g; # ~~ is single backslash in a pg file
+          return $student eq $correct;
+        }
+);
+
+BEGIN_PGML
+
+Enter the correct word or phrase in the blank:  
+
+When a substance undergoes a chemical or physical change, there is no detectable change in the total amount of matter. 
+This is known as the law of conservation of [_]{$ans}{10}.
+
+
+END_PGML
+
+BEGIN_PGML_SOLUTION
+
+Answer: mass
+
+The law of conservation of mass states that the amount of matter that was present before a reaction, is present after the reaction. 
+Mass can neither be created nor destroyed, only converted into different forms.
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

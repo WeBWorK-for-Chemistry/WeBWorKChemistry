@@ -1,0 +1,107 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "parserRadioButtons.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+#Context()->flags->set(
+#  tolerance => 0.2,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+
+
+@options = ( "?", "ionic", "covalent");
+@options2 = ( "?", "ionic", "covalent");
+@options3 = ( "?", "transferred", "shared");
+@options4 = ( "?", "a discrete molecule", "the ratio of cations to anions");
+
+$compound1 = PopUp( [ @options ], 2);
+$bond1 = PopUp( [ @options2 ], 2);
+$electron1 = PopUp( [ @options3 ], 2);
+$unit1 = PopUp( [ @options4 ], 1);
+
+$compound2 = PopUp( [ @options ], 1);
+$bond2 = PopUp( [ @options2 ], 1);
+$electron2 = PopUp( [ @options3 ], 1);
+$unit2 = PopUp( [ @options4 ], 2);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Ionic Compounds vs Covalent Compounds
+
+_Fill in the statements to complete each paragraph._  
+
+
+1. [``\mathrm{CO}``] is a(n) [________]{$compound1} compound. It is held together by [_________]{$bond1} bonds where electrons are [________]{$electron1}. The formula represents [______]{$unit1}. 
+
+2. [``\mathrm{CoO}``] is a(n) [________]{$compound2} compound. It is held together by [_________]{$bond2} bonds where electrons are [________]{$electron2}. The formula represents [______]{$unit2}. 
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.02%3A_Contrasting_Ionic_Compounds_and_Covalent_Compounds"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

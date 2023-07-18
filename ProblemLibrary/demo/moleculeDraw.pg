@@ -1,0 +1,120 @@
+
+#  This file needs JSME javascript available to webwork.  This file assumes it is in the html folder under the course folder.
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGinfo.pl",
+   "contextArbitraryString.pl",
+   "contextChemicalStructure.pl"
+   #"communication.pl"
+   #"source.pl",        # allows code to be displayed on certain sites.
+   #"PGcourse.pl",      # Customization file for the course
+);
+#warn ref($WeBWorK::CGI);
+
+HEADER_TEXT(<<EOF);
+<script>
+	function processChanges(jsmeEvent) {
+		var jsme = jsmeEvent.src;
+		var smiles = jsme.smiles();
+		var jmeFile = jsme.jmeFile();
+		var svg = jsme.getMolecularAreaGraphicsString();
+		document.getElementById('jmeFile').value = jmeFile;
+		document.getElementById('drawingSMILES').value = smiles;
+		document.getElementById('svgString').value = btoa(svg);
+	}
+    function jsmeOnLoad() {
+        jsmeApplet = new JSApplet.JSME("jsme_container", "380px", "340px", {
+            "options" : "oldlook,marker"
+		});
+		jsmeApplet.setCallBack("AfterStructureModified", processChanges);
+		var jmeFile = document.getElementById('jmeFile').value;
+		jsmeApplet.readMolecule(jmeFile);
+	}
+	
+</script>
+<script type="text/javascript" language="javascript" src="/webwork2_course_files/123/jsme/jsme.nocache.js"></script>
+
+EOF
+
+$drawingTool = MODES(
+	HTML=>
+	"<div id='jsme_container'></div>",
+	TeX =>
+	"An embedded molecule drawing app."
+);
+
+#listVariables();
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+# Show which answers are correct and which ones are incorrect
+$showPartialCorrectAnswers = 1;
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+
+##############################################################
+#
+#  Text
+#
+#
+
+Context()->normalStrings;
+my $jmeFile = $inputs_ref->{"jmeFile"};
+my $drawingSMILES = $inputs_ref->{"drawingSMILES"};
+my $svgString = $inputs_ref->{"svgString"};
+
+TEXT(qq!<h3>Draw the structure for 2-pentanol in the box below:</h3>!);
+
+TEXT(qq!$drawingTool!);
+
+TEXT(qq!<input type='hidden' name="drawingSMILES" id="drawingSMILES" value="$drawingSMILES" /><br />!);
+TEXT(qq!<input type='hidden' name="jmeFile" id="jmeFile" value="$jmeFile" /><br />!);
+TEXT(qq!<input type='hidden' name="svgString" id="svgString" value="$svgString" /><br />!);
+
+RECORD_FORM_LABEL('jmeFile');
+NAMED_HIDDEN_ANS_RULE('drawingSMILES');
+RECORD_FORM_LABEL('svgString');
+
+	
+##############################################################
+#
+#  Answers
+#
+#
+
+# There's not a good way to generate the answer picture automatically.  
+# Interacting with javascript means that the answer will be encoded into the page that a student can see.  
+# We don't want that, so you'll have to generate it before hand and hard-wire it into the server-side perl script here.
+# Use the tool itself to get the base-64 encoded SVG image (https://jsme-editor.github.io/dist/JSME_minimal.html) 
+# 1.  Right-click and paste the SMILES or just draw your structure
+# 2.  Open dev console (F12 on windows) and type:  btoa(jsmeApplet.getMolecularAreaGraphicsString())
+# 3.  Copy resulting string and stick it into variable.
+
+$answerSVGbase64Encoded = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjM1MyIgaGVpZ2h0PSIyNjgiPjxzdHlsZT4gdGV4dCB7IGN1cnNvcjogZGVmYXVsdDsgfSA8L3N0eWxlPjxnIHRyYW5zZm9ybT0ic2NhbGUoMC4wMzMzMzMzMzMzMzMzMzMzMykiPgo8cmVjdCB4PSIwIiB5PSIwIiBoZWlnaHQ9IjgwNDAiIHdpZHRoPSIxMDU5MCIgc3Ryb2tlPSJub25lIiBmaWxsPSJ3aGl0ZSIgLz4KPGxpbmUgeDE9IjYxMDIiIHkxPSI0MjA4IiB4Mj0iNjc1MiIgeTI9IjQ1ODMiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMzAiIC8+CjxsaW5lIHgxPSI1NDUzIiB5MT0iNDU4MyIgeDI9IjYxMDIiIHkyPSI0MjA4IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjMwIiAvPgo8bGluZSB4MT0iNDgwMyIgeTE9IjQyMDgiIHgyPSI1NDUzIiB5Mj0iNDU4MyIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIzMCIgLz4KPGxpbmUgeDE9IjQ4MDMiIHkxPSIzNDU3IiB4Mj0iNDgwMyIgeTI9IjQyMDgiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMzAiIC8+CjxsaW5lIHgxPSI0MTUzIiB5MT0iNDU4MyIgeDI9IjQ4MDMiIHkyPSI0MjA4IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjMwIiAvPgo8cmVjdCB4PSIzNjQzIiB5PSI0Mzg4IiBoZWlnaHQ9IjM5MCIgd2lkdGg9IjcyMCIgcng9Ijk3IiByeT0iOTciIHN0cm9rZT0ibm9uZSIgZmlsbD0id2hpdGUiIC8+Cjx0ZXh0IHg9IjM3MzMiIHk9IjQ3MTgiICBmb250LXNpemU9IjM5MHB4IiBmb250LWZhbWlseT0iSGVsdmV0aWNhIiBmaWxsPSJyZWQiPkhPPC90ZXh0Pgo8L2c+PC9zdmc+';
+Context("ArbitraryString");
+LABELED_ANS('drawingSMILES',Compute("CCCC(C)O")->cmp->withPostFilter(sub {
+	my $ans = shift;
+	$ans->{student_ans} = $main::PG->decode_base64($svgString);
+	$ans->{preview_latex_string} = "\space";
+	if (defined $answerSVGbase64Encoded){
+		$ans->{correct_ans} = $main::PG->decode_base64($answerSVGbase64Encoded);  
+		$ans->{correct_ans_latex_string} = "";#"\]".$main::PG->decode_base64($answerSVGbase64Encoded)."\[";  
+		# the "\]" and "\[" is a hack to make the svg show normally despite it being encapsulated by these TeX markers. 
+	}
+	return $ans;
+}));
+
+
+ENDDOCUMENT();        

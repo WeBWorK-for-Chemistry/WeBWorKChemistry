@@ -1,0 +1,213 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+ # "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "scaffold.pl",
+  "betterUnits.pl",
+  "contextChemical.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: -30px;
+    justify-content: space-evenly;
+  }
+  .conversionEQ > div {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  .conversionFactorGrouping{
+      display:flex;
+      justify-content: space-around;
+      align-items: center;
+  }
+  </style>  
+EOF
+
+##############################################
+
+sub conversionEQ {
+    my $start = shift;
+    my $colsref = shift;
+    my $n = scalar @{$colsref};
+    my $end = shift;
+    my $html;
+    my $tex;
+    $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+    $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+        $html .= '<div class="conversionEQmath">';
+        $html .= math_ev3('\times');
+        $html .= '</div>';
+        $html .= '<div class="conversionEQcol">';
+        $html .= '<div>';
+        $html .= $colsref->[$i];
+        $html .= '</div>';       
+        $html .= '<div class="conversionFractionBar">';
+        $html .= '<svg height="1" width="40">';
+        $html .= '<desc>per</desc>';
+        $html .= '</svg>';
+        $html .= '</div>';       
+        $html .= '<div>';
+        $html .= $colsref->[$i+1];
+        $html .= '</div>';       
+        $html .= '</div>';
+    }
+    $html .= '<div  class="conversionEQmath">';
+    $html .= math_ev3('{}={}');
+    $html .= '</div>';
+    $html .= '<div>';
+    $html .= $end;
+    $html .= '</div>';
+    $html .= '</div>';
+    MODES(HTML=>$html, TeX=>'');
+}
+
+sub conversionFactor {
+    my $numerator = shift;
+    my $denominator = shift;
+    my $html;
+    $html .= '<div class="conversionEQ">';
+        $html .= '<div class="conversionEQcol">';
+            $html .= '<div>';
+                $html .= $numerator;
+            $html .= '</div>';       
+            $html .= '<div class="conversionFractionBar">';
+                $html .= '<svg height="1" width="40">';
+                $html .= '<desc>per</desc>';
+                $html .= '</svg>';
+            $html .= '</div>';       
+            $html .= '<div>';
+                $html .= $denominator;
+            $html .= '</div>';       
+        $html .= '</div>';
+    $html .= '</div>';
+
+    MODES(HTML=>$html, TeX=>'');
+}
+
+install_weighted_grader();
+
+
+Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);
+
+
+
+$n1 = InexactValueWithUnits(['1', 9**9**9], 'mol Na_2CO_3'); 
+$d1 = InexactValueWithUnits(['2', 1], 'mol HCl'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+#$answer = $given * $n1 / $d1;
+
+#$equalityMultiAnswer = MultiAnswer($n1,$d1)->asEquality();
+
+$conversionFactorsMultiAnswer = MultiAnswer($n1,$d1,$d1,$n1)->asPairOfConversionFactors();
+
+ANS($conversionFactorsMultiAnswer->cmp);
+#ANS($n1->cmp);
+#ANS($d1->cmp);
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter (not ready yet!) will adjust how the scoring is done.
+
+#$ma = MultiAnswer($given,$n1,$d1,$answer)->asDimensionalAnalysis($given,{gradeGiven=>1});
+
+$texConversionFactor = '\frac\{\hspace\{2cm\}\}\{\hspace\{2cm\}\}';
+$tconversionFactor = '\frac{a}{b}'; 
+#$texProblem = '' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}';
+
+#$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+##############################################
+
+TEXT(beginproblem());
+BEGIN_PGML
+
+## Conversion Problem
+
+The reaction of hydrochloric acid [``(HCl)``] with sodium carbonate [``(Na_2CO_3)``] is represented by the follwing blanced chemcial equaion:
+[``2HCl(aq) + Na_2CO_3(aq) \rightarrow  H_2O(l) + CO_2(g) + 2NaCl(aq)``]
+
+Write the two stoichiometric factors that relate the amounts of hydrochloric acid [``(HCl)``] and sodium carbonate [``(Na_2CO_3)``] consumed by this process 
+
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+
+[@ conversionFactor(ans_rule(10), ans_rule(10)) @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ MODES(HTML=>'&amp;', TeX=>'\&') @]*
+[@ conversionFactor(ans_rule(10), ans_rule(10)) @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+
+[@ MODES(HTML=>'</div>', TeX=>'') @]*
+
+
+ 
+END_PGML
+
+
+
+
+
+
+
+##############################################
+
+BEGIN_PGML_HINT
+
+
+For more information on stoichiometric conversion factors, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/10%3A_Mass_Relations_in_Chemical_Reactions/10.01%3A_Stoichiometry"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+
+BEGIN_PGML_SOLUTION
+From the stoichiometric coeffiecients in the reaction, we can write the following equality. So far you have gotten used to relating a reactant and a product, but note that these relationships are also between reactants and other reactants or between products and other products. This question asks you to relate two reactants.
+
+[```[$n1] = [$d1]```]
+
+You can convert this equality to a conversion factor.  The two conversion factors you can generate are:
+
+[```\frac{[$n1]}{[$d1]} \text{ & } \frac{[$d1]}{[$n1]} ```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+

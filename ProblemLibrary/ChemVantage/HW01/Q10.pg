@@ -1,0 +1,56 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl"
+);
+
+TEXT(beginproblem);
+
+@correct = ( 'mercury','bromine');
+@wrong = ('lithium', 'xenon', 'neon', 'oxygen', 'iron', 'sodium', 'phosphorus', 'sulfur', 'helium', 'argon', 'selenium', 'tin');
+$mc = new_checkbox_multiple_choice();
+@selected = $mc->NchooseK(scalar @wrong, 3); # choose 3 random out of the list
+@selectedWrong = ();
+foreach (@selected){
+    push(@selectedWrong, $wrong[$_]);
+}
+$mc -> qa( "Which two chemical elements are liquids at room temperature and atmospheric pressure? $BR Select all of the correct answers:", @correct);
+$mc -> extra( @selectedWrong );
+
+BEGIN_PGML
+
+[@ $mc -> print_q() @]*
+[@ $mc -> print_a() @]*
+
+END_PGML
+
+##############################
+
+$showPartialCorrectAnswers = 0;
+
+ANS( checkbox_cmp( $mc->correct_ans() ) );
+
+
+##############################
+
+BEGIN_PGML_SOLUTION
+
+#### Solution
+
+Mercury and bromine are the only elements on the periodic table that are liquid at room temperature (defined as 25°C) 
+and standard atmospheric pressure (defined as 760 mmHg or 1 atm).  
+
+Every other element is either a solid or a gas.
+
+#### More details
+
+Mercury's melting point is -38.83°C at 1 atm, which is much lower than room temperature and its boiling point is 356.7°C at 1 atm, which makes it a liquid at room temperature.
+
+Bromine's melting point is -7.2°C at 1 atm, which is lower than room temperature and its boiling point is 58.8°C at 1 atm, which makes it a liquid at room temperature.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

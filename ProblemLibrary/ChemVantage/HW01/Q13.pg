@@ -1,0 +1,44 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl"
+);
+
+TEXT(beginproblem);
+
+@rowForms = ( 'solid',
+'liquid',
+'gas',
+'superconductor',
+'magnet' );
+$mcRow = new_checkbox_multiple_choice();
+$mcRow -> qa( "Which three of the the following describe the possible states of ordinary matter? $BR Select all of the correct answers:",
+$rowForms[0], $rowForms[1], $rowForms[2] );
+$mcRow -> extra( $rowForms[3], $rowForms[4] );
+
+BEGIN_PGML
+
+[@ $mcRow -> print_q() @]*
+[@ $mcRow -> print_a() @]*
+
+END_PGML
+
+##############################
+
+$showPartialCorrectAnswers = 0;
+
+ANS( checkbox_cmp( $mcRow->correct_ans() ) );
+
+
+##############################
+
+BEGIN_PGML_SOLUTION
+
+Solids, liquids, and gases are the three possible states of ordinary matter.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

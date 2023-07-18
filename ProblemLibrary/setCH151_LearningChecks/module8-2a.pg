@@ -1,0 +1,122 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "true", "false");
+
+$pop1 = PopUp( [@options], 1);
+$pop2 = PopUp( [@options], 2);
+$pop3 = PopUp( [@options], 1);
+$pop4 = PopUp( [@options], 2);
+$pop5 = PopUp( [@options], 2);
+$pop6 = PopUp( [@options], 1);
+$pop7 = PopUp( [@options], 1);
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Converting Between Grams and Moles
+
+_Answer the True/False Questions. Use [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* for the molar mass needed._
+
+1. The molar mass of any element is the mass of one mole of that element. [__]{$pop1}
+
+2. The mass of one atom of an element (in grams) and the mass of one mole of the same element (in grams) are the same. [__]{$pop2}
+
+3. The mass of one mole of an element is [``6.022 \times 10^{23}``] times greater than the mass of one atom of the same element. [__]{$pop3}
+
+4. The average mass of 1 atom of helium in a typical sample of helium is 4.00 grams. [__]{$pop4}
+
+5. The mass of 1 mole of typical neon atoms is 20.18 atomic mass units. [__]{$pop5}
+
+6. The average mass of 1 atom of argon in a typical sample of argon is 39.95 atomic mass units. [__]{$pop6}
+
+7. The mass of 1 mole of typical krypton atoms is 83.80 grams. [__]{$pop7}
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+
+To review mole conversions, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/08%3A_Counting_Atoms_Ions_and_Molecules/8.01%3A_Counting_Atoms_by_the_Gram"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. This is true.  The molar mass of anything is the mass of 1 mole of that thing.
+
+2. This is false. Atoms are very small, and one mole of atoms contains [``6.022 \times 10^{23}``] atoms! The atomic mass and the molar mass of an element are numerically equal and can both be read from a periodic table, but when doing so the mass of an atom would use units of atomic mass units (amu) while the mass of a mole would use units of grams (g).
+
+3. This is true. One mole of anything contains [``6.022 \times 10^{23}``] of that thing!
+
+4. This is false. The average mass of 1 mole of a typical sample of helium is 4.00 g. The average mass of one atom of helium is 4.00 amu.
+
+5. This is false. The mass of 1 mole of typical neon atoms is 20.18 grams. The average mass of one typical neon atom is 20.18 amu.
+
+6. This is true. Use units of atomic mass units when reading the mass of atoms of an element from the periodic table. Use units of grams per mole (or grams) when reading the molar mass of an element from the periodic table.
+
+7. This is true. Use units of grams per mole (or grams) when reading the molar mass of an element from the periodic table. Use units of atomic mass units when reading the mass of atoms of an element from the periodic table.
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

@@ -1,0 +1,125 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "contextChemical.pl",  # added for chemical parsing in units
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+##############################################
+
+
+install_weighted_grader();
+
+Context("Numeric");
+
+$m = random(1.01 ,9.99, 0.01);
+$mass = $m*10;
+
+Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);  # flag needed to recognize chemical names as units
+
+
+   
+    $given = InexactValueWithUnits( [$mass , 3], 'grams NaF'); 
+    
+    $n1 = InexactValueWithUnits(['1', 9**9**9], 'mol NaF'); 
+    $d1 = InexactValueWithUnits(['41.99',4], 'g NaF'); 
+    
+    $n2 = InexactValueWithUnits(['1', 9**9**9], 'mol MgF_2'); 
+    $d2 = InexactValueWithUnits(['2', 9**9**9], 'mol NaF');
+    
+$answer = $given * $n1 / $d1 * $n2 / $d2;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$n2, $d2,$answer)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2],$answer);
+##############################################
+#Calculate the mass in grams of [`[$given]`] of [`[@'~~mathrm{' . $compound . '} '@]`].  
+
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Stoichiometry: Mass to Moles
+
+    Calculate the moles of [``\mathrm{MgF_2}``] produced when [$mass] grams of [``\mathrm{NaF}``] reacts with excess Mg according to the chemical equation given. 
+    
+    _Use [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]*  to find the molar mass needed.  Use molar masses rounded to the nearest hundredth._
+
+[``` \ce{Mg + 2NaF \rightarrow MgF_2 + 2Na} ```]
+
+
+[@ DimensionalAnalysis::generateProblem($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)) @]*
+
+END_PGML
+
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+
+
+
+BEGIN_PGML_HINT
+
+The general steps in performing dimensional analysis
+
+1.  Identify the "given" information in the problem. Look for a number with units to start this problem with.
+2.  What is the problem asking you to "find"? In other words, what unit will your answer have?
+3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
+4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
+
+
+For more information on mass to mass conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/10%3A_Mass_Relations_in_Chemical_Reactions/10.03%3A_Mole-to-Mass_Mass-to-Mole_and_Mass-to-Mass_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+

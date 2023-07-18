@@ -1,0 +1,56 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
+
+$val1 = random(12, 18, 1); # generate number from 12 to 18 including to the ones digit 
+$val2 = random(45, 53, 0.1); # generate number from 45.0 to 53.0 including to the 1st decimal place 
+
+$gasolineMass = InexactValue(sprintf('%.1f', $val1));  # force display to the tenths position (i.e. 12.0)
+$oxygenMass = InexactValue(sprintf('%.1f', $val2));
+
+$answer = $gasolineMass + $oxygenMass;
+
+BEGIN_PGML
+The gasoline tank of an automobile contains [`[$gasolineMass]`] kg of gasoline. The gasoline combines with [`[$oxygenMass]`] kg of oxygen. 
+What is the total combined mass of the carbon dioxide and water produced by combustion in the engine?
+
+[______]{$answer} kg 
+
+END_PGML
+
+############################
+#  Solution
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$gasolineMassKg = InexactValueWithUnits($gasolineMass, 'kg');
+$oxygenMassKg = InexactValueWithUnits($oxygenMass, 'kg');
+$solution = $gasolineMassKg + $oxygenMassKg;
+
+
+BEGIN_PGML_SOLUTION
+We arrive to this answer due to the law of conservation of mass which states that the same amount of matter that existed before the reaction, 
+exists after the reaction takes place. Nothing is created, nor destroyed only converted into a different form.
+
+[``` \mathrm{gasoline} + \mathrm{oxygen} \rightarrow \mathrm{carbon\ dioxide} + \mathrm{water} ```]
+
+[``` [$gasolineMassKg]_{\mathrm{gasoline}} + [$oxygenMassKg]_{\mathrm{oxygen}} = [$solution] ```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

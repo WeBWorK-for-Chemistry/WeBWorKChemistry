@@ -1,0 +1,114 @@
+##DESCRIPTION
+##  Significant Figures problem: counting sig figs 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+
+## Date('2/15/2021')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "contextInexactValue.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+$rand_num_generator = new PGrandom();
+#$rand_num_generator = new PGrandom(5);
+Context("InexactValue");
+#$time = Time::HiRes::gettimeofday;
+$num = $rand_num_generator->random(100,10000,1);
+$zeroes = $rand_num_generator->random(1,3,1);
+$val1 = InexactValue($num*(10**$zeroes), length($num));
+$val1Solution = $val1->generateSfCountingExplanation(true);
+
+$num = $rand_num_generator->random(0.00001,0.01,0.00001);
+$sfs = $rand_num_generator->random(2,4,1);
+$val2 = InexactValue($num, $sfs);
+$val2Solution = $val2->generateSfCountingExplanation(true);
+
+$num = $rand_num_generator->random(10,10000,1);
+$zeroes = $rand_num_generator->random(1,4,1);
+$val3 = InexactValue($num*(10**$zeroes), length($num*(10**$zeroes)));
+$val3Solution = $val3->generateSfCountingExplanation(true);
+
+$num = $rand_num_generator->random(1,100,1);
+$num2 = $rand_num_generator->random(1,100,1);
+$multiplier = 10**$rand_num_generator->random(3,5,1);
+($zeroes) = ($multiplier =~ /(0+)/);
+$val4 = InexactValue($num . $zeroes . $num2);
+$val4Solution = $val4->generateSfCountingExplanation(true);
+
+$num = $rand_num_generator->random(100,10000,1);
+$zeroes = $rand_num_generator->random(1,3,1);
+$val5 = InexactValue($num*(10**$zeroes), length($num), true);
+$val5Solution = $val5->generateSfCountingExplanation(true);
+
+$num = $rand_num_generator->random(0.00001,0.001,0.00001);
+$sfs = $rand_num_generator->random(3,6,1);
+$val6 = InexactValue($num, $sfs, true);
+$val6Solution = $val6->generateSfCountingExplanation(true);
+
+##############################################################
+#
+#  Problem
+#
+#
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+
+BEGIN_PGML
+
+How many significant figures are in the number, [`[$val1]`] ? 
+[____]{$val1->sigFigs()}
+
+How many significant figures are in the number, [`[$val2]`] ? 
+[____]{$val2->sigFigs()}
+
+How many significant figures are in the number, [`[$val3]`] ? 
+[____]{$val3->sigFigs()}
+
+How many significant figures are in the number, [`[$val4]`] ? 
+[____]{$val4->sigFigs()}
+
+How many significant figures are in the number, [`[$val5]`] ? 
+[____]{$val5->sigFigs()}
+
+How many significant figures are in the number, [`[$val6]`] ? 
+[____]{$val6->sigFigs()}
+
+END_PGML
+
+BEGIN_SOLUTION
+
+\[ $val1Solution \]
+
+\[ $val2Solution \]
+
+\[ $val3Solution \]
+
+\[ $val4Solution \]
+
+\[ $val5Solution \]
+
+\[ $val6Solution \]
+
+END_SOLUTION
+
+
+
+ENDDOCUMENT();        

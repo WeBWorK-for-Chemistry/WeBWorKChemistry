@@ -1,0 +1,95 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "contextString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+Context("Numeric");
+
+$i = random(1,4,1);
+$j = $i + non_zero_random(1,3,1);
+
+@polyNames = ('choose an ion','hydroxide','ammonium', 'carbonate','hydrogen carbonate','phosphate','sulfate', 'sulfite');
+
+@Formula = ('none', 'Fe(OH)_2', 'NH_4Cl', 'Na_2CO_3', 'NaHCO_3', 'K_3PO_4', 'BaSO_4', 'K_2SO_3');
+
+$x = $polyNames[$i];	
+$fx = $Formula[$i];
+$popx = PopUp([@polyNames], $x);
+
+$y = $polyNames[$j];	
+$fy = $Formula[$j];
+$popy = PopUp([@polyNames], $y);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Naming Polyatomic Ions
+
+Choose the name of the polyatomic ion in the following compounds.  You will want to use a list of polyatomic ions to complete this question.
+
+1. `[$fx]` contains the following polyatomic ion : [____]{$popx}
+
+2. `[$fy]` contains the following polyatomic ion : [____]{$popy}
+
+
+END_PGML
+
+
+############################################################
+# Solution
+############################################################
+
+
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

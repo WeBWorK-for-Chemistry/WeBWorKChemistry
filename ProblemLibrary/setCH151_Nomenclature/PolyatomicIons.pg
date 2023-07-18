@@ -1,0 +1,121 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextString.pl",
+  "contextArbitraryString.pl"
+
+);
+
+##############################################
+Context("ArbitraryString");
+
+
+@anions = ("CH_3CO_2", "ClO_3", "ClO_2", "CN", "OH", "NO_3", "NO_2", "MnO_4", "CO_3", "Cr_2O_7", "SO_4", "SO_3", "PO_4");
+
+@answ = ("acetate", "chlorate", "chlorite", "cyanide", "hydroxide", "nitrate", "nitrite", "permanganate", "carbonate", "dichromate","sulfate", "sulfite", "phosphate"); 
+
+@charge = ('-', '-', '-', '-', '-', '-', '-', '-', '2-', '2-', '2-','2-','3-');
+
+my @numbers;
+my %unique2;
+
+for (0..4) {
+    my $number = random(0,12);
+    redo if $unique2{$number}++;
+    push @numbers, $number;
+ }
+
+for (0..4) {
+    $a = $numbers[$_];
+    $c[$_] = $charge[$a];
+    $anion[$_] = $anions[$a];
+    $answer[$_] = Compute($answ[$a])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+ }
+
+
+
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Naming Polyatomic Ions
+
+What is the IUPAC name for the following polyatomic ions?  Use the name and don't include the word ion as it is already there for you.  There is no need to capitalize the name or use an article.  The first one has been done for you to use as an example.  
+
+example: `HCO_3^{+}`  hydrogen carbonate ion
+
+a. `[$anion[0]]^{[$c[0]]}` [____________________]{$answer[0]} ion
+
+a. `[$anion[1]]^{[$c[1]]}` [____________________]{$answer[1]} ion
+
+a. `[$anion[2]]^{[$c[2]]}` [____________________]{$answer[2]} ion
+
+a. `[$anion[3]]^{[$c[3]]}` [____________________]{$answer[3]} ion
+
+a. `[$anion[4]]^{[$c[4]]}` [____________________]{$answer[4]} ion
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+Polyatomic Ions contain more than one type of atom in one ion.  These ion names must be memorized or looked up in a table.  A list of common polyatomic ions can be found at [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/05%3A_Molecules_and_Compounds/5.05%3A_Writing_Formulas_for_Ionic_Compounds#Writing_Formulas_for_Ionic_Compounds_Containing_Polyatomic_Ions"), protect_underbar("this link"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+a. `[$anion[0]]^{[$c[0]]}` is the [$answer[0]] ion.
+
+a. `[$anion[1]]^{[$c[1]]}`is the [$answer[1]] ion.
+
+a. `[$anion[2]]^{[$c[2]]}` is the [$answer[2]] ion.
+
+a. `[$anion[3]]^{[$c[3]]}` is the [$answer[3]] ion.
+
+a. `[$anion[4]]^{[$c[4]]}` is the [$answer[4]] ion.
+
+
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

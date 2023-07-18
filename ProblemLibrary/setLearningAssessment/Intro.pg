@@ -1,0 +1,46 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"parserOneOf.pl",
+"contextArbitraryString.pl"
+);
+
+TEXT(beginproblem());
+
+######################################
+
+
+Context("ArbitraryString");
+
+$answ = OneOf("yes", "YES", "Yes", "no", "NO", "No");
+
+
+######################################
+
+
+BEGIN_PGML
+## Learning Assessment ##
+
+Please read all of the following before proceeding on the assignment.
+
+This is an assignment that has been designed to help you learn about unit conversion. WeBWorK is a free homework program that is available to you through the work of PCC faculty and staff. We want to show that products like these can show student progress and gains similar to commercial paid products and make changes if this is not the case. This assignment is part of a learning assessment that will be assessing the knowledge of a group of students as they work through a module on unit conversion.  
+
+You instructor can help you with WeBWorK entry issues during this task, but cannot help with feedback about unit conversion. This is because we would like to get results that are independent of instructor. Remember that you can look through the hint links which take you to the book. You can also go back to the presentAbles and Knowledge Checks which contain WeBWorK questions and solutions. These solutions may be very helpful as you work through the problems in this assignment.
+
+We would like you to answer the following question honestly. You will be scored correctly for all answers. 
+
+Have you watched the presentAbles before this class that your instructor asked you to watch and worked through the knowledge check questions for this module?
+Answer yes or no in this box [____]{$answ}
+END_PGML
+
+
+######################################
+
+
+
+
+ENDDOCUMENT();
+

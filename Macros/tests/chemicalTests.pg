@@ -1,0 +1,239 @@
+##DESCRIPTION
+##  Chemical Tests
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+
+## Date('2/15/2021')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+	"PGstandard.pl",     # Standard macros for PG language
+	"MathObjects.pl",
+	"PGML.pl",
+	"contextChemical.pl"
+);
+
+
+Context("Chemical");
+# $chem1 = Chemical("oxygen");
+# $chem2 = Chemical("sodium chloride");
+# $chem3 = Chemical("iron (III) chloride");
+# $chem4 = Chemical("NaCl");
+# $chem5 = Chemical("MgCl2");
+# $chem6 = Chemical("Ca(NO3)2");
+
+@testData = (
+	['oxygen', {pieces=>[[8,2,0]]}],
+	['O_2', {pieces=>[[8,2,0]]}],
+	['sodium chloride',{pieces=>[[11,1,1],[17,1,-1]]} ],
+	['iron (III) chloride', {pieces=>[[26,1,3],[17,3,-1]]}],
+	['NaCl', {pieces=>[[11,1,1],[17,1,-1]]}],
+	['FeCl2', {pieces=>[[26,1,2],[17,2,-1]]}],
+	['mol FeCl3', {pieces=>[[26,1,3],[17,3,-1]]}],
+	['mol MgCl2', {pieces=>[[12,1,2],[17,2,-1]]}],
+	['MOL MgCl2', {pieces=>[[12,1,2],[17,2,-1]]}],
+	['Ca(NO3)2', {pieces=>[[20,1,2],[[8,8,8,7],2,-1]]}],
+	['Ca(NO_3)_2', {pieces=>[[20,1,2],[[8,8,8,7],2,-1]]}],
+	['calcium nitrate', {pieces=>[[20,1,2],[[8,8,8,7],2,-1]]}],
+	['dinitrogen monoxide', {pieces=>[[7,2,0],[8,1,0]]}],
+	['calcium peroxide', {pieces=>[[20,1,2],[[8,8],1,-2]]}],
+	['CaO_2', {pieces=>[[20,1,2],[[8,8],1,-2]]}],
+	['Fe3+', {pieces=> [[26,1,3]], string=>'Fe³⁺'}],
+	['Fe^3+', {pieces=> [[26,1,3]]}],
+	['Fe+3', {pieces=> [[26,1,3]]}],
+	['Fe^+3', {pieces=> [[26,1,3]]}],
+	['Fe^{3+}', {pieces=> [[26,1,3]]}],
+	['NO_3^-', {pieces=> [[[8,8,8,7],1,-1]]}],
+	['NO_3^2-', {pieces=> [[[8,8,8,7],1,-2]]}],
+	['nitrate', {pieces=> [[[8,8,8,7],1,-1]]}],
+	['nitrate ion', {pieces=> [[[8,8,8,7],1,-1]]}],
+	['nitrite', {pieces=> [[[8,8,7],1,-1]]}],
+	['NO_2^-', {pieces=> [[[8,8,7],1,-1]]}],
+	['NO_2', {pieces=> [[7,1,0],[8,2,0]]}],
+	['nitrogen dioxide', {pieces=> [[7,1,0],[8,2,0]]}],
+	['(NH_4)_2SO_4', {pieces=> [[[7,1,1,1,1],2,1],[[16,8,8,8],1,-2]]}],
+	['g (NH_4)_2SO_4', {pieces=> [[[7,1,1,1,1],2,1],[[16,8,8,8],1,-2]]}],
+	['ammonium sulfate', {pieces=> [[[7,1,1,1,1],2,1],[[16,8,8,8],1,-2]]}],
+	['(NH₄)₂SO₄', {pieces=> [[[7,1,1,1,1],2,1],[[16,8,8,8],1,-2]]}],
+	['nitrogen oxide', {pieces=> [[7,1,0],[8,1,0]]}],
+	['nitrogen monoxide', {pieces=> [[7,1,0],[8,1,0]]}],
+	['NO', {pieces=> [[7,1,0],[8,1,0]]}],
+	['water',{pieces=> [[1,2,0],[8,1,0]]}],
+	['ammonia',{pieces=> [[7,1,0],[1,3,0]]}]
+);
+
+$html = '
+<style>
+	table#results {
+		border: 1px double black;
+		border-collapse: collapse;
+		}
+	table#results th, table#results td {  
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	.wrong {
+		background:salmon;
+	}
+	.unknown{
+		background:gray;
+	}
+</style>
+<table id="results">
+	<tr>
+		<th>Input</th>
+		<th>Pieces</th>
+		<th>Chemical</th>
+		<th>String</th>
+		<th>TeX</th>
+		<th>TeX Raw</th>
+		<th>Error</th>
+		<th>IsElement</th>
+	</tr>
+';
+
+sub hashPrint {
+	$hashRef = shift;
+	%hash = %$hashRef;
+	$output='';
+	while(my($k, $v) = each %hash) { 
+		$output .= "$k: $v<br/>";
+	}
+	return $output;
+}
+
+sub compareArrays {
+	my $a1r = shift;
+	my $a2r = shift;
+	my @a1 = @$a1r;
+	my @a2 = @$a2r;
+	my %a1 = map { $_ => 1 } @a1;
+	my %a2 = map { $_ => 1 } @a2;
+
+	my @missing_from_a1 = grep !$a1{$_}, @a2;
+	my @missing_from_a2 = grep !$a2{$_}, @a1;
+
+	if (scalar @missing_from_a1 > 0) {
+		return 0;
+	}
+	if (scalar @missing_from_a2 > 0) {
+		return 0;
+	}
+	return 1;
+}
+
+
+#$test =Chemical::Chemical::compareAtomNums([8,8,6],[8,8,6]);
+#warn $test;
+
+foreach $dataItem (@testData) {
+	$success=1;
+	$errorMessage='';
+	
+	$html .= "<tr>";
+	$testString = $dataItem->[0];
+	$expected = $dataItem->[1];
+
+	$testValue = Chemical($testString);
+	$html .= "<td>$testString</td>";
+
+	$dataHash = $testValue->{data};
+	@data = @$dataHash;
+	$html .= "<td>" . scalar @data . '</td>';
+
+	$html .= "<td>";
+	$html .= '<table>';
+	$html .= '<tr><th>AtomNum</th><th>Count</th><th>Charge</th></tr>';
+	$index=0;
+	foreach $piece (@data) {
+		$html .= '<tr>';
+		if (ref($piece->{atomNum}) eq 'ARRAY'){
+			if (compareArrays( $piece->{atomNum}, $expected->{pieces}[$index][0])){
+				$html .= '<td>';
+			} else {
+				$html .= '<td class="wrong">';
+				$success=0;
+				$errorMessage .= "Expected AtomNum: " . join(',',@{ $expected->{pieces}[$index][0] }) . '<br/>';
+			}
+			$html .= join(',', @{ $piece->{atomNum} }) . "</td>";
+		} else {
+			$html .= '<td>';
+			$html .= $piece->{atomNum} . "</td>";
+		}
+
+		if ($piece->{count} == $expected->{pieces}[$index][1]){
+				$html .= '<td>';
+		}else{
+				$html .= '<td class="wrong">';
+				$success=0;
+				$errorMessage .= "Expected count: " . $expected->{pieces}[$index][1]. '<br/>';
+		}
+		$html .=  $piece->{count} . "</td>";
+		
+		
+		if ($piece->{charge} == $expected->{pieces}[$index][2]){
+				$html .= '<td>';
+		}else{
+				$html .= '<td class="wrong">';
+				$success=0;
+				$errorMessage .= "Expected charge: " . $expected->{pieces}[$index][2]. '<br/>';
+		}
+		$html .= $piece->{charge} . "</td>";
+		$html .= '</tr>';
+		$index++;
+	}
+	$html .= '</table>';
+	$html .= "</td>";
+	
+	#$html .= '<td>'. $testValue->string() . '</td>';
+	$stringB = $testValue->string();
+	if (!(exists $expected->{string}) || $expected->{string} eq $stringB){
+		$html .= '<td>';
+	} else {		
+
+		$html .= '<td class="wrong">';
+		$errorMessage .= "Expected value: " . $expected->{string} . "<br/>";
+		$success=0;
+	}
+	$html .=  $testValue->string . "</td>";
+
+
+	$html .= '<td>$$'. $testValue->TeX() . '$$</td>';
+	$html .= '<td>'. $testValue->TeX() . '</td>';
+
+	$html .= "<td>";
+	if ($success){
+		$html .='';
+	} else {
+		$html .= $errorMessage;
+	} 
+	$html .= "</td>";
+
+	$html .= "<td>";
+	$html .= $testValue->isElement() == 1 ? 'YES' : 'NO';
+	$html .= "</td>";
+
+	$html .= "</tr>";
+}
+
+
+# Print problem number and point value (weight) for the problem
+#TEXT(beginproblem());
+
+$html .= '</table>';
+
+BEGIN_PGML
+
+[$html]***
+
+END_PGML
+
+
+ENDDOCUMENT();        

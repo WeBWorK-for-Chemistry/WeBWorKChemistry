@@ -1,0 +1,43 @@
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "contextArbitraryString.pl",
+  "PGML.pl",
+  "PGcourse.pl"
+);
+
+TEXT(beginproblem());
+
+Context("ArbitraryString");
+
+$ans = String("scientific method")->cmp(mathQuillOpts => "disabled",
+    checker => sub {
+        my ($correct,$student,$ans) = @_;
+          $correct = $correct->value; # get perl string from String object
+          $student = $student->value; # ditto
+          ##
+          # Accepting anything that contains "scientific method"
+          $score = $student =~ /scientific~~s*method/i; # i means case-insensitive, ~~ is backslash in pg file (otherwise gets escaped to double backslash)
+          return $score;
+        }
+);
+
+BEGIN_PGML
+
+Enter the correct word or phrase in the blank:
+
+The scientific approach to knowledge is [_]{$ans}{10} because it is based on observations and experiments. 
+
+END_PGML
+
+BEGIN_PGML_SOLUTION
+
+The scientific method. 
+
+The scientific method is the method we use in science that consists of creating a hypothesis and then testing said hypothesis to gather observations and data.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

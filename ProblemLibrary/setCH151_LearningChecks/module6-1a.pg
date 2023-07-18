@@ -1,0 +1,151 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "parserRadioButtons.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+#Context()->flags->set(
+#  tolerance => 0.2,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+
+$atom1 = "hydrogen.png";
+
+$alt1  = "One inner circle representing the nuclues is labeled +1.  This is surrounded by an outer circle containing one black dot representing an electron.";
+
+$h = 1;
+$hv = 1;
+
+@options = ( "?", "yes", "no");
+
+$pop1 = PopUp( [ @options ], 2);
+
+$atom2 = "helium.png";
+
+$alt2  = "One inner circle representing the nuclues is labeled +2.  This is surrounded by an outer circle containing two black dots representing electrons.";
+
+$he = 2;
+$hev = 2;
+$pop2 = PopUp( [ @options ], 1);
+
+$atom3 = "oxygen.png";
+
+$alt3  = "One inner circle representing the nuclues is labeled +8.  This is surrounded by two outer circles. The closest to the nucleus contains 2 black dots.  The furthest contains 6 black dots.  These black dots represent electrons.";
+
+$oe = 8;
+$oev = 6;
+
+
+$pop3 = PopUp( [ @options ], 2);
+
+$atom4 = "neon.png";
+
+$alt4  = "One inner circle representing the nuclues is labeled +10.  This is surrounded by two outer circles. The closest to the nucleus contains 2 black dots.  The furthest contains 8 black dots.  These black dots represent electrons.";
+
+$ne = 10;
+$nev = 8;
+
+
+$pop4 = PopUp( [ @options ], 1);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Valence Electrons and the Periodic Table
+
+_Use the image above the questions to help answer each set of questions._  
+
+
+1. [@ image( $atom1, width=>300, height=>300,extra_html_tags=>"alt='$alt1'"  )@]*
+
+    a. How many electrons does a hydrogen atom have? [__]{$h}  
+    b. How many of the electrons in a hydrogen atom are valence electrons? [__]{$hv}  
+    c. Is hydrogen’s valence shell full? [__]{$pop1}
+
+2. [@ image( $atom2, width=>300, height=>300,extra_html_tags=>"alt='$alt2'"  )@]*
+
+    a. How many electrons does a helium atom have? [__]{$he}  
+    b. How many of the electrons in a helium atom are valence electrons? [__]{$hev}  
+    c. Is helium’s valence shell full? [__]{$pop2}
+
+3. [@ image( $atom3, width=>300, height=>300,extra_html_tags=>"alt='$alt2'"  )@]*
+
+    a. How many electrons does an oxygen atom have? [__]{$oe}  
+    b. How many of the electrons in a oxygen atom are valence electrons? [__]{$oev}  
+    c. Is oxygen’s valence shell full? [__]{$pop3}
+
+4. [@ image( $atom4, width=>300, height=>300,extra_html_tags=>"alt='$alt2'"  )@]*
+
+    a. How many electrons does a neon atom have? [__]{$ne}  
+    b. How many of the electrons in a neon atom are valence electrons? [__]{$nev}  
+    c. Is neon’s valence shell full? [__]{$pop4}
+
+
+
+END_PGML
+############################################################
+#BEGIN_PGML_HINT
+
+
+
+#END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

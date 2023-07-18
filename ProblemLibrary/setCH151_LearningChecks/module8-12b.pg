@@ -1,0 +1,261 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1(not reported)
+## Problem1(8.1.12)
+## Author()
+## Institution()
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "AnswerFormatHelp.pl",
+  "parserPopUp.pl",
+  "PGcourse.pl",
+  "niceTables.pl",
+  "contextInexactValue.pl"
+);
+
+############################################################
+# Header
+############################################################
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: -30px;
+    justify-content: space-evenly;
+  }
+  .conversionEQ > div {
+    text-align: center;
+    margin-top: 30px;
+    padding: 1em;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  .conversionFactorGrouping{
+      display:flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1em;
+  }
+  </style>  
+EOF
+
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+sub conversionEQ {
+    my $start = shift;
+    my $colsref = shift;
+    my $n = scalar @{$colsref};
+    my $end = shift;
+    my $html;
+    my $tex;
+    $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+    $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+        $html .= '<div class="conversionEQmath">';
+        $html .= math_ev3('\times');
+        $html .= '</div>';
+        $html .= '<div class="conversionEQcol">';
+        $html .= '<div>';
+        $html .= $colsref->[$i];
+        $html .= '</div>';       
+        $html .= '<div class="conversionFractionBar">';
+        $html .= '<svg height="1" width="40">';
+        $html .= '<desc>per</desc>';
+        $html .= '</svg>';
+        $html .= '</div>';       
+        $html .= '<div>';
+        $html .= $colsref->[$i+1];
+        $html .= '</div>';       
+        $html .= '</div>';
+    }
+    $html .= '<div  class="conversionEQmath">';
+    $html .= math_ev3('{}={}');
+    $html .= '</div>';
+    $html .= '<div>';
+    $html .= $end;
+    $html .= '</div>';
+    $html .= '</div>';
+    MODES(HTML=>$html, TeX=>'');
+}
+
+sub conversionFactor {
+    my $numerator = shift;
+    my $denominator = shift;
+    my $html;
+    $html .= '<div class="conversionEQ">';
+        $html .= '<div class="conversionEQcol">';
+            $html .= '<div>';
+                $html .= $numerator;
+            $html .= '</div>';       
+            $html .= '<div class="conversionFractionBar">';
+                $html .= '<svg height="1" width="40">';
+                $html .= '<desc>per</desc>';
+                $html .= '</svg>';
+            $html .= '</div>';       
+            $html .= '<div>';
+                $html .= $denominator;
+            $html .= '</div>';       
+        $html .= '</div>';
+    $html .= '</div>';
+
+    MODES(HTML=>$html, TeX=>'');
+}
+
+
+Context("Numeric");
+
+
+
+
+$C = 3;
+$H = 8;
+
+$formula = "C_3H_8";
+
+$massC = 12.01;
+$massH = 1.01;
+
+$subtotalC = $massC*$C;
+$subtotalH = $massH*$H;
+
+if ($subtotalC >= 100) {
+    $sfC = 5;
+    }
+else {
+    $sfC = 4;
+}
+
+if ($subtotalH >= 10) {
+    $sfH = 4;
+    }
+else {
+   $sfH = 3;
+   }
+
+
+
+$periodicTable = MODES(
+HTML=> 
+"<div style='min-width:740px;overflow:auto;'><periodic-table casGroupNames='false' showNames='false' hideTransitionMetals='false' maxPrecision='3' colorMode='light'></periodic-table></div>", 
+TeX =>
+"An embedded periodic table. View directly by following - https://spot.pcc.edu/chemistry/periodic-table/"
+);
+
+Context("InexactValue");
+$IvMassC = InexactValue(12.01, 4);
+$IvMassH = InexactValue(1.01, 3);
+
+$IvSubtotalC = InexactValue($subtotalC, $sfC);
+$IvSubtotalH = InexactValue($subtotalH, $sfH);
+
+
+$total = $IvSubtotalC + $IvSubtotalH;
+
+ANS($IvSubtotalC->cmp);
+ANS($total->cmp);
+
+$massPercent1 = ($IvSubtotalC/$total)*100;
+ANS($massPercent1->cmp);
+
+ANS($IvSubtotalC->cmp);
+ANS($total->cmp);
+
+$massPercent2 = ($IvSubtotalH/$total)*100;
+ANS($massPercent2->cmp);
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Calulating Mass Percent
+
+###### Determine the percent composition of propane, [``[$formula]``].
+
+The following molar masses can be used to solve this problem.  They have been taken from [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]*.  
+
+molar mass of C = [$IvMassC] [``\frac{g}{mol}``]
+
+molar mass of H = [$IvMassH] [``\frac{g}{mol}``]
+
+
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+[@ ('mass percent of C =') @]*
+[@ conversionFactor('mass of C in 1 mole of compound', 'molar mass of compound') @]*
+[@ MODES(HTML=>'  x 100  ', TeX=>'\times 100') @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ MODES(HTML=>'</div>', TeX=>'') @]*
+
+
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+[@ ('mass percent of C =') @]*
+[@ conversionFactor(ans_rule(6), ans_rule(6)) @]*
+[@ MODES(HTML=>'  x 100  =  ', TeX=>'\times 100 =') @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ ans_rule(6) @]*%
+
+[@ MODES(HTML=>'</div>', TeX=>'') @]*
+
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+[@ ('mass percent of H =') @]*
+[@ conversionFactor(ans_rule(6), ans_rule(6)) @]*
+[@ MODES(HTML=>'  x 100  =  ', TeX=>'\times 100 =') @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ ans_rule(6) @]*%
+
+[@ MODES(HTML=>'</div>', TeX=>'') @]*
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To see examples of calculating percent mass from the chemical formula, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/08%3A_Counting_Atoms_Ions_and_Molecules/8.05%3A_Mass_Percent_Composition_from_a_Chemical_Formula"), protect_underbar("here"), "TARGET='_blank'" ); @]* and scroll down the page.
+
+END_PGML_HINT
+
+############################################################
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+ENDDOCUMENT();

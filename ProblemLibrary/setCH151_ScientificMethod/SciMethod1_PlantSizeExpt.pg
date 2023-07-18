@@ -1,0 +1,156 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "parserRadioButtons.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+$radio1 = RadioButtons(
+  ["Different plants have different characteristics.","Plants that get more sunshine grow larger than plants that get less sunshine.","Plants that grow in the shade grow larger.","Plants that don’t receive water will die.","Plants that receive the same amount of water and plant food will grow the same amount."],
+ "Plants that get more sunshine grow larger than plants that get less sunshine.", # correct answer
+);
+
+ANS( $radio1->cmp() );
+
+$radio2 = RadioButtons(
+  ["Gary wanted to determine if the size of the container would affect the plant growth.","Gary wanted to make sure the size of the container did not affect differential plant growth in his experiment.","Gary wanted to control how much plant food his plants received.","Gary wanted his garden to look organized.","There is no possible scientific reason for having the same size containers."],
+ "Gary wanted to make sure the size of the container did not affect differential plant growth in his experiment.", # correct answer
+);
+
+ANS( $radio2->cmp() );
+
+$radio3 = RadioButtons(
+  ["Gary wanted to test the effect of shade on plant growth and therefore, he wanted to
+have no variables other than the amount of sunshine on the plants.","Gary wanted to test the effect of the amount of water on plant growth.","Gary's hypothesis was that water quality was affecting plant growth.","Gary was conserving water.","There is no possible scientific reason for having the same amount of water for each plant
+every day."],
+ "Gary wanted to test the effect of shade on plant growth and therefore, he wanted to
+have no variables other than the amount of sunshine on the plants.", # correct answer
+);
+
+ANS( $radio3->cmp() );
+
+$radio4 = RadioButtons(
+  ["the amount of water","the amount of plant food","the amount of soil","the amount of sunshine","the type of soil"],
+ "the amount of sunshine", # correct answer
+);
+
+ANS( $radio4->cmp() );
+
+$radio5 = RadioButtons(
+  ["individual plant variation","soil temperature due to different colors of containers","water loss due to evaporation from the soil","the effect of insects which may attack one set of plants but not the other","All of the above are possible factors that Gary did not control"],
+ "All of the above are possible factors that Gary did not control", # correct answer
+);
+
+ANS( $radio5->cmp() );
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Scientific Method
+
+_Read the following passage, then answer the remaining questions._
+
+Gary noticed that two plants which his mother planted on the same day that were the same size when planted were different in size after three weeks. Since the larger plant was in the full sun all day and the smaller plant was in the shade of a tree most of the day, Gary believed the sunshine was responsible for the difference in the plant sizes. In order to test this, Gary bought ten small plants of the same size and type. He made sure they had the same size and type of pot. He also made sure they have the same amount and type of soil. Then Gary built a frame to hold a canvas roof over five of the plants while the other five were nearby, but out in the sun. Gary was careful to make sure that each plant received exactly the same amount of water and plant food every day.
+
+a) Which of the following is a reasonable statement of Gary’s hypothesis?
+
+    [@ $radio1->buttons() @]*
+
+b) What scientific reason might Gary have for insisting that the container size for the all plants be the same?
+
+    [@ $radio2->buttons() @]*
+
+c) What scientific reason might Gary have for insisting that all plants receive the same amount of water every day?
+
+    [@ $radio3->buttons() @]*
+
+d) What was the variable being tested in Gary's experiment?
+
+    [@ $radio4->buttons() @]*
+    
+e)  Which of the following factors may be varying in Gary’s experimental setup that he did not control?
+
+    [@ $radio5->buttons() @]*
+
+License: CC BY-NC-SA
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+Scientists search for answers to questions and solutions to problems by using a procedure called the scientific method. This procedure consists of making observations, formulating hypotheses, and designing experiments; which leads to additional observations, hypotheses, and experiments in repeated cycles.  To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/01%3A_The_Chemical_World/1.04%3A_The_Scientific_Method_-_How_Chemists_Think"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+a) The correct answer is [$radio1->correct_ans()].
+
+b) The correct answer is [$radio2->correct_ans()].
+
+c) The correct answer is [$radio3->correct_ans()].
+
+d) The correct answer is [$radio4->correct_ans()].
+
+e) The correct answer is [$radio5->correct_ans()].
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+

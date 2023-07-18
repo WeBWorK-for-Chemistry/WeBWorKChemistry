@@ -1,0 +1,72 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
+
+$val1 = random(0.0400, 0.0500, 0.0001); # generate number from 0.04 to 0.05 including to the 4th decimal place 
+
+$waterMoleculeMass = InexactValue('2.9915e-23');
+$waterDropMass = InexactValue(sprintf('%.3f', $val1)); # create InexactValue using random value but sprintf guarantees starting value has 3 decimals even if zero
+
+$moleculesInDrop = $waterDropMass / $waterMoleculeMass;
+
+BEGIN_PGML
+A single water molecule has a mass of [`[$waterMoleculeMass]`] g. A single drop of water has a mass of [`[$waterDropMass]`] g. How many molecules are in a single drop of water? 
+
+ [______]{$moleculesInDrop} molecules
+
+END_PGML
+
+
+############################
+#  Solution
+
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$waterMoleculeMassGrams = InexactValueWithUnits($waterMoleculeMass, 'g');
+$waterDropMassGrams = InexactValueWithUnits($waterDropMass, 'g');
+$moleculeUnit = InexactValueWithUnits([1, Inf], 'molecule');
+$dropUnit = InexactValueWithUnits([1, Inf], 'drop');
+
+$conversionAnswer = $waterDropMassGrams * $moleculeUnit / $waterMoleculeMassGrams;
+
+$dimensionalAnalysisConversion = DimensionalAnalysis::generateExplanation([$waterDropMassGrams], [$moleculeUnit, $waterMoleculeMassGrams], $conversionAnswer);
+
+$conversionAnswerAlt = $waterDropMassGrams / $dropUnit * $moleculeUnit / $waterMoleculeMassGrams;
+$dimensionalAnalysisConversionAlternate = DimensionalAnalysis::generateExplanation([$waterDropMassGrams, $dropUnit], [$moleculeUnit, $waterMoleculeMassGrams], $conversionAnswerAlt);
+
+BEGIN_PGML_SOLUTION
+
+Use the equality [`[$moleculeUnit] = [$waterMoleculeMassGrams]`] from the first sentence in order to create a conversion factor
+that will allow you to convert the mass of a single drop of water into a number of water molecules.
+
+[```[$dimensionalAnalysisConversion]```]
+
+While the first method is reasonable, you may choose to be very explicit with your equalities.  
+Technically, the second sentence contains an equality, too: [`[$dropUnit] = [$waterDropMassGrams]`].
+
+Then, you can rewrite your conversion this way:
+
+[```[$dimensionalAnalysisConversionAlternate]```]
+
+This conversion has the same result, but with slightly more meaning.
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

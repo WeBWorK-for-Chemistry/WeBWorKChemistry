@@ -1,0 +1,170 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+
+Context("Reaction");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+
+
+
+$react1 = Formula("4 Al(s)");
+$react2 = Formula("3 O_2(g)");
+$prod1 = Formula("2 Al_2O_3(s)");
+
+$mp1 = MultiAnswer($react1, $react2)->with(
+   singleResult => 0,
+   separator => " + ",
+   tex_separator => " + ",
+   checker => sub {
+     my $correct= shift; my $student = shift;
+     my ($ca,$cb) = @$correct;
+     my ($sa,$sb) = @$student;
+    if ( ($ca == $sa && $cb == $sb) ||
+           ($ca == $sb && $cb == $sa) ) {
+          return [1,1];
+      } else {
+          if ($ca == $sa || $cb == $sa) {
+              return [1,0];
+          } elsif ($cb == $sb || $ca == $sb) {
+              return [0,1];
+          } else {
+              return [0,0];
+          }
+          }
+   },
+ );
+ 
+$mp2 = $prod1;
+
+$react3 = Formula("2 Fe(s)");
+$react4 = Formula("3 Cl_2(g)");
+$prod3 = Formula("2 FeCl_3(s)");
+
+
+$mp3 = MultiAnswer($react3, $react4)->with(
+   singleResult => 0,
+   separator => " + ",
+   tex_separator => " + ",
+   checker => sub {
+     my $correct= shift; my $student = shift;
+     my ($ca,$cb) = @$correct;
+     my ($sa,$sb) = @$student;
+    if ( ($ca == $sa && $cb == $sb) ||
+           ($ca == $sb && $cb == $sa) ) {
+          return [1,1];
+      } else {
+          if ($ca == $sa || $cb == $sa) {
+              return [1,0];
+          } elsif ($cb == $sb || $ca == $sb) {
+              return [0,1];
+          } else {
+              return [0,0];
+          }
+          }
+   },
+ );
+ 
+
+$mp4 = $prod3;
+
+
+ 
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Writing Balanced Reactions
+
+Write the complete balanced molecular reaction from the description given.
+
+Write the balanced chemical equations for the following reactions based on their descriptions. These descriptions include information about the coefficients used to balance the equations. Do not forget to include the state of each reactant and product, (s) or (aq). You will need to enter all reactants and/or all products before WeBWorK will score your problem correctly.  It does not matter the order in which these are entered.
+
+1. 4 atoms of elemental aluminum and 3 molecules of oxygen react to form 2 formula units of solid aluminum oxide
+
+
+    [_________]{$mp1} + [__________]{$mp1} [``\rightarrow``] [_________]{$mp2}
+
+2. 3 moles of elemental iron react with 3 moles of chlorine to form 2 moles of solid iron(III) chloride
+
+    [_________]{$mp3} + [__________]{$mp3} [``\rightarrow``] [_________]{$mp4}
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review balancing and writing chemical equations, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.01%3A_Chemical_Equations"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. Elemental aluminum (Al) is solid, so it has phase label of (s). Oxygen is a gas [``\mathrm(O_2)``], so it has phase label of (g). Don’t forget that oxygen is a diatomic element! The product is aluminum oxide [``\mathrm(Al_2O_3)``]. Aluminum oxide is a solid ionic compound formed from aluminum ions and oxide ions. Make sure to choose subscripts so that the overall charge of the formula is neutral! It has ha phase label of (s).
+Next you are ready to fill in the coefficients used to balance. The coefficients can represent either the number of particles in the smallest possible reaction or they can represent the number of moles of particles in a scaled-up version of the reaction. This problem describes the reaction at the particle level.
+
+2. Elemental iron (Fe) is a solid, so it has phase label of (s). Chlorine is a gas [``\mathrm(Cl_2)``], so it has phase label of (g). Don’t forget that chlorine is a diatomic element!  The product is iron(III) chloride [``\mathrm(FeCl_3)``]. Iron(III) chloride is a solid ionic compound formed from iron(III) ions and chloride ions. Make sure to choose subscripts so that the overall charge of the formula is neutral! It has a phase label of (s).
+ Next you are ready to fill in the coefficients used to balance. The coefficients can represent either the number of particles in the smallest possible reaction or they can represent the number of moles of particles in a scaled-up version of the reaction. This problem describes the reaction at the scaled-up molar level.
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

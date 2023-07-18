@@ -1,0 +1,252 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+  }
+  .conversionEQ > div {
+    text-align: center;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  </style>  
+EOF
+
+##############################################
+
+sub conversionEQ {
+  my $start = shift;
+  my $colsref = shift;
+  my $n = scalar @{$colsref};
+  my $end = shift;
+  my $html;
+  $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+      $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+      $html .= '<div class="conversionEQmath">';
+         $html .= math_ev3('\times');
+      $html .= '</div>';
+      $html .= '<div class="conversionEQcol">';
+         $html .= '<div>';
+             $html .= $colsref->[$i];
+         $html .= '</div>';       
+         $html .= '<div class="conversionFractionBar">';
+             $html .= '<svg height="1" width="40">';
+                 $html .= '<desc>per</desc>';
+             $html .= '</svg>';
+         $html .= '</div>';       
+         $html .= '<div>';
+             $html .= $colsref->[$i+1];
+         $html .= '</div>';       
+      $html .= '</div>';
+  }
+  $html .= '<div  class="conversionEQmath">';
+      $html .= math_ev3('{}={}');
+  $html .= '</div>';
+  $html .= '<div>';
+      $html .= $end;
+  $html .= '</div>';
+  $html .= '</div>';
+  MODES(HTML=>$html);
+}
+
+install_weighted_grader();
+
+
+
+Context("InexactValueWithUnits");
+
+#Start 1D problem
+$m = InexactValue(2.00,3);
+$given = InexactValueWithUnits( [2.00, 3], 'ft');
+
+#$display =$m.'`\frac{mi}{hr}`';
+
+$n1 = InexactValueWithUnits(['12', 9**9**9], 'in'); 
+$d1 = InexactValueWithUnits(['1', 9**9**9], 'ft'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+
+$answer = $given * $n1 / $d1;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+
+#Start 2D problem
+$m2 = InexactValue(4.00,3);
+$given2 = InexactValueWithUnits( [4.00, 3], 'ft^2');
+
+$display =$m2.'`ft^2`';
+
+$n2 = InexactValueWithUnits(['12', 9**9**9], 'in'); 
+$d2 = InexactValueWithUnits(['1', 9**9**9], 'ft'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$n3 = InexactValueWithUnits(['12', 9**9**9], 'in'); 
+$d3 = InexactValueWithUnits(['1', 9**9**9], 'ft'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$answer2 = $given2 * $n2 / $d2* $n3 / $d3;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma2 = MultiAnswer($n2,$d2,$n3,$d3,$answer2)->asDimensionalAnalysis($given2);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution2 = DimensionalAnalysis::generateExplanation([$given2],[$n2,$d2,$n3,$d3],$answer2);
+
+#Start 3D problem
+$m3 = InexactValue(8.00,3);
+$given3 = InexactValueWithUnits( [8.00, 3], 'ft^3');
+
+$display3 =$m3.'`ft^3`';
+
+$n4 = InexactValueWithUnits(['12', 9**9**9], 'in'); 
+$d4 = InexactValueWithUnits(['1', 9**9**9], 'ft'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$n5 = InexactValueWithUnits(['12', 9**9**9], 'in'); 
+$d5 = InexactValueWithUnits(['1', 9**9**9], 'ft'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$n6 = InexactValueWithUnits(['12', 9**9**9], 'in'); 
+$d6 = InexactValueWithUnits(['1', 9**9**9], 'ft'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$answer3 = $given3 * $n4 / $d4* $n5 / $d5* $n6 / $d6;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma3 = MultiAnswer($n4,$d4,$n5,$d5,$n6,$d6,$answer3)->asDimensionalAnalysis($given3);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution3 = DimensionalAnalysis::generateExplanation([$given3],[$n4,$d4,$n5,$d5,$n6,$d6],$answer3);
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Unit Conversion - Units with Exponents
+
+1. How many inches are in 2.00 feet? 
+
+    Use the conversion factor `(\frac{12 \text{in}}{1 ft})`.
+
+
+    [@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+    
+    
+2. How many “square inches,” [``\mathrm{in^2}``], are in an object that is 2.00 feet on each side?  
+  
+    [``\mathrm{2.00\ ft \times 2.00\ ft = 4.00\ ft^2}``]
+    
+    Use the conversion factor `(\frac{12 \text{in}}{1 ft})` twice to convert `ft \times ft = ft^2`
+    
+    [@conversionEQ($display,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+    
+3. How many “cubic inches,” [``\mathrm{in^3}``], are in an object that is 2.00 feet on each side?
+ 
+    [``\mathrm{2.00\ ft \times 2.00\ ft \times 2.00\ ft= 8.00\ ft^3}``]
+    
+    Use the conversion factor `(\frac{12 \text{in}}{1 ft})` three times to convert `ft \times ft \times ft= ft^3`
+    
+    [@conversionEQ($display3,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+END_PGML
+
+ ANS($ma->cmp);
+# Without weighting, you could simply use this:
+ ANS($ma2->cmp);
+# each answer blank will be worth the same amount of points.
+
+# Without weighting, you could simply use this:
+# each answer blank will be worth the same amount of points.
+
+ANS($ma3->cmp);
+##############################################
+
+
+BEGIN_PGML_HINT
+
+The general steps in performing dimensional analysis
+
+1.  Identify the "given" information in the problem. Look for a number with units to start this problem with.
+2.  What is the problem asking you to "find"? In other words, what unit will your answer have?
+3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
+4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
+
+
+For more information on unit conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemistry_I_(Southeast)/2%3A_Measurement_and_Problem_Solving/2.5%3A_Problem_Solving_and_Unit_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+1. The definition of a foot provides you with an equivalence to build a conversion factor to convert from feet to inches, or vice versa. Build the conversion factor such that the units of feet cancel, leaving the desired units of inches. Definitions contain exact values; thus, the conversion factor is considered to have infinite significant figures. However, the measurement (2.00 feet) contains only 3 significant figures. Refer to the number with the fewest significant figures when determining the number of significant figures for multiplication/division problems.
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+2.  This problem requires you to convert from feet to inches as you did in the first problem. However, this time the unit has an exponent. Therefore, the conversion factor that you build must also have the same exponent. For this problem, the exponent is 2. In other words, the conversion factor is squared or the conversion factor is used twice.
+
+[```[$dimensionalAnalysisSolution2]```]
+
+*There is a technical issue where the solution generator is crossing off too many units in the numerator for solutions with exponents.  We are in the process of fixing this.*
+
+3. This problem requires you to convert from feet to inches as you did in the first problem. However, this time the unit has an exponent. Therefore, the conversion factor that you buuild must also have the same exponent. For this problem, the exponent is 3. In other words, the conversion factor is cubed or the conversion factor is used three times.
+
+[```[$dimensionalAnalysisSolution3]```]
+
+*There is a technical issue where the solution generator is crossing off too many units in the numerator for solutions with exponents.  We are in the process of fixing this.*
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
+

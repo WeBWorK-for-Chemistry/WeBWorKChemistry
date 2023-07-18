@@ -1,0 +1,38 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl"
+);
+
+TEXT(beginproblem);
+
+@rowForms = ( 'adopts the shape of its container',
+'has a definite volume',
+'has a definite shape',
+'has weak intermolecular forces',
+'adopts the volume of its container' );
+$mcRow = new_checkbox_multiple_choice();
+$mcRow -> qa( "A gas is a phase of matter that $BR Select all of the correct answers:",
+$rowForms[0], $rowForms[3], $rowForms[4] );
+$mcRow -> extra( $rowForms[1], $rowForms[2] );
+
+BEGIN_PGML
+
+[@ $mcRow -> print_q() @]*  
+[@ $mcRow -> print_a() @]*
+
+END_PGML
+
+##############################
+
+$showPartialCorrectAnswers = 0;
+
+ANS( checkbox_cmp( $mcRow->correct_ans() ) );
+
+
+##############################
+
+ENDDOCUMENT();

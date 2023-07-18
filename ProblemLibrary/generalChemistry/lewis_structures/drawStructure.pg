@@ -1,0 +1,59 @@
+##DESCRIPTION
+##  Lewis Structures
+##ENDDESCRIPTION
+
+##KEYWORDS('lewis structures')
+
+## Date('3/5/2023')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "parserLewisStructureTool.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+
+#                           0       1       2       3       4           5       6       7       8       9           10      11      12       13          14
+@moleculeFormulaLatex = ('NH_3', 'CH_4', 'CCl_4', 'PON', 'C_2H_6', 'C_2H_4', 'SF_6', 'SF_4', 'XeF_4', 'C_3H_8', 'C_4H_10', 'N_2O', 'O_3', 'SO_4^{2-}', 'NO_3^-');
+$rand_num_generator = new PGrandom();
+$index = random(0,scalar @moleculeFormulaLatex,1);
+$index = 8;  # in case you don't want to make it random...
+
+$formula = $moleculeFormulaLatex[$index];
+
+$lewisStructure = LewisStructureTool($formula)->with(cmpOptions => {'showFormalCharges'=> 0, 'formalChargePenalty'=>0.4});
+
+# With optional parameters for grading.
+# $lewisStructure = LewisStructureTool($formula)->with(cmpOptions => { "bondOrderPenalty" => 0.333 } );
+
+##############################################################
+#
+#  Problem
+
+BEGIN_PGML
+Draw the structure for [`\mathrm{[$formula]}`] in the box below:
+[_]{$lewisStructure}
+
+
+END_PGML
+
+
+BEGIN_PGML_SOLUTION
+
+[@ $lewisStructure->showSolutionGuide() @]*
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        

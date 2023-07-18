@@ -1,0 +1,153 @@
+##DESCRIPTION
+##  Significant Figures problem: rounding 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+
+## Date('2/15/2021')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "contextInexactValue.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+$rand_num_generator = new PGrandom();
+
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>0);
+Context()->flags->set(creditSigFigs=>1);
+Context()->flags->set(creditValue=>0);
+
+#$test = InexactValue('0');
+
+$val1 = $rand_num_generator->random(1000,10000,1);
+$sf1 = 2;
+$ans1 = InexactValue($val1, $sf1);
+$ans1Explanation = $ans1->generateSfRoundingExplanation($sf1, true);
+
+$sf1b = 1;
+$ans1b = InexactValue($val1, $sf1b);
+$ans1bExplanation = $ans1b->generateSfRoundingExplanation($sf1b, true);
+
+$val2 = "12";
+$sf2 = $rand_num_generator->random(3,6,1);
+$ans2 = InexactValue($val2,$sf2);
+$ans2Explanation = $ans2->generateSfRoundingExplanation($sf2, true);
+
+$val3 = "0.0014880";
+$sf3 = 3;
+$ans3 = InexactValue($val3,$sf3);
+$ans3Explanation = $ans3->generateSfRoundingExplanation($sf3, true);
+
+$val4 = "5.56655555e-15";
+$inex4 = InexactValue($val4);
+$sf4 = 5;
+$ans4 = InexactValue($val4,$sf4);
+$ans4Explanation = $ans4->generateSfRoundingExplanation($sf4, {suppressStart => 0});
+
+$val5 = "0.0035";
+$sf5 = 4;
+$ans5 = InexactValue($val5,$sf5);
+$ans5Explanation = $ans5->generateSfRoundingExplanation($sf5, true);
+
+$val6 = "77000";
+$sf6 = 4;
+$ans6 = InexactValue($val6,$sf6);
+$ans6Explanation = $ans6->generateSfRoundingExplanation($sf6, true);
+
+$val7 = "590000.";
+$sf7 = 3;
+$ans7 = InexactValue($val7,$sf7);
+$ans7Explanation = $ans7->generateSfRoundingExplanation($sf7, true);
+
+$val8 = "1.4378";
+$sf8 = 3;
+$ans8 = InexactValue($val8,$sf8);
+$ans8Explanation = $ans8->generateSfRoundingExplanation($sf8, true);
+
+##############################################################
+#
+#  Problem
+#
+#
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+
+
+BEGIN_PGML
+
+Round [`[$val1]`] to [$sf1] significant figures:  [________]{$ans1}
+
+Round [`[$val1]`] to [$sf1b] significant figures:  [________]{$ans1b}
+
+Convert [`[$val2]`] to have [$sf2] signficant figures: [________]{$ans2}
+
+Round [`[$val3]`] to [$sf3] signficant figures: [________]{$ans3}
+
+
+
+Round [`[$inex4]`] to [$sf4] significant figures: [________]{$ans4}
+
+Convert [`[$val5]`] to have [$sf5] significant figures:  [________]{$ans5}
+
+Convert [`[$val6]`] to have [$sf6] signficant figures:  [________]{$ans6}
+
+Round [`[$val7]`] to [$sf7] signficant figures:  [________]{$ans7}
+
+Round [`[$val8]`] to [$sf8] signficant figures:  [________]{$ans8}
+
+END_PGML
+
+
+
+BEGIN_SOLUTION
+
+
+
+$ans1Explanation->{text}
+\[ $ans1Explanation->{TeX} \]
+
+$ans1bExplanation->{text}
+\[ $ans1bExplanation->{TeX} \]
+
+$ans2Explanation->{text}
+\[ $ans2Explanation->{TeX} \]
+
+$ans3Explanation->{text}
+\[ $ans3Explanation->{TeX} \]
+
+$ans4Explanation->{text}
+\[ $ans4Explanation->{TeX} \]
+
+$ans5Explanation->{text}
+\[ $ans5Explanation->{TeX} \]
+
+$ans6Explanation->{text}
+\[ $ans6Explanation->{TeX} \]
+
+$ans7Explanation->{text}
+\[ $ans7Explanation->{TeX} \]
+
+$ans8Explanation->{text}
+\[ $ans8Explanation->{TeX} \]
+
+END_SOLUTION
+
+
+
+ENDDOCUMENT();        

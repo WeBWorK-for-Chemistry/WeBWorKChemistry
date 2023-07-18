@@ -1,0 +1,119 @@
+##DESCRIPTION
+##  Rates of Reaction 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'kinetics', 'rates')
+
+## Date('8/9/2022')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "niceTables.pl",
+   "contextChemical.pl",
+   "contextInexactValue.pl",
+   "contextInexactValueWithUnits.pl",
+   "parserDimensionalAnalysis.pl",
+   "parserMultiAnswer.pl",
+   "weightedGrader.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+$rand_num_generator = new PGrandom();
+
+Context("InexactValueWithUnits");
+
+$KcRaw = random(0.1,1000,0.1);
+
+$Kc = InexactValueWithUnits([$KcRaw,3], '');
+
+$coefA = random(1,4,1);
+$coefB = random(1,4,1);
+$coefC = random(2,4,1);
+if ($coefA % 2 == 0 && $coefB % 2 == 0 && $coefC % 2 == 0){
+	$coefB = 3;
+}elsif ($coefA == 3 && $coefB == 3 && $coefC == 3){
+	$ceofB = 2;
+}
+
+$concBRaw = random(0.001, 0.08, 0.00005);
+$concCRaw = random(0.001, 0.08, 0.00005);
+
+$concB = InexactValueWithUnits([$concBRaw,3], 'M');
+$concC = InexactValueWithUnits([$concCRaw,3], 'M');
+$activity = InexactValueWithUnits([1,Inf], 'M');  
+# Technically, all of these should be activites, but we can approximate
+# activities using concentrations and divide by 1 M to remove units.
+
+$concA = (($concC/$activity)**$coefC/((($concB/$activity)**$coefB)*$Kc))**(1/$coefA) * $activity;
+
+##############################################################
+#
+#  Problem
+#
+#
+
+BEGIN_PGML
+
+The following reaction has a [`{K_c}`] of [$Kc] at a certain temperature.
+
+[```\ce{[$coefA == 1 ? '' : $coefA]A + [$coefB == 1 ? '' : $coefB]B <=> [$coefC == 1 ? '' : $coefC]C}```]
+
+What is the equilibrium concentration of *A* if [`\mathrm{\left[B\right]=[$concB]}`] and [`\mathrm{\left[C\right]=[$concC]}`]?
+
+	_Don't forget proper units!_
+
+	[`\mathrm{\left[A\right]=}`] [_______]{$concA}
+
+
+
+END_PGML
+
+
+BEGIN_PGML_SOLUTION
+
+Start with the equilibrium expression for the reaction.  Remember, the exponents
+come from the coefficients.  Also, always place products over reactants.
+
+[``` K_c = \mathrm{\frac{[C]^[$coefC]}{[A]^[$coefA][B]^[$coefB]}} ```]
+
+Re-arrange the equation to solve for \[A\]:
+
+[``` \mathrm{\frac{{\color{red}[A]^[$coefA]}\cancel{K_c}}{{\color{blue}\cancel{K_c}}} = \frac{{\color{red}\cancel{[A]^[$coefA]}}[C]^[$coefC]}{{\color{blue}K_c}\cancel{[A]^[$coefA]}[B]^[$coefB]}} ```]
+
+[``` \mathrm{[A]^[$coefA] = \frac{[C]^[$coefC]}{K_c [B]^[$coefB]}} ```]
+
+[``` \mathrm{[A] = \left(\frac{[C]^[$coefC]}{K_c [B]^[$coefB]}\right)^{\frac{1}{[$coefA]}}} ```]
+
+Now, plug in your values!
+
+[``` \mathrm{[A] = \left(\frac{[$concC->{inexactValue}]^[$coefC]}{[$Kc]\times [$concB->{inexactValue}]^[$coefB]}\right)^{\frac{1}{[$coefA]}}} ```]
+
+[``` \mathrm{[A]} = [$concA] ```]
+
+Note:  Why is [`\mathrm{K_c}`] unitless even though many versions of the equilibrium expression 
+mathmatically return a value with units?  That's because we aren't really plugging in plain
+concentrations.  Technically, we're plugging in the *activity*.  This is a unitless value and 
+we can approximate an activity by dividing the all concentrations by exactly 1 M.  When you divide
+it, the units cancel and you get a unitless number.
+
+Activity is a concept that is studied in a more advanced chemistry course.  As long as our
+reaction concentrations are low, using concentration instead of activity is a reasonable approximation.
+This is somewhat similar to how we can use the ideal gas equation under _normal_ conditions
+but have to use the Van der Waals equation under more extreme conditions.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        

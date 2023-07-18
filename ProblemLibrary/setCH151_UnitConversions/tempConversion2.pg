@@ -1,0 +1,89 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+
+
+##############################################
+
+
+Context("Numeric");
+
+$m = random(30.0,69.9,0.1);
+
+Context("InexactValue");
+
+$given = InexactValue($m, 3);
+
+$scale = InexactValue(1.8, 10);
+
+$shift = InexactValue(32, 10);
+
+$degF = InexactValue($scale*$given + $shift);
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Unit Conversion - Temperature - Celcius to Fahrenheit
+
+The temperature of a substance is [$given] [``^\circ C``], convert this into degrees Fahrenheit.
+ 
+
+[$given] [``^\circ C``] = [_________]{$degF} [``^\circ F``]
+
+
+
+ 
+END_PGML
+
+
+
+##############################################
+BEGIN_TEXT
+$PAR
+If you don't get this in $showHint tries, you can get a hint.
+END_TEXT
+
+BEGIN_PGML_HINT
+
+Remember that temperature conversions cannot be done via the conversion factor method that is used for many other conversions.  For more information on temperature conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/03%3A_Dimensional_Anlaysis_and_Density/3.06%3A_Temperature"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+To convert to from Celsius to Fahrenheit, remember that the constants in this equation are exact. 
+
+[$given][``\times``]1.8 + 32 = [$degF][``^\circ F``]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
+
