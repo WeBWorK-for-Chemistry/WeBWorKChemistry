@@ -59,7 +59,7 @@ foreach (@correct){
 BEGIN_PGML_SOLUTION
 
 Each element is defined by its atomic number (or number 
-ofprotons in the nuclei), whether it is isolated or combined.
+of protons in the nuclei), whether it is isolated or combined.
 
 For example, if all of the atoms in a sample of matter have an atomic number of 8, 
 then the sample is a sample of the element oxygen whether it 
