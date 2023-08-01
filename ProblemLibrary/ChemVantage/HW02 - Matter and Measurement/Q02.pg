@@ -1,0 +1,42 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGunion.pl",
+"PGasu.pl",
+"PGstringevaluators.pl",
+"contextInteger.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("Numeric");
+Context()->flags->set(
+    zeroLevel => 1E-40,
+    tolerance => 0.02,
+);
+
+$ans = Compute(0.00218);
+$vol = 1.81;
+
+BEGIN_PGML
+The density of dry air at 20 °C and normal atmospheric pressure is 1.2041 [`kg/m^3`]. Calculate the mass of dry air inside a [$vol] L balloon under these conditions in kg.
+
+ [______]{$answer} kg
+
+Enter the value with the appropriate number of significant figures.
+ END_PGML
+
+ANS( $ans->cmp() );
+
+############################
+#  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
+
+#BEGIN_PGML_SOLUTION
+#The answer is [$ans].
+#END_PGML_SOLUTION
+
+ENDDOCUMENT();

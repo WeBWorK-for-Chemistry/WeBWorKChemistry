@@ -1,0 +1,42 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGunion.pl",
+"PGasu.pl",
+"PGstringevaluators.pl",
+"contextInteger.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("Numeric");
+Context()->flags->set(
+    zeroLevel => 1E-40,
+    tolerance => 0.02,
+);
+
+$ans = Compute(13.02);
+
+BEGIN_PGML
+If your credit card charges you interest at an annualized rate of 18.50% and your average daily balance for the month of September was $855.97, how much interest do you owe for this month?
+
+ [______]{$answer} dollars 
+
+Enter the value with the appropriate number of significant figures.
+
+ END_PGML
+
+ANS( $ans->cmp() );
+
+############################
+#  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
+
+#BEGIN_PGML_SOLUTION
+#The answer is [$ans].
+#END_PGML_SOLUTION
+
+ENDDOCUMENT();

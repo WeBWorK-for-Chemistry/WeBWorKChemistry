@@ -1,0 +1,41 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGunion.pl",
+"PGasu.pl",
+"PGstringevaluators.pl",
+"contextInteger.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("Numeric");
+Context()->flags->set(
+    zeroLevel => 1E-40,
+    tolerance => 0.02,
+);
+
+$ans = Compute(46.7);
+
+BEGIN_PGML
+In a close-packed structure consisting of identical spheres, 25.95% of the bulk volume consists of empty space between the spheres. If a hypothetical metal atom has an atomic mass of 102.9 amu and an atomic radius of 179.0 pm, calculate the density of the close-packed bulk metal.
+
+ [______]{$answer} [`g/cm^3 `]
+
+Include at least 3 significant figures in your answer.
+ END_PGML
+
+ANS( $ans->cmp() );
+
+############################
+#  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
+
+#BEGIN_PGML_SOLUTION
+#The answer is [$ans].
+#END_PGML_SOLUTION
+
+ENDDOCUMENT();

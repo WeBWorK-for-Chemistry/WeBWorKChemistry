@@ -734,7 +734,15 @@ sub generateExplanation {
 	my $finalAnswer = shift;
 
 	# this is an options optional parameter
+	# Added option to check explicit string.  This solves an issue when trying to check
+	# if 1 mL = 1 cm^3.  These are equal unit hashes, but in the case of dimensional analysis
+	# we may want to show they're NOT equal, otherwise, in the explanation, these will get canceled out.
+
 	my $options = shift;
+	my $explicit = 0;
+	if (defined $options && exists $options->{explicit} && $options->{explicit} == 1){
+		$explicit = 1;
+	}
 
 	my $hasChemicals;
 	if ($options->{hasChemicals}){
@@ -899,8 +907,23 @@ sub generateExplanation {
 			# 	warn $key .': '. $finalAnswerUnitArrayCopy[$j]->{unitHash}->{$key};
 			# }
 
+			# FLAW: if units are technically the same, they'll cancel... 1 mL / 1 cm^3... this cancels when it shouldn't if being explicit...
 			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($conversionFactors[$i]->{units_ref}, $finalAnswerUnitArrayCopy[$j]->{unitHash})){
+				# check explicit option
+				if ($explicit){
+					# must be same text.
+
+				}
 				# Same so do NOT cancel out.
+				warn "SAME";
+				warn $i;
+				warn $conversionFactors[$i]->{units};
+				warn %{$conversionFactors[$i]->{units_ref}};
+				warn %{@{$conversionFactors[$i]->{units_ref}->{parsed}}[0]};
+				warn $j;
+				warn $finalAnswer->{units};
+				warn $finalAnswerUnitArrayCopy[$j]->{units};
+				warn %{$finalAnswerUnitArrayCopy[$j]->{unitHash}};
 				splice(@finalAnswerUnitArrayCopy,$j,1);	
 
 				if ($isDenominator){

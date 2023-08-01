@@ -1,0 +1,42 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGunion.pl",
+"PGasu.pl",
+"PGstringevaluators.pl",
+"contextInteger.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("Numeric");
+Context()->flags->set(
+    zeroLevel => 1E-40,
+    tolerance => 0.02,
+);
+
+$ans = Compute(1180000);
+
+BEGIN_PGML
+If gasoline costs $3.24 per gallon and the exchange rate for Iranian rials is 29834.31677 rial/dollar, how much does it cost (in rials) to fill a 12.2 gallon tank?
+
+ [______]{$answer} rial
+
+Enter the value with the appropriate number of significant figures.
+
+ END_PGML
+
+ANS( $ans->cmp() );
+
+############################
+#  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
+
+#BEGIN_PGML_SOLUTION
+#The answer is [$ans].
+#END_PGML_SOLUTION
+
+ENDDOCUMENT();

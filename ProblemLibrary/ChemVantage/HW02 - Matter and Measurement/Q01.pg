@@ -1,0 +1,64 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGunion.pl",
+"PGasu.pl",
+"PGstringevaluators.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
+"chemQuillMath.pl",
+);
+
+TEXT(beginproblem());
+
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
+
+$val1 = random(1, 5, 0.01); # generate number from 1.00 to 5.00  
+$mercuryMass = InexactValue(sprintf('%.2f', $val1)); # create InexactValue using random value but sprintf guarantees starting value has 2 decimals even if zero
+$density = InexactValue('13.57');
+
+
+$ans = $mercuryMass * 1000 / $density;
+
+BEGIN_PGML
+What is the volume of [$mercuryMass] kg of mercury at 25 °C? The density of mercury at 25 °C is [$mercuryMass] [`g/cm^3`].
+
+ [______]{$ans} mL
+
+Enter the value with the appropriate number of significant figures.
+
+END_PGML
+
+
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$mercuryMassKg = InexactValueWithUnits($mercuryMass, 'kg');
+$densityg = InexactValueWithUnits($density, 'g');
+$densitycm3 = InexactValueWithUnits([1, Inf], 'cm^3');
+$n1 = InexactValueWithUnits(['1000', Inf], 'g');
+$d1 = InexactValueWithUnits(['1', Inf], 'kg');
+$n2 = InexactValueWithUnits(['1', Inf], 'mL');
+$d2 = InexactValueWithUnits(['1', Inf], 'cm^3');
+
+$volumemL = $mercuryMassKg*$n1/$d1*$densitycm3/$densityg*$n2/$d2; 
+
+$dimensionalAnalysisConversion = DimensionalAnalysis::generateExplanation([$mercuryMassKg], [$n1, $d1, $densitycm3, $densityg, $n2, $d2], $volumemL);
+############################
+#  Solution  
+
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisConversion]```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
