@@ -768,6 +768,8 @@ sub generateExplanation {
 	
 	@startingArray = @{ $startingArrayRef };
 
+	# The flaw with this function is that the hash does NOT include the power's meaning.
+	warn $finalAnswer->{units};
 	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units},{hasChemicals=>$hasChemicals});
 	my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;
 
@@ -787,7 +789,7 @@ sub generateExplanation {
 	my $val = $startingArray[0]->{inexactValue};
 	my $numeratorUnits = '';
 	my $denominatorUnits = '';
-			
+
 	@unitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($startingArray[0]->{units},{hasChemicals=>$hasChemicals});
 	foreach $unit (@unitArray){
 		$found = 0;
@@ -906,6 +908,22 @@ sub generateExplanation {
 	# }
 	
 	# now parse the dimensional analysis part
+	# The unit comparison needs to be adjusted to work.  The conversion factors have a unit hash that combines all units into one hash.
+	# The final answer was parsed using the process_unit_for_stringCombine function that leaves the power separate.
+	# We'll need to manually scale that power back into the hash.  
+	# Do it first and avoid repetition, won't need this copy for anything else.
+
+	for ($i=0; $i < scalar @finalAnswerUnitArrayCopy; $i++){
+		my @keys = (keys %{$finalAnswerUnitArrayCopy[$i]->{unitHash}});
+		for ($j=0;$j<scalar @keys; $j++){
+			if ($keys[$j] eq 'factor'){
+				$finalAnswerUnitArrayCopy[$i]->{unitHash}->{$keys[$j]} = $finalAnswerUnitArrayCopy[$i]->{unitHash}->{$keys[$j]}**$finalAnswerUnitArrayCopy[$i]->{power};
+			} else {
+				$finalAnswerUnitArrayCopy[$i]->{unitHash}->{$keys[$j]} = $finalAnswerUnitArrayCopy[$i]->{unitHash}->{$keys[$j]}*$finalAnswerUnitArrayCopy[$i]->{power};
+			}
+		}
+	}
+
 	@conversionFactors = @{ $conversionFactorsRef };
 	for ($i=0; $i < scalar @conversionFactors; $i++){
 		$isDenominator = $i % 2;
