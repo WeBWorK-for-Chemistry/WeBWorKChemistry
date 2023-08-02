@@ -5,6 +5,8 @@ WeBWorK scripts for doing problems related to Chemistry (and beyond!)
 
 This repo is a work-in-progress!  It has not yet been added to the WeBWorK repo as it needs more testing and improvements.  If you want to contribute, please submit a PR!  It's easy to do.  (Fork this repo, make some changes to your forked repo, then come back here and make a PR that points to your forked repo.)  
 
+API Documentation (unfinished) here:  https://webwork-for-chemistry.github.io/WeBWorKChemistry/Macros/doc/html/
+
 ## Installation instructions
 Copy the macro files into the macro folder of the class you want to use this for.  Then, link to these (as necessary) in your pg file.
 
