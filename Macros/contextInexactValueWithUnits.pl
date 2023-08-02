@@ -1092,13 +1092,21 @@ sub compareUnitHash {
 # and the power of the unit adjusted negative if it's in the denominator.
 # These will be used to create new units when doing multiplication and division.  
 sub process_unit_for_stringCombine {
-	#** @function public array process_unit_for_stringCombine ($s, %$options)
+	#** 
+	# @function public array process_unit_for_stringCombine ($s, %$options)
 	# @brief Process string units into array of unit hashes.  This particular function only 
-	# separates numerator and denominator.  
+	# 	separates numerator and denominator.  
+	# @brief Note: This is very different from the BetterUnits::process_unit function as it
+	# 	does not combine everything into one hash.  Powers are left separate from the hash, too.  This 
+	# 	is useful exactly for the "string combine" where we want to merge two sets of units together.
+	# 	(Happens in multiplication and division.)
+	#	This way we can more easily cancel out units, or merge two sets of prefixed units.
 	# @param s required - Value/string to convert
 	# @param options optional - Notes below
 	# @brief {fundamental_units} for defining your own set of fundamental units. Will be default set it empty.
-	# {known_units} Default set if empty.
+	# 	{known_units} Default set if empty.
+	# @retval numerator_array - An array of hash refs that contain:
+	# @brief {name:scalar, power:scalar, unitHash: hash ref}
 	#*
   my $string = shift;
 
