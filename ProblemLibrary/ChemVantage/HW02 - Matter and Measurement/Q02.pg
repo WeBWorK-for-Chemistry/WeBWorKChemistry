@@ -4,39 +4,68 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
 TEXT(beginproblem());
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-$ans = Compute(0.00218);
-$vol = 1.81;
+$val1 = random(1, 5, 0.01); # generate number from 1.00 to 5.00  
+$airVolume = InexactValue(sprintf('%.2f', $val1)); # create InexactValue using random value but sprintf guarantees starting value has 2 decimals even if zero
+$density = InexactValue('1.2041');
+
+$airMass = $airVolume / 1000 * $density;
 
 BEGIN_PGML
-The density of dry air at 20 °C and normal atmospheric pressure is 1.2041 [`kg/m^3`]. Calculate the mass of dry air inside a [$vol] L balloon under these conditions in kg.
+The density of dry air at 20 °C and normal atmospheric pressure is 1.2041 [`\mathrm{kg}/\mathrm{m}^3`]. Calculate the mass of dry air inside a [$airVolume] L balloon under these conditions in kg.
 
- [______]{$answer} kg
+ [______]{$airMass} kg
 
 Enter the value with the appropriate number of significant figures.
- END_PGML
 
-ANS( $ans->cmp() );
+END_PGML
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$airVolumeL = InexactValueWithUnits($airVolume, 'L');
+$n1 = InexactValueWithUnits(['1', Inf], 'm^3');
+$d1 = InexactValueWithUnits(['1000', Inf], 'L');
+$densitykg = InexactValueWithUnits($density, 'kg');
+$densitym3 = InexactValueWithUnits([1, Inf], 'm^3');
+
+
+$airMasskg = $airVolumeL*$n1/$d1*$densitykg/$densitym3; 
+
+$volConversionSolution = $airVolumeL*$n1/$d1;
+$volConversion = DimensionalAnalysis::generateExplanation([$airVolumeL], [$n1, $d1], $volConversionSolution);
+$densityConversionSolution = $volConversionSolution*$densitykg/$densitym3;
+$densityConversion = DimensionalAnalysis::generateExplanation([$volConversionSolution], [$densitykg, $densitym3], $densityConversionSolution);
+
+BEGIN_PGML_SOLUTION
+
+You are starting with a volume physical quantity, [$airVolumeL].  The solution must be a mass physical quantity (in kg). 
+You will need a conversion factor that contains both of those physical quantities.  The density, [$densitykg->{inexactValue}] [`\mathrm{kg}/\mathrm{m}^3`],
+is perfect for this as it has mass in the numerator and volume in the denominator.  
+You will just need to do some conversions to match the same units in the density first.  Convert 
+Liters to meters cubed.
+
+[```[$volConversion] ```]
+
+Now you can use the density to convert your volume in meters cubed to a mass in kilograms.  
+
+[```[$densityConversion] ```]
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
