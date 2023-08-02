@@ -768,13 +768,10 @@ sub generateExplanation {
 	
 	@startingArray = @{ $startingArrayRef };
 
-	# The flaw with this function is that the hash does NOT include the power's meaning.
-	warn $finalAnswer->{units};
+	# The flaw with this function is that the hash does NOT include the power's meaning, adjust it later!
 	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units},{hasChemicals=>$hasChemicals});
 	my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;
 
-    
-	
 
 	# This is only for the first value!
 	# if (scalar(@startingArray) == 2) {
@@ -932,13 +929,7 @@ sub generateExplanation {
 		# 	warn $key .': '. $conversionFactors[$i]->{units_ref}->{$key};
 		# }
 		for ($j=0; $j < scalar @finalAnswerUnitArrayCopy; $j++){
-			
-			# for $key (keys %{$finalAnswerUnitArrayCopy[$j]->{unitHash}}){
-			# 	warn $key .': '. $finalAnswerUnitArrayCopy[$j]->{unitHash}->{$key};
-			# }
-			warn %{$conversionFactors[$i]->{units_ref}};
-			warn %{$finalAnswerUnitArrayCopy[$j]};
-			warn %{$finalAnswerUnitArrayCopy[$j]->{unitHash}};
+
 			# FLAW: if units are technically the same, they'll cancel... 1 mL / 1 cm^3... this cancels when it shouldn't if being explicit...
 			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($conversionFactors[$i]->{units_ref}, $finalAnswerUnitArrayCopy[$j]->{unitHash})){
 				# check explicit option
@@ -946,7 +937,6 @@ sub generateExplanation {
 					# must be same text.... this is reasonable for a solution where the units are written according to some standard
 					# Same so do NOT cancel out.
 					splice(@finalAnswerUnitArrayCopy,$j,1);	
-					warn "HERE";
 
 					if ($isDenominator){
 						$explanation .= '{'. $conversionFactors[$i]->TeX . '}';
