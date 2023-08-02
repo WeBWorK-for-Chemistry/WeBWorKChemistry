@@ -50,15 +50,33 @@ $d2 = InexactValueWithUnits(['1', Inf], 'cm^3');
 
 $volumemL = $mercuryMassKg*$n1/$d1*$densitycm3/$densityg*$n2/$d2; 
 
+$massConversionSolution = $mercuryMassKg*$n1/$d1;
+#$massConversion = DimensionalAnalysis::generateExplanation([$mercuryMassKg], [$n1, $d1], $massConversionSolution);
+$densityConversionSolution = $massConversionSolution*$densitycm3/$densityg;
+$densityConversion = DimensionalAnalysis::generateExplanation([$massConversionSolution], [$densitycm3, $densityg], $densityConversionSolution);
+$volConversionSolution = $densityConversionSolution*$n2/$d2;
+#$volConversion = DimensionalAnalysis::generateExplanation([$densityConversionSolution], [$n2, $d2], $volConversionSolution, {explicit=>1});
+
 # The explicit parameter is to prevent the explanation generator from canceling out 1 mL and 1 cm3 since they are technically equal.
-$dimensionalAnalysisConversion = DimensionalAnalysis::generateExplanation([$mercuryMassKg], [$n1, $d1, $densitycm3, $densityg, $n2, $d2], $volumemL, {explicit=>1});
+#$dimensionalAnalysisConversion = DimensionalAnalysis::generateExplanation([$mercuryMassKg], [$n1, $d1, $densitycm3, $densityg, $n2, $d2], $volumemL, {explicit=>1});
 ############################
 #  Solution  
 
 
 BEGIN_PGML_SOLUTION
 
-[```[$dimensionalAnalysisConversion]```]
+You are starting with a mass physical quantity, [$mercuryMassKg].  The solution must be a volume physical quantity (in mL). 
+You will need a conversion factor that contains both of those physical quantities.  The density, [`[$densityg->{inexactValue}]`] [`\frac{\mathrm{g}}{\mathrm{cm}^3}`],
+is perfect for this.  You will just need to do some conversions to match the same units in the density first.  Convert 
+kilograms to grams.
+
+[```[$densityConversion]```]
+
+[```[$densityConversion]```]
+
+[```[$densityConversion]```]
+
+[```[$densityConversion]```]
 
 END_PGML_SOLUTION
 

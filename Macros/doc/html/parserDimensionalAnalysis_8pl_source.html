@@ -789,344 +789,351 @@ $(document).ready(function(){initNavTree('parserDimensionalAnalysis_8pl_source.h
 <div class="line"><a name="l00724"></a><span class="lineno">  724</span>&#160; </div>
 <div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160;<span class="keyword">package </span>DimensionalAnalysis;</div>
 <div class="line"><a name="l00726"></a><span class="lineno">  726</span>&#160; </div>
-<div class="line"><a name="l00727"></a><span class="lineno">  727</span>&#160;sub <a class="code" href="classDimensionalAnalysis.html#a851d403599a15545be4b3c807a8e46da">generateExplanation</a> {</div>
-<div class="line"><a name="l00728"></a><span class="lineno">  728</span>&#160; </div>
-<div class="line"><a name="l00729"></a><span class="lineno">  729</span>&#160;<span class="preprocessor">    # starts with an array in case you want to separate numerator part and denominator part</span></div>
-<div class="line"><a name="l00730"></a><span class="lineno">  730</span>&#160;    my $startingArrayRef = shift; </div>
-<div class="line"><a name="l00731"></a><span class="lineno">  731</span>&#160;<span class="preprocessor">    # array of conversion factors organized as [numerator,denominator,numerator,denominator,...] </span></div>
-<div class="line"><a name="l00732"></a><span class="lineno">  732</span>&#160;    my $conversionFactorsRef = shift;</div>
-<div class="line"><a name="l00733"></a><span class="lineno">  733</span>&#160;<span class="preprocessor">    # final pre-calculated answer, NOT an array because we want it shown as one number</span></div>
-<div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;    my $finalAnswer = shift;</div>
-<div class="line"><a name="l00735"></a><span class="lineno">  735</span>&#160; </div>
-<div class="line"><a name="l00736"></a><span class="lineno">  736</span>&#160;<span class="preprocessor">    # this is an options optional parameter</span></div>
-<div class="line"><a name="l00737"></a><span class="lineno">  737</span>&#160;<span class="preprocessor">    # Added option to check explicit string.  This solves an issue when trying to check</span></div>
-<div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160;<span class="preprocessor">    # if 1 mL = 1 cm^3.  These are equal unit hashes, but in the case of dimensional analysis</span></div>
-<div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;<span class="preprocessor">    # we may want to show they&#39;re NOT equal, otherwise, in the explanation, these will get canceled out.</span></div>
-<div class="line"><a name="l00740"></a><span class="lineno">  740</span>&#160; </div>
-<div class="line"><a name="l00741"></a><span class="lineno">  741</span>&#160;    my $options = shift;</div>
-<div class="line"><a name="l00742"></a><span class="lineno">  742</span>&#160;    my $explicit = 0;</div>
-<div class="line"><a name="l00743"></a><span class="lineno">  743</span>&#160;    <span class="keywordflow">if</span> (defined $options &amp;&amp; exists $options-&gt;{<span class="keyword">explicit</span>} &amp;&amp; $options-&gt;{<span class="keyword">explicit</span>} == 1){</div>
-<div class="line"><a name="l00744"></a><span class="lineno">  744</span>&#160;        $explicit = 1;</div>
-<div class="line"><a name="l00745"></a><span class="lineno">  745</span>&#160;    }</div>
-<div class="line"><a name="l00746"></a><span class="lineno">  746</span>&#160; </div>
-<div class="line"><a name="l00747"></a><span class="lineno">  747</span>&#160;    my $hasChemicals;</div>
-<div class="line"><a name="l00748"></a><span class="lineno">  748</span>&#160;    <span class="keywordflow">if</span> ($options-&gt;{hasChemicals}){</div>
-<div class="line"><a name="l00749"></a><span class="lineno">  749</span>&#160;        $hasChemicals = 1;</div>
-<div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;    }</div>
-<div class="line"><a name="l00751"></a><span class="lineno">  751</span>&#160; </div>
-<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;    my $explanation = <span class="stringliteral">&#39;&#39;</span>;</div>
-<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160; </div>
-<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;    </div>
-<div class="line"><a name="l00755"></a><span class="lineno">  755</span>&#160;    @startingArray = @{ $startingArrayRef };</div>
-<div class="line"><a name="l00756"></a><span class="lineno">  756</span>&#160; </div>
-<div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160;    my @finalAnswerUnitArray = <a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#a3eb4261d112eda9a9e4cb377457cb616">InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine</a>($finalAnswer-&gt;{units},{hasChemicals=&gt;$hasChemicals});</div>
-<div class="line"><a name="l00758"></a><span class="lineno">  758</span>&#160;    my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;</div>
-<div class="line"><a name="l00759"></a><span class="lineno">  759</span>&#160; </div>
-<div class="line"><a name="l00760"></a><span class="lineno">  760</span>&#160;<span class="preprocessor">    # NOT USED</span></div>
-<div class="line"><a name="l00761"></a><span class="lineno">  761</span>&#160;<span class="preprocessor">    # $startingUnits = $startingArray[0]-&gt;{units};</span></div>
-<div class="line"><a name="l00762"></a><span class="lineno">  762</span>&#160;<span class="preprocessor">    # $endingUnits = $finalAnswer-&gt;{units};</span></div>
-<div class="line"><a name="l00763"></a><span class="lineno">  763</span>&#160;    </div>
-<div class="line"><a name="l00764"></a><span class="lineno">  764</span>&#160; </div>
-<div class="line"><a name="l00765"></a><span class="lineno">  765</span>&#160;<span class="preprocessor">    # This is only for the first value!</span></div>
-<div class="line"><a name="l00766"></a><span class="lineno">  766</span>&#160;<span class="preprocessor">    # if (scalar(@startingArray) == 2) {</span></div>
-<div class="line"><a name="l00767"></a><span class="lineno">  767</span>&#160;<span class="preprocessor">    #   $explanation .= &#39;\frac{&#39;;</span></div>
-<div class="line"><a name="l00768"></a><span class="lineno">  768</span>&#160;<span class="preprocessor">    #   $explanation .= @startingArray[0]-&gt;TeX;</span></div>
-<div class="line"><a name="l00769"></a><span class="lineno">  769</span>&#160;<span class="preprocessor">    #   $explanation .= &#39;}{&#39;;</span></div>
-<div class="line"><a name="l00770"></a><span class="lineno">  770</span>&#160;<span class="preprocessor">    #   $explanation .= @startingArray[1]-&gt;TeX;</span></div>
-<div class="line"><a name="l00771"></a><span class="lineno">  771</span>&#160;<span class="preprocessor">    #   $explanation .= &#39;}&#39;;</span></div>
-<div class="line"><a name="l00772"></a><span class="lineno">  772</span>&#160;<span class="preprocessor">    # } else {</span></div>
-<div class="line"><a name="l00773"></a><span class="lineno">  773</span>&#160;<span class="preprocessor">        #$explanation .= @startingArray[0]-&gt;TeX({shouldCancel=&gt;1});</span></div>
-<div class="line"><a name="l00774"></a><span class="lineno">  774</span>&#160; </div>
-<div class="line"><a name="l00775"></a><span class="lineno">  775</span>&#160;    my $val = $startingArray[0]-&gt;{inexactValue};</div>
-<div class="line"><a name="l00776"></a><span class="lineno">  776</span>&#160;    my $numeratorUnits = <span class="stringliteral">&#39;&#39;</span>;</div>
-<div class="line"><a name="l00777"></a><span class="lineno">  777</span>&#160;    my $denominatorUnits = <span class="stringliteral">&#39;&#39;</span>;</div>
-<div class="line"><a name="l00778"></a><span class="lineno">  778</span>&#160;            </div>
-<div class="line"><a name="l00779"></a><span class="lineno">  779</span>&#160;    @unitArray = <a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#a3eb4261d112eda9a9e4cb377457cb616">InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine</a>($startingArray[0]-&gt;{units},{hasChemicals=&gt;$hasChemicals});</div>
-<div class="line"><a name="l00780"></a><span class="lineno">  780</span>&#160;    <span class="keywordflow">foreach</span> $unit (@unitArray){</div>
-<div class="line"><a name="l00781"></a><span class="lineno">  781</span>&#160;        $found = 0;</div>
-<div class="line"><a name="l00782"></a><span class="lineno">  782</span>&#160;        <span class="keywordflow">for</span> ($i=0; $i &lt; scalar @finalAnswerUnitArrayCopy; $i++){</div>
-<div class="line"><a name="l00783"></a><span class="lineno">  783</span>&#160;            <span class="keywordflow">if</span> (<a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#ac084cb960b19e412a6e750250cd6016b">InexactValueWithUnits::InexactValueWithUnits::compareUnitHash</a>($unit-&gt;{unitHash}, $finalAnswerUnitArrayCopy[$i]-&gt;{unitHash})){</div>
-<div class="line"><a name="l00784"></a><span class="lineno">  784</span>&#160;<span class="preprocessor">                # Same so do NOT cancel out.</span></div>
-<div class="line"><a name="l00785"></a><span class="lineno">  785</span>&#160;                splice(@finalAnswerUnitArrayCopy,$i,1);</div>
-<div class="line"><a name="l00786"></a><span class="lineno">  786</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
-<div class="line"><a name="l00787"></a><span class="lineno">  787</span>&#160;                    $numeratorUnits .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
-<div class="line"><a name="l00788"></a><span class="lineno">  788</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
-<div class="line"><a name="l00789"></a><span class="lineno">  789</span>&#160;                        $numeratorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00790"></a><span class="lineno">  790</span>&#160;                    }</div>
-<div class="line"><a name="l00791"></a><span class="lineno">  791</span>&#160;                    $numeratorUnits .= <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00792"></a><span class="lineno">  792</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00793"></a><span class="lineno"><a class="line" href="classDimensionalAnalysis.html">  793</a></span>&#160;                    $denominatorUnits .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
-<div class="line"><a name="l00794"></a><span class="lineno">  794</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
-<div class="line"><a name="l00795"></a><span class="lineno">  795</span>&#160;                        $denominatorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00796"></a><span class="lineno">  796</span>&#160;                    }</div>
-<div class="line"><a name="l00797"></a><span class="lineno">  797</span>&#160;                    $denominatorUnits .= <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00798"></a><span class="lineno">  798</span>&#160;                }</div>
-<div class="line"><a name="l00799"></a><span class="lineno">  799</span>&#160;                $found=1;</div>
-<div class="line"><a name="l00800"></a><span class="lineno">  800</span>&#160;                last;</div>
-<div class="line"><a name="l00801"></a><span class="lineno">  801</span>&#160;            } </div>
-<div class="line"><a name="l00802"></a><span class="lineno">  802</span>&#160;        }</div>
-<div class="line"><a name="l00803"></a><span class="lineno">  803</span>&#160;        <span class="keywordflow">if</span> ($found==0){</div>
-<div class="line"><a name="l00804"></a><span class="lineno">  804</span>&#160;            </div>
-<div class="line"><a name="l00805"></a><span class="lineno">  805</span>&#160;            <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
-<div class="line"><a name="l00806"></a><span class="lineno">  806</span>&#160;                $numeratorUnits .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
-<div class="line"><a name="l00807"></a><span class="lineno">  807</span>&#160;                $numeratorUnits .= $unit-&gt;{name};</div>
-<div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
-<div class="line"><a name="l00809"></a><span class="lineno">  809</span>&#160;                    $numeratorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00727"></a><span class="lineno">  727</span>&#160;sub <a class="code" href="classDimensionalAnalysis.html#a2627c391d4d0ca32499e5b6987dc23c7">generateExplanation</a> {</div>
+<div class="line"><a name="l00728"></a><span class="lineno">  728</span>&#160;<span class="preprocessor">    #** @function public scalar generateExplanation (@$startingArrayRef, @$conversionFactorsRef, %$finalAnswer, %$options)</span></div>
+<div class="line"><a name="l00729"></a><span class="lineno">  729</span>&#160;<span class="preprocessor">    # @brief Generate a LaTeX formated dimensional analysis equation with canceled numerators and denominators where appropriate.</span></div>
+<div class="line"><a name="l00730"></a><span class="lineno">  730</span>&#160;<span class="preprocessor">    # @brief The technique used is to parse the starting value&#39;s units and final value&#39;s units separately.  Then match any </span></div>
+<div class="line"><a name="l00731"></a><span class="lineno">  731</span>&#160;<span class="preprocessor">    # identical units along with those identical in the conversion factors and NOT cancel those out.  We assume all other </span></div>
+<div class="line"><a name="l00732"></a><span class="lineno">  732</span>&#160;<span class="preprocessor">    # units will get canceled out.   </span></div>
+<div class="line"><a name="l00733"></a><span class="lineno">  733</span>&#160;<span class="preprocessor">    # @param startingArrayRef required - Array for numerator and denominator portion.  Denominator is optional.</span></div>
+<div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;<span class="preprocessor">    # @param conversionFactorsRef required - Array for each conversion factor using terms in pairs. i.e. [numerator1, denominator1, numerator2, denominator2, etc...]</span></div>
+<div class="line"><a name="l00735"></a><span class="lineno">  735</span>&#160;<span class="preprocessor">    # @param finalAnswer required - Answer to equation. </span></div>
+<div class="line"><a name="l00736"></a><span class="lineno">  736</span>&#160;<span class="preprocessor">    # @param options optional - hash: </span></div>
+<div class="line"><a name="l00737"></a><span class="lineno">  737</span>&#160;<span class="preprocessor">    # @brief {explicit}: boolean - requires units to also match string name instead of just hash values.  i.e. prevents mL and cm^3 from canceling since they are equivalent</span></div>
+<div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160;    </div>
+<div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;<span class="preprocessor">    # @retval explanation - string output in LaTeX format.</span></div>
+<div class="line"><a name="l00740"></a><span class="lineno">  740</span>&#160;<span class="preprocessor">    #*</span></div>
+<div class="line"><a name="l00741"></a><span class="lineno">  741</span>&#160; </div>
+<div class="line"><a name="l00742"></a><span class="lineno">  742</span>&#160;<span class="preprocessor">    # starts with an array in case you want to separate numerator part and denominator part</span></div>
+<div class="line"><a name="l00743"></a><span class="lineno">  743</span>&#160;    my $startingArrayRef = shift; </div>
+<div class="line"><a name="l00744"></a><span class="lineno">  744</span>&#160;<span class="preprocessor">    # array of conversion factors organized as [numerator,denominator,numerator,denominator,...] </span></div>
+<div class="line"><a name="l00745"></a><span class="lineno">  745</span>&#160;    my $conversionFactorsRef = shift;</div>
+<div class="line"><a name="l00746"></a><span class="lineno">  746</span>&#160;<span class="preprocessor">    # final pre-calculated answer, NOT an array because we want it shown as one number</span></div>
+<div class="line"><a name="l00747"></a><span class="lineno">  747</span>&#160;    my $finalAnswer = shift;</div>
+<div class="line"><a name="l00748"></a><span class="lineno">  748</span>&#160; </div>
+<div class="line"><a name="l00749"></a><span class="lineno">  749</span>&#160;<span class="preprocessor">    # this is an options optional parameter</span></div>
+<div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;<span class="preprocessor">    # Added option to check explicit string.  This solves an issue when trying to check</span></div>
+<div class="line"><a name="l00751"></a><span class="lineno">  751</span>&#160;<span class="preprocessor">    # if 1 mL = 1 cm^3.  These are equal unit hashes, but in the case of dimensional analysis</span></div>
+<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;<span class="preprocessor">    # we may want to show they&#39;re NOT equal, otherwise, in the explanation, these will get canceled out.</span></div>
+<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;<span class="preprocessor">    # Maybe we can make this the default, but I&#39;m not sure yet.</span></div>
+<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160; </div>
+<div class="line"><a name="l00755"></a><span class="lineno">  755</span>&#160;    my $options = shift;</div>
+<div class="line"><a name="l00756"></a><span class="lineno">  756</span>&#160;    my $explicit = 0;</div>
+<div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160;    <span class="keywordflow">if</span> (defined $options &amp;&amp; exists $options-&gt;{<span class="keyword">explicit</span>}){</div>
+<div class="line"><a name="l00758"></a><span class="lineno">  758</span>&#160;        $explicit = $options-&gt;{<span class="keyword">explicit</span>};</div>
+<div class="line"><a name="l00759"></a><span class="lineno">  759</span>&#160;    }</div>
+<div class="line"><a name="l00760"></a><span class="lineno">  760</span>&#160; </div>
+<div class="line"><a name="l00761"></a><span class="lineno">  761</span>&#160;    my $hasChemicals;</div>
+<div class="line"><a name="l00762"></a><span class="lineno">  762</span>&#160;    <span class="keywordflow">if</span> ($options-&gt;{hasChemicals}){</div>
+<div class="line"><a name="l00763"></a><span class="lineno">  763</span>&#160;        $hasChemicals = 1;</div>
+<div class="line"><a name="l00764"></a><span class="lineno">  764</span>&#160;    }</div>
+<div class="line"><a name="l00765"></a><span class="lineno">  765</span>&#160; </div>
+<div class="line"><a name="l00766"></a><span class="lineno">  766</span>&#160;    my $explanation = <span class="stringliteral">&#39;&#39;</span>;</div>
+<div class="line"><a name="l00767"></a><span class="lineno">  767</span>&#160; </div>
+<div class="line"><a name="l00768"></a><span class="lineno">  768</span>&#160;    </div>
+<div class="line"><a name="l00769"></a><span class="lineno">  769</span>&#160;    @startingArray = @{ $startingArrayRef };</div>
+<div class="line"><a name="l00770"></a><span class="lineno">  770</span>&#160; </div>
+<div class="line"><a name="l00771"></a><span class="lineno">  771</span>&#160;    my @finalAnswerUnitArray = <a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#a3eb4261d112eda9a9e4cb377457cb616">InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine</a>($finalAnswer-&gt;{units},{hasChemicals=&gt;$hasChemicals});</div>
+<div class="line"><a name="l00772"></a><span class="lineno">  772</span>&#160;    my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;</div>
+<div class="line"><a name="l00773"></a><span class="lineno">  773</span>&#160; </div>
+<div class="line"><a name="l00774"></a><span class="lineno">  774</span>&#160;    </div>
+<div class="line"><a name="l00775"></a><span class="lineno">  775</span>&#160;    </div>
+<div class="line"><a name="l00776"></a><span class="lineno">  776</span>&#160; </div>
+<div class="line"><a name="l00777"></a><span class="lineno">  777</span>&#160;<span class="preprocessor">    # This is only for the first value!</span></div>
+<div class="line"><a name="l00778"></a><span class="lineno">  778</span>&#160;<span class="preprocessor">    # if (scalar(@startingArray) == 2) {</span></div>
+<div class="line"><a name="l00779"></a><span class="lineno">  779</span>&#160;<span class="preprocessor">    #   $explanation .= &#39;\frac{&#39;;</span></div>
+<div class="line"><a name="l00780"></a><span class="lineno">  780</span>&#160;<span class="preprocessor">    #   $explanation .= @startingArray[0]-&gt;TeX;</span></div>
+<div class="line"><a name="l00781"></a><span class="lineno">  781</span>&#160;<span class="preprocessor">    #   $explanation .= &#39;}{&#39;;</span></div>
+<div class="line"><a name="l00782"></a><span class="lineno">  782</span>&#160;<span class="preprocessor">    #   $explanation .= @startingArray[1]-&gt;TeX;</span></div>
+<div class="line"><a name="l00783"></a><span class="lineno">  783</span>&#160;<span class="preprocessor">    #   $explanation .= &#39;}&#39;;</span></div>
+<div class="line"><a name="l00784"></a><span class="lineno">  784</span>&#160;<span class="preprocessor">    # } else {</span></div>
+<div class="line"><a name="l00785"></a><span class="lineno">  785</span>&#160;<span class="preprocessor">        #$explanation .= @startingArray[0]-&gt;TeX({shouldCancel=&gt;1});</span></div>
+<div class="line"><a name="l00786"></a><span class="lineno">  786</span>&#160; </div>
+<div class="line"><a name="l00787"></a><span class="lineno">  787</span>&#160;    my $val = $startingArray[0]-&gt;{inexactValue};</div>
+<div class="line"><a name="l00788"></a><span class="lineno">  788</span>&#160;    my $numeratorUnits = <span class="stringliteral">&#39;&#39;</span>;</div>
+<div class="line"><a name="l00789"></a><span class="lineno">  789</span>&#160;    my $denominatorUnits = <span class="stringliteral">&#39;&#39;</span>;</div>
+<div class="line"><a name="l00790"></a><span class="lineno">  790</span>&#160;            </div>
+<div class="line"><a name="l00791"></a><span class="lineno">  791</span>&#160;    @unitArray = <a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#a3eb4261d112eda9a9e4cb377457cb616">InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine</a>($startingArray[0]-&gt;{units},{hasChemicals=&gt;$hasChemicals});</div>
+<div class="line"><a name="l00792"></a><span class="lineno">  792</span>&#160;    <span class="keywordflow">foreach</span> $unit (@unitArray){</div>
+<div class="line"><a name="l00793"></a><span class="lineno"><a class="line" href="classDimensionalAnalysis.html">  793</a></span>&#160;        $found = 0;</div>
+<div class="line"><a name="l00794"></a><span class="lineno">  794</span>&#160;        <span class="keywordflow">for</span> ($i=0; $i &lt; scalar @finalAnswerUnitArrayCopy; $i++){</div>
+<div class="line"><a name="l00795"></a><span class="lineno">  795</span>&#160;            <span class="keywordflow">if</span> (<a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#ac084cb960b19e412a6e750250cd6016b">InexactValueWithUnits::InexactValueWithUnits::compareUnitHash</a>($unit-&gt;{unitHash}, $finalAnswerUnitArrayCopy[$i]-&gt;{unitHash})){</div>
+<div class="line"><a name="l00796"></a><span class="lineno">  796</span>&#160;<span class="preprocessor">                # Same so do NOT cancel out.</span></div>
+<div class="line"><a name="l00797"></a><span class="lineno">  797</span>&#160;                splice(@finalAnswerUnitArrayCopy,$i,1);</div>
+<div class="line"><a name="l00798"></a><span class="lineno">  798</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
+<div class="line"><a name="l00799"></a><span class="lineno">  799</span>&#160;                    $numeratorUnits .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
+<div class="line"><a name="l00800"></a><span class="lineno">  800</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
+<div class="line"><a name="l00801"></a><span class="lineno">  801</span>&#160;                        $numeratorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00802"></a><span class="lineno">  802</span>&#160;                    }</div>
+<div class="line"><a name="l00803"></a><span class="lineno">  803</span>&#160;                    $numeratorUnits .= <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00804"></a><span class="lineno">  804</span>&#160;                } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00805"></a><span class="lineno">  805</span>&#160;                    $denominatorUnits .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
+<div class="line"><a name="l00806"></a><span class="lineno">  806</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
+<div class="line"><a name="l00807"></a><span class="lineno">  807</span>&#160;                        $denominatorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;                    }</div>
+<div class="line"><a name="l00809"></a><span class="lineno">  809</span>&#160;                    $denominatorUnits .= <span class="charliteral">&#39;}&#39;</span>;</div>
 <div class="line"><a name="l00810"></a><span class="lineno">  810</span>&#160;                }</div>
-<div class="line"><a name="l00811"></a><span class="lineno">  811</span>&#160;                $numeratorUnits .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
-<div class="line"><a name="l00812"></a><span class="lineno">  812</span>&#160;            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00813"></a><span class="lineno">  813</span>&#160;                $denominatorUnits .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
-<div class="line"><a name="l00814"></a><span class="lineno">  814</span>&#160;                $denominatorUnits .= $unit-&gt;{name};</div>
-<div class="line"><a name="l00815"></a><span class="lineno">  815</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
-<div class="line"><a name="l00816"></a><span class="lineno">  816</span>&#160;                    $denominatorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00817"></a><span class="lineno">  817</span>&#160;                }</div>
-<div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;                $denominatorUnits .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
-<div class="line"><a name="l00819"></a><span class="lineno">  819</span>&#160;            }</div>
-<div class="line"><a name="l00820"></a><span class="lineno">  820</span>&#160;        }</div>
-<div class="line"><a name="l00821"></a><span class="lineno">  821</span>&#160;    }</div>
-<div class="line"><a name="l00822"></a><span class="lineno">  822</span>&#160;    <span class="keywordflow">if</span> (scalar(@startingArray) == 2) {</div>
-<div class="line"><a name="l00823"></a><span class="lineno">  823</span>&#160;        my $val2 = $startingArray[1]-&gt;{inexactValue};</div>
-<div class="line"><a name="l00824"></a><span class="lineno">  824</span>&#160;        my $numeratorUnits2 = <span class="stringliteral">&#39;&#39;</span>;</div>
-<div class="line"><a name="l00825"></a><span class="lineno">  825</span>&#160;        my $denominatorUnits2 = <span class="stringliteral">&#39;&#39;</span>;</div>
-<div class="line"><a name="l00826"></a><span class="lineno">  826</span>&#160;            </div>
-<div class="line"><a name="l00827"></a><span class="lineno">  827</span>&#160;        @unitArray = <a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#a3eb4261d112eda9a9e4cb377457cb616">InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine</a>($startingArray[1]-&gt;{units},{hasChemicals=&gt;$hasChemicals});</div>
-<div class="line"><a name="l00828"></a><span class="lineno">  828</span>&#160;        <span class="keywordflow">foreach</span> $unit (@unitArray){</div>
-<div class="line"><a name="l00829"></a><span class="lineno">  829</span>&#160;            $found = 0;</div>
-<div class="line"><a name="l00830"></a><span class="lineno">  830</span>&#160;            <span class="keywordflow">for</span> ($i=0; $i &lt; scalar @finalAnswerUnitArrayCopy; $i++){</div>
-<div class="line"><a name="l00831"></a><span class="lineno">  831</span>&#160;                <span class="keywordflow">if</span> (<a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#ac084cb960b19e412a6e750250cd6016b">InexactValueWithUnits::InexactValueWithUnits::compareUnitHash</a>($unit-&gt;{unitHash}, $finalAnswerUnitArrayCopy[$i]-&gt;{unitHash})){</div>
-<div class="line"><a name="l00832"></a><span class="lineno">  832</span>&#160;<span class="preprocessor">                    # Same so do NOT cancel out.</span></div>
-<div class="line"><a name="l00833"></a><span class="lineno">  833</span>&#160;                    splice(@finalAnswerUnitArrayCopy,$i,1);</div>
-<div class="line"><a name="l00834"></a><span class="lineno">  834</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
-<div class="line"><a name="l00835"></a><span class="lineno">  835</span>&#160;                        $numeratorUnits2 .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
-<div class="line"><a name="l00836"></a><span class="lineno">  836</span>&#160;                        <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
-<div class="line"><a name="l00837"></a><span class="lineno">  837</span>&#160;                            $numeratorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00838"></a><span class="lineno">  838</span>&#160;                        }</div>
-<div class="line"><a name="l00839"></a><span class="lineno">  839</span>&#160;                        $numeratorUnits2 .= <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00840"></a><span class="lineno">  840</span>&#160;                    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00841"></a><span class="lineno">  841</span>&#160;                        $denominatorUnits2 .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
-<div class="line"><a name="l00842"></a><span class="lineno">  842</span>&#160;                        <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
-<div class="line"><a name="l00843"></a><span class="lineno">  843</span>&#160;                            $denominatorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00844"></a><span class="lineno">  844</span>&#160;                        }</div>
-<div class="line"><a name="l00845"></a><span class="lineno">  845</span>&#160;                        $denominatorUnits2 .= <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00846"></a><span class="lineno">  846</span>&#160;                    }</div>
-<div class="line"><a name="l00847"></a><span class="lineno">  847</span>&#160;                    $found=1;</div>
-<div class="line"><a name="l00848"></a><span class="lineno">  848</span>&#160;                    last;</div>
-<div class="line"><a name="l00849"></a><span class="lineno">  849</span>&#160;                } </div>
-<div class="line"><a name="l00850"></a><span class="lineno">  850</span>&#160;            }</div>
-<div class="line"><a name="l00851"></a><span class="lineno">  851</span>&#160;            <span class="keywordflow">if</span> ($found==0){</div>
-<div class="line"><a name="l00852"></a><span class="lineno">  852</span>&#160;                </div>
-<div class="line"><a name="l00853"></a><span class="lineno">  853</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
-<div class="line"><a name="l00854"></a><span class="lineno">  854</span>&#160;                    $numeratorUnits2 .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
-<div class="line"><a name="l00855"></a><span class="lineno">  855</span>&#160;                    $numeratorUnits2 .= $unit-&gt;{name};</div>
-<div class="line"><a name="l00856"></a><span class="lineno">  856</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
-<div class="line"><a name="l00857"></a><span class="lineno">  857</span>&#160;                        $numeratorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00811"></a><span class="lineno">  811</span>&#160;                $found=1;</div>
+<div class="line"><a name="l00812"></a><span class="lineno">  812</span>&#160;                last;</div>
+<div class="line"><a name="l00813"></a><span class="lineno">  813</span>&#160;            } </div>
+<div class="line"><a name="l00814"></a><span class="lineno">  814</span>&#160;        }</div>
+<div class="line"><a name="l00815"></a><span class="lineno">  815</span>&#160;        <span class="keywordflow">if</span> ($found==0){</div>
+<div class="line"><a name="l00816"></a><span class="lineno">  816</span>&#160;            </div>
+<div class="line"><a name="l00817"></a><span class="lineno">  817</span>&#160;            <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
+<div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;                $numeratorUnits .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
+<div class="line"><a name="l00819"></a><span class="lineno">  819</span>&#160;                $numeratorUnits .= $unit-&gt;{name};</div>
+<div class="line"><a name="l00820"></a><span class="lineno">  820</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
+<div class="line"><a name="l00821"></a><span class="lineno">  821</span>&#160;                    $numeratorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00822"></a><span class="lineno">  822</span>&#160;                }</div>
+<div class="line"><a name="l00823"></a><span class="lineno">  823</span>&#160;                $numeratorUnits .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
+<div class="line"><a name="l00824"></a><span class="lineno">  824</span>&#160;            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00825"></a><span class="lineno">  825</span>&#160;                $denominatorUnits .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
+<div class="line"><a name="l00826"></a><span class="lineno">  826</span>&#160;                $denominatorUnits .= $unit-&gt;{name};</div>
+<div class="line"><a name="l00827"></a><span class="lineno">  827</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
+<div class="line"><a name="l00828"></a><span class="lineno">  828</span>&#160;                    $denominatorUnits .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00829"></a><span class="lineno">  829</span>&#160;                }</div>
+<div class="line"><a name="l00830"></a><span class="lineno">  830</span>&#160;                $denominatorUnits .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
+<div class="line"><a name="l00831"></a><span class="lineno">  831</span>&#160;            }</div>
+<div class="line"><a name="l00832"></a><span class="lineno">  832</span>&#160;        }</div>
+<div class="line"><a name="l00833"></a><span class="lineno">  833</span>&#160;    }</div>
+<div class="line"><a name="l00834"></a><span class="lineno">  834</span>&#160;    <span class="keywordflow">if</span> (scalar(@startingArray) == 2) {</div>
+<div class="line"><a name="l00835"></a><span class="lineno">  835</span>&#160;        my $val2 = $startingArray[1]-&gt;{inexactValue};</div>
+<div class="line"><a name="l00836"></a><span class="lineno">  836</span>&#160;        my $numeratorUnits2 = <span class="stringliteral">&#39;&#39;</span>;</div>
+<div class="line"><a name="l00837"></a><span class="lineno">  837</span>&#160;        my $denominatorUnits2 = <span class="stringliteral">&#39;&#39;</span>;</div>
+<div class="line"><a name="l00838"></a><span class="lineno">  838</span>&#160;            </div>
+<div class="line"><a name="l00839"></a><span class="lineno">  839</span>&#160;        @unitArray = <a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#a3eb4261d112eda9a9e4cb377457cb616">InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine</a>($startingArray[1]-&gt;{units},{hasChemicals=&gt;$hasChemicals});</div>
+<div class="line"><a name="l00840"></a><span class="lineno">  840</span>&#160;        <span class="keywordflow">foreach</span> $unit (@unitArray){</div>
+<div class="line"><a name="l00841"></a><span class="lineno">  841</span>&#160;            $found = 0;</div>
+<div class="line"><a name="l00842"></a><span class="lineno">  842</span>&#160;            <span class="keywordflow">for</span> ($i=0; $i &lt; scalar @finalAnswerUnitArrayCopy; $i++){</div>
+<div class="line"><a name="l00843"></a><span class="lineno">  843</span>&#160;                <span class="keywordflow">if</span> (<a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#ac084cb960b19e412a6e750250cd6016b">InexactValueWithUnits::InexactValueWithUnits::compareUnitHash</a>($unit-&gt;{unitHash}, $finalAnswerUnitArrayCopy[$i]-&gt;{unitHash})){</div>
+<div class="line"><a name="l00844"></a><span class="lineno">  844</span>&#160;<span class="preprocessor">                    # Same so do NOT cancel out.</span></div>
+<div class="line"><a name="l00845"></a><span class="lineno">  845</span>&#160;                    splice(@finalAnswerUnitArrayCopy,$i,1);</div>
+<div class="line"><a name="l00846"></a><span class="lineno">  846</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
+<div class="line"><a name="l00847"></a><span class="lineno">  847</span>&#160;                        $numeratorUnits2 .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
+<div class="line"><a name="l00848"></a><span class="lineno">  848</span>&#160;                        <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
+<div class="line"><a name="l00849"></a><span class="lineno">  849</span>&#160;                            $numeratorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00850"></a><span class="lineno">  850</span>&#160;                        }</div>
+<div class="line"><a name="l00851"></a><span class="lineno">  851</span>&#160;                        $numeratorUnits2 .= <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00852"></a><span class="lineno">  852</span>&#160;                    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00853"></a><span class="lineno">  853</span>&#160;                        $denominatorUnits2 .= <span class="stringliteral">&#39;\\mathrm{&#39;</span> . $unit-&gt;{name};</div>
+<div class="line"><a name="l00854"></a><span class="lineno">  854</span>&#160;                        <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
+<div class="line"><a name="l00855"></a><span class="lineno">  855</span>&#160;                            $denominatorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00856"></a><span class="lineno">  856</span>&#160;                        }</div>
+<div class="line"><a name="l00857"></a><span class="lineno">  857</span>&#160;                        $denominatorUnits2 .= <span class="charliteral">&#39;}&#39;</span>;</div>
 <div class="line"><a name="l00858"></a><span class="lineno">  858</span>&#160;                    }</div>
-<div class="line"><a name="l00859"></a><span class="lineno">  859</span>&#160;                    $numeratorUnits2 .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
-<div class="line"><a name="l00860"></a><span class="lineno">  860</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00861"></a><span class="lineno">  861</span>&#160;                    $denominatorUnits2 .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
-<div class="line"><a name="l00862"></a><span class="lineno">  862</span>&#160;                    $denominatorUnits2 .= $unit-&gt;{name};</div>
-<div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
-<div class="line"><a name="l00864"></a><span class="lineno">  864</span>&#160;                        $denominatorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00865"></a><span class="lineno">  865</span>&#160;                    }</div>
-<div class="line"><a name="l00866"></a><span class="lineno">  866</span>&#160;                    $denominatorUnits2 .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
-<div class="line"><a name="l00867"></a><span class="lineno">  867</span>&#160;                }</div>
-<div class="line"><a name="l00868"></a><span class="lineno">  868</span>&#160;            }</div>
-<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;        }</div>
-<div class="line"><a name="l00870"></a><span class="lineno">  870</span>&#160;        $explanation .= <span class="stringliteral">&#39;\frac{&#39;</span>;</div>
-<div class="line"><a name="l00871"></a><span class="lineno">  871</span>&#160;        <span class="keywordflow">if</span> ($denominatorUnits eq <span class="stringliteral">&#39;&#39;</span>){</div>
-<div class="line"><a name="l00872"></a><span class="lineno">  872</span>&#160;            $explanation .= $val-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. $numeratorUnits;</div>
-<div class="line"><a name="l00873"></a><span class="lineno">  873</span>&#160;        } <span class="keywordflow">else</span>{</div>
-<div class="line"><a name="l00874"></a><span class="lineno">  874</span>&#160;            $explanation .= $val-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. <span class="stringliteral">&#39;\\frac{&#39;</span> . $numeratorUnits . <span class="stringliteral">&#39;}{&#39;</span> . $denominatorUnits . <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00875"></a><span class="lineno">  875</span>&#160;        }</div>
-<div class="line"><a name="l00876"></a><span class="lineno">  876</span>&#160;        $explanation .= <span class="stringliteral">&#39;}{&#39;</span>;</div>
-<div class="line"><a name="l00877"></a><span class="lineno">  877</span>&#160;        <span class="keywordflow">if</span> ($denominatorUnits2 eq <span class="stringliteral">&#39;&#39;</span>){</div>
-<div class="line"><a name="l00878"></a><span class="lineno">  878</span>&#160;            $explanation .= $val2-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span> . $numeratorUnits2;</div>
-<div class="line"><a name="l00879"></a><span class="lineno">  879</span>&#160;        } <span class="keywordflow">else</span>{</div>
-<div class="line"><a name="l00880"></a><span class="lineno">  880</span>&#160;            $explanation .= $val2-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. <span class="stringliteral">&#39;\\frac{&#39;</span> . $numeratorUnits2 . <span class="stringliteral">&#39;}{&#39;</span> . $denominatorUnits2 . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00859"></a><span class="lineno">  859</span>&#160;                    $found=1;</div>
+<div class="line"><a name="l00860"></a><span class="lineno">  860</span>&#160;                    last;</div>
+<div class="line"><a name="l00861"></a><span class="lineno">  861</span>&#160;                } </div>
+<div class="line"><a name="l00862"></a><span class="lineno">  862</span>&#160;            }</div>
+<div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160;            <span class="keywordflow">if</span> ($found==0){</div>
+<div class="line"><a name="l00864"></a><span class="lineno">  864</span>&#160;                </div>
+<div class="line"><a name="l00865"></a><span class="lineno">  865</span>&#160;                <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 0) {</div>
+<div class="line"><a name="l00866"></a><span class="lineno">  866</span>&#160;                    $numeratorUnits2 .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
+<div class="line"><a name="l00867"></a><span class="lineno">  867</span>&#160;                    $numeratorUnits2 .= $unit-&gt;{name};</div>
+<div class="line"><a name="l00868"></a><span class="lineno">  868</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &gt; 1){</div>
+<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;                        $numeratorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.$unit-&gt;{power}.<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00870"></a><span class="lineno">  870</span>&#160;                    }</div>
+<div class="line"><a name="l00871"></a><span class="lineno">  871</span>&#160;                    $numeratorUnits2 .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
+<div class="line"><a name="l00872"></a><span class="lineno">  872</span>&#160;                } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00873"></a><span class="lineno">  873</span>&#160;                    $denominatorUnits2 .= <span class="stringliteral">&#39;\\cancel{\\mathrm{&#39;</span>;</div>
+<div class="line"><a name="l00874"></a><span class="lineno">  874</span>&#160;                    $denominatorUnits2 .= $unit-&gt;{name};</div>
+<div class="line"><a name="l00875"></a><span class="lineno">  875</span>&#160;                    <span class="keywordflow">if</span> ($unit-&gt;{power} &lt; -1){</div>
+<div class="line"><a name="l00876"></a><span class="lineno">  876</span>&#160;                        $denominatorUnits2 .= <span class="stringliteral">&#39;^{&#39;</span>.abs($unit-&gt;{power}).<span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00877"></a><span class="lineno">  877</span>&#160;                    }</div>
+<div class="line"><a name="l00878"></a><span class="lineno">  878</span>&#160;                    $denominatorUnits2 .= <span class="stringliteral">&#39;}}&#39;</span>;</div>
+<div class="line"><a name="l00879"></a><span class="lineno">  879</span>&#160;                }</div>
+<div class="line"><a name="l00880"></a><span class="lineno">  880</span>&#160;            }</div>
 <div class="line"><a name="l00881"></a><span class="lineno">  881</span>&#160;        }</div>
-<div class="line"><a name="l00882"></a><span class="lineno">  882</span>&#160;<span class="preprocessor">        #$explanation .= $val2-&gt;TeX() .$numeratorUnits2;</span></div>
-<div class="line"><a name="l00883"></a><span class="lineno">  883</span>&#160;        $explanation .= <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00884"></a><span class="lineno">  884</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00885"></a><span class="lineno">  885</span>&#160;        <span class="keywordflow">if</span> ($denominatorUnits eq <span class="stringliteral">&#39;&#39;</span>){</div>
-<div class="line"><a name="l00886"></a><span class="lineno">  886</span>&#160;            $explanation .= $val-&gt;TeX() . <span class="charliteral">&#39;\,&#39;</span>. $numeratorUnits;</div>
-<div class="line"><a name="l00887"></a><span class="lineno">  887</span>&#160;        } <span class="keywordflow">else</span>{</div>
-<div class="line"><a name="l00888"></a><span class="lineno">  888</span>&#160;            $explanation .= <span class="stringliteral">&#39;\\frac{&#39;</span> . $val-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. $numeratorUnits . <span class="stringliteral">&#39;}{&#39;</span> .<span class="stringliteral">&#39;1\\,&#39;</span>. $denominatorUnits . <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00889"></a><span class="lineno">  889</span>&#160;        }</div>
-<div class="line"><a name="l00890"></a><span class="lineno">  890</span>&#160;    }</div>
-<div class="line"><a name="l00891"></a><span class="lineno">  891</span>&#160; </div>
-<div class="line"><a name="l00892"></a><span class="lineno">  892</span>&#160;        </div>
-<div class="line"><a name="l00893"></a><span class="lineno">  893</span>&#160;        </div>
-<div class="line"><a name="l00894"></a><span class="lineno">  894</span>&#160;<span class="preprocessor">    # }</span></div>
-<div class="line"><a name="l00895"></a><span class="lineno">  895</span>&#160;    </div>
-<div class="line"><a name="l00896"></a><span class="lineno">  896</span>&#160;<span class="preprocessor">    # now parse the dimensional analysis part</span></div>
-<div class="line"><a name="l00897"></a><span class="lineno">  897</span>&#160;    @conversionFactors = @{ $conversionFactorsRef };</div>
-<div class="line"><a name="l00898"></a><span class="lineno">  898</span>&#160;    <span class="keywordflow">for</span> ($i=0; $i &lt; scalar @conversionFactors; $i++){</div>
-<div class="line"><a name="l00899"></a><span class="lineno">  899</span>&#160;        $isDenominator = $i % 2;</div>
-<div class="line"><a name="l00900"></a><span class="lineno">  900</span>&#160;        $found = 0;</div>
-<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;<span class="preprocessor">        # for $key (keys %{$conversionFactors[$i]-&gt;{units_ref}}){</span></div>
-<div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;<span class="preprocessor">        #   warn $key .&#39;: &#39;. $conversionFactors[$i]-&gt;{units_ref}-&gt;{$key};</span></div>
-<div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160;<span class="preprocessor">        # }</span></div>
-<div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;        <span class="keywordflow">for</span> ($j=0; $j &lt; scalar @finalAnswerUnitArrayCopy; $j++){</div>
-<div class="line"><a name="l00905"></a><span class="lineno">  905</span>&#160;            </div>
-<div class="line"><a name="l00906"></a><span class="lineno">  906</span>&#160;<span class="preprocessor">            # for $key (keys %{$finalAnswerUnitArrayCopy[$j]-&gt;{unitHash}}){</span></div>
-<div class="line"><a name="l00907"></a><span class="lineno">  907</span>&#160;<span class="preprocessor">            #   warn $key .&#39;: &#39;. $finalAnswerUnitArrayCopy[$j]-&gt;{unitHash}-&gt;{$key};</span></div>
-<div class="line"><a name="l00908"></a><span class="lineno">  908</span>&#160;<span class="preprocessor">            # }</span></div>
-<div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160; </div>
-<div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;<span class="preprocessor">            # FLAW: if units are technically the same, they&#39;ll cancel... 1 mL / 1 cm^3... this cancels when it shouldn&#39;t if being explicit...</span></div>
-<div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;            <span class="keywordflow">if</span> (<a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#ac084cb960b19e412a6e750250cd6016b">InexactValueWithUnits::InexactValueWithUnits::compareUnitHash</a>($conversionFactors[$i]-&gt;{units_ref}, $finalAnswerUnitArrayCopy[$j]-&gt;{unitHash})){</div>
-<div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;<span class="preprocessor">                # check explicit option</span></div>
-<div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160;                <span class="keywordflow">if</span> ($explicit){</div>
-<div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;<span class="preprocessor">                    # must be same text.</span></div>
-<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;                    </div>
-<div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160;                }</div>
-<div class="line"><a name="l00917"></a><span class="lineno">  917</span>&#160;<span class="preprocessor">                # Same so do NOT cancel out.</span></div>
-<div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;                warn <span class="stringliteral">&quot;SAME&quot;</span>;</div>
-<div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160;                warn $i;</div>
-<div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;                warn $conversionFactors[$i]-&gt;{units};</div>
-<div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;                warn %{$conversionFactors[$i]-&gt;{units_ref}};</div>
-<div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160;                warn %{@{$conversionFactors[$i]-&gt;{units_ref}-&gt;{parsed}}[0]};</div>
-<div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;                warn $j;</div>
-<div class="line"><a name="l00924"></a><span class="lineno">  924</span>&#160;                warn $finalAnswer-&gt;{units};</div>
-<div class="line"><a name="l00925"></a><span class="lineno">  925</span>&#160;                warn $finalAnswerUnitArrayCopy[$j]-&gt;{units};</div>
-<div class="line"><a name="l00926"></a><span class="lineno">  926</span>&#160;                warn %{$finalAnswerUnitArrayCopy[$j]-&gt;{unitHash}};</div>
-<div class="line"><a name="l00927"></a><span class="lineno">  927</span>&#160;                splice(@finalAnswerUnitArrayCopy,$j,1); </div>
-<div class="line"><a name="l00928"></a><span class="lineno">  928</span>&#160; </div>
-<div class="line"><a name="l00929"></a><span class="lineno">  929</span>&#160;                <span class="keywordflow">if</span> ($isDenominator){</div>
-<div class="line"><a name="l00930"></a><span class="lineno">  930</span>&#160;                    $explanation .= <span class="charliteral">&#39;{&#39;</span>. $conversionFactors[$i]-&gt;TeX . <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00931"></a><span class="lineno">  931</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00932"></a><span class="lineno">  932</span>&#160;                    $explanation .= <span class="stringliteral">&#39;\\times&#39;</span>;</div>
-<div class="line"><a name="l00933"></a><span class="lineno">  933</span>&#160;                    $explanation .= <span class="stringliteral">&#39;\\frac{&#39;</span> . $conversionFactors[$i]-&gt;TeX . <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00934"></a><span class="lineno">  934</span>&#160;                }</div>
-<div class="line"><a name="l00935"></a><span class="lineno">  935</span>&#160;                $found=1;</div>
-<div class="line"><a name="l00936"></a><span class="lineno">  936</span>&#160;                last;</div>
-<div class="line"><a name="l00937"></a><span class="lineno">  937</span>&#160;            }</div>
-<div class="line"><a name="l00938"></a><span class="lineno">  938</span>&#160;        }</div>
-<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160;<span class="preprocessor">        #doesn&#39;t match units with answer, so cancel it.</span></div>
-<div class="line"><a name="l00940"></a><span class="lineno">  940</span>&#160;        <span class="keywordflow">if</span> ($found == 0){</div>
-<div class="line"><a name="l00941"></a><span class="lineno">  941</span>&#160;            <span class="keywordflow">if</span> ($isDenominator){</div>
-<div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160;                $explanation .= <span class="charliteral">&#39;{&#39;</span> . $conversionFactors[$i]-&gt;TeX({shouldCancel=&gt;1}) . <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00943"></a><span class="lineno">  943</span>&#160;<span class="preprocessor">                #$explanation .= &#39;{&#39;. $conversionFactors[$i]-&gt;{inexactValue} . &#39;\cancel{\rm &#39;. $conversionFactors[$i]-&gt;{units} . &#39;}}&#39;;</span></div>
-<div class="line"><a name="l00944"></a><span class="lineno">  944</span>&#160;            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00945"></a><span class="lineno">  945</span>&#160;                $explanation .= <span class="stringliteral">&#39;\\times&#39;</span>;</div>
-<div class="line"><a name="l00946"></a><span class="lineno">  946</span>&#160;                $explanation .= <span class="stringliteral">&#39;\\frac{&#39;</span> . $conversionFactors[$i]-&gt;TeX({shouldCancel=&gt;1}) . <span class="charliteral">&#39;}&#39;</span>;</div>
-<div class="line"><a name="l00947"></a><span class="lineno">  947</span>&#160;<span class="preprocessor">                #$explanation .= &#39;\frac{&#39; . $conversionFactors[$i]-&gt;{inexactValue} . &#39;\cancel{\rm &#39; . $conversionFactors[$i]-&gt;{units} . &#39;}}&#39;;</span></div>
-<div class="line"><a name="l00948"></a><span class="lineno">  948</span>&#160;            }</div>
-<div class="line"><a name="l00949"></a><span class="lineno">  949</span>&#160;        }</div>
-<div class="line"><a name="l00950"></a><span class="lineno">  950</span>&#160;    }</div>
-<div class="line"><a name="l00951"></a><span class="lineno">  951</span>&#160;    </div>
-<div class="line"><a name="l00952"></a><span class="lineno">  952</span>&#160;    $explanation .= <span class="charliteral">&#39;=&#39;</span> . $finalAnswer-&gt;TeX;</div>
-<div class="line"><a name="l00953"></a><span class="lineno">  953</span>&#160; </div>
-<div class="line"><a name="l00954"></a><span class="lineno">  954</span>&#160; </div>
-<div class="line"><a name="l00955"></a><span class="lineno">  955</span>&#160; </div>
-<div class="line"><a name="l00956"></a><span class="lineno">  956</span>&#160;    <span class="keywordflow">return</span>  $explanation;</div>
-<div class="line"><a name="l00957"></a><span class="lineno">  957</span>&#160; </div>
-<div class="line"><a name="l00958"></a><span class="lineno">  958</span>&#160;}</div>
-<div class="line"><a name="l00959"></a><span class="lineno">  959</span>&#160; </div>
-<div class="line"><a name="l00960"></a><span class="lineno">  960</span>&#160;main::HEADER_TEXT(&lt;&lt;EOF);</div>
-<div class="line"><a name="l00961"></a><span class="lineno">  961</span>&#160;&lt;style&gt;</div>
-<div class="line"><a name="l00962"></a><span class="lineno">  962</span>&#160;.dimensionalAnalysis {</div>
-<div class="line"><a name="l00963"></a><span class="lineno">  963</span>&#160;    display: flex;</div>
-<div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160;    align-items: center;</div>
+<div class="line"><a name="l00882"></a><span class="lineno">  882</span>&#160;        $explanation .= <span class="stringliteral">&#39;\frac{&#39;</span>;</div>
+<div class="line"><a name="l00883"></a><span class="lineno">  883</span>&#160;        <span class="keywordflow">if</span> ($denominatorUnits eq <span class="stringliteral">&#39;&#39;</span>){</div>
+<div class="line"><a name="l00884"></a><span class="lineno">  884</span>&#160;            $explanation .= $val-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. $numeratorUnits;</div>
+<div class="line"><a name="l00885"></a><span class="lineno">  885</span>&#160;        } <span class="keywordflow">else</span>{</div>
+<div class="line"><a name="l00886"></a><span class="lineno">  886</span>&#160;            $explanation .= $val-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. <span class="stringliteral">&#39;\\frac{&#39;</span> . $numeratorUnits . <span class="stringliteral">&#39;}{&#39;</span> . $denominatorUnits . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00887"></a><span class="lineno">  887</span>&#160;        }</div>
+<div class="line"><a name="l00888"></a><span class="lineno">  888</span>&#160;        $explanation .= <span class="stringliteral">&#39;}{&#39;</span>;</div>
+<div class="line"><a name="l00889"></a><span class="lineno">  889</span>&#160;        <span class="keywordflow">if</span> ($denominatorUnits2 eq <span class="stringliteral">&#39;&#39;</span>){</div>
+<div class="line"><a name="l00890"></a><span class="lineno">  890</span>&#160;            $explanation .= $val2-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span> . $numeratorUnits2;</div>
+<div class="line"><a name="l00891"></a><span class="lineno">  891</span>&#160;        } <span class="keywordflow">else</span>{</div>
+<div class="line"><a name="l00892"></a><span class="lineno">  892</span>&#160;            $explanation .= $val2-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. <span class="stringliteral">&#39;\\frac{&#39;</span> . $numeratorUnits2 . <span class="stringliteral">&#39;}{&#39;</span> . $denominatorUnits2 . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00893"></a><span class="lineno">  893</span>&#160;        }</div>
+<div class="line"><a name="l00894"></a><span class="lineno">  894</span>&#160;<span class="preprocessor">        #$explanation .= $val2-&gt;TeX() .$numeratorUnits2;</span></div>
+<div class="line"><a name="l00895"></a><span class="lineno">  895</span>&#160;        $explanation .= <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00896"></a><span class="lineno">  896</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00897"></a><span class="lineno">  897</span>&#160;        <span class="keywordflow">if</span> ($denominatorUnits eq <span class="stringliteral">&#39;&#39;</span>){</div>
+<div class="line"><a name="l00898"></a><span class="lineno">  898</span>&#160;            $explanation .= $val-&gt;TeX() . <span class="charliteral">&#39;\,&#39;</span>. $numeratorUnits;</div>
+<div class="line"><a name="l00899"></a><span class="lineno">  899</span>&#160;        } <span class="keywordflow">else</span>{</div>
+<div class="line"><a name="l00900"></a><span class="lineno">  900</span>&#160;            $explanation .= <span class="stringliteral">&#39;\\frac{&#39;</span> . $val-&gt;TeX() . <span class="stringliteral">&#39;\\,&#39;</span>. $numeratorUnits . <span class="stringliteral">&#39;}{&#39;</span> .<span class="stringliteral">&#39;1\\,&#39;</span>. $denominatorUnits . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;        }</div>
+<div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;    }</div>
+<div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160; </div>
+<div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;        </div>
+<div class="line"><a name="l00905"></a><span class="lineno">  905</span>&#160;        </div>
+<div class="line"><a name="l00906"></a><span class="lineno">  906</span>&#160;<span class="preprocessor">    # }</span></div>
+<div class="line"><a name="l00907"></a><span class="lineno">  907</span>&#160;    </div>
+<div class="line"><a name="l00908"></a><span class="lineno">  908</span>&#160;<span class="preprocessor">    # now parse the dimensional analysis part</span></div>
+<div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;    @conversionFactors = @{ $conversionFactorsRef };</div>
+<div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;    <span class="keywordflow">for</span> ($i=0; $i &lt; scalar @conversionFactors; $i++){</div>
+<div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;        $isDenominator = $i % 2;</div>
+<div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;        $found = 0;</div>
+<div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160;<span class="preprocessor">        # for $key (keys %{$conversionFactors[$i]-&gt;{units_ref}}){</span></div>
+<div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;<span class="preprocessor">        #   warn $key .&#39;: &#39;. $conversionFactors[$i]-&gt;{units_ref}-&gt;{$key};</span></div>
+<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;<span class="preprocessor">        # }</span></div>
+<div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160;        <span class="keywordflow">for</span> ($j=0; $j &lt; scalar @finalAnswerUnitArrayCopy; $j++){</div>
+<div class="line"><a name="l00917"></a><span class="lineno">  917</span>&#160;            </div>
+<div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;<span class="preprocessor">            # for $key (keys %{$finalAnswerUnitArrayCopy[$j]-&gt;{unitHash}}){</span></div>
+<div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160;<span class="preprocessor">            #   warn $key .&#39;: &#39;. $finalAnswerUnitArrayCopy[$j]-&gt;{unitHash}-&gt;{$key};</span></div>
+<div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;<span class="preprocessor">            # }</span></div>
+<div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;            warn %{$conversionFactors[$i]-&gt;{units_ref}};</div>
+<div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160;            warn %{$finalAnswerUnitArrayCopy[$j]};</div>
+<div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;            warn %{$finalAnswerUnitArrayCopy[$j]-&gt;{unitHash}};</div>
+<div class="line"><a name="l00924"></a><span class="lineno">  924</span>&#160;<span class="preprocessor">            # FLAW: if units are technically the same, they&#39;ll cancel... 1 mL / 1 cm^3... this cancels when it shouldn&#39;t if being explicit...</span></div>
+<div class="line"><a name="l00925"></a><span class="lineno">  925</span>&#160;            <span class="keywordflow">if</span> (<a class="code" href="classInexactValueWithUnits_1_1InexactValueWithUnits.html#ac084cb960b19e412a6e750250cd6016b">InexactValueWithUnits::InexactValueWithUnits::compareUnitHash</a>($conversionFactors[$i]-&gt;{units_ref}, $finalAnswerUnitArrayCopy[$j]-&gt;{unitHash})){</div>
+<div class="line"><a name="l00926"></a><span class="lineno">  926</span>&#160;<span class="preprocessor">                # check explicit option</span></div>
+<div class="line"><a name="l00927"></a><span class="lineno">  927</span>&#160;                unless ($explicit &amp;&amp; $conversionFactors[$i]-&gt;{units} ne $finalAnswer-&gt;{units}){</div>
+<div class="line"><a name="l00928"></a><span class="lineno">  928</span>&#160;<span class="preprocessor">                    # must be same text.... this is reasonable for a solution where the units are written according to some standard</span></div>
+<div class="line"><a name="l00929"></a><span class="lineno">  929</span>&#160;<span class="preprocessor">                    # Same so do NOT cancel out.</span></div>
+<div class="line"><a name="l00930"></a><span class="lineno">  930</span>&#160;                    splice(@finalAnswerUnitArrayCopy,$j,1); </div>
+<div class="line"><a name="l00931"></a><span class="lineno">  931</span>&#160;                    warn <span class="stringliteral">&quot;HERE&quot;</span>;</div>
+<div class="line"><a name="l00932"></a><span class="lineno">  932</span>&#160; </div>
+<div class="line"><a name="l00933"></a><span class="lineno">  933</span>&#160;                    <span class="keywordflow">if</span> ($isDenominator){</div>
+<div class="line"><a name="l00934"></a><span class="lineno">  934</span>&#160;                        $explanation .= <span class="charliteral">&#39;{&#39;</span>. $conversionFactors[$i]-&gt;TeX . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00935"></a><span class="lineno">  935</span>&#160;                    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00936"></a><span class="lineno">  936</span>&#160;                        $explanation .= <span class="stringliteral">&#39;\\times&#39;</span>;</div>
+<div class="line"><a name="l00937"></a><span class="lineno">  937</span>&#160;                        $explanation .= <span class="stringliteral">&#39;\\frac{&#39;</span> . $conversionFactors[$i]-&gt;TeX . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00938"></a><span class="lineno">  938</span>&#160;                    }</div>
+<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160;                    $found=1;</div>
+<div class="line"><a name="l00940"></a><span class="lineno">  940</span>&#160;                    last;</div>
+<div class="line"><a name="l00941"></a><span class="lineno">  941</span>&#160;                }</div>
+<div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160;            }</div>
+<div class="line"><a name="l00943"></a><span class="lineno">  943</span>&#160;        }</div>
+<div class="line"><a name="l00944"></a><span class="lineno">  944</span>&#160;<span class="preprocessor">        #doesn&#39;t match units with answer, so cancel it.</span></div>
+<div class="line"><a name="l00945"></a><span class="lineno">  945</span>&#160;        <span class="keywordflow">if</span> ($found == 0){</div>
+<div class="line"><a name="l00946"></a><span class="lineno">  946</span>&#160;            <span class="keywordflow">if</span> ($isDenominator){</div>
+<div class="line"><a name="l00947"></a><span class="lineno">  947</span>&#160;                $explanation .= <span class="charliteral">&#39;{&#39;</span> . $conversionFactors[$i]-&gt;TeX({shouldCancel=&gt;1}) . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00948"></a><span class="lineno">  948</span>&#160;<span class="preprocessor">                #$explanation .= &#39;{&#39;. $conversionFactors[$i]-&gt;{inexactValue} . &#39;\cancel{\rm &#39;. $conversionFactors[$i]-&gt;{units} . &#39;}}&#39;;</span></div>
+<div class="line"><a name="l00949"></a><span class="lineno">  949</span>&#160;            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00950"></a><span class="lineno">  950</span>&#160;                warn <span class="stringliteral">&#39;here?&#39;</span>;</div>
+<div class="line"><a name="l00951"></a><span class="lineno">  951</span>&#160;                warn $conversionFactors[$i];</div>
+<div class="line"><a name="l00952"></a><span class="lineno">  952</span>&#160;                $explanation .= <span class="stringliteral">&#39;\\times&#39;</span>;</div>
+<div class="line"><a name="l00953"></a><span class="lineno">  953</span>&#160;                $explanation .= <span class="stringliteral">&#39;\\frac{&#39;</span> . $conversionFactors[$i]-&gt;TeX({shouldCancel=&gt;1}) . <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a name="l00954"></a><span class="lineno">  954</span>&#160;<span class="preprocessor">                #$explanation .= &#39;\frac{&#39; . $conversionFactors[$i]-&gt;{inexactValue} . &#39;\cancel{\rm &#39; . $conversionFactors[$i]-&gt;{units} . &#39;}}&#39;;</span></div>
+<div class="line"><a name="l00955"></a><span class="lineno">  955</span>&#160;            }</div>
+<div class="line"><a name="l00956"></a><span class="lineno">  956</span>&#160;        }</div>
+<div class="line"><a name="l00957"></a><span class="lineno">  957</span>&#160;    }</div>
+<div class="line"><a name="l00958"></a><span class="lineno">  958</span>&#160;    </div>
+<div class="line"><a name="l00959"></a><span class="lineno">  959</span>&#160;    $explanation .= <span class="charliteral">&#39;=&#39;</span> . $finalAnswer-&gt;TeX;</div>
+<div class="line"><a name="l00960"></a><span class="lineno">  960</span>&#160; </div>
+<div class="line"><a name="l00961"></a><span class="lineno">  961</span>&#160; </div>
+<div class="line"><a name="l00962"></a><span class="lineno">  962</span>&#160; </div>
+<div class="line"><a name="l00963"></a><span class="lineno">  963</span>&#160;    <span class="keywordflow">return</span>  $explanation;</div>
+<div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160; </div>
 <div class="line"><a name="l00965"></a><span class="lineno">  965</span>&#160;}</div>
-<div class="line"><a name="l00966"></a><span class="lineno">  966</span>&#160;.dimensionalAnalysis &gt; div {</div>
-<div class="line"><a name="l00967"></a><span class="lineno">  967</span>&#160;    text-align: center;</div>
-<div class="line"><a name="l00968"></a><span class="lineno">  968</span>&#160;}</div>
-<div class="line"><a name="l00969"></a><span class="lineno">  969</span>&#160;.dimensionalAnalysisFractionBar {</div>
-<div class="line"><a name="l00970"></a><span class="lineno">  970</span>&#160;    line-height: 1px;</div>
-<div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;    width: 100%;</div>
-<div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160;    border-bottom: 1px solid black;</div>
-<div class="line"><a name="l00973"></a><span class="lineno">  973</span>&#160;    margin-bottom: 4px;</div>
-<div class="line"><a name="l00974"></a><span class="lineno">  974</span>&#160;}</div>
-<div class="line"><a name="l00975"></a><span class="lineno">  975</span>&#160;.dimensionalAnalysisMath {</div>
-<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;    padding: 1em;</div>
-<div class="line"><a name="l00977"></a><span class="lineno">  977</span>&#160;}</div>
-<div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160;&lt;/style&gt;  </div>
-<div class="line"><a name="l00979"></a><span class="lineno">  979</span>&#160;EOF</div>
-<div class="line"><a name="l00980"></a><span class="lineno">  980</span>&#160; </div>
-<div class="line"><a name="l00981"></a><span class="lineno">  981</span>&#160;sub generateProblemLaTeX {</div>
-<div class="line"><a name="l00982"></a><span class="lineno">  982</span>&#160;    my $start = shift;</div>
-<div class="line"><a name="l00983"></a><span class="lineno">  983</span>&#160;    my $colsref = shift;</div>
-<div class="line"><a name="l00984"></a><span class="lineno">  984</span>&#160;    my $n = scalar @{$colsref};</div>
-<div class="line"><a name="l00985"></a><span class="lineno">  985</span>&#160;    my $end = shift;</div>
-<div class="line"><a name="l00986"></a><span class="lineno">  986</span>&#160;    my $tex;</div>
-<div class="line"><a name="l00987"></a><span class="lineno">  987</span>&#160;    $tex .= <span class="stringliteral">&#39;$ &#39;</span>;# . $start-&gt;TeX();</div>
-<div class="line"><a name="l00988"></a><span class="lineno">  988</span>&#160;    $tex .= $start-&gt;TeX;</div>
-<div class="line"><a name="l00989"></a><span class="lineno">  989</span>&#160;    <span class="keywordflow">for</span> ($i=0; $i &lt; $n; $i+=2) {</div>
-<div class="line"><a name="l00990"></a><span class="lineno">  990</span>&#160;        $tex .= <span class="stringliteral">&#39;\times&#39;</span>;</div>
-<div class="line"><a name="l00991"></a><span class="lineno">  991</span>&#160;        $tex .= <span class="stringliteral">&#39;\frac&#39;</span>;</div>
-<div class="line"><a name="l00992"></a><span class="lineno">  992</span>&#160;        $tex .= <span class="stringliteral">&#39;{\hspace{2cm}}&#39;</span>;</div>
-<div class="line"><a name="l00993"></a><span class="lineno">  993</span>&#160;        $tex .= <span class="stringliteral">&#39;{\hspace{2cm}}&#39;</span>;</div>
-<div class="line"><a name="l00994"></a><span class="lineno">  994</span>&#160;    }</div>
-<div class="line"><a name="l00995"></a><span class="lineno">  995</span>&#160;    $tex .= <span class="stringliteral">&#39; = &#39;</span>;</div>
-<div class="line"><a name="l00996"></a><span class="lineno">  996</span>&#160;    $tex .=<span class="stringliteral">&#39;\fbox{\phantom{placeholder}}&#39;</span>;</div>
-<div class="line"><a name="l00997"></a><span class="lineno">  997</span>&#160;    $tex .= <span class="stringliteral">&#39; $&#39;</span>;</div>
-<div class="line"><a name="l00998"></a><span class="lineno">  998</span>&#160;    <span class="keywordflow">return</span> $tex;</div>
-<div class="line"><a name="l00999"></a><span class="lineno">  999</span>&#160;}</div>
-<div class="line"><a name="l01000"></a><span class="lineno"> 1000</span>&#160; </div>
-<div class="line"><a name="l01001"></a><span class="lineno"> 1001</span>&#160;sub generateProblemHTML {</div>
-<div class="line"><a name="l01002"></a><span class="lineno"> 1002</span>&#160;    my $start = shift;</div>
-<div class="line"><a name="l01003"></a><span class="lineno"> 1003</span>&#160;    my $colsref = shift;</div>
-<div class="line"><a name="l01004"></a><span class="lineno"> 1004</span>&#160;    my $n = scalar @{$colsref};</div>
-<div class="line"><a name="l01005"></a><span class="lineno"> 1005</span>&#160;    my $end = shift;</div>
-<div class="line"><a name="l01006"></a><span class="lineno"> 1006</span>&#160;    my $html;</div>
-<div class="line"><a name="l01007"></a><span class="lineno"> 1007</span>&#160;    $html .= <span class="stringliteral">&#39;&#39;</span>;</div>
-<div class="line"><a name="l01008"></a><span class="lineno"> 1008</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysis&quot;&gt;&#39;</span>;</div>
-<div class="line"><a name="l01009"></a><span class="lineno"> 1009</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01010"></a><span class="lineno"> 1010</span>&#160;    $html .= <span class="stringliteral">&#39;$$ &#39;</span> . $start-&gt;TeX . <span class="stringliteral">&#39; $$&#39;</span>;  #<span class="keyword">this</span> forces the number to display as LaTeX </div>
-<div class="line"><a name="l01011"></a><span class="lineno"> 1011</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01012"></a><span class="lineno"> 1012</span>&#160;    <span class="keywordflow">for</span> ($i=0; $i &lt; $n; $i+=2) {</div>
-<div class="line"><a name="l01013"></a><span class="lineno"> 1013</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysisMath&quot;&gt;&#39;</span>;</div>
-<div class="line"><a name="l01014"></a><span class="lineno"> 1014</span>&#160;            $html .= main::math_ev3(<span class="stringliteral">&#39;\times&#39;</span>);</div>
-<div class="line"><a name="l01015"></a><span class="lineno"> 1015</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01016"></a><span class="lineno"> 1016</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysisCol&quot;&gt;&#39;</span>;</div>
-<div class="line"><a name="l01017"></a><span class="lineno"> 1017</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01018"></a><span class="lineno"> 1018</span>&#160;                $html .= $colsref-&gt;[$i];</div>
-<div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;       </div>
-<div class="line"><a name="l01020"></a><span class="lineno"> 1020</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysisFractionBar&quot;&gt;&#39;</span>;</div>
-<div class="line"><a name="l01021"></a><span class="lineno"> 1021</span>&#160;                $html .= <span class="stringliteral">&#39;&lt;svg height=&quot;1&quot; width=&quot;40&quot;&gt;&#39;</span>;</div>
-<div class="line"><a name="l01022"></a><span class="lineno"> 1022</span>&#160;                    $html .= <span class="stringliteral">&#39;&lt;desc&gt;per&lt;/desc&gt;&#39;</span>;</div>
-<div class="line"><a name="l01023"></a><span class="lineno"> 1023</span>&#160;                $html .= <span class="stringliteral">&#39;&lt;/svg&gt;&#39;</span>;</div>
-<div class="line"><a name="l01024"></a><span class="lineno"> 1024</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;       </div>
-<div class="line"><a name="l01025"></a><span class="lineno"> 1025</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01026"></a><span class="lineno"> 1026</span>&#160;                $html .= $colsref-&gt;[$i+1];</div>
-<div class="line"><a name="l01027"></a><span class="lineno"> 1027</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;       </div>
-<div class="line"><a name="l01028"></a><span class="lineno"> 1028</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01029"></a><span class="lineno"> 1029</span>&#160;    }</div>
-<div class="line"><a name="l01030"></a><span class="lineno"> 1030</span>&#160;    </div>
-<div class="line"><a name="l01031"></a><span class="lineno"> 1031</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div  class=&quot;dimensionalAnalysisMath&quot;&gt;&#39;</span>;</div>
-<div class="line"><a name="l01032"></a><span class="lineno"> 1032</span>&#160;        $html .= main::math_ev3(<span class="stringliteral">&#39;{}={}&#39;</span>);</div>
-<div class="line"><a name="l01033"></a><span class="lineno"> 1033</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01034"></a><span class="lineno"> 1034</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01035"></a><span class="lineno"> 1035</span>&#160;        $html .= $end;</div>
-<div class="line"><a name="l01036"></a><span class="lineno"> 1036</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
-<div class="line"><a name="l01038"></a><span class="lineno"> 1038</span>&#160;    $html .= <span class="stringliteral">&#39;&#39;</span>;</div>
-<div class="line"><a name="l01039"></a><span class="lineno"> 1039</span>&#160;    <span class="keywordflow">return</span> $html;</div>
-<div class="line"><a name="l01040"></a><span class="lineno"> 1040</span>&#160;}</div>
-<div class="line"><a name="l01041"></a><span class="lineno"> 1041</span>&#160; </div>
-<div class="line"><a name="l01042"></a><span class="lineno"> 1042</span>&#160; </div>
-<div class="line"><a name="l01043"></a><span class="lineno"> 1043</span>&#160;sub generateProblem {</div>
-<div class="line"><a name="l01044"></a><span class="lineno"> 1044</span>&#160; </div>
-<div class="line"><a name="l01045"></a><span class="lineno"> 1045</span>&#160;    my $start = shift;</div>
-<div class="line"><a name="l01046"></a><span class="lineno"> 1046</span>&#160;    my $colsref = shift;</div>
-<div class="line"><a name="l01047"></a><span class="lineno"> 1047</span>&#160;    my $n = scalar @{$colsref};</div>
-<div class="line"><a name="l01048"></a><span class="lineno"> 1048</span>&#160;    my $end = shift;</div>
-<div class="line"><a name="l01049"></a><span class="lineno"> 1049</span>&#160;    </div>
-<div class="line"><a name="l01050"></a><span class="lineno"> 1050</span>&#160;    <span class="keywordflow">return</span> main::MODES(HTML=&gt;generateProblemHTML($start, $colsref, $end), TeX=&gt;generateProblemLaTeX($start, $colsref, $end));</div>
-<div class="line"><a name="l01051"></a><span class="lineno"> 1051</span>&#160;    </div>
-<div class="line"><a name="l01052"></a><span class="lineno"> 1052</span>&#160;}</div>
-<div class="line"><a name="l01053"></a><span class="lineno"> 1053</span>&#160; </div>
-<div class="line"><a name="l01054"></a><span class="lineno"> 1054</span>&#160; </div>
-<div class="line"><a name="l01055"></a><span class="lineno"> 1055</span>&#160;1;</div>
+<div class="line"><a name="l00966"></a><span class="lineno">  966</span>&#160; </div>
+<div class="line"><a name="l00967"></a><span class="lineno">  967</span>&#160;main::HEADER_TEXT(&lt;&lt;EOF);</div>
+<div class="line"><a name="l00968"></a><span class="lineno">  968</span>&#160;&lt;style&gt;</div>
+<div class="line"><a name="l00969"></a><span class="lineno">  969</span>&#160;.dimensionalAnalysis {</div>
+<div class="line"><a name="l00970"></a><span class="lineno">  970</span>&#160;    display: flex;</div>
+<div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;    align-items: center;</div>
+<div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160;}</div>
+<div class="line"><a name="l00973"></a><span class="lineno">  973</span>&#160;.dimensionalAnalysis &gt; div {</div>
+<div class="line"><a name="l00974"></a><span class="lineno">  974</span>&#160;    text-align: center;</div>
+<div class="line"><a name="l00975"></a><span class="lineno">  975</span>&#160;}</div>
+<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;.dimensionalAnalysisFractionBar {</div>
+<div class="line"><a name="l00977"></a><span class="lineno">  977</span>&#160;    line-height: 1px;</div>
+<div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160;    width: 100%;</div>
+<div class="line"><a name="l00979"></a><span class="lineno">  979</span>&#160;    border-bottom: 1px solid black;</div>
+<div class="line"><a name="l00980"></a><span class="lineno">  980</span>&#160;    margin-bottom: 4px;</div>
+<div class="line"><a name="l00981"></a><span class="lineno">  981</span>&#160;}</div>
+<div class="line"><a name="l00982"></a><span class="lineno">  982</span>&#160;.dimensionalAnalysisMath {</div>
+<div class="line"><a name="l00983"></a><span class="lineno">  983</span>&#160;    padding: 1em;</div>
+<div class="line"><a name="l00984"></a><span class="lineno">  984</span>&#160;}</div>
+<div class="line"><a name="l00985"></a><span class="lineno">  985</span>&#160;&lt;/style&gt;  </div>
+<div class="line"><a name="l00986"></a><span class="lineno">  986</span>&#160;EOF</div>
+<div class="line"><a name="l00987"></a><span class="lineno">  987</span>&#160; </div>
+<div class="line"><a name="l00988"></a><span class="lineno">  988</span>&#160;sub generateProblemLaTeX {</div>
+<div class="line"><a name="l00989"></a><span class="lineno">  989</span>&#160;    my $start = shift;</div>
+<div class="line"><a name="l00990"></a><span class="lineno">  990</span>&#160;    my $colsref = shift;</div>
+<div class="line"><a name="l00991"></a><span class="lineno">  991</span>&#160;    my $n = scalar @{$colsref};</div>
+<div class="line"><a name="l00992"></a><span class="lineno">  992</span>&#160;    my $end = shift;</div>
+<div class="line"><a name="l00993"></a><span class="lineno">  993</span>&#160;    my $tex;</div>
+<div class="line"><a name="l00994"></a><span class="lineno">  994</span>&#160;    $tex .= <span class="stringliteral">&#39;$ &#39;</span>;# . $start-&gt;TeX();</div>
+<div class="line"><a name="l00995"></a><span class="lineno">  995</span>&#160;    $tex .= $start-&gt;TeX;</div>
+<div class="line"><a name="l00996"></a><span class="lineno">  996</span>&#160;    <span class="keywordflow">for</span> ($i=0; $i &lt; $n; $i+=2) {</div>
+<div class="line"><a name="l00997"></a><span class="lineno">  997</span>&#160;        $tex .= <span class="stringliteral">&#39;\times&#39;</span>;</div>
+<div class="line"><a name="l00998"></a><span class="lineno">  998</span>&#160;        $tex .= <span class="stringliteral">&#39;\frac&#39;</span>;</div>
+<div class="line"><a name="l00999"></a><span class="lineno">  999</span>&#160;        $tex .= <span class="stringliteral">&#39;{\hspace{2cm}}&#39;</span>;</div>
+<div class="line"><a name="l01000"></a><span class="lineno"> 1000</span>&#160;        $tex .= <span class="stringliteral">&#39;{\hspace{2cm}}&#39;</span>;</div>
+<div class="line"><a name="l01001"></a><span class="lineno"> 1001</span>&#160;    }</div>
+<div class="line"><a name="l01002"></a><span class="lineno"> 1002</span>&#160;    $tex .= <span class="stringliteral">&#39; = &#39;</span>;</div>
+<div class="line"><a name="l01003"></a><span class="lineno"> 1003</span>&#160;    $tex .=<span class="stringliteral">&#39;\fbox{\phantom{placeholder}}&#39;</span>;</div>
+<div class="line"><a name="l01004"></a><span class="lineno"> 1004</span>&#160;    $tex .= <span class="stringliteral">&#39; $&#39;</span>;</div>
+<div class="line"><a name="l01005"></a><span class="lineno"> 1005</span>&#160;    <span class="keywordflow">return</span> $tex;</div>
+<div class="line"><a name="l01006"></a><span class="lineno"> 1006</span>&#160;}</div>
+<div class="line"><a name="l01007"></a><span class="lineno"> 1007</span>&#160; </div>
+<div class="line"><a name="l01008"></a><span class="lineno"> 1008</span>&#160;sub generateProblemHTML {</div>
+<div class="line"><a name="l01009"></a><span class="lineno"> 1009</span>&#160;    my $start = shift;</div>
+<div class="line"><a name="l01010"></a><span class="lineno"> 1010</span>&#160;    my $colsref = shift;</div>
+<div class="line"><a name="l01011"></a><span class="lineno"> 1011</span>&#160;    my $n = scalar @{$colsref};</div>
+<div class="line"><a name="l01012"></a><span class="lineno"> 1012</span>&#160;    my $end = shift;</div>
+<div class="line"><a name="l01013"></a><span class="lineno"> 1013</span>&#160;    my $html;</div>
+<div class="line"><a name="l01014"></a><span class="lineno"> 1014</span>&#160;    $html .= <span class="stringliteral">&#39;&#39;</span>;</div>
+<div class="line"><a name="l01015"></a><span class="lineno"> 1015</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysis&quot;&gt;&#39;</span>;</div>
+<div class="line"><a name="l01016"></a><span class="lineno"> 1016</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01017"></a><span class="lineno"> 1017</span>&#160;    $html .= <span class="stringliteral">&#39;$$ &#39;</span> . $start-&gt;TeX . <span class="stringliteral">&#39; $$&#39;</span>;  #<span class="keyword">this</span> forces the number to display as LaTeX </div>
+<div class="line"><a name="l01018"></a><span class="lineno"> 1018</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160;    <span class="keywordflow">for</span> ($i=0; $i &lt; $n; $i+=2) {</div>
+<div class="line"><a name="l01020"></a><span class="lineno"> 1020</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysisMath&quot;&gt;&#39;</span>;</div>
+<div class="line"><a name="l01021"></a><span class="lineno"> 1021</span>&#160;            $html .= main::math_ev3(<span class="stringliteral">&#39;\times&#39;</span>);</div>
+<div class="line"><a name="l01022"></a><span class="lineno"> 1022</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01023"></a><span class="lineno"> 1023</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysisCol&quot;&gt;&#39;</span>;</div>
+<div class="line"><a name="l01024"></a><span class="lineno"> 1024</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01025"></a><span class="lineno"> 1025</span>&#160;                $html .= $colsref-&gt;[$i];</div>
+<div class="line"><a name="l01026"></a><span class="lineno"> 1026</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;       </div>
+<div class="line"><a name="l01027"></a><span class="lineno"> 1027</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;div class=&quot;dimensionalAnalysisFractionBar&quot;&gt;&#39;</span>;</div>
+<div class="line"><a name="l01028"></a><span class="lineno"> 1028</span>&#160;                $html .= <span class="stringliteral">&#39;&lt;svg height=&quot;1&quot; width=&quot;40&quot;&gt;&#39;</span>;</div>
+<div class="line"><a name="l01029"></a><span class="lineno"> 1029</span>&#160;                    $html .= <span class="stringliteral">&#39;&lt;desc&gt;per&lt;/desc&gt;&#39;</span>;</div>
+<div class="line"><a name="l01030"></a><span class="lineno"> 1030</span>&#160;                $html .= <span class="stringliteral">&#39;&lt;/svg&gt;&#39;</span>;</div>
+<div class="line"><a name="l01031"></a><span class="lineno"> 1031</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;       </div>
+<div class="line"><a name="l01032"></a><span class="lineno"> 1032</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01033"></a><span class="lineno"> 1033</span>&#160;                $html .= $colsref-&gt;[$i+1];</div>
+<div class="line"><a name="l01034"></a><span class="lineno"> 1034</span>&#160;            $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;       </div>
+<div class="line"><a name="l01035"></a><span class="lineno"> 1035</span>&#160;        $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01036"></a><span class="lineno"> 1036</span>&#160;    }</div>
+<div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160;    </div>
+<div class="line"><a name="l01038"></a><span class="lineno"> 1038</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div  class=&quot;dimensionalAnalysisMath&quot;&gt;&#39;</span>;</div>
+<div class="line"><a name="l01039"></a><span class="lineno"> 1039</span>&#160;        $html .= main::math_ev3(<span class="stringliteral">&#39;{}={}&#39;</span>);</div>
+<div class="line"><a name="l01040"></a><span class="lineno"> 1040</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01041"></a><span class="lineno"> 1041</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01042"></a><span class="lineno"> 1042</span>&#160;        $html .= $end;</div>
+<div class="line"><a name="l01043"></a><span class="lineno"> 1043</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01044"></a><span class="lineno"> 1044</span>&#160;    $html .= <span class="stringliteral">&#39;&lt;/div&gt;&#39;</span>;</div>
+<div class="line"><a name="l01045"></a><span class="lineno"> 1045</span>&#160;    $html .= <span class="stringliteral">&#39;&#39;</span>;</div>
+<div class="line"><a name="l01046"></a><span class="lineno"> 1046</span>&#160;    <span class="keywordflow">return</span> $html;</div>
+<div class="line"><a name="l01047"></a><span class="lineno"> 1047</span>&#160;}</div>
+<div class="line"><a name="l01048"></a><span class="lineno"> 1048</span>&#160; </div>
+<div class="line"><a name="l01049"></a><span class="lineno"> 1049</span>&#160; </div>
+<div class="line"><a name="l01050"></a><span class="lineno"> 1050</span>&#160;sub generateProblem {</div>
+<div class="line"><a name="l01051"></a><span class="lineno"> 1051</span>&#160; </div>
+<div class="line"><a name="l01052"></a><span class="lineno"> 1052</span>&#160;    my $start = shift;</div>
+<div class="line"><a name="l01053"></a><span class="lineno"> 1053</span>&#160;    my $colsref = shift;</div>
+<div class="line"><a name="l01054"></a><span class="lineno"> 1054</span>&#160;    my $n = scalar @{$colsref};</div>
+<div class="line"><a name="l01055"></a><span class="lineno"> 1055</span>&#160;    my $end = shift;</div>
+<div class="line"><a name="l01056"></a><span class="lineno"> 1056</span>&#160;    </div>
+<div class="line"><a name="l01057"></a><span class="lineno"> 1057</span>&#160;    <span class="keywordflow">return</span> main::MODES(HTML=&gt;generateProblemHTML($start, $colsref, $end), TeX=&gt;generateProblemLaTeX($start, $colsref, $end));</div>
+<div class="line"><a name="l01058"></a><span class="lineno"> 1058</span>&#160;    </div>
+<div class="line"><a name="l01059"></a><span class="lineno"> 1059</span>&#160;}</div>
+<div class="line"><a name="l01060"></a><span class="lineno"> 1060</span>&#160; </div>
+<div class="line"><a name="l01061"></a><span class="lineno"> 1061</span>&#160; </div>
+<div class="line"><a name="l01062"></a><span class="lineno"> 1062</span>&#160;1;</div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <div class="ttc" id="aclassValue_html"><div class="ttname"><a href="classValue.html">Value</a></div></div>
 <div class="ttc" id="aclassparser_1_1MultiAnswer_html_a54b4db68ef616645256c1c1cd006a7cc"><div class="ttname"><a href="classparser_1_1MultiAnswer.html#a54b4db68ef616645256c1c1cd006a7cc">parser::MultiAnswer::asPairOfConversionFactors</a></div><div class="ttdeci">public method asPairOfConversionFactors()</div></div>
 <div class="ttc" id="aclassInexactValueWithUnits_1_1InexactValueWithUnits_html"><div class="ttname"><a href="classInexactValueWithUnits_1_1InexactValueWithUnits.html">InexactValueWithUnits::InexactValueWithUnits</a></div><div class="ttdef"><b>Definition:</b> <a href="contextInexactValueWithUnits_8pl_source.html#l00194">contextInexactValueWithUnits.pl:194</a></div></div>
-<div class="ttc" id="aclassDimensionalAnalysis_html_a851d403599a15545be4b3c807a8e46da"><div class="ttname"><a href="classDimensionalAnalysis.html#a851d403599a15545be4b3c807a8e46da">DimensionalAnalysis::generateExplanation</a></div><div class="ttdeci">public method generateExplanation()</div></div>
 <div class="ttc" id="aclassparser_1_1MultiAnswer_html_a1774b47961b464851f6b397b56a0d254"><div class="ttname"><a href="classparser_1_1MultiAnswer.html#a1774b47961b464851f6b397b56a0d254">parser::MultiAnswer::asConversionFactor</a></div><div class="ttdeci">public method asConversionFactor()</div></div>
 <div class="ttc" id="aclassDimensionalAnalysis_html_ac260d076d055ea0d046b05d02337604f"><div class="ttname"><a href="classDimensionalAnalysis.html#ac260d076d055ea0d046b05d02337604f">DimensionalAnalysis::generateProblem</a></div><div class="ttdeci">public method generateProblem()</div></div>
 <div class="ttc" id="aclassBetterUnits_html_a8f2e082d08b0a8fdd3eba6fb947d3eb1"><div class="ttname"><a href="classBetterUnits.html#a8f2e082d08b0a8fdd3eba6fb947d3eb1">BetterUnits::comparePhysicalQuantity</a></div><div class="ttdeci">public method comparePhysicalQuantity()</div></div>
+<div class="ttc" id="aclassDimensionalAnalysis_html_a2627c391d4d0ca32499e5b6987dc23c7"><div class="ttname"><a href="classDimensionalAnalysis.html#a2627c391d4d0ca32499e5b6987dc23c7">DimensionalAnalysis::generateExplanation</a></div><div class="ttdeci">static public scalar generateExplanation(array_ref startingArrayRef, array_ref conversionFactorsRef, hash_ref finalAnswer, hash_ref options)</div><div class="ttdoc">Generate a LaTeX formated dimensional analysis equation with canceled numerators and denominators whe...</div></div>
 <div class="ttc" id="aclassBetterUnits_html_a808c970a36170db2739dcf60a2525fcf"><div class="ttname"><a href="classBetterUnits.html#a808c970a36170db2739dcf60a2525fcf">BetterUnits::isMolarRatio</a></div><div class="ttdeci">public method isMolarRatio()</div></div>
 <div class="ttc" id="aclassparser_1_1MultiAnswer_html"><div class="ttname"><a href="classparser_1_1MultiAnswer.html">parser::MultiAnswer</a></div><div class="ttdef"><b>Definition:</b> <a href="parserDimensionalAnalysis_8pl_source.html#l00019">parserDimensionalAnalysis.pl:19</a></div></div>
 <div class="ttc" id="aclassmain__parserDimensionalAnalysis_html"><div class="ttname"><a href="classmain__parserDimensionalAnalysis.html">main_parserDimensionalAnalysis</a></div><div class="ttdef"><b>Definition:</b> <a href="parserDimensionalAnalysis_8pl_source.html#l00012">parserDimensionalAnalysis.pl:12</a></div></div>
@@ -1142,7 +1149,7 @@ $(document).ready(function(){initNavTree('parserDimensionalAnalysis_8pl_source.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="parserDimensionalAnalysis_8pl.html">parserDimensionalAnalysis.pl</a></li>
-    <li class="footer">Generated on Tue Aug 1 2023 20:09:08 for WeBWorKChemistry by
+    <li class="footer">Generated on Wed Aug 2 2023 08:40:31 for WeBWorKChemistry by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

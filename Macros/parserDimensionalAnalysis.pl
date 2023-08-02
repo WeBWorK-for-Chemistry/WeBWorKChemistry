@@ -725,6 +725,19 @@ sub asPairOfConversionFactors {
 package DimensionalAnalysis;
 
 sub generateExplanation {
+	#** @function public scalar generateExplanation (@$startingArrayRef, @$conversionFactorsRef, %$finalAnswer, %$options)
+	# @brief Generate a LaTeX formated dimensional analysis equation with canceled numerators and denominators where appropriate.
+	# @brief The technique used is to parse the starting value's units and final value's units separately.  Then match any 
+	# identical units along with those identical in the conversion factors and NOT cancel those out.  We assume all other 
+	# units will get canceled out.   
+	# @param startingArrayRef required - Array for numerator and denominator portion.  Denominator is optional.
+	# @param conversionFactorsRef required - Array for each conversion factor using terms in pairs. i.e. [numerator1, denominator1, numerator2, denominator2, etc...]
+	# @param finalAnswer required - Answer to equation. 
+	# @param options optional - hash: 
+	# @brief {explicit}: boolean - requires units to also match string name instead of just hash values.  i.e. prevents mL and cm^3 from canceling since they are equivalent
+	
+	# @retval explanation - string output in LaTeX format.
+	#*
 
 	# starts with an array in case you want to separate numerator part and denominator part
 	my $startingArrayRef = shift; 
@@ -758,9 +771,7 @@ sub generateExplanation {
 	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units},{hasChemicals=>$hasChemicals});
 	my @finalAnswerUnitArrayCopy = @finalAnswerUnitArray;
 
-    # NOT USED
-	# $startingUnits = $startingArray[0]->{units};
-	# $endingUnits = $finalAnswer->{units};
+    
 	
 
 	# This is only for the first value!
@@ -907,25 +918,17 @@ sub generateExplanation {
 			# for $key (keys %{$finalAnswerUnitArrayCopy[$j]->{unitHash}}){
 			# 	warn $key .': '. $finalAnswerUnitArrayCopy[$j]->{unitHash}->{$key};
 			# }
-
+			warn %{$conversionFactors[$i]->{units_ref}};
+			warn %{$finalAnswerUnitArrayCopy[$j]};
+			warn %{$finalAnswerUnitArrayCopy[$j]->{unitHash}};
 			# FLAW: if units are technically the same, they'll cancel... 1 mL / 1 cm^3... this cancels when it shouldn't if being explicit...
 			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($conversionFactors[$i]->{units_ref}, $finalAnswerUnitArrayCopy[$j]->{unitHash})){
 				# check explicit option
 				unless ($explicit && $conversionFactors[$i]->{units} ne $finalAnswer->{units}){
 					# must be same text.... this is reasonable for a solution where the units are written according to some standard
-					
-					
 					# Same so do NOT cancel out.
-					warn "SAME ??";
-					warn $i;
-					warn $conversionFactors[$i]->{units};
-					warn %{$conversionFactors[$i]->{units_ref}};
-					warn %{@{$conversionFactors[$i]->{units_ref}->{parsed}}[0]};
-					warn $j;
-					warn $finalAnswer->{units};
-					warn $finalAnswerUnitArrayCopy[$j]->{units};
-					warn %{$finalAnswerUnitArrayCopy[$j]->{unitHash}};
 					splice(@finalAnswerUnitArrayCopy,$j,1);	
+					warn "HERE";
 
 					if ($isDenominator){
 						$explanation .= '{'. $conversionFactors[$i]->TeX . '}';
@@ -944,6 +947,8 @@ sub generateExplanation {
 				$explanation .= '{' . $conversionFactors[$i]->TeX({shouldCancel=>1}) . '}';
 				#$explanation .= '{'. $conversionFactors[$i]->{inexactValue} . '\cancel{\rm '. $conversionFactors[$i]->{units} . '}}';
 			} else {
+				warn 'here?';
+				warn $conversionFactors[$i];
 				$explanation .= '\\times';
 				$explanation .= '\\frac{' . $conversionFactors[$i]->TeX({shouldCancel=>1}) . '}';
 				#$explanation .= '\frac{' . $conversionFactors[$i]->{inexactValue} . '\cancel{\rm ' . $conversionFactors[$i]->{units} . '}}';
