@@ -955,8 +955,6 @@ sub generateExplanation {
 				$explanation .= '{' . $conversionFactors[$i]->TeX({shouldCancel=>1}) . '}';
 				#$explanation .= '{'. $conversionFactors[$i]->{inexactValue} . '\cancel{\rm '. $conversionFactors[$i]->{units} . '}}';
 			} else {
-				warn 'here?';
-				warn $conversionFactors[$i];
 				$explanation .= '\\times';
 				$explanation .= '\\frac{' . $conversionFactors[$i]->TeX({shouldCancel=>1}) . '}';
 				#$explanation .= '\frac{' . $conversionFactors[$i]->{inexactValue} . '\cancel{\rm ' . $conversionFactors[$i]->{units} . '}}';
