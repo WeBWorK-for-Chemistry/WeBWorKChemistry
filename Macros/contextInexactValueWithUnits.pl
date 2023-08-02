@@ -202,7 +202,11 @@ sub new {
 
 	unless (ref $num eq 'InexactValue::InexactValue'){
 		$num = $self->makeValue($num,context=>$context);
+	} else {
+		# make a copy of the InexactValue so we don't overwrite the original ref with a InexactValueWithUnits
+		$num = $num->copy;
 	}
+
 
 	# store a copy of fundamental units on self
 	$num->{fundamental_units} = \%fundamental_units;
