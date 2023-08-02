@@ -50,7 +50,8 @@ $d2 = InexactValueWithUnits(['1', Inf], 'cm^3');
 
 $volumemL = $mercuryMassKg*$n1/$d1*$densitycm3/$densityg*$n2/$d2; 
 
-$dimensionalAnalysisConversion = DimensionalAnalysis::generateExplanation([$mercuryMassKg], [$n1, $d1, $densitycm3, $densityg, $n2, $d2], $volumemL);
+# The explicit parameter is to prevent the explanation generator from canceling out 1 mL and 1 cm3 since they are technically equal.
+$dimensionalAnalysisConversion = DimensionalAnalysis::generateExplanation([$mercuryMassKg], [$n1, $d1, $densitycm3, $densityg, $n2, $d2], $volumemL, {explicit=>1});
 ############################
 #  Solution  
 

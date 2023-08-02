@@ -1092,6 +1092,14 @@ sub compareUnitHash {
 # and the power of the unit adjusted negative if it's in the denominator.
 # These will be used to create new units when doing multiplication and division.  
 sub process_unit_for_stringCombine {
+	#** @function public array process_unit_for_stringCombine ($s, %$options)
+	# @brief Process string units into array of unit hashes.  This particular function only 
+	# separates numerator and denominator.  
+	# @param s required - Value/string to convert
+	# @param options optional - Notes below
+	# @brief {fundamental_units} for defining your own set of fundamental units. Will be default set it empty.
+	# {known_units} Default set if empty.
+	#*
   my $string = shift;
 
   my $options = shift;
@@ -1125,6 +1133,15 @@ sub process_unit_for_stringCombine {
 
 # returns an array of hashes with properties: unitHash (hash containing fundamentals), name (string), power (number)
 sub process_term_for_stringCombine {
+	#** @function public array process_term_for_stringCombine ($s, %$options)
+	# @brief Process string units into array of unit hashes.  This particular function splits 
+	# string into terms. (i.e. J*s -> J and s)  
+	# @param s required - Value/string to convert
+	# @param options optional - Notes below
+	# @brief {fundamental_units} for defining your own set of fundamental units. Will be default set it empty.
+	# {known_units} Default set if empty.
+	# {hasChemicals} - boolean - indicates string may end with chemical name and not formal unit, i.e. qualitative unit instead of quantitative unit
+	#*
 	my $string = shift;
 	my $isNumerator = shift;
 	my $options = shift;
@@ -1222,6 +1239,17 @@ sub process_term_for_stringCombine {
 }
 
 sub process_factor_for_stringCombine {
+	#** @function public hash process_factor_for_stringCombine ($s, %$options)
+	# @brief Process string unit into array of unit hashes.  This particular function parses 
+	# term into hash.   
+	# @param s required - Value/string to convert
+	# @param options optional - Notes below
+	# @brief {fundamental_units} for defining your own set of fundamental units. Will be default set it empty.
+	# {known_units} Default set if empty.
+	# {hasChemicals} - boolean - indicates string may end with chemical name and not formal unit, i.e. qualitative unit instead of quantitative unit
+	# @retval unit_name_hash - { name as scalar , power as scalar , unit_hash as hash ref }
+	# @brief unit_hash key contains fundamental description of unit. i.e. km is length fundamental(meter) scaled by 1000
+	#*
 	my $string = shift;
 	my $isNumerator = shift;
 	#split the factor into unit and powers

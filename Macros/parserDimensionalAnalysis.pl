@@ -737,11 +737,12 @@ sub generateExplanation {
 	# Added option to check explicit string.  This solves an issue when trying to check
 	# if 1 mL = 1 cm^3.  These are equal unit hashes, but in the case of dimensional analysis
 	# we may want to show they're NOT equal, otherwise, in the explanation, these will get canceled out.
+	# Maybe we can make this the default, but I'm not sure yet.
 
 	my $options = shift;
 	my $explicit = 0;
-	if (defined $options && exists $options->{explicit} && $options->{explicit} == 1){
-		$explicit = 1;
+	if (defined $options && exists $options->{explicit}){
+		$explicit = $options->{explicit};
 	}
 
 	my $hasChemicals;
@@ -910,30 +911,31 @@ sub generateExplanation {
 			# FLAW: if units are technically the same, they'll cancel... 1 mL / 1 cm^3... this cancels when it shouldn't if being explicit...
 			if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($conversionFactors[$i]->{units_ref}, $finalAnswerUnitArrayCopy[$j]->{unitHash})){
 				# check explicit option
-				if ($explicit){
-					# must be same text.
+				unless ($explicit && $conversionFactors[$i]->{units} ne $finalAnswer->{units}){
+					# must be same text.... this is reasonable for a solution where the units are written according to some standard
+					
+					
+					# Same so do NOT cancel out.
+					warn "SAME ??";
+					warn $i;
+					warn $conversionFactors[$i]->{units};
+					warn %{$conversionFactors[$i]->{units_ref}};
+					warn %{@{$conversionFactors[$i]->{units_ref}->{parsed}}[0]};
+					warn $j;
+					warn $finalAnswer->{units};
+					warn $finalAnswerUnitArrayCopy[$j]->{units};
+					warn %{$finalAnswerUnitArrayCopy[$j]->{unitHash}};
+					splice(@finalAnswerUnitArrayCopy,$j,1);	
 
+					if ($isDenominator){
+						$explanation .= '{'. $conversionFactors[$i]->TeX . '}';
+					} else {
+						$explanation .= '\\times';
+						$explanation .= '\\frac{' . $conversionFactors[$i]->TeX . '}';
+					}
+					$found=1;
+					last;
 				}
-				# Same so do NOT cancel out.
-				warn "SAME";
-				warn $i;
-				warn $conversionFactors[$i]->{units};
-				warn %{$conversionFactors[$i]->{units_ref}};
-				warn %{@{$conversionFactors[$i]->{units_ref}->{parsed}}[0]};
-				warn $j;
-				warn $finalAnswer->{units};
-				warn $finalAnswerUnitArrayCopy[$j]->{units};
-				warn %{$finalAnswerUnitArrayCopy[$j]->{unitHash}};
-				splice(@finalAnswerUnitArrayCopy,$j,1);	
-
-				if ($isDenominator){
-					$explanation .= '{'. $conversionFactors[$i]->TeX . '}';
-				} else {
-					$explanation .= '\\times';
-					$explanation .= '\\frac{' . $conversionFactors[$i]->TeX . '}';
-				}
-				$found=1;
-				last;
 			}
 		}
 		#doesn't match units with answer, so cancel it.

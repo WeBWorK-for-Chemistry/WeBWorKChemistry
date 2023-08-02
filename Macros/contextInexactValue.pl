@@ -1,3 +1,5 @@
+## @file contextInexactValueFILETHIS
+
 loadMacros("MathObjects.pl");
 loadMacros('PGauxiliaryFunctions.pl'); # needed for Round function
 
@@ -55,6 +57,9 @@ sub Init {
 # intro and basic-level courses.  
 
 package InexactValue::InexactValue;
+#** @class InexactValue::InexactValue
+# @brief Here's where I describe the internals...
+#*
 
 our @ISA = qw(Value);
 
@@ -62,10 +67,16 @@ our @ISA = qw(Value);
 my $inf    = 9**9**9;  
 
 sub new {
+	#** @method public new ($x)
+	# @param x required - String literal that is converted to number with set sig figs OR a 2-item array where the 1st item is the value and the 2nd item is the number of signififcant digits 
+    # @brief Constructor.  
+	# Example: new('1.30') 
+	# Example: new([1.3, 3])
+    #*
 	my $self = shift; my $class = ref($self) || $self;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	my $x = shift; $x = [$x,@_] if scalar(@_) > 0; # not going to worry about this scenario yet.
-	#return $x->inContext($context) if isInexactValue($x);  # if it's already an inexact value object, return it
+	# return $x->inContext($context) if isInexactValue($x);  # if it's already an inexact value object, return it
 	
 	# this all seems to deal with turning a single parameter into an array so we can deal with
 	# the generic case of passing multiple arguments.  [ ] creates an array reference, so we need
@@ -213,6 +224,11 @@ sub new {
 }
 
 sub getValue {
+	#** @function private getValue ($x)
+	# @brief Parses string value in multiple formats into number 
+	# @param x required Raw string that needs to be parsed into a value.
+	# @retval result Array: 1st item is coefficient, 2nd item is scientific exponent.
+	#*
 	my $x = shift;
 	my @result;
 	$result[1] = 0;
@@ -249,6 +265,10 @@ sub getValue {
 }
 
 sub make {
+	#** @method private make ($x)
+	# @param x required String literal that is converted to number with set sig figs OR a 2-item array where the 1st item is the value and the 2nd item is the number of signififcant digits  
+    # @brief Internal alternate constructor. 
+    #*
 	my $self = shift;
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	#Value::Error($self->value);
@@ -385,6 +405,11 @@ sub make {
 }
 
 sub sigFigs {
+	#** @method public scalar sigFigs ($value)
+	# @brief Gets or sets number of significant figures. 
+	# @param value optional Number of significant figures to set if needed. 
+    # 
+	#*
 	my ($self, $value) = @_;
 	if (@_ == 2) {
 		$self->{sigFigs} = $value;
@@ -393,6 +418,11 @@ sub sigFigs {
 }
 
 sub preferScientificNotation {
+	#** @method public scalar preferScientificNotation ($value)
+	# @brief Sets flag to output scientific notation whenever possible. 
+	# @param value - Boolean (1 or 0) to set flag. 
+    # 
+	#*
 		my ($self, $value) = @_;
 		if (@_ == 2) {
 				$self->{preferScientificNotation} = $value;
@@ -401,6 +431,11 @@ sub preferScientificNotation {
 }
 
 sub valueAsNumber {
+	#** @method public scalar valueAsNumber ()
+	# @brief Returns unrounded internal value of InexactValue.  This includes irrational values 
+	# resulting from calculations.  Will NOT round to the sig figs set internally. 
+    # 
+	#*
 	my $self = shift;
 	
 	@valArray = $self->value;# + 0;
@@ -409,12 +444,20 @@ sub valueAsNumber {
 }
 
 sub valueAsRoundedNumber {
+	#** @method public scalar valueAsRoundedNumber ()
+	# @brief Returns internal rounded value of InexactValue as a string. 
+	# Will round to the sig figs set internally. 
+	#*
 	my $self = shift;
 	$roundedValue = $self->string(true);
 	return $roundedValue;
 }
 
 sub valueAsRoundedScientific {
+	#** @method public scalar valueAsRoundedScientific ()
+	# @brief Returns internal rounded value of InexactValue as a string, 
+	# but forced as scientific notation. Will round to the sig figs set internally. 
+	#*
 	my $self = shift;
 	$roundedValue = $self->string(true, true);
 	return $roundedValue;
@@ -454,6 +497,16 @@ sub unRoundedValueMarked {
 #  if requested.
 #
 sub string {
+	#** @method public scalar string ($preventClean, $forceScientific)
+	# @brief Returns string representation of InexactValue.  
+	# Will round to the sig figs set internally.
+	# "Cleaning" converts 'e' computer notation into readable 'x10^' notation.
+	# Scientific notation is normally output when the value's exponent would be 
+	# greater than the positive scientificNotationThreshold (default: 6) or less 
+	# than the negative of that same value.  This can be set as a context option.
+	# @param preventClean optional - Prevent cleaning, i.e. prevent conversion of 'e' to 'x10^'
+	# @param forceScientific optional - Force scientific notation even for easy to read numbers.
+	#*
 	my $self = shift;
 	my $preventClean = shift;
 
@@ -644,7 +697,7 @@ sub string {
 }
 
 # THIS IS NOT FUNCTIONAL.  LEAVING IT HERE UNTIL WE CAN REMOVE IT FROM OTHER PLACES.
-sub roundingHack {
+sub roundingHack {	
 	my $self = shift;
 	my $s = shift;
 	return main::Round($s,20);
@@ -684,6 +737,14 @@ sub roundingHack {
 }
 
 sub cleanSciText {
+	#** @method public scalar cleanSciText ($s, %$options)
+	# @brief Converts 'e' scientific notation to 'x10^' notation.  
+	# Example:  Converts '1e3' to '1x10^3'.
+	# Optionally trims zeros.  Some "exact" values like 1e5 get output
+	# to 1.00000e5 by sprintf.  Trimming these zeros would be necessary.
+	# @param s required - Value/string to convert
+	# @param options optional - Contains {trimZeros} key as boolean.
+	#*
 	my $self = shift;
 	my $s = shift;
 	my $options = shift;
@@ -703,6 +764,14 @@ sub cleanSciText {
 #  Our text output should always have 10x notation if scientific.
 #
 sub TeX {
+	#** @method public scalar TeX ($preventClean)
+	# @brief Returns LaTeX representation of InexactValue.  
+	# Will round to the sig figs set internally.
+	# Actually calls string method first.
+	# "Cleaning" converts 'e' computer notation into readable '\10^' notation
+	# which in LaTeX would use \times instead of x.
+	# @param preventClean optional - Prevent cleaning, i.e. prevent conversion of 'e' to 'x10^'
+	#*
 	my $self = shift;
 	my $preventClean = shift;
 	my $r = $self->string($preventClean);
