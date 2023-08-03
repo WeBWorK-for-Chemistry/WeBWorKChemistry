@@ -69,13 +69,16 @@ Do the following math problems using correct significant figures. Assume none of
 
 END_PGML
 
-BEGIN_SOLUTION
 
-\[ $ans1Exp \]
+BEGIN_PGML_SOLUTION
+[$ans1->generateMultiplyDivideExplanation($ival1, $ival2, +1, {plainText=>1})]
 
-\[ $ans2Exp \]
+[```[$ans1Exp]```]
 
-END_SOLUTION
+[$ans2->generateMultiplyDivideExplanation($ival3, $ival4, -1, {plainText=>1})]
+[```[$ans2Exp]```]
+
+END_PGML_SOLUTION
 
 
 

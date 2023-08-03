@@ -916,6 +916,10 @@ sub generateSfRoundingExplanation {
 	if (exists $options->{suppressStart}){
 		$suppressStart = $options->{suppressStart};
 	}
+	my $usePlainText = 0;
+	if (exists $options->{plainText}){
+		$usePlainText = $options->{plainText};
+	}
 	# my $outputTextOnly;
 	# if (exists $options->{outputTextOnly}){
 	#   $outputTextOnly = $options->{outputTextOnly};
@@ -947,12 +951,13 @@ sub generateSfRoundingExplanation {
 	$decimalRemoved = $trimmedData =~ s/\.?\,?//r;
 
 	my $explanation = '';
-	my $textExplanation = '';
+	#my $textExplanation = '';
 
-	if ($suppressStart != 1) {
-		$explanation = $originalValue->TeX . '~\\text{with ' . $roundTo . ' sig figs }→~'; 
+	unless ($usePlainText){
+		if ($suppressStart != 1) {
+			$explanation = $originalValue->TeX . '~\\text{with ' . $roundTo . ' sig figs }→~'; 
+		}
 	}
-
 
 		# need to remove digits
 	if (length($decimalRemoved) > $roundTo ) {
@@ -982,80 +987,105 @@ sub generateSfRoundingExplanation {
 		$restToDrop = substr($trimmedData, $ind, length($trimmedData) - $ind);
 
 		if ($useSciNot) {
-			$explanation = $explanation . '\\overbrace{'. $keepPart.'}^{\\text{keep}}~'.'\\overbrace{\\underset{↑}{'. $firstDigitToDrop . '}'.$restToDrop .'}^{\\text{reject}}\times 10^{' . $trailingExponent . '}';
-			$textExplanation = " Keep the " . $keepPart . " part of the original number. The rest will be dropped as insignificant except for the exponential portion. "
-		} else {     
-			$explanation = $explanation. $leadingZeros .'\\overbrace{'. $keepPart .'}^{\\text{keep}}~'.'\\overbrace{\\underset{↑}{'. $firstDigitToDrop . '}'.$restToDrop . '}^{\\text{reject}}';
-			$textExplanation = " Keep the " . $keepPart . " part of the original number. The rest will be considered insignificant."
-		}
+			if ($usePlainText){
+				$explanation .= " Keep the " . $keepPart . " part of the original number. The rest will be dropped as insignificant except for the exponential portion. "
+			} else {
+				$explanation .= '\\overbrace{'. $keepPart.'}^{\\text{keep}}~'.'\\overbrace{\\underset{↑}{'. $firstDigitToDrop . '}'.$restToDrop .'}^{\\text{reject}}\times 10^{' . $trailingExponent . '}';
+			}
+		} else {    
+			if ($usePlainText){
+				$explanation .= " Keep the " . $keepPart . " part of the original number. The rest will be considered insignificant."
+			} else {
+				$explanation .= $leadingZeros .'\\overbrace{'. $keepPart .'}^{\\text{keep}}~'.'\\overbrace{\\underset{↑}{'. $firstDigitToDrop . '}'.$restToDrop . '}^{\\text{reject}}';
+			} 
+		}	
 
 		$roundingExplanation = $firstDigitToDrop >= 5 ? '5 or greater' : 'less than 5';
 		$roundingDirection = $firstDigitToDrop >= 5 ? 'up' : 'down';
-		$explanation = $explanation . "\\xrightarrow[\\text{$roundingExplanation, round $roundingDirection}]{\\text{since $firstDigitToDrop at arrow is }}";
-		$textExplanation = $textExplanation . " Since the first insignificant digit after is " . $roundingExplanation . ", the last significant digit needs to be rounded " . $roundingDirection ."."; 
-
-		if ($useSciNot){
-			$explanation = $explanation. $self->TeX;
+		if ($usePlainText){
+			$explanation .= " Since the first insignificant digit after is " . $roundingExplanation . ", the last significant digit needs to be rounded " . $roundingDirection ."."; 
 		} else {
-			if ($firstDigitToDrop >= 5) {
-				$keepPart = $self->roundUp($keepPart);
-			}
-			unless ($leadingZeros . $keepPart =~ /[\.\,]/) { # if leadingZeros + keepPart does not have a decimal, 
-																											 # then most likely we'll need trailing zeroes to pad out the actual number
-				@decSplit = split(/[\.\,]/, $restToDrop);
-				$digits = 1;
-				if (defined $decSplit[0]){
-					$digits = $digits + length($decSplit[0]);
-				}
-				for ($a=0;$a < $digits; $a++){
-					$keepPart = $keepPart . "0";
-				}
-			}
-			$explanation = $explanation .$leadingZeros. $keepPart;
-			
+			$explanation .= "\\xrightarrow[\\text{$roundingExplanation, round $roundingDirection}]{\\text{since $firstDigitToDrop at arrow is }}";
 		}
 
+		unless ($usePlainText){
+			if ($useSciNot){				
+					$explanation .= $self->TeX;
+				
+			} else {
+				if ($firstDigitToDrop >= 5) {
+					$keepPart = $self->roundUp($keepPart);
+				}
+				unless ($leadingZeros . $keepPart =~ /[\.\,]/) { # if leadingZeros + keepPart does not have a decimal, 
+																												# then most likely we'll need trailing zeroes to pad out the actual number
+					@decSplit = split(/[\.\,]/, $restToDrop);
+					$digits = 1;
+					if (defined $decSplit[0]){
+						$digits = $digits + length($decSplit[0]);
+					}
+					for ($a=0;$a < $digits; $a++){
+						$keepPart = $keepPart . "0";
+					}
+				}
+				$explanation .= $leadingZeros. $keepPart;
+				
+			}
+		}
 		if ($s =~ /e/ && !$useSciNot) {
 			#if scientific despite not prefering it, we HAVE to use sci notation to display correct sigfigs
-			$explanation = $explanation . "\\xrightarrow[\\text{required for $roundTo sig figs}]{\\text{scientific notation}}";
-			$explanation = $explanation . $self->TeX;
-			$textExplanation = $textExplanation . " Even though the number was using standard notation, we are forced to use scientific notation to display the correct number of significant figures in this case."
+			if ($usePlainText){
+				$explanation .= " Even though the number was using standard notation, we are forced to use scientific notation to display the correct number of significant figures in this case."
+				
+			}else{
+				$explanation .= "\\xrightarrow[\\text{required for $roundTo sig figs}]{\\text{scientific notation}}";
+				$explanation .= $self->TeX;
+			}			
 		} 
 
 	
 	} elsif (length($decimalRemoved) < $roundTo) {
-		
-		 if ($useSciNot){
-			$explanation = $explanation. '\\overbrace{'. $trimmedData.'}^{\\text{keep}}~\times 10^{' . $trailingExponent . '}';
-		} else {
-			$explanation = $explanation. $leadingZeros .'\\overbrace{'. $trimmedData . '}^{\\text{keep}}~';
-		}
-		$textExplanation = $textExplanation . " The provided number does not have enough significant figures.";
+		if ($usePlainText){
+			$explanation = $textExplanation . " The provided number does not have enough significant figures.";	
 
+		} else {
+			if ($useSciNot){
+				$explanation = $explanation. '\\overbrace{'. $trimmedData.'}^{\\text{keep}}~\times 10^{' . $trailingExponent . '}';
+			} else {
+				$explanation = $explanation. $leadingZeros .'\\overbrace{'. $trimmedData . '}^{\\text{keep}}~';
+			}
+		}
+		 
+		
 	
 		$originalSF = $originalValue->sigFigs();
 		$zeroesNeeded = $roundTo - $originalSF;
-		$explanation = $explanation . "\\xrightarrow[\\text{Need to add $zeroesNeeded zeros}]{\\text{Only $originalSF sig figs}}";
-		$textExplanation = $textExplanation . " We must add " . $zeroesNeeded . " extra zeroes to the end of this number.";
+		if ($usePlainText){
+			$explanation .= " We must add " . $zeroesNeeded . " extra zeroes to the end of this number.";		
+		} else {
+			$explanation .= "\\xrightarrow[\\text{Need to add $zeroesNeeded zeros}]{\\text{Only $originalSF sig figs}}";
+		}
 		if ($s =~ /e/ && !$useSciNot) {
 			#if scientific despite not prefering it, we HAVE to use sci notation to display correct sigfigs
-			$explanation = $explanation . '✘' . "\\xrightarrow[\\text{must use scientific notation}]{\\text{Impossible with standard notation}}";
-			$textExplanation = $textExplanation . " Even though the number was using standard notation, we are forced to use scientific notation to display the correct number of significant figures in this case.";
+			if ($usePlainText){
+				$explanation .= " Even though the number was using standard notation, we are forced to use scientific notation to display the correct number of significant figures in this case.";
+			}else{
+				$explanation .= '✘' . "\\xrightarrow[\\text{must use scientific notation}]{\\text{Impossible with standard notation}}";
+			}
 		} 
-		$explanation = $explanation . $self->TeX;
-
+		unless ($usePlainText) {
+			$explanation .= $self->TeX;
+		}
 	} else {
 		#perfect length already, do nothing
-		$explanation = $explanation . 'Already has correct number of significant figures!';
-		$textExplanation = $textExplanation . " This number already has the correct number of significant figures.";
+		if ($usePlainText){
+			$explanation .= ' This number already has the correct number of significant figures.';
+		}else {
+			$explanation .= '\\ \\mathrm{Already has correct number of significant figures!}';
+		}
+	
 	}
 
-
-	my $result = {
-		TeX => $explanation,
-		text => $textExplanation
-	};
-	return $result;
+	return $explanation;
 	
 }
 
@@ -1242,9 +1272,10 @@ sub generateMultiplyDivideExplanation {
 	my $operation = shift; # +1 multiply, -1 divide
 	my $options = shift;
 
-	$useUnroundedFirst = $options->{useUnroundedFirst};
-	$useUnroundedSecond = $options->{useUnroundedSecond};
-	$leaveUnrounded = $options->{leaveUnrounded};
+	my $useUnroundedFirst = $options->{useUnroundedFirst};
+	my $useUnroundedSecond = $options->{useUnroundedSecond};
+	my $leaveUnrounded = $options->{leaveUnrounded};
+	my $usePlainText = $options->{plainText};
 
 	if (!defined $first || !$first){
 		return "Error:  Didn't specify the first parameter.";
@@ -1257,11 +1288,15 @@ sub generateMultiplyDivideExplanation {
 	}
 	my $useSciNot = $self->preferScientificNotation();
 
-	$sfFirst = $first->sigFigs();
-	$sfSecond = $second->sigFigs(); 
+	my $explanation = '';
+	my $sfFirst = $first->sigFigs();
+	my $sfSecond = $second->sigFigs(); 
+
 	
 	my $valueFirst;
 	my $valueSecond;
+	my $firstTrail;
+	my $secondTrail;
 
 	if ($useUnroundedFirst) {
 		$valueFirst = $first->valueAsNumber();
@@ -1275,10 +1310,8 @@ sub generateMultiplyDivideExplanation {
 		$valueSecond = $second->preferScientificNotation() ? $second->valueAsRoundedScientific() : $second->valueAsRoundedNumber();
 	}
 
-	my $explanation = '';
-	my $textExplanation = '';
 
-	$valueFirstR = $valueFirst;
+	my $valueFirstR = $valueFirst;
 	if ($useUnroundedFirst){
 		my $strPosFirst = '';
 		if (($first->preferScientificNotation() ? $first->valueAsRoundedScientific() : $first->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
@@ -1306,7 +1339,7 @@ sub generateMultiplyDivideExplanation {
 		$valueFirstR =~ s/\^(.*)/^{$1}/;
 	}
  
-	$valueSecondR = $valueSecond;
+	my $valueSecondR = $valueSecond;
 	if ($useUnroundedSecond){
 		my $strPosSecond = '';
 		if ($valueSecondR =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
@@ -1334,29 +1367,36 @@ sub generateMultiplyDivideExplanation {
 		$valueSecondR =~ s/\^(.*)/^{$1}/;
 	}
 
-	if ($operation > 0){
-		$explanation = $explanation . '\\overbrace{' . $valueFirstR . '}^{\\text{' . $sfFirst . ' sig figs}}';
-		$explanation = $explanation . '\\times \\overbrace{' . $valueSecondR .'}^{\\text{' . $sfSecond . ' sig figs}}';
-	} else {
-		$explanation = $explanation . '\\frac{\\overbrace{' . $valueFirstR . '}^{\\text{' . $sfFirst . ' sig figs}}}';
-		$explanation = $explanation . '{\\underbrace{' . $valueSecondR .'}_{\\text{' . $sfSecond . ' sig figs}}}';
+	if ($usePlainText){
+		$explanation .= "$valueFirstR has $sfFirst significant figures and $valueSecondR has $sfSecond significant figures.  "; 
+	}else {
+		if ($operation > 0){
+			$explanation .= '\\overbrace{' . $valueFirstR . '}^{\\text{' . $sfFirst . ' sig figs}}';
+			$explanation .= '\\times \\overbrace{' . $valueSecondR .'}^{\\text{' . $sfSecond . ' sig figs}}';
+		} else {
+			$explanation .= '\\frac{\\overbrace{' . $valueFirstR . '}^{\\text{' . $sfFirst . ' sig figs}}}';
+			$explanation .= '{\\underbrace{' . $valueSecondR .'}_{\\text{' . $sfSecond . ' sig figs}}}';
+		}
 	}
 
-	$minSF = $sfFirst > $sfSecond ? $sfSecond : $sfFirst;
-
-	$explanation = $explanation . "\\xrightarrow[\\text{$minSf sig figs}]{\\text{Minimum}}" ;
-
+	my $minSf = $sfFirst > $sfSecond ? $sfSecond : $sfFirst;
+	if ($usePlainText){
+		$explanation .= "The smallest number of sig figs is " . $minSf . ".";
+	} else {
+		$explanation .= "\\xrightarrow[\\text{$minSf sig figs}]{\\text{Minimum}}" ;
+	}
 	# may need to force more digits under extreme sig figs cases
-	$unroundedValueCleaned = $useSciNot ? sprintf('%e',$self->valueAsNumber) : sprintf('%f', $self->valueAsNumber);
-	$newInexact = $self->new("$unroundedValueCleaned", $minSF);
-	$sfExplained = $newInexact->generateSfRoundingExplanation($minSF)->{TeX};
-	$explanation = $explanation . $sfExplained;
-
-	if ($includePlainText){
-		return $plainTextExplanation . $explanation;
+	my $unroundedValueCleaned = $useSciNot ? sprintf('%e',$self->valueAsNumber) : sprintf('%f', $self->valueAsNumber);
+	my $newInexact = $self->new("$unroundedValueCleaned", $minSf);
+	if ($usePlainText){
+		my $temp = $newInexact->generateSfRoundingExplanation($minSf, {plainText=>1});
+		$temp =~ s/original number/calculated solution/;
+		$explanation .= $temp;
 	} else {
-		return $explanation;
+		my $sfExplained = $newInexact->generateSfRoundingExplanation($minSf);
+		$explanation .= $sfExplained;
 	}
+	
 	return $explanation;
 }
 
