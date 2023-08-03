@@ -928,12 +928,22 @@ sub generateSfRoundingExplanation {
 	$leadingZeros = '';
 	$originalData = $self->{data}[0];
 	$originalValue = $self->new($originalData);
-	$trimmedData = $originalData =~ s/^\s*-?\s*(0[.,]0*)//r;
-	if (defined $1){
-		$leadingZeros = $1;
+	my $trimmedData;
+	my $trailingExponent;
+
+	# need initial check so we can be sure that $1 is either defined or undefined
+	# the "r" non-destructive substitution parameter seems to be buggy since we can't check for success
+	if ($originalData =~ /^\s*-?\s*(0[.,]0*)/){
+		$trimmedData = $originalData =~ s/^\s*-?\s*(0[.,]0*)//r;
+		if (defined $1){
+			$leadingZeros = $1;
+		}
+	} else {
+		$trimmedData = $originalData;
 	}
-	$trimmedData =~ s/e(\+?-?\d*)\s*//;
-	$trailingExponent = $1;
+	if ($trimmedData =~ s/e(\+?-?\d*)\s*//){
+		$trailingExponent = $1;
+	}
 	$decimalRemoved = $trimmedData =~ s/\.?\,?//r;
 
 	my $explanation = '';
@@ -1093,31 +1103,32 @@ sub generateAddSubtractExplanation {
 		$valueSecond = $second->preferScientificNotation() ? $second->valueAsRoundedScientific() : $second->valueAsRoundedNumber();
 	}
 
-	$valueFirst =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/;
-	$strPosFirst = '';
-	if(defined $1){
-		$strPosFirst = $-[1];
-	} elsif (defined $2){
-		$strPosFirst = $-[2];
-	} elsif (defined $3){
-		$strPosFirst = $-[3];
-	} elsif (defined $4){
-		$strPosFirst = $-[4];
+	my $strPosFirst = '';
+	if ($valueFirst =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+		if(defined $1){
+			$strPosFirst = $-[1];
+		} elsif (defined $2){
+			$strPosFirst = $-[2];
+		} elsif (defined $3){
+			$strPosFirst = $-[3];
+		} elsif (defined $4){
+			$strPosFirst = $-[4];
+		}
 	}
 	#return Value::Error($strPosFirst);
 	# original regex: /(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/
-	$valueSecond =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/;
-	$strPosSecond = '';
-	if(defined $1){
-		$strPosSecond = $-[1];
-	} elsif (defined $2){
-		$strPosSecond = $-[2];
-	} elsif (defined $3){
-		$strPosSecond = $-[3];
-	} elsif (defined $4){
-		$strPosSecond = $-[4];
+	my $strPosSecond = '';
+	if ($valueSecond =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+		if(defined $1){
+			$strPosSecond = $-[1];
+		} elsif (defined $2){
+			$strPosSecond = $-[2];
+		} elsif (defined $3){
+			$strPosSecond = $-[3];
+		} elsif (defined $4){
+			$strPosSecond = $-[4];
+		}
 	}
-
 	# this is for scientific notation, will stay blank if nothing
 	$firstTrail = '';
 	if ($first->preferScientificNotation){
@@ -1176,16 +1187,17 @@ sub generateAddSubtractExplanation {
 	#$actualAnswerPosition = $self->leastSignificantPosition();
 	$answerValue = $self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber();
 	#this regex is for the purpose of identifying the position of the last significant digit in the rounded value, NOT the unrounded one.
-	$answerValue =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/;
-	$strActualAnswerPosition = '';
-	if(defined $1){
-		$strActualAnswerPosition = $-[1];
-	} elsif (defined $2){
-		$strActualAnswerPosition = $-[2];
-	} elsif (defined $3){
-		$strActualAnswerPosition = $-[3];
-	} elsif (defined $4){
-		$strActualAnswerPosition = $-[4];
+	my $strActualAnswerPosition = '';
+	if ($answerValue =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+		if(defined $1){
+			$strActualAnswerPosition = $-[1];
+		} elsif (defined $2){
+			$strActualAnswerPosition = $-[2];
+		} elsif (defined $3){
+			$strActualAnswerPosition = $-[3];
+		} elsif (defined $4){
+			$strActualAnswerPosition = $-[4];
+		}
 	}
 
 	# this is for scientific notation, will stay blank if nothing
@@ -1268,16 +1280,17 @@ sub generateMultiplyDivideExplanation {
 
 	$valueFirstR = $valueFirst;
 	if ($useUnroundedFirst){
-		($first->preferScientificNotation() ? $first->valueAsRoundedScientific() : $first->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/;
-		$strPosFirst = '';
-		if(defined $1){
-			$strPosFirst = $-[1];
-		} elsif (defined $2){
-			$strPosFirst = $-[2];
-		} elsif (defined $3){
-			$strPosFirst = $-[3];
-		} elsif (defined $4){
-			$strPosFirst = $-[4];
+		my $strPosFirst = '';
+		if (($first->preferScientificNotation() ? $first->valueAsRoundedScientific() : $first->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+			if(defined $1){
+				$strPosFirst = $-[1];
+			} elsif (defined $2){
+				$strPosFirst = $-[2];
+			} elsif (defined $3){
+				$strPosFirst = $-[3];
+			} elsif (defined $4){
+				$strPosFirst = $-[4];
+			}
 		}
 		$firstTrail = substr($valueFirstR, $strPosFirst + 1, length($valueFirstR) - $strPosFirst - 1);
 		$firstTrail =~ s/e/\\times 10^ /r;
@@ -1295,16 +1308,17 @@ sub generateMultiplyDivideExplanation {
  
 	$valueSecondR = $valueSecond;
 	if ($useUnroundedSecond){
-		$valueSecondR =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/;
-		$strPosSecond = '';
-		if(defined $1){
-			$strPosSecond = $-[1];
-		} elsif (defined $2){
-			$strPosSecond = $-[2];
-		} elsif (defined $3){
-			$strPosSecond = $-[3];
-		} elsif (defined $4){
-			$strPosSecond = $-[4];
+		my $strPosSecond = '';
+		if ($valueSecondR =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+			if(defined $1){
+				$strPosSecond = $-[1];
+			} elsif (defined $2){
+				$strPosSecond = $-[2];
+			} elsif (defined $3){
+				$strPosSecond = $-[3];
+			} elsif (defined $4){
+				$strPosSecond = $-[4];
+			}
 		}
 		$secondTrail = substr($valueSecondR, $strPosSecond + 1, length($valueSecondR) - $strPosSecond - 1);
 		$secondTrail =~ s/e/\\times 10^ /r;

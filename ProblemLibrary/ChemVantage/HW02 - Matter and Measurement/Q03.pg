@@ -4,33 +4,41 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+# instead of a random size saline bag, let's limit the sizes to standard sizes
+@sizes = (250, 500, 750, 1000); 
+$val1 = random(0, 3, 1); # generate number from 0 to 3 (inclusive) for an index
+$val2 = random(110, 190, 10); # generate number from 110 to 240.  
+$val3 = random(1.2, 1.8, 0.1); # generate number from 1.2 to 1.8 by tenths.  
 
-$ans = Compute(120);
+$bagVolume = InexactValue(sprintf('%.0f', $sizes[$val1]), $val1 == 3 ? 4 : 3); # 2nd parameter forces a specific number of sig figs.
+$bodyMass = InexactValue(sprintf('%.0f', $val2), 2); # 2nd parameter forces 3 sig figs
+$dose = InexactValue(sprintf('%.2f', $val3));
+$lbToKg = InexactValue(2.20462262, 9);
+
+$drugMass = $bodyMass / $lbToKg * $dose;
 
 BEGIN_PGML
-Tobramycin is an antibiotic drug that is administered intravenously at a dose of 1.60 mg per kg of body mass. If the patient weighs 160 lb, what mass of drug should be added to a 600 mL bag of saline to achieve the proper dose?
 
+Tobramycin is an antibiotic drug that is administered intravenously at a dose of [$dose] mg per kg of body mass. 
+If the patient weighs [$bodyMass] lb, what mass of drug should be added to a [$bagVolume] mL bag of saline to achieve the proper dose?
 
-[______]mg Tobramycin
+[______]{$drugMass} mg Tobramycin
 
 Enter the value with the appropriate number of significant figures.
- END_PGML
 
-ANS( $ans->cmp() );
+END_PGML
+
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework

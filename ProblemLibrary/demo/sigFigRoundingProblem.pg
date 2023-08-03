@@ -78,6 +78,11 @@ $sf8 = 3;
 $ans8 = InexactValue($val8,$sf8);
 $ans8Explanation = $ans8->generateSfRoundingExplanation($sf8, true);
 
+$val9 = "820450970";
+$sf9 = 7;
+$ans9 = InexactValue($val9,$sf9);
+$ans9Explanation = $ans9->generateSfRoundingExplanation($sf9, true);
+
 ##############################################################
 #
 #  Problem
@@ -99,8 +104,6 @@ Convert [`[$val2]`] to have [$sf2] signficant figures: [________]{$ans2}
 
 Round [`[$val3]`] to [$sf3] signficant figures: [________]{$ans3}
 
-
-
 Round [`[$inex4]`] to [$sf4] significant figures: [________]{$ans4}
 
 Convert [`[$val5]`] to have [$sf5] significant figures:  [________]{$ans5}
@@ -111,13 +114,13 @@ Round [`[$val7]`] to [$sf7] signficant figures:  [________]{$ans7}
 
 Round [`[$val8]`] to [$sf8] signficant figures:  [________]{$ans8}
 
+Round [`[$val9]`] to [$sf9] signficant figures:  [________]{$ans9}
+
 END_PGML
 
 
 
 BEGIN_SOLUTION
-
-
 
 $ans1Explanation->{text}
 \[ $ans1Explanation->{TeX} \]
@@ -145,6 +148,10 @@ $ans7Explanation->{text}
 
 $ans8Explanation->{text}
 \[ $ans8Explanation->{TeX} \]
+
+
+$ans9Explanation->{text}
+\[ $ans9Explanation->{TeX} \]
 
 END_SOLUTION
 
