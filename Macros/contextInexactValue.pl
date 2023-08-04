@@ -469,25 +469,55 @@ sub valueAsRoundedScientific {
 #
 sub unRoundedValueMarked {
 	my $self = shift;
-	my $forceScientific = shift;
+	my $options = shift;
 
-	$unRoundedValue = $self->valueAsNumber();
+	# by default, limit to at most 3 digits past last significant digit.  0 means no limit.
+ 	my $limit = 3;
+ 	if (exists $options->{limit}){ 
+ 		$limit = $options->{limit};
+ 	}
 
-	($self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/;
-	$strPos = '';
-	if(defined $1){
-		$strPos = $-[1];
-	} elsif (defined $2){
-		$strPos = $-[2];
-	} elsif (defined $3){
-		$strPos = $-[3];
-	} elsif (defined $4){
-		$strPos = $-[4];
+	my $unRoundedValue = $self->valueAsNumber();
+	my $strPos = '';
+	my $trail;
+	if (($self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+
+		if(defined $1){
+			$strPos = $-[1]; # $-[1] gives the position of the match!
+		} elsif (defined $2){
+			$strPos = $-[2];
+		} elsif (defined $3){
+			$strPos = $-[3];
+		} elsif (defined $4){
+			$strPos = $-[4];
+			if ($strPos > 0){
+				$strPos--;
+			}
+		}
 	}
-	$trail = substr($unRoundedValue, $strPos + 1, length($unRoundedValue) - $strPos - 1);
-	$trail =~ s/e/\\times 10^ /r;
-	
+	# what if unroundedvalue is scientific?
+	if ($unRoundedValue =~ /e/){
+		$trail = substr($unRoundedValue, $strPos + 2, length($unRoundedValue) - $strPos - 2);
+		if (scalar $trail > $limit){
+			if ($trail =~ /\./){
+				$trail = substr($trail, 0, $limit + 1);
+			} else {
+				$trail = substr($trail, 0, $limit);
+			}
+		}
+		$trail =~ s/e/\\times 10^ /r;
+	} else {
+		$trail = substr($unRoundedValue, $strPos + 1, length($unRoundedValue) - $strPos - 1);
+		if (scalar $trail > $limit){
+			if ($trail =~ /\./){
+				$trail = substr($trail, 0, $limit + 1);
+			} else {
+				$trail = substr($trail, 0, $limit);
+			}
+		}
+	}
 	$unRoundedValue = substr($unRoundedValue, 0, $strPos) . '\\underline{' . substr($unRoundedValue, $strPos,1) . '}' . $trail;
+	
 	return $unRoundedValue;
 }
 
@@ -779,6 +809,47 @@ sub TeX {
 	$r =~ s/\^(.*)/^{$1}/;
 	return $r;
 }
+
+# sub unroundedMarked {
+# 	my $self = shift;
+# 	my $options = shift;
+
+# 	# by default, limit to at most 3 digits past last significant digit.  0 means no limit.
+# 	my $limit = 3;
+# 	if (exists $options->{limit}){ 
+# 		$limit = $options->{limit};
+# 	}
+	
+# 	my $value = $self->valueAsNumber();
+# 	warn $value;
+# 	my $strPos = 0;
+# 	warn $self;
+# 	warn $self->valueAsRoundedNumber();
+# 	if (($self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+# 		if(defined $1){
+# 			$strPos = $1;
+# 		} elsif (defined $2){
+# 			$strPos = $2;
+# 		} elsif (defined $3){
+# 			$strPos = $3;
+# 		} elsif (defined $4){
+# 			$strPos = $4;
+# 		}
+# 	}
+# 	warn $strPos;
+# 	my $trailAmount = length($value) - $strPos - 1;
+# 	if ($trailAmount > $limit && $limit != 0){
+# 		warn 'here';
+# 		warn $trailAmount;
+# 		$trailAmount = 3;
+# 	}
+
+# 	my $trail = substr($value, $strPos + 1, $trailAmount);
+# 	my $trail =~ s/e/\\times 10^ /r;
+
+# 	$value = substr($value, 0, $strPos) . '\\underline{' . substr($value, $strPos,1) . '}' . $trail;
+# 	return $value;
+# }
 
 sub generateSfCountingExplanation {
 	my $self = shift;

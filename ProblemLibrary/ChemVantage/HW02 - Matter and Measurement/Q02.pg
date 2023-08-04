@@ -28,6 +28,8 @@ The density of dry air at 20 °C and normal atmospheric pressure is 1.2041 [`\ma
 
  [______]{$airMass} kg
 
+[@ '<a href="#" class="knowl" data-knowl-contents="CHECK">test</a>' @]*
+
 Enter the value with the appropriate number of significant figures.
 
 END_PGML
@@ -49,22 +51,37 @@ $airMasskg = $airVolumeL*$n1/$d1*$densitykg/$densitym3;
 
 $volConversionSolution = $airVolumeL*$n1/$d1;
 $volConversion = DimensionalAnalysis::generateExplanation([$airVolumeL], [$n1, $d1], $volConversionSolution);
+$volConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$airVolumeL], [$n1, $d1], $volConversionSolution);
 $densityConversionSolution = $volConversionSolution*$densitykg/$densitym3;
 $densityConversion = DimensionalAnalysis::generateExplanation([$volConversionSolution], [$densitykg, $densitym3], $densityConversionSolution);
+$densityConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$volConversionSolution], [$densitykg, $densitym3], $densityConversionSolution);
 
 BEGIN_PGML_SOLUTION
 
 You are starting with a volume physical quantity, [$airVolumeL].  The solution must be a mass physical quantity (in kg). 
 You will need a conversion factor that contains both of those physical quantities.  The density, [$densitykg->{inexactValue}] [`\mathrm{kg}/\mathrm{m}^3`],
 is perfect for this as it has mass in the numerator and volume in the denominator.  
-You will just need to do some conversions to match the same units in the density first.  Convert 
-Liters to meters cubed.
+You will just need to do some conversions to match the same units in the density first.  
+
+#### Step 1
+
+Convert Liters to meters cubed.
 
 [```[$volConversion] ```]
+
+##### Sig figs
+
+[$volConversionSf]**
+
+#### Step 2
 
 Now you can use the density to convert your volume in meters cubed to a mass in kilograms.  
 
 [```[$densityConversion] ```]
+
+##### Sig figs
+
+[$densityConversionSf]**
 
 END_PGML_SOLUTION
 

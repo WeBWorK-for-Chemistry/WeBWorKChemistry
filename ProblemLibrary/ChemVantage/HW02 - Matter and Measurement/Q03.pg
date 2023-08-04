@@ -43,8 +43,54 @@ END_PGML
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$bodyMasslb = InexactValueWithUnits($bodyMass, 'lb');
+$kgUnity = InexactValueWithUnits(['1', Inf], 'kg');
+$d1 = InexactValueWithUnits($lbToKg, 'lb');
+$dosemg = InexactValueWithUnits($dose, 'mg');
+
+
+$drugMassmg = $bodyMasslb*$kgUnity/$d1*$dosemg/$kgUnity; 
+
+$massConversionSolution = $bodyMasslb*$kgUnity/$d1;
+$massConversion = DimensionalAnalysis::generateExplanation([$bodyMasslb], [$kgUnity, $d1], $massConversionSolution);
+$massConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$bodyMasslb], [$kgUnity, $d1], $massConversionSolution);
+$doseConversionSolution = $massConversionSolution*$dosemg/$kgUnity;
+$doseConversion = DimensionalAnalysis::generateExplanation([$massConversionSolution], [$dosemg, $kgUnity], $doseConversionSolution);
+$doseConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$massConversionSolution], [$dosemg, $kgUnity], $doseConversionSolution);
+
+BEGIN_PGML_SOLUTION
+
+You are starting with a mass physical quantity, [$bodyMasslb], but for a body.  The solution must be a mass physical quantity for a different substance, a drug. 
+You will need a conversion factor that converts from one substance to another.  The dosage, [$dose] [`\mathrm{mg}/\mathrm{kg}`],
+is perfect for this as its numerator relates to the drug, but the denominator relates to a body mass.  
+You will just need to do some conversions to match the same units in the dosage first.  
+
+#### Step 1
+
+Convert pounds to kilograms.
+
+[```[$massConversion] ```]
+
+##### Sig figs
+
+[$massConversionSf]**
+
+#### Step 2
+
+Now you can use the dosage to convert your body mass to a drug mass.  
+
+[``` [$test] ```]
+
+[```[$doseConversion] ```]
+
+##### Sig figs
+
+[$doseConversionSf]**
+
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();

@@ -766,7 +766,7 @@ sub generateExplanation {
 	my $explanation = '';
 
 	
-	@startingArray = @{ $startingArrayRef };
+	my @startingArray = @{ $startingArrayRef };
 
 	# The flaw with this function is that the hash does NOT include the power's meaning, adjust it later!
 	my @finalAnswerUnitArray = InexactValueWithUnits::InexactValueWithUnits::process_unit_for_stringCombine($finalAnswer->{units},{hasChemicals=>$hasChemicals});
@@ -969,6 +969,134 @@ sub generateExplanation {
 	return  $explanation;
 
 }
+
+# NOT WORKING YET
+sub generateSigFigsExplanationHint {
+	my($startingArrayRef, $conversionFactorsRef, $finalAnswer, $options) = @_;
+	$options->{output} = "HTML";
+	my $explanation = generateSigFigsExplanation($startingArrayRef, $conversionFactorsRef, $finalAnswer, $options);
+	my $html = '<a href="#" class="knowl" data-knowl-contents="';
+	$html .= $explanation;
+	$html .= '">Sig figs explanation...</a>';
+
+	return $html;
+}
+
+sub generateSigFigsExplanation {
+	#** @function public scalar generateExplanation (@$startingArrayRef, @$conversionFactorsRef, %$finalAnswer, %$options)
+	# @brief Generate an explanation of the correct number of significant figures for the final answer.   
+	# @param startingArrayRef required - Array for numerator and denominator portion.  Denominator is optional.
+	# @param conversionFactorsRef required - Array for each conversion factor using terms in pairs. i.e. [numerator1, denominator1, numerator2, denominator2, etc...]
+	# @param finalAnswer required - Answer to equation. 
+	# @param options optional - hash: 
+	# @brief {output}: scalar - "PGML" or "HTML"	
+	# @retval explanation - string output.
+	#*
+		
+	# starts with an array in case you want to separate numerator part and denominator part
+	my $startingArrayRef = shift; 
+	# array of conversion factors organized as [numerator,denominator,numerator,denominator,...] 
+	my $conversionFactorsRef = shift;
+	# final pre-calculated answer, NOT an array because we want it shown as one number
+	my $finalAnswer = shift;
+
+	# this is an options optional parameter
+	# Added option to check explicit string.  This solves an issue when trying to check
+	# if 1 mL = 1 cm^3.  These are equal unit hashes, but in the case of dimensional analysis
+	# we may want to show they're NOT equal, otherwise, in the explanation, these will get canceled out.
+	# Maybe we can make this the default, but I'm not sure yet.
+
+	my $options = shift;
+	# my $explicit = 0;
+	# if (defined $options && exists $options->{explicit}){
+	# 	$explicit = $options->{explicit};
+	# }
+
+	# my $hasChemicals;
+	# if ($options->{hasChemicals}){
+	# 	$hasChemicals = 1;
+	# }
+	my $outputType = "PGML";
+	if (exists $options->{output}){
+		$outputType = $options->{output};
+	}
+
+	my $explanation = "First, determine the number of significant figures in all of your factors.";
+	if ($outputType eq "PGML"){
+		$explanation .= "\n";
+	} elsif ($outputType eq "HTML"){
+		$explanation .= "<br/><ul>";
+	}
+	
+	my @startingArray = @{ $startingArrayRef };
+	for my $start (@startingArray) {
+		my $sf = $start->sigFigs();
+		if ($sf == Inf){
+			$sf = 'infinite sig figs.';
+		} elsif ($sf == 1){
+			$sf .= ' sig fig.';
+		} else {
+			$sf .= ' sig figs.';	
+		}
+		if ($outputType eq "PGML"){
+			$explanation .= "* $start has $sf\n";
+		} elsif ($outputType eq "HTML"){
+			$explanation .= "<li>$start has $sf</li>";
+		}
+	}
+
+	my @conversionFactors = @{$conversionFactorsRef};
+	for (my $i = 0; $i + 1 < scalar @conversionFactors; $i+=2){
+		# check in pairs
+		my $num = $conversionFactors[$i];
+		my $denom = $conversionFactors[$i+1];
+		my $numSf = $num->sigFigs();
+		my $denomSf = $denom->sigFigs();
+		if ($numSf == Inf && $denomSf == Inf){
+			if ($outputType eq "PGML"){
+				$explanation .= "* $num / $denom is an exact conversion, so infinite sig figs for each.\n";
+			} elsif ($outputType eq "HTML"){
+				$explanation .= "<li>$num / $denom is an exact conversion, so infinite sig figs for each.</li>";
+			}
+			
+		} else {
+			if ($numSf == Inf){
+				$numSf = "infinite sig figs.";
+				if ($num->valueAsNumber() == 1){$numSf .= " (A one in a conversion factor is almost always exact.)";}
+			} elsif ($numSf == 1){
+				$numSf .= " sig fig.";
+			} else {
+				$numSf .= " sig figs.";			
+			}
+			if ($denomSf == Inf){
+				$denomSf = "infinite sig figs.";
+				if ($denom->valueAsNumber() == 1){$denomSf .= " (A one in a conversion factor is almost always exact.)";}
+			} elsif ($denomSf == 1){
+				$denomSf .= " sig fig.";
+			} else {
+				$denomSf .= " sig figs.";			
+			}
+			if ($outputType eq "PGML"){
+				$explanation .= "* $num has $numSf\n";
+				$explanation .= "* $denom has $denomSf\n";
+			} elsif ($outputType eq "HTML"){
+				$explanation .= "<li>$num has $numSf</li>";
+				$explanation .= "<li>$denom has $denomSf</li>";
+			}
+			
+		}
+	}
+	my $finalSf = $finalAnswer->sigFigs();
+
+	if ($outputType eq "PGML"){
+		$explanation .= "\nThe answer, $finalAnswer, needs to have $finalSf sig figs because this is the smallest number of sig figs from all of the factors.\n";
+	} elsif ($outputType eq "HTML"){
+		$explanation .= "<br/>The answer, $finalAnswer, needs to have $finalSf sig figs because this is the smallest number of sig figs from all of the factors.<br/>";
+	}
+	
+	return $explanation;
+}
+
 
 main::HEADER_TEXT(<<EOF);
 <style>
