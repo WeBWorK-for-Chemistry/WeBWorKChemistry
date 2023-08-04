@@ -498,7 +498,7 @@ sub unRoundedValueMarked {
 	# what if unroundedvalue is scientific?
 	if ($unRoundedValue =~ /e/){
 		$trail = substr($unRoundedValue, $strPos + 2, length($unRoundedValue) - $strPos - 2);
-		if (scalar $trail > $limit){
+		if (length $trail > $limit){
 			if ($trail =~ /\./){
 				$trail = substr($trail, 0, $limit + 1);
 			} else {
@@ -508,7 +508,7 @@ sub unRoundedValueMarked {
 		$trail =~ s/e/\\times 10^ /r;
 	} else {
 		$trail = substr($unRoundedValue, $strPos + 1, length($unRoundedValue) - $strPos - 1);
-		if (scalar $trail > $limit){
+		if (length $trail > $limit){
 			if ($trail =~ /\./){
 				$trail = substr($trail, 0, $limit + 1);
 			} else {

@@ -735,6 +735,8 @@ sub generateExplanation {
 	# @param finalAnswer required - Answer to equation. 
 	# @param options optional - hash: 
 	# @brief {explicit}: boolean - requires units to also match string name instead of just hash values.  i.e. prevents mL and cm^3 from canceling since they are equivalent
+	# {useUnrounded}: boolean - leave starting value unrounded, but last sig fig marked
+	# {leaveUnrounded}: boolean - write final answerunrounded but marked
 	
 	# @retval explanation - string output in LaTeX format.
 	#*
@@ -757,6 +759,14 @@ sub generateExplanation {
 	if (defined $options && exists $options->{explicit}){
 		$explicit = $options->{explicit};
 	}
+	my $useUnrounded = 0;
+	if (defined $options && exists $options->{useUnrounded}){
+		$useUnrounded = $options->{useUnrounded};
+	}
+	my $leaveUnrounded = 0;
+	if (defined $options && exists $options->{leaveUnrounded}){
+		$leaveUnrounded = $options->{leaveUnrounded};
+	}
 
 	my $hasChemicals;
 	if ($options->{hasChemicals}){
@@ -764,7 +774,6 @@ sub generateExplanation {
 	}
 
 	my $explanation = '';
-
 	
 	my @startingArray = @{ $startingArrayRef };
 
@@ -784,6 +793,10 @@ sub generateExplanation {
 		#$explanation .= @startingArray[0]->TeX({shouldCancel=>1});
 
 	my $val = $startingArray[0]->{inexactValue};
+	my $displayVal = $val->TeX();
+	if ($useUnrounded){
+		$displayVal = $val->unRoundedValueMarked();
+	}
 	my $numeratorUnits = '';
 	my $denominatorUnits = '';
 
@@ -880,9 +893,9 @@ sub generateExplanation {
 		}
 		$explanation .= '\frac{';
 		if ($denominatorUnits eq ''){
-			$explanation .= $val->TeX() . '\\,'. $numeratorUnits;
+			$explanation .= $displayVal . '\\,'. $numeratorUnits;
 		} else{
-			$explanation .= $val->TeX() . '\\,'. '\\frac{' . $numeratorUnits . '}{' . $denominatorUnits . '}';
+			$explanation .= $displayVal . '\\,'. '\\frac{' . $numeratorUnits . '}{' . $denominatorUnits . '}';
 		}
 		$explanation .= '}{';
 		if ($denominatorUnits2 eq ''){
@@ -894,9 +907,9 @@ sub generateExplanation {
 		$explanation .= '}';
 	} else {
 		if ($denominatorUnits eq ''){
-			$explanation .= $val->TeX() . '\,'. $numeratorUnits;
+			$explanation .= $displayVal . '\,'. $numeratorUnits;
 		} else{
-			$explanation .= '\\frac{' . $val->TeX() . '\\,'. $numeratorUnits . '}{' .'1\\,'. $denominatorUnits . '}';
+			$explanation .= '\\frac{' . $displayVal . '\\,'. $numeratorUnits . '}{' .'1\\,'. $denominatorUnits . '}';
 		}
 	}
 
