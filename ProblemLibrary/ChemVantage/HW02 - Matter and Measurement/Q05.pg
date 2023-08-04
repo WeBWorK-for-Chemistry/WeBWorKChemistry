@@ -4,22 +4,23 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+$val1 = random(30, 99, 0.001); # generate number from 30 to 99 out to thousandths place
+$val2 = random(0, 3, 1);  # generate a number from 0 to 3 for making sig figs random!
+$length = InexactValue(sprintf("%.${val2}f", $val1)); # could have no decimal places to 3 decimal places
 
-$ans = Compute(2.50);
+$answer = $length*2.54/100;
+
 
 BEGIN_PGML
 Convert 98.3 inches to meters.
@@ -28,16 +29,37 @@ Convert 98.3 inches to meters.
 
 Enter the value with the appropriate number of significant figures.
 
- END_PGML
+END_PGML
 
-ANS( $ans->cmp() );
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$lengthin = InexactValueWithUnits($length, 'in');
+$cmTOin = InexactValueWithUnits([2.54, Inf], 'cm');
+$inUnity = InexactValueWithUnits(['1', Inf], 'in');
+$cmUnity = InexactValueWithUnits(['1', Inf], 'cm');
+$mTOcm = InexactValueWithUnits(['0.01', Inf], 'm');
+
+$lengthm = $lengthin * $cmTOin / $inUnity * $mTOcm / $cmUnity;
+$lengthConversion = DimensionalAnalysis::generateExplanation([$lengthin], [$cmTOin, $inUnity, $mTOcm, $cmUnity], $lengthm);
+$lengthConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$lengthin], [$cmTOin, $inUnity, $mTOcm, $cmUnity], $lengthm);
 
 BEGIN_PGML_SOLUTION
 
-The answer is [$ans].
+You'll need two conversion factors for this problem.  
+* [`[$cmTOin] = [$inUnity]`] (which is exact!)
+* [`[$cmUnity] = [$mTOcm] `] (also exact but not unusual)
+
+Just set them up so that units cancel out appropriately.
+
+[```[$lengthConversion]```].
+
+##### Sig figs
+
+[$lengthConversionSf]**
 
 END_PGML_SOLUTION
 
