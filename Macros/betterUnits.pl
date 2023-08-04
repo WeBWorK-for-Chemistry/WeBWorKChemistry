@@ -1398,6 +1398,9 @@ sub process_factor {
 		$options->{known_units} = $known_units;
 	}
 	
+	# This split fails if unit has curly braces around power.  We need to remove the braces 
+	# at this level since there's only individual units here.
+	$string =~ s/[{}]//g;
 	my ($unit_name,$power) = split(/\^/, $string);
 
 	my @unitsNameArray = keys %$known_units;

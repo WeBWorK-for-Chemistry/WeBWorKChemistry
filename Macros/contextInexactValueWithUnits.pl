@@ -1284,6 +1284,9 @@ sub process_factor_for_stringCombine {
   	}
 
 	# %op = %$known_units;
+	# This split fails if unit has curly braces around power.  We need to remove the braces 
+	# at this level since there's only individual units here.
+	$string =~ s/[{}]//g;
 	my ($unit_name,$power) = split(/\^/, $string);
 	my @unitsNameArray = keys %$known_units;
 	@unitNamesArray2 = main::PGsort(sub {length($_[0]) > length($_[1])}, @unitsNameArray);

@@ -4,38 +4,128 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+# instead of a random size saline bag, let's limit the sizes to standard sizes
+$val1 = random(100, 180, 0.1); # generate number from 100 to 180.
+$val2 = random(150, 190, 0.1); # generate number from 150 to 190.  
 
-$ans = Compute(46.7);
+$atomicMass = InexactValue(sprintf('%.1f', $val1)); 
+$radius = InexactValue(sprintf('%.1f', $val2)); 
+$percentEmpty = InexactValue('25.95');
+$avogadros = InexactValue('6.022e23');
+
+$mass = $atomicMass / $avogadros;
+$volume = 4/3*3.14159*(($radius*1e-10)**3);
+$densityAtom = $mass/$volume;
+$densityMetal = $densityAtom * (1-($percentEmpty*0.01));
 
 BEGIN_PGML
-In a close-packed structure consisting of identical spheres, 25.95% of the bulk volume consists of empty space between the spheres. If a hypothetical metal atom has an atomic mass of 102.9 amu and an atomic radius of 179.0 pm, calculate the density of the close-packed bulk metal.
+In a close-packed structure consisting of identical spheres, 
+[$percentEmpty]% of the bulk volume consists of empty space between the spheres. 
+If a hypothetical metal atom has an atomic mass of [$atomicMass] amu and an 
+atomic radius of [$radius] pm, calculate the density of the close-packed bulk metal.
 
- [______]{$answer} [`g/cm^3 `]
+[______]{$densityMetal} [`\mathrm{g}/\mathrm{cm}^3 `]
 
-Include at least 3 significant figures in your answer.
- END_PGML
+Include significant figures in your answer.
 
-ANS( $ans->cmp() );
+END_PGML
+
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$atomicMassu = InexactValueWithUnits($atomicMass, 'g/mol');
+$avogadrosEmpty = InexactValueWithUnits($avogadros, 'atom');
+$avogadrosMol = InexactValueWithUnits(['1', Inf], 'mol');
+$radiuspm = InexactValueWithUnits($radius, 'pm');
+$cmUnity = InexactValueWithUnits(['1', Inf], 'cm');
+$mAScm = InexactValueWithUnits([1e-2, Inf], 'm');
+$pmUnity = InexactValueWithUnits(['1', Inf], 'pm');
+$mASpm = InexactValueWithUnits([1e-12, Inf], 'm');
+#$d1 = InexactValueWithUnits($lbToKg, 'lb');
+#$dosemg = InexactValueWithUnits($dose, 'mg');
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+$massAtomgperatom = $atomicMassu*$avogadrosMol/$avogadrosEmpty;
+
+$massAtomg = InexactValueWithUnits($mass, 'g');
+
+$radiuscm = $radiuspm * $mASpm / $pmUnity * $cmUnity / $mAScm;
+$lengthConversion = DimensionalAnalysis::generateExplanation([$radiuspm], [$mASpm, $pmUnity, $cmUnity, $mAScm], $radiuscm);
+
+$volumecc = InexactValueWithUnits($volume, 'cm^3'); 
+
+$densityAtom = $massAtomg / $volumecc;
+
+$percentFull = 100 - $percentEmpty;
+$decimalFull = InexactValueWithUnits($percentFull*0.01, '');
+$densitySubstance = $decimalFull * $densityAtom;
+
+BEGIN_PGML_SOLUTION
+To calculate a density, you'll need to define a mass and a volume since
+mass divided by volume *is* density.  But instead of using a bulk mass and volume, 
+i.e. amounts at human scales, you will need to find a mass and volume at 
+an atomic scale.
+
+To start with, let's calculate the density of a single atom.  Afterwards, we will 
+modify that value to get the actual density of the bulk substance.
+
+#### Step 1
+
+We can find the mass of one atom using the atomic mass and Avogadro's number.  
+
+[``` [$atomicMassu] \times \frac{[$avogadrosMol]}{[$avogadrosEmpty]} = [$massAtomgperatom] ```]
+
+We can leave the per atom unit off since we'll know this is the mass of one atom:  [`\ [$massAtomg]`]
+
+#### Step 2
+
+We can find the volume of the atom using geometry and the equation for the volume of a sphere.  
+Before we do that, since we eventually want our volume units in centimeters cubed, 
+let's convert the radius units to centimeters first.
+
+[``` [$lengthConversion] ```]
+
+#### Step 3
+
+Now, use the volume of a sphere to calculate the volume of this atom.
+
+[``` V = \frac{4}{3}\pi r^3 = \frac{4}{3}\pi \left([$radiuscm]\right)^3  = [$volumecc]```]
+
+#### Step 4
+
+We can now calculate the density of a single atom by dividing the mass by the volume:
+
+[``` d = \frac{m}{V} = \frac{[$massAtomg]}{[$volumecc]} = [$densityAtom]```]
+
+#### Step 5
+
+Why is there a step 5?  The density of a single atom is *not* the density of the 
+bulk solid.  If the atoms were all squished together without any gaps at all, 
+this value would work.  However, we know there is empty space between the atoms. 
+Imagine a bunch of marbles in a jar.  There are a lot of gaps.  Fortunately, we 
+are told in the problem how much empty space there actually is:  [`[$percentEmpty]%`]
+
+Let's get the opposite, the amount of space actually filled, and use that (in decimal form)
+on the density to get the true density of that substance.
+
+[```100% - [$percentEmpty]%\ \mathrm{empty\ space} = [$percentFull]%\ \mathrm{filled\ space} ```]
+
+[``` \left([$densityAtom]\right)\left([$decimalFull]\right) = [$densitySubstance] ```]
+
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
