@@ -55,7 +55,7 @@ $dosemg = InexactValueWithUnits($dose, 'mg');
 $drugMassmg = $bodyMasslb*$kgUnity/$d1*$dosemg/$kgUnity; 
 
 $massConversionSolution = $bodyMasslb*$kgUnity/$d1;
-$massConversion = DimensionalAnalysis::generateExplanation([$bodyMasslb], [$kgUnity, $d1], $massConversionSolution);
+$massConversion = DimensionalAnalysis::generateExplanation([$bodyMasslb], [$kgUnity, $d1], $massConversionSolution, {leaveUnrounded=>1});
 $massConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$bodyMasslb], [$kgUnity, $d1], $massConversionSolution);
 $doseConversionSolution = $massConversionSolution*$dosemg/$kgUnity;
 $doseConversion = DimensionalAnalysis::generateExplanation([$massConversionSolution], [$dosemg, $kgUnity], $doseConversionSolution, {useUnrounded=>1});

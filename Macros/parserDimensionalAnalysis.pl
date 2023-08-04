@@ -795,7 +795,7 @@ sub generateExplanation {
 	my $val = $startingArray[0]->{inexactValue};
 	my $displayVal = $val->TeX();
 	if ($useUnrounded){
-		$displayVal = $val->unRoundedValueMarked();
+		$displayVal = $val->unroundedValueMarked();
 	}
 	my $numeratorUnits = '';
 	my $denominatorUnits = '';
@@ -845,6 +845,10 @@ sub generateExplanation {
 	}
 	if (scalar(@startingArray) == 2) {
 		my $val2 = $startingArray[1]->{inexactValue};
+		my $displayVal2 = $val2->TeX();
+		if ($useUnrounded){
+			$displayVal2 = $val2->unroundedValueMarked();
+		}
 		my $numeratorUnits2 = '';
 		my $denominatorUnits2 = '';
 			
@@ -899,9 +903,9 @@ sub generateExplanation {
 		}
 		$explanation .= '}{';
 		if ($denominatorUnits2 eq ''){
-			$explanation .= $val2->TeX() . '\\,' . $numeratorUnits2;
+			$explanation .= $displayVal2 . '\\,' . $numeratorUnits2;
 		} else{
-			$explanation .= $val2->TeX() . '\\,'. '\\frac{' . $numeratorUnits2 . '}{' . $denominatorUnits2 . '}';
+			$explanation .= $displayVal2 . '\\,'. '\\frac{' . $numeratorUnits2 . '}{' . $denominatorUnits2 . '}';
 		}
 		#$explanation .= $val2->TeX() .$numeratorUnits2;
 		$explanation .= '}';
@@ -975,7 +979,11 @@ sub generateExplanation {
 		}
 	}
 	
-	$explanation .= '=' . $finalAnswer->TeX;
+	if ($leaveUnrounded){
+		$explanation .= '=' . $finalAnswer->{inexactValue}->unroundedValueMarked() . '\\,' .  InexactValueWithUnits::InexactValueWithUnits::TeXunits($finalAnswer->{units});
+	} else {
+		$explanation .= '=' . $finalAnswer->TeX;
+	}
 
 
 

@@ -467,7 +467,7 @@ sub valueAsRoundedScientific {
 # Generate the unrounded inexact value (from a previous calculation) and underline the last significant figure.
 # Add a true parameter to force scientific notation. (NOT WORKING YET)
 #
-sub unRoundedValueMarked {
+sub unroundedValueMarked {
 	my $self = shift;
 	my $options = shift;
 
@@ -480,6 +480,7 @@ sub unRoundedValueMarked {
 	my $unRoundedValue = $self->valueAsNumber();
 	my $strPos = '';
 	my $trail;
+	
 	if (($self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
 
 		if(defined $1){
