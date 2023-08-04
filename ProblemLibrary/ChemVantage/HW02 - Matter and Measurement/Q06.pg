@@ -4,38 +4,91 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+$val1 = random(4, 9, 0.1); # generate number from 5 to 8 out to hundredths place
+$val2 = random(0.1, 0.3, 0.1);  # generate a number from 0.01 to 0.03 for uncertainty
+$totalMass = InexactValue(sprintf("%.1f", $val1)); # force 2 decimals
 
-$ans = Compute(30.88);
+$pennyMass = InexactValue('2.5');
+$minimum = $totalMass - $val2;
+$quantity = $minimum*1000/$pennyMass;
+$dollars = $quantity/100;
 
 BEGIN_PGML
-Bernard weighs a jar of pennies to find out how much they are worth. After subtracting the weight of the empty jar, he finds that the pennies have a total mass of 7.82 +/- 0.1 kg. Assuming that each penny weights 2.5 g, and taking into account the uncertainty of the measurement, what is the minimum value of the pennies (expressed in dollars)?
+Bernard weighs a jar of pennies to find out how much they are worth. After subtracting the weight of the empty jar, 
+he finds that the pennies have a total mass of [$totalMass] +/- [$val2] kg. 
+Assuming that each penny weights 2.5 g, and taking into account the uncertainty of the measurement, 
+what is the minimum value of the pennies (expressed in dollars)?
 
- [______]{$answer}  dollars 
+ [______]{$dollars}  dollars 
 
-Include at least 3 significant figures in your answer.
- END_PGML
+Include appropriate significant figures in your answer.
+END_PGML
 
-ANS( $ans->cmp() );
+
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$totalMasskg = InexactValueWithUnits($totalMass, 'kg');
+$uncertainty = InexactValueWithUnits([$val2, 1], 'kg');
+$kgUnity = InexactValueWithUnits(['1', Inf], 'kg');
+$kgTOm = InexactValueWithUnits(['1000', Inf], 'g');
+$pennyMassg = InexactValueWithUnits($pennyMass, 'g');
+
+$minimumkg = $totalMasskg - $uncertainty;
+$minimumg = $minimumkg * $kgTOm / $kgUnity;
+$lengthConversion = DimensionalAnalysis::generateExplanation([$minimumkg], [$kgTOm, $kgUnity], $minimumg);
+$lengthConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$minimumkg], [$kgTOm, $kgUnity], $minimumg);
+
+$quantityUnit = $minimumg/$pennyMassg;
+
+BEGIN_PGML_SOLUTION
+
+#### Step 1
+
+Uncertainties give a range of values possible for a measurement.  Since we want the minimum dollar amount in the jar,
+we should base all of our calculations on the minimum mass possible for the pennies.
+
+[``` [$totalMasskg] - [$uncertainty] = [$minimumkg] ```]
+
+#### Step 2
+
+Since we're eventually going to use the mass of a single penny whose units are grams, we should convert our total mass 
+of pennies into grams as well.
+
+[```[$lengthConversion]```]
+
+##### Sig figs
+
+[$lengthConversionSf]**
+
+#### Step 3
+
+If we divide the total mass of the pennies by the mass of each penny, we will get an approximate number of pennies in the jar.  
+Notice that we round to the correct number of significant figures.
+
+[```\frac{[$minimumg]}{[$pennyMassg]/\mathrm{penny}} = [$quantityUnit->valueAsNumber()]\,\mathrm{pennies} \rightarrow [$quantityUnit]\,\mathrm{pennies} ```]
+
+#### Step 4
+
+Convert number of pennies to a dollar amount.
+
+[``` [$quantityUnit]\,\mathrm{pennies} \times \frac{1\,\mathrm{dollar}}{100\,\mathrm{pennies}} = [$dollars]\,\mathrm{dollars} ```]
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
