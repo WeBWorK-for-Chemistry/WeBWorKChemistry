@@ -4,39 +4,57 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+$val1 = random(0.14, 0.16, 0.001); # generate number from 5 to 8 out to hundredths place
+$val2 = random(0.1, 0.3, 0.1);  # generate a number from 0.01 to 0.03 for uncertainty
 
-$ans = Compute(2.99E-23);
+$massDrop = InexactValue(sprintf("%.3f", $val1));
+$molarMass = InexactValue('18.02');
+$avogadros = InexactValue('6.022e23');
+
+$numberMolecules = $massDrop/$molarMass*$avogadros;
+$massMolecule = $massDrop/$numberMolecules;
 
 BEGIN_PGML
-A single drop of water has a mass of about 0.160 g and contains about 5.35E+21  molecules of water. (Here, 5.35E+21 is scientific E notation that is easily understood by computers and means the same as 5.35 x [`10^{21}`].) Compute the mass of a single molecule of water, expressing your answer in scientific E notation. Round your answer to 3 significant figures.
+A single drop of water has a mass of about [`[$massDrop]`] g and contains about [`[$numberMolecules]`]  molecules of water. 
+Compute the mass of a single molecule of water, expressing your answer in scientific notation. 
 
- [______]{$answer} g
+[______]{$massMolecule} g
 
 Enter the value with the appropriate number of significant figures.
 
- END_PGML
+END_PGML
 
-ANS( $ans->cmp() );
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$massDropg = InexactValueWithUnits($massDrop, 'g');
+$numberMolecules = InexactValueWithUnits($numberMolecules, '');
+
+$massMoleculeg = $massDropg / $numberMolecules;
+
+BEGIN_PGML_SOLUTION
+
+We have everything available to directly calculate the mass of a molecule of water.  If we divide the 
+mass of a drop of water by the number of molecules in that drop, we'll get the mass of a single molecule.
+
+[``` \frac{[$massDropg]}{[$numberMolecules]\,\mathrm{molecules}} = [$massMolecule]\,\mathrm{g}/\mathrm{molecule} ```]
+
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
