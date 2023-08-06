@@ -4,39 +4,66 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
 
-$ans = Compute(13.02);
+$val1 = random(16, 24, 0.1); # generate number from 12 to 18 out to tenths place
+$val2 = random(700, 2200, 0.01);
+
+$annualRate = InexactValue(sprintf("%.2f", $val1));
+$balance = InexactValue(sprintf("%.2f", $val2));
+
+$monthlyRate = $annualRate/12;
+
+$interest = $balance * $monthlyRate/100;
 
 BEGIN_PGML
-If your credit card charges you interest at an annualized rate of 18.50% and your average daily balance for the month of September was $855.97, how much interest do you owe for this month?
+If your credit card charges you interest at an annualized rate of [$annualRate]% and 
+your average daily balance for the month of September was $[$balance], how much interest do you owe for this month?
 
- [______]{$answer} dollars 
+ [______]{$interest} dollars 
 
 Enter the value with the appropriate number of significant figures.
 
  END_PGML
 
-ANS( $ans->cmp() );
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+#$mercuryVolmL = InexactValueWithUnits($mercuryVol, 'mL');
+# $flaskVolmL = InexactValueWithUnits('100.0', 'mL');
+# $alcoholVol = $flaskVolmL - $mercuryVolmL;
+
+BEGIN_PGML_SOLUTION
+
+An annualized interest rate can be converted to a monthly interest rate by dividing by the number of months in a year, 12.
+
+[``` \frac{[$annualRate]%}{12} = [$monthlyRate]% ```]
+
+Since 12 months is a value derived from counting things, it's exact so it has infinite sig figs. 
+The monthly rate will then have the same number of sig figs as the annual rate.
+
+Convert the rate from percent to decimal form by dividing by 100% then multiply by the balance to 
+get the interest owed.
+
+[``` \frac{[$monthlyRate]%}{100%} \times $[$balance] = $[$interest]```]
+
+One hundred percent is exact.  The monthly interest rate has [$monthlyRate->sigFigs()] sig figs while the 
+balance has [$balance->sigFigs()] sig figs.  The interest should have  [$monthlyRate->sigFigs()] sig figs.
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
