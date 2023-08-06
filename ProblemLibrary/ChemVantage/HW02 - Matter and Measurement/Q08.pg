@@ -4,38 +4,91 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+$vald = random(1.4, 1.8, 0.01); # generate number from 1.4 to 1.8 out to hundredths place
+$val1 = random(250, 290, 1);
+$val2 = random(50, 70, 1);
+$val3 = random(80, 99, 1);
 
-$ans = Compute(1.52);
+$density = InexactValue(sprintf("%.2f", $vald));
+$width = InexactValue(sprintf("%.1f", $val3));
+$height = InexactValue(sprintf("%.1f", $val2));
+$length = InexactValue(sprintf("%.0f", $val1));
+
+$volume = $length*$width*$height/1000;
+$mass = $density*$volume/1000;
+
 
 BEGIN_PGML
-Composition C-4 is a plastic explosive having a density of 1.05 [`g/cm^3`]. Calculate the mass of a brick of C-4 measuring 58.0 mm x 87.0 mm x 286 mm.
+Composition C-4 is a plastic explosive having a density of 1.05 [`\mathrm{g}/\mathrm{cm}^3`]. 
+Calculate the mass of a brick of C-4 measuring 58.0 mm x 87.0 mm x 286 mm.
 
- [______]{$answer} Kg
+ [______]{$mass} kg
 
 Enter the value with the appropriate number of significant figures.
- END_PGML
 
-ANS( $ans->cmp() );
+END_PGML
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$densityg = InexactValueWithUnits($density, 'g');
+$unitycc = InexactValueWithUnits([1, Inf], 'cm^3');
+$widthmm = InexactValueWithUnits($width, 'mm');
+$heightmm = InexactValueWithUnits($height, 'mm');
+$lengthmm = InexactValueWithUnits($length, 'mm');
+$cmmTOcc = InexactValueWithUnits([1000,Inf], 'mm^3');
+$gTOkg = InexactValueWithUnits([1000,Inf], 'g');
+$unitykg = InexactValueWithUnits([1, Inf], 'kg');
+
+$volumemm = $lengthmm*$widthmm*$heightmm;
+$volumecc = $volumemm*$unitycc/$cmmTOcc;
+$volumeConversion = DimensionalAnalysis::generateExplanation([$volumemm], [$unitycc, $cmmTOcc], $volumecc);
+$massg = $volumecc*$densityg/$unitycc;
+$densityConversion = DimensionalAnalysis::generateExplanation([$volumecc], [$densityg, $unitycc], $massg);
+$masskg = $massg*$unitykg/$gTOkg;
+$massConversion = DimensionalAnalysis::generateExplanation([$massg], [$unitykg, $gTOkg], $masskg);
+
+
+
+BEGIN_PGML_SOLUTION
+
+We need a mass, but we have a bunch of length measurements.  The density is a clue.  Since density can 
+convert a volume into a mass (and vice versa), we'll need a volume of C-4 if we want to get a mass of C-4. 
+Fortunately, we can calculate a colume use the formula for volume of a rectangular prism:  
+
+[``` V = \mathrm{length} \times \mathrm{width} \times \mathrm{height} = [$lengthcm] \times [$widthcm] \times [$heightcm] = [$volumecc]  ```]
+
+This volume has different units than the density contains.  We'll need to convert it to cubic centimeters.  
+To find the conversion factor, we can start with the conversion factor 10 mm / 1 cm and cube it:
+
+[``` \left(\frac{10\,\mathrm{mm}}{1\,\mathrm{cm}}\right)^3 = \frac{1000\,\mathrm{mm}^3}{1\,\mathrm{cm}^3} ```]
+
+Use this new conversion factor to convert the volume:
+
+[``` [$volumeConversion] ```]
+
+Next, convert the volume into a mass using the density:
+
+[``` [$densityConversion] ```]
+
+Finally, the answer needs to be in kilograms.  Convert the grams to kilograms.
+
+[``` [$massConversion] ```]
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();

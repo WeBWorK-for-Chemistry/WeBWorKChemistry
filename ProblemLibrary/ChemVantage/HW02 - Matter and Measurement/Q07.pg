@@ -54,7 +54,6 @@ mass of a drop of water by the number of molecules in that drop, we'll get the m
 
 [``` \frac{[$massDropg]}{[$numberMolecules]\,\mathrm{molecules}} = [$massMolecule]\,\mathrm{g}/\mathrm{molecule} ```]
 
-
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
