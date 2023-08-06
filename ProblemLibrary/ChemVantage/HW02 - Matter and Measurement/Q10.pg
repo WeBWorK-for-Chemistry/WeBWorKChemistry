@@ -64,9 +64,7 @@ $alcoholg = $alcoholcc * $alcoholDensityg / $unitycc;
 
 $mercuryConversion = DimensionalAnalysis::generateExplanation([$mercurycc], [$mercuryDensityg, $unitycc], $mercuryg);
 $alcoholConversion = DimensionalAnalysis::generateExplanation([$alcoholcc], [$alcoholDensityg, $unitycc], $alcoholg);
-# $costdollar = $tankgal*$pricedollar/$unitygal;
-# $priceConversion = DimensionalAnalysis::generateExplanation([$tankgal], [$pricedollar, $unitygal], $costdollar, {leaveUnrounded=>1});
-# $priceConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$tankgal], [$pricedollar, $unitygal], $costdollar);
+
 $total = $mercuryg + $alcoholg;
 
 BEGIN_PGML_SOLUTION
