@@ -30,8 +30,8 @@ $mass = $density*$volume/1000;
 
 
 BEGIN_PGML
-Composition C-4 is a plastic explosive having a density of 1.05 [`\mathrm{g}/\mathrm{cm}^3`]. 
-Calculate the mass of a brick of C-4 measuring 58.0 mm x 87.0 mm x 286 mm.
+Composition C-4 is a plastic explosive having a density of [$density] [`\mathrm{g}/\mathrm{cm}^3`]. 
+Calculate the mass of a brick of C-4 measuring [$height] mm x [$width] mm x [$length] mm.
 
  [______]{$mass} kg
 
@@ -70,7 +70,7 @@ We need a mass, but we have a bunch of length measurements.  The density is a cl
 convert a volume into a mass (and vice versa), we'll need a volume of C-4 if we want to get a mass of C-4. 
 Fortunately, we can calculate a colume use the formula for volume of a rectangular prism:  
 
-[``` V = \mathrm{length} \times \mathrm{width} \times \mathrm{height} = [$lengthcm] \times [$widthcm] \times [$heightcm] = [$volumecc]  ```]
+[``` V = \mathrm{length} \times \mathrm{width} \times \mathrm{height} = [$lengthmm] \times [$widthmm] \times [$heightmm] = [$volumemm]  ```]
 
 This volume has different units than the density contains.  We'll need to convert it to cubic centimeters.  
 To find the conversion factor, we can start with the conversion factor 10 mm / 1 cm and cube it:
