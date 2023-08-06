@@ -49,6 +49,11 @@ $conversionSf = DimensionalAnalysis::generateSigFigsExplanation([$tankgal], [$ga
 
 BEGIN_PGML_SOLUTION
 
+You'll have to look up the correct conversion factor for gallons to Liters.  If we don't want to make our data less precise, 
+since the data has 3 significant figures, we'll need a conversion factor with 4 sig figs at least.
+
+[` [$gallonLiter[0]] = [$gallonLiter[1]] `] will work in this case.  Setup the conversion so gallons cancels out.
+
 [``` [$conversion] ```]
 
 [$conversionSf]**
