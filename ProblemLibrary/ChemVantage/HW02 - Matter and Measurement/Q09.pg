@@ -4,39 +4,88 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+$val1 = random(12, 18, 0.1); # generate number from 12 to 18 out to tenths place
+$val2 = random(25000, 50000, 0.00001);
+$val3 = random(3, 5, 0.01);
 
-$ans = Compute(1180000);
+$tank = InexactValue(sprintf("%.1f", $val1));
+$exchange = InexactValue(sprintf("%.5f", $val2));
+$price = InexactValue(sprintf("%.2f", $val3));
+
+$rials = $tank*$price*$exchange;
 
 BEGIN_PGML
-If gasoline costs $3.24 per gallon and the exchange rate for Iranian rials is 29834.31677 rial/dollar, how much does it cost (in rials) to fill a 12.2 gallon tank?
+If gasoline costs $[$price] per gallon and the exchange rate for Iranian rials is [$exchange] rial/dollar, how much does it cost (in rials) to fill a [$tank] gallon tank?
 
- [______]{$answer} rial
+ [______]{$rials} rials
 
 Enter the value with the appropriate number of significant figures.
 
- END_PGML
+END_PGML
 
-ANS( $ans->cmp() );
+
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits")->flags->set(newUnit=>['dollar', 'rial']); 
+# if the previous units are not defined, then they have no meaning... the dimensional analysis part won't 
+# know that they're different and may cancel them all out.
+$tankgal = InexactValueWithUnits($tank, 'gal');
+$pricedollar = InexactValueWithUnits($price, 'dollar');
+$unitygal = InexactValueWithUnits([1, Inf], 'gal');
+$costdollar = $tankgal*$pricedollar/$unitygal;
+$priceConversion = DimensionalAnalysis::generateExplanation([$tankgal], [$pricedollar, $unitygal], $costdollar, {leaveUnrounded=>1});
+$priceConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$tankgal], [$pricedollar, $unitygal], $costdollar);
+
+$rialconv = InexactValueWithUnits($exchange, 'rial');
+$unitydollar = InexactValueWithUnits([1, Inf], 'dollar');
+$costrial = $costdollar * $rialconv / $unitydollar;
+$price2Conversion = DimensionalAnalysis::generateExplanation([$costdollar], [$rialconv, $unitydollar], $costrial, {useUnrounded =>1});
+$price2ConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$costdollar], [$rialconv, $unitydollar], $costrial);
+
+
+BEGIN_PGML_SOLUTION
+
+#### Step 1
+
+The question is ultimately asking how many rials for [$tank] gallons.  So we'll start with gallons (a volume) and 
+do conversion with the goal of getting rials.  If you scan the rest of the problem, there is a conversion 
+factor that converts gallons to dollars, $[$price]/gallon.  Start by converting to dollars:
+
+[``` [$priceConversion] ```]
+
+Notice, we leave it unrounded so we do not get rounding errors in the final answer later.  The final sig fig is marked with an underline.
+
+##### Sig figs
+
+[$priceConversionSf]**
+
+#### Step 2
+
+Now you can convert dollars to rials using the second conversion factor in the problem.
+
+[``` [$price2Conversion] ```]
+
+##### Sig figs
+
+[$price2ConversionSf]**
+
+
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
