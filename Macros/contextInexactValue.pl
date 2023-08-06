@@ -546,8 +546,8 @@ sub string {
 		return 'zero sig figs';
 	}
 
-	@valArray = $self->value;# + 0;
-	$valAsNumber = $valArray[0];
+	my @valArray = $self->value;# + 0;
+	my $valAsNumber = $valArray[0];
 	
 	# Only here is scientific required or preferred
 	if ($self->preferScientificNotation() || $forceScientific) {
@@ -665,8 +665,17 @@ sub string {
 							
 							#$nondecimalPartAbs = sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
 							$sigfigs = $self->sigFigs();
-							$digits = length($valAsNumber) - $self->sigFigs();  
-							# negative value for digits because we are rounding non-decimal digits.
+
+							# INCORRECT IF valAsNumber contains a decimal
+							#$digits = length($valAsNumber) - $self->sigFigs(); 
+							my $digits; 
+							my $wholeCheck = sprintf("%.0f",$valAsNumber);
+							if (length $wholeCheck >= $sigfigs){
+								$digits = length($wholeCheck) - $sigfigs;
+							} else {
+								$digits = $sigfigs - length($wholeCheck);
+							}
+							
 							$nondecimalPartAbs = sprintf("%.${sigfigs}e", main::Round($valAsNumber, $digits * -1));
 							$nondecimalPartAbs = sprintf("%.0f", abs($nondecimalPartAbs));
 
