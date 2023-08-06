@@ -76,6 +76,45 @@ sub parserInexactValueWithUnits::add_unit {
     return %$Units;
 }
 
+sub getConversion {
+	#** @function public array getConversion ($unit1, $unit2, %$options)
+	# @brief Returns array of exactly 2 InexactValueWithUnits  
+	# Together they create an equality that can be used in a conversion factor.
+	# Second value will always be unity (1),
+	# @param unit1 required - string unit 1.
+	# @param unit2 required - string unit 2.
+	# @param options optional - 
+	# @brief {limitSF} value - limit sig figs to x amount
+	# @retvalue array
+	#*
+
+	my $unit1 = shift;
+	my $unit2 = shift;
+	my $options = shift;
+	my $limitSF = Inf;
+
+	my $region = 'us';
+	if (defined $options && exists $options->{unitRegion}){
+		$region = $options->{unitRegion};
+	}
+	if (defined $options && exists $options->{limitSF}){
+		$limitSF = $options->{limitSF};
+	}
+
+	unless (defined $unit1 && defined $unit2){
+		Value::Error("You are missing units for conversion.");
+	}
+
+	my $conversionDetails = BetterUnits::convertUnit($unit1, $unit2, {region=> $region, hashReturn=>1});
+
+	# is it an exact conversion??
+	my $first = InexactValueWithUnits::InexactValueWithUnits->new([1/$conversionDetails->{multiplier}, $limitSF],$unit1);
+	my $second = InexactValueWithUnits::InexactValueWithUnits->new([1, Inf],$unit2);
+
+	return ($first, $second);
+
+}
+
 ######################################################################
 
 #
@@ -728,6 +767,7 @@ sub TeXunits {
 	return '{\textstyle\frac{\rm '.$1.'}{\rm '.$2.'}}' if ($displayMode eq 'HTML_tth');
 	return '{\textstyle\frac{\mathrm\mathstrut \rm '.$1.'}{\mathrm\mathstrut \rm '.$2.'}}';
 }
+
 
 
 sub convertTo {

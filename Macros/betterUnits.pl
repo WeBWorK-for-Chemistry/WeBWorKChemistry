@@ -1515,6 +1515,7 @@ sub convertUnit {
 	my $fundamental_units = \%fundamental_units;
 	my $known_units = \%known_units;
 	my $region = 'us';
+	my $hashReturn=0;
 
 	if (defined($options->{fundamental_units})) {
 		$fundamental_units = $options->{fundamental_units};
@@ -1531,59 +1532,67 @@ sub convertUnit {
 	if ($region eq 'uk'){
 		@known_units{ keys %known_units_uk } = values %known_units_uk;
 	}
-	
-	my ($unit_name_from,$power_from) = split(/\^/, $fromUnit);
-	#warn $unit_name_from;
-	$power_from = 1 unless defined($power_from);
 
-	my %unit_hash_from = %$fundamental_units;
-	if ( defined( $known_units->{$unit_name_from} )  ) {
-		my %unit_name_from_hash = %{$known_units->{$unit_name_from}};   # $reference_units contains all of the known units.
-		#warn %unit_name_from_hash;
-		my $u;
-		foreach $u (keys %unit_name_from_hash) {
-			if ( $u eq 'factor' ) {
-				#warn "$u: $unit_name_from{$u}";
-				#warn "$u: $unit_name_from_hash{$u}";
-				$unit_hash_from{$u} = $unit_name_from_hash{$u}**$power_from;  # calculate the correction factor for the unit
-				#warn "power: $power_from";
-			} else {
-				my $fundamental_unit = $unit_name_from_hash{$u};
-				$fundamental_unit = 0 unless defined($fundamental_unit); # a fundamental unit which doesn't appear in the unit need not be defined explicitly
-				#warn "fundamental: $fundamental_unit";
-				$unit_hash_from{$u} = $fundamental_unit*$power_from; # calculate the power of the fundamental unit in the unit
-			}
-		}
-	} else {
-		warn "$unit_name_from";
-		die "UNIT ERROR Unrecognizable unit: |$unit_name_from|";
+	if (defined($options->{hashReturn}) && $options->{hashReturn} == 1){
+		$hashReturn = $options->{hashReturn};
 	}
 
-	my ($unit_name_to,$power_to) = split(/\^/, $toUnit);
-	#warn $unit_name_to;
-	$power_to = 1 unless defined($power_to);
+	my %unit_hash_from = process_factor($fromUnit);
+	my %unit_hash_to = process_factor($toUnit);
 
-	my %unit_hash_to = %$fundamental_units;
-	if ( defined( $known_units->{$unit_name_to} )  ) {
-		my %unit_name_to_hash = %{$known_units->{$unit_name_to}};   # $reference_units contains all of the known units.
-		#warn %unit_name_to_hash;
-		my $u;
-		foreach $u (keys %unit_name_to_hash) {
-			if ( $u eq 'factor' ) {
-				#warn "$u: $unit_name_to{$u}";
-				#warn "$u: $unit_name_to_hash{$u}";
-				$unit_hash_to{$u} = $unit_name_to_hash{$u}**$power_to;  # calculate the correction factor for the unit
-				#warn "power: $power_to";
-			} else {
-				my $fundamental_unit = $unit_name_to_hash{$u};
-				$fundamental_unit = 0 unless defined($fundamental_unit); # a fundamental unit which doesn't appear in the unit need not be defined explicitly
-				#warn "fundamental: $fundamental_unit";
-				$unit_hash_to{$u} = $fundamental_unit*$power_to; # calculate the power of the fundamental unit in the unit
-			}
-		}
-	} else {
-		die "UNIT ERROR Unrecognizable unit: |$unit_name_to|";
-	}
+	# my ($unit_name_from,$power_from) = split(/\^/, $fromUnit);
+	# warn $unit_name_from;
+	# #warn $unit_name_from;
+	# $power_from = 1 unless defined($power_from);
+
+	# my %unit_hash_from = %$fundamental_units;
+	# if ( defined( $known_units->{$unit_name_from} )  ) {
+	# 	my %unit_name_from_hash = %{$known_units->{$unit_name_from}};   # $reference_units contains all of the known units.
+	# 	#warn %unit_name_from_hash;
+	# 	my $u;
+	# 	foreach $u (keys %unit_name_from_hash) {
+	# 		if ( $u eq 'factor' ) {
+	# 			#warn "$u: $unit_name_from{$u}";
+	# 			#warn "$u: $unit_name_from_hash{$u}";
+	# 			$unit_hash_from{$u} = $unit_name_from_hash{$u}**$power_from;  # calculate the correction factor for the unit
+	# 			#warn "power: $power_from";
+	# 		} else {
+	# 			my $fundamental_unit = $unit_name_from_hash{$u};
+	# 			$fundamental_unit = 0 unless defined($fundamental_unit); # a fundamental unit which doesn't appear in the unit need not be defined explicitly
+	# 			#warn "fundamental: $fundamental_unit";
+	# 			$unit_hash_from{$u} = $fundamental_unit*$power_from; # calculate the power of the fundamental unit in the unit
+	# 		}
+	# 	}
+	# } else {
+	# 	warn "$unit_name_from";
+	# 	die "UNIT ERROR Unrecognizable unit: |$unit_name_from|";
+	# }
+
+	# my ($unit_name_to,$power_to) = split(/\^/, $toUnit);
+	# #warn $unit_name_to;
+	# $power_to = 1 unless defined($power_to);
+
+	# my %unit_hash_to = %$fundamental_units;
+	# if ( defined( $known_units->{$unit_name_to} )  ) {
+	# 	my %unit_name_to_hash = %{$known_units->{$unit_name_to}};   # $reference_units contains all of the known units.
+	# 	#warn %unit_name_to_hash;
+	# 	my $u;
+	# 	foreach $u (keys %unit_name_to_hash) {
+	# 		if ( $u eq 'factor' ) {
+	# 			#warn "$u: $unit_name_to{$u}";
+	# 			#warn "$u: $unit_name_to_hash{$u}";
+	# 			$unit_hash_to{$u} = $unit_name_to_hash{$u}**$power_to;  # calculate the correction factor for the unit
+	# 			#warn "power: $power_to";
+	# 		} else {
+	# 			my $fundamental_unit = $unit_name_to_hash{$u};
+	# 			$fundamental_unit = 0 unless defined($fundamental_unit); # a fundamental unit which doesn't appear in the unit need not be defined explicitly
+	# 			#warn "fundamental: $fundamental_unit";
+	# 			$unit_hash_to{$u} = $fundamental_unit*$power_to; # calculate the power of the fundamental unit in the unit
+	# 		}
+	# 	}
+	# } else {
+	# 	die "UNIT ERROR Unrecognizable unit: |$unit_name_to|";
+	# }
 	
 	#foreach my $name (keys %unit_hash_from) {
 	 # warn "$name $unit_hash_from{$name}";
@@ -1596,7 +1605,11 @@ sub convertUnit {
 	#warn "multiplier:  $multiplier";
 
 	#%unit_hash_from;
-	return $multiplier;
+	if ($hashReturn){
+		return {multiplier=>$multiplier, from=>\%unit_hash_from, to=>\%unit_hash_to };
+	}else {
+		return $multiplier;
+	}
 }
 
 # # This is the "exported" subroutine.  Use this to evaluate the units given in an answer.
