@@ -4,39 +4,97 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
+@liquids = ('ethanol', 'methanol', 'isopropanol', '1-butanol');
+@densities = ('0.789', '0.792', '0.785', '0.810');
 
-$ans = Compute(517);
+$val1 = random(25, 45, 0.1); # generate number from 12 to 18 out to tenths place
+$val2 = random(0, 3, 1);
+
+$mercuryVol = InexactValue(sprintf("%.1f", $val1));
+$mercuryDensity = InexactValue("13.6");
+$name = $liquids[$val2];
+$density = InexactValue(sprintf("%.3f", $densities[$val2]));
+
+$totalMass = ($mercuryVol*$mercuryDensity) + ((100 - $mercuryVol) * $density);
+
 
 BEGIN_PGML
-A 100 mL flask is filled with 34.2 mL of mercury plus enough ethanol to fill the remainder of the volume. Calculate the total mass of liquid in the flask. The densities of ethanol and mercury are 0.789 and 13.6 [`g/cm^3`], respectively.
+A 100-mL flask is filled with [$mercuryVol] mL of mercury plus enough [$name] to fill the remainder of the volume. 
+Calculate the total mass of liquid in the flask. The densities of [$name] and mercury are [$density] and 13.6 [`\mathrm{g}/\mathrm{cm}^3`], respectively.
+Assume the flask has an uncertainty of [`\pm 0.1`] mL.
 
- [______]{$answer} g
+ [______]{$totalMass} g
 
-Enter the value with the appropriate number of significant figures. 
+Enter the value with the appropriate number of significant figures.
 
- END_PGML
+END_PGML
 
-ANS( $ans->cmp() );
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+Context("InexactValueWithUnits");
+$mercuryVolmL = InexactValueWithUnits($mercuryVol, 'mL');
+$flaskVolmL = InexactValueWithUnits('100.0', 'mL');
+$alcoholVol = $flaskVolmL - $mercuryVolmL;
+
+$mercuryDensityg = InexactValueWithUnits($mercuryDensity, 'g');
+$alcoholDensityg = InexactValueWithUnits($density, 'g');
+$unitycc = InexactValueWithUnits([1, Inf], 'cm^3');
+$unitymL = InexactValueWithUnits([1, Inf], 'mL');
+
+$mercurycc = $mercuryVolmL * $unitycc/$unitymL;
+$alcoholcc = $alcoholVol * $unitycc/$unitymL;
+
+$mercuryg = $mercurycc * $mercuryDensityg / $unitycc;
+$alcoholg = $alcoholcc * $alcoholDensityg / $unitycc;
+
+$mercuryConversion = DimensionalAnalysis::generateExplanation([$mercurycc], [$mercuryDensityg, $unitycc], $mercuryg);
+$alcoholConversion = DimensionalAnalysis::generateExplanation([$alcoholcc], [$alcoholDensityg, $unitycc], $alcoholg);
+# $costdollar = $tankgal*$pricedollar/$unitygal;
+# $priceConversion = DimensionalAnalysis::generateExplanation([$tankgal], [$pricedollar, $unitygal], $costdollar, {leaveUnrounded=>1});
+# $priceConversionSf = DimensionalAnalysis::generateSigFigsExplanation([$tankgal], [$pricedollar, $unitygal], $costdollar);
+$total = $mercuryg + $alcoholg;
+
+BEGIN_PGML_SOLUTION
+
+Since the flask has two different liquids in it, we'll need to calculate their masses separately since they 
+have different densities.  We're given the volume of mercury, but not the volume of [$name].  However, 
+the problem states that the 100-mL flask is filled so we can calculate the volume of [$name] using a subtratction:
+
+[``` [$flaskVolmL] - [$mercuryVolmL] = [$alcoholVol] ```]
+
+The flask's volume is precise to the tenths place according to the uncertainty of [`\pm 1`].  The answer continues to 
+have its final sig fig be in the tenths position.
+
+The density has [`\mathrm{cm}^3`] units for volume instead of mL.  Since 1 [`\mathrm{cm}^3`] = 1 mL, we can simply 
+rewrite the volumes with [`\mathrm{cm}^3`] instead. 
+
+Convert the volume of each substance using its respective density. 
+You'll have to multiply so that the milliliter units cancel out.
+
+[``` [$mercuryConversion]\ \mathrm{mercury} ```]
+
+[``` [$alcoholConversion]\ \mathrm{[$name]}```]
+
+Finally, add the two masses together to get the total mass.  Notice how the sig figs are limited to the ones position.
+
+[``` [$mercuryg] + [$alcoholg] = [$total] ```]
+
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();

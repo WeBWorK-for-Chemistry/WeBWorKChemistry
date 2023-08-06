@@ -1577,6 +1577,7 @@ sub isOne {
 
 # negative values mean last place is tens or hundreds, etc.
 # positive values mean last place is in the decimal region, tenths, hundredths, etc
+# 0 is the ones digit
 sub leastSignificantPosition {
 	$self = shift;
 	my $val = $self->valueAsNumber();
@@ -1584,7 +1585,7 @@ sub leastSignificantPosition {
 	$val = abs($val);
 	if ($val >= 10) {
 		my $p = 1;
-		while ($val / (10**$p) > 10) {
+		while ($val / (10**$p) >= 10) {  # this used to be just '>' but 100. would show 1 as the least sig position (tenths) which is WRONG
 			$p++;
 		}
 		return -$p + $sf - 1;
