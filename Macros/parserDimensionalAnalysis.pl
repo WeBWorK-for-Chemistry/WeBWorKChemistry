@@ -1075,7 +1075,9 @@ sub generateSigFigsExplanation {
 		my $denomSf = $denom->sigFigs();
 		if ($numSf == Inf && $denomSf == Inf){
 			if ($outputType eq "PGML"){
-				$explanation .= "* $num / $denom is an exact conversion, so infinite sig figs for each.\n";
+				my $numTeX = $num->TeX();
+				my $denomTeX = $denom->TeX();
+				$explanation .= "* [`$numTeX`] / [`$denomTeX`] is an exact conversion, so infinite sig figs for each.\n";
 			} elsif ($outputType eq "HTML"){
 				$explanation .= "<li>$num / $denom is an exact conversion, so infinite sig figs for each.</li>";
 			}
@@ -1098,8 +1100,10 @@ sub generateSigFigsExplanation {
 				$denomSf .= " sig figs.";			
 			}
 			if ($outputType eq "PGML"){
-				$explanation .= "* $num has $numSf\n";
-				$explanation .= "* $denom has $denomSf\n";
+				my $numTeX = $num->TeX();
+				my $denomTeX = $denom->TeX();
+				$explanation .= "* [`$numTeX`] has $numSf\n";
+				$explanation .= "* [`$denomTeX`] has $denomSf\n";
 			} elsif ($outputType eq "HTML"){
 				$explanation .= "<li>$num has $numSf</li>";
 				$explanation .= "<li>$denom has $denomSf</li>";
@@ -1110,7 +1114,8 @@ sub generateSigFigsExplanation {
 	my $finalSf = $finalAnswer->sigFigs();
 
 	if ($outputType eq "PGML"){
-		$explanation .= "\nThe answer, $finalAnswer, needs to have $finalSf sig figs because this is the smallest number of sig figs from all of the factors.\n";
+		my $finalTeX = $finalAnswer->TeX();
+		$explanation .= "\nThe answer, [`$finalTeX`], needs to have $finalSf sig figs because this is the smallest number of sig figs from all of the factors.\n";
 	} elsif ($outputType eq "HTML"){
 		$explanation .= "<br/>The answer, $finalAnswer, needs to have $finalSf sig figs because this is the smallest number of sig figs from all of the factors.<br/>";
 	}

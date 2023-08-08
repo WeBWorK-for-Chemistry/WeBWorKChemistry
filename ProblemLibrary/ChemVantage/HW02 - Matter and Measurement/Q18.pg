@@ -20,7 +20,7 @@ $val1 = random(1, 9, 0.01); # generate number from 1 to 9 out to hundredths plac
 
 $time = InexactValue(sprintf("%.2f", $val1));
 
-@psSecond = InexactValueWithUnits::getConversion('ps', 's');
+@psSecond = InexactValueWithUnits::getConversion('s', 'ps');
 
 $answer = $time * $psSecond[0]->{inexactValue} / $psSecond[1]->{inexactValue}; 
 
@@ -46,6 +46,10 @@ $conversion = DimensionalAnalysis::generateExplanation([$timeps], [$psSecond[0],
 $conversionSf = DimensionalAnalysis::generateSigFigsExplanation([$timeps], [$psSecond[0], $psSecond[1]], $answers);
 
 BEGIN_PGML_SOLUTION
+
+Start with the conversion from picoseconds to seconds:  [`[$psSecond[1]] = [$psSecond[0]]`]
+
+Then, setup your conversion so that the picosecond units cancel out.
 
 [``` [$conversion] ```]
 
