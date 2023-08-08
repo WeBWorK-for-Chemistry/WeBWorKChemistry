@@ -27,7 +27,8 @@ If the thermometer reads [$temp]°C. What is this temperature expressed in kelvi
 
 [______]{$answer} K
 
-Be sure to write your answer with the correct significant figures.
+Be sure to write your answer with the correct significant figures.  Also, be sure 
+to use the *full and exact* conversion from degrees celcius to kelvin. 
 
 END_PGML
 
@@ -45,11 +46,17 @@ $expText = $answer->generateAddSubtractExplanation($temp, $add, 1, {plainText=>1
 
 BEGIN_PGML_SOLUTION
 
+The exact conversion from degrees celcius to Kelvin is to add 273.15 to the celcius value.
+
 [``` [$temp]^{\circ}\mathrm{C} + 273.15 = [$answer]\,\mathrm{K} ```]
+
+###### Sig figs
+
+[$expText]*
 
 [``` [$exp] ```]
 
-[$expText]*
+
 
 END_PGML_SOLUTION
 
