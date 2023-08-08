@@ -1318,8 +1318,6 @@ sub generateAddSubtractExplanation {
 	my $posFirstAlt = $first->leastSignificantPosition({useStringPosition=>1});
 	my $posSecondAlt = $second->leastSignificantPosition({useStringPosition=>1});
 	$rightmost = $posFirstAlt > $posSecondAlt ? $posFirstAlt : $posSecondAlt; 
-	warn $posFirstAlt;
-	warn $posSecondAlt;
 	
 	$leftmost = $posFirst < $posSecond ? $posFirst : $posSecond; #this one is for actual rounding.
 	$leftmostName = $self->getNameOfPosition($leftmost);
