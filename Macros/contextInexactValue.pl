@@ -1211,7 +1211,9 @@ sub generateSfRoundingExplanation {
 			}
 		} 
 		unless ($usePlainText) {
-			$explanation .= $self->TeX;
+			my $copy = $self->copy();
+			$copy->sigFigs($roundTo);
+			$explanation .= $copy->TeX();
 		}
 	} else {
 		#perfect length already, do nothing
