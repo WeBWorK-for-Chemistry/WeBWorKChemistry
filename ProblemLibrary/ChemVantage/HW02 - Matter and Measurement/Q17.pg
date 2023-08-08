@@ -40,7 +40,6 @@ END_PGML
 # using InexactValueWithUnits so that full dimensional analysis is shown.
 $add = InexactValue(273.15, Inf);
 
-
 $exp = $answer->generateAddSubtractExplanation($temp, $add, 1);
 $expText = $answer->generateAddSubtractExplanation($temp, $add, 1, {plainText=>1});
 
@@ -55,8 +54,6 @@ The exact conversion from degrees celcius to Kelvin is to add 273.15 to the celc
 [$expText]*
 
 [``` [$exp] ```]
-
-
 
 END_PGML_SOLUTION
 
