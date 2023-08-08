@@ -4,38 +4,55 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
 
-$ans = Compute(298);
+$val1 = random(15, 32, 0.1); # generate number from 15 to 32 out to tenths place
+$val2 = random(0,1,1);
+
+$temp = InexactValue(sprintf("%.${val2}f", $val1));
+$answer = $temp + 273.15; 
+warn $answer;
+warn $answer->valueAsNumber();
 
 BEGIN_PGML
-Standard room temperature is 25°C. What is this temperature expressed in kelvins?
+If the thermometer reads [$temp]°C. What is this temperature expressed in kelvins?
 
 [______]{$answer} K
 
-Include at least 3 significant figures in your answer.
- END_PGML
+Be sure to write your answer with the correct significant figures.
 
-ANS( $ans->cmp() );
+END_PGML
+
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+$add = InexactValue(273.15, Inf);
+
+
+$exp = $answer->generateAddSubtractExplanation($temp, $add, 1);
+$expText = $answer->generateAddSubtractExplanation($temp, $add, 1, {plainText=>1});
+
+BEGIN_PGML_SOLUTION
+
+[``` [$temp]^{\circ}\mathrm{C} + 273.15 = [$answer]\,\mathrm{K} ```]
+
+[``` [$exp] ```]
+
+[$expText]*
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();

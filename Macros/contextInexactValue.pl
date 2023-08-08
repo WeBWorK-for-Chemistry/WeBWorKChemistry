@@ -630,23 +630,20 @@ sub string {
 						# try printing part of number without decimal
 						#$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
 						# There was a major bug here.  Using sprintf actually rounds when all we want is to truncate the decimal part.
-						$nondecimalPartAbs = int(abs($self->roundingHack($valAsNumber)));
+						$nondecimalPartAbs = int(abs($valAsNumber));
 						$sign = $valAsNumber >= 0;
 						# if there are more sig figs than the whole part of the number (i.e. 12 with 4 sig figs)
 						if ($self->sigFigs() > length($nondecimalPartAbs)) {
 							# there is definitely a decimal, count how many places
 							$fixedDecimal = $self->sigFigs() - length($nondecimalPartAbs);
-							# redo convert value to fixed decimal place
-							# if ($fixedDecimal eq "Inf"){
-							# 	return sprintf("%.0f", $self->roundingHack($valAsNumber));
-							# } 
-							return sprintf("%.${fixedDecimal}f", $self->roundingHack($valAsNumber));
+							# changed to round BEFORE formating to avoid floating point rounding errors in sprintf
+							return sprintf("%.${fixedDecimal}f", main::Round($valAsNumber, $fixedDecimal));
 
 						} elsif ($self->sigFigs() == length($nondecimalPartAbs)) {
 							# no decimal, but there are exactly the right number of digits in non-decimal part
 							# must check if number ends in zero; if so, we need a decimal point at the end.  
 							# BUG: using $nondecimalPartAbs from before causes 55.5 with 2 sf to round to 55 only.
-							$nondecimalPartAbs = sprintf("%.0f", abs($self->roundingHack($valAsNumber)));
+							$nondecimalPartAbs = sprintf("%.0f", abs($valAsNumber));
 							if (substr($nondecimalPartAbs,-1) == 0) {
 								return ($sign ? '' : '-') . $nondecimalPartAbs . '.';
 							} else {
@@ -1314,9 +1311,16 @@ sub generateAddSubtractExplanation {
 		$explanation .= '\\overbrace{' . substr($firstTeX, 0, $strPosFirst) . '\\underline{' . substr($firstTeX, $strPosFirst,1) . '}' . $firstTrail .'}^{\\text{' . $self->getNameOfPosition($posFirst). '}}';
 		$explanation .= ($operation > 0 ?  '+' : '-' ) . '\\overbrace{' . substr($secondTeX, 0, $strPosSecond) . '\\underline{' . substr($secondTeX, $strPosSecond,1) . '}' . $secondTrail .'}^{\\text{' . $self->getNameOfPosition($posSecond). '}}';
 	}
-	
 
-	$rightmost = $posFirst > $posSecond ? $posFirst : $posSecond; #need this to limit floating point errors when decimals are present
+	# $rightmost => need this to limit floating point errors when decimals are present
+	# if rightmost is Inf, this creates errors later on with the sprintf function
+	# calculate this with string positions, not actual sig figs
+	my $posFirstAlt = $first->leastSignificantPosition({useStringPosition=>1});
+	my $posSecondAlt = $second->leastSignificantPosition({useStringPosition=>1});
+	$rightmost = $posFirstAlt > $posSecondAlt ? $posFirstAlt : $posSecondAlt; 
+	warn $posFirstAlt;
+	warn $posSecondAlt;
+	
 	$leftmost = $posFirst < $posSecond ? $posFirst : $posSecond; #this one is for actual rounding.
 	$leftmostName = $self->getNameOfPosition($leftmost);
 	if ($usePlainText) {
@@ -1332,7 +1336,6 @@ sub generateAddSubtractExplanation {
 	
 	
 	$simpleOperation = $operation > 0 ? $valueFirst + $valueSecond : $valueFirst - $valueSecond;
- 
 	#if there are any floating point errors, this will show up here.  Need to limit the digits displayed.
 	$simpleAsInexact;
 	if ($rightmost>0){ #it's got decimals...round to smallest decimal!
@@ -1635,26 +1638,52 @@ sub isOne {
 # positive values mean last place is in the decimal region, tenths, hundredths, etc
 # 0 is the ones digit
 sub leastSignificantPosition {
-	$self = shift;
+	my $self = shift;
+	my $options = shift;
+	my $useStringPosition = 0;
+	if (defined $options && exists $options->{useStringPosition}){
+		$useStringPosition = $options->{useStringPosition};
+	}
 	my $val = $self->valueAsNumber();
 	my $sf = $self->sigFigs();
 	$val = abs($val);
 	if ($val >= 10) {
+		# 10.000 - Inf, 1.2e8		
 		my $p = 1;
 		while ($val / (10**$p) >= 10) {  # this used to be just '>' but 100. would show 1 as the least sig position (tenths) which is WRONG
 			$p++;
 		}
-		return -$p + $sf - 1;
-
+		if ($useStringPosition){
+			my $val = $val/(10**$p);
+			$val =~ s/\d\.?//;
+			return length($val) - $p;
+		}else {
+			return -$p + $sf - 1;
+		}
+		
 	} elsif ($val < 1) {
+		# 0.0000 - 0.9999
 		my $p = 1;
 		while ($val * (10**$p) < 1) {
 			$p++;
 		}
-		return $p + $sf - 1;
+		if ($useStringPosition){
+			my $val = $val*(10**$p);
+			$val =~ s/\d\.?//;
+			return length($val) + $p;
+		}else {
+			return $p + $sf - 1;
+		}
+		
 
 	} else {
-		return $sf - 1;
+		# 1.000 - 9.9999
+		if ($useStringPosition){
+			$val =~ s/\d\.?//;
+			return length $val;
+		} else {
+			return $sf - 1;
+		}
 	}
 }
 
