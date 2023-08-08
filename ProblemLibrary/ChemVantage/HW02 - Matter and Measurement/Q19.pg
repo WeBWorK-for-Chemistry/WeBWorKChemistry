@@ -4,38 +4,56 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
 
-$ans = Compute(-106.5);
+$val1 = random(110, 210, 0.1); # generate number from 110 to 210 out to tenths place
+$val2 = random(0,1,1);
+
+$temp = InexactValue(sprintf("%.${val2}f", $val1));
+$answer = $temp - 273.15; 
 
 BEGIN_PGML
-Convert 166.7 K to degrees Celsius
+Convert [$temp] K to degrees Celsius.
 
  [______]{$answer} °C
 
-Include at least 3 significant figures in your answer.
- END_PGML
+Use the correct number of significant figures in your answer.
 
-ANS( $ans->cmp() );
+END_PGML
+
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+# Don't require student to enter units for problem above.  However, recreate problem for solution
+# using InexactValueWithUnits so that full dimensional analysis is shown.
+$sub = InexactValue(273.15, Inf);
+
+$exp = $answer->generateAddSubtractExplanation($temp, $sub, -1);
+$expText = $answer->generateAddSubtractExplanation($temp, $sub, -1, {plainText=>1});
+
+BEGIN_PGML_SOLUTION
+
+The exact conversion from Kelvin to degrees Celcius is to subtract 273.15 from the Kelvin value.
+
+[``` [$temp]\,\mathrm{K} - 273.15 = [$answer]^{\circ}\mathrm{C} ```]
+
+###### Sig figs
+
+[$expText]*
+
+[``` [$exp] ```]
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
