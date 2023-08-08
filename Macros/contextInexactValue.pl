@@ -2064,11 +2064,15 @@ sub compareValue {
 		}
 	}
 
+
+
 	# WHAT ABOUT ROUNDING ERRORS??? NEED ANOTHER CHECK FOR SLIGHT VARIATIONS... TO COME!
 	if ($isAnswerValueGood == 1){
 		# numbers match, now check sig figs
 		$currentCredit += $creditValue;
-		if ($self->sigFigs == $student->sigFigs){
+		# If self is exact and student is not, DO NOT MARK WRONG.  There's no way to make an inputted 
+		# value exact.  We'll assume it is.
+		if ($self->sigFigs == $student->sigFigs || $self->sigFigs == Inf){
 			$currentCredit += $creditSF;
 		} else {
 			$ans->{ans_message} = "Your significant figures are not correct.";
@@ -2078,7 +2082,9 @@ sub compareValue {
 			#$ans->{ans_message} = $correct->valueAsRoundedNumber();
 		} else {
 			# grade sig figs amount anyways
-			if ($self->sigFigs == $student->sigFigs){
+			# If self is exact and student is not, DO NOT MARK WRONG.  There's no way to make an inputted 
+			# value exact.  We'll assume it is.
+			if ($self->sigFigs == $student->sigFigs || $self->sigFigs == Inf){
 				$currentCredit += $creditSF;
 			#$ans->{ans_message} = "Your value is not correct, but your significant values are good.";
 			} else {

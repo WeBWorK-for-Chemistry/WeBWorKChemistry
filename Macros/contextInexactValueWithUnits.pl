@@ -600,14 +600,13 @@ sub compareValuesWithUnits {
 
 
 	my $valueCompare = $self->{inexactValue}->compareValue($student->{inexactValue}, $options);
-	
+
 	if ($anyPrefix && !$valueCompare){
 		$valueCompare = $self->compareValuesAnyPrefix($student, $options);
 	}
 
 	if ($valueCompare){
 		$currentCredit+= $valueCompare;
-
 	} else {
 		# use the possible rounding error calculations to compute an "acceptable" range for potential student answers
 		if (defined $roundingErrorPossibles) {
@@ -653,8 +652,10 @@ sub compareValuesWithUnits {
 	#warn "GRADING $self and $student";
 	# warn %{$self->{units_ref}};
 	# warn %{$student->{units_ref}};
+	
 	if (compareUnitHash($self->{units_ref}, $student->{units_ref} )){
 		$currentCredit += $creditUnits;
+
 	} elsif ($anyPrefix && $self->compareValuesAnyPrefix($student, $options)) {
 		$currentCredit += $creditUnits;
 	} else {

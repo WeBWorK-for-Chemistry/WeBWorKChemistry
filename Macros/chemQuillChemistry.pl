@@ -1,17 +1,8 @@
 HEADER_TEXT( MODES(TeX=>'', HTML=><<END_SCRIPT ));
 <script>
-
 window.addEventListener('DOMContentLoaded', () => {
 if (window.answerQuills !== undefined){
 	for (var i in window.answerQuills) {
-        // this will prevent MathQuill from ex: auto formating "sec" inside of "picoseconds" to "pico sec onds" 
-        window.answerQuills[i].mathField.config({autoCommands:'needAsuperLONGstringJUSTnotBLANK', autoOperatorNames:'needAsuperLONGstringJUSTnotBLANK'});
-        // we also need to repopulate the fields because they've probably already been formatted badly
-        var rawText = window.answerQuills[i].innerText;
-        window.answerQuills[i].mathField.empty();
-        window.answerQuills[i].mathField.typedText(rawText);
-
-        // this redoes the buttons that show up
 		window.answerQuills[i].buttons = [
 			{ 
 				id: 'subscript', 
@@ -25,10 +16,38 @@ if (window.answerQuills !== undefined){
 				tooltip: 'superscript (^)', 
 				icon: '\\\\text{ }^\\\\text{ }' 
 			},
-			{ 	id: 'scinotation',
-			    	latex: '\\\\sci',
-				tooltip: 'Scientific Notation',
-				icon: 'Sci' 
+			{ 
+				id: 'AXE', 
+				latex: '_^', 
+				tooltip: 'AXE format for nuclides', 
+				icon: '_\\\\text{ }^\\\\text{ }\\\\text{ }' 
+			},
+			{ 
+				id: 'species', 
+				latex: '_^', 
+				tooltip: 'species', 
+				icon: '\\\\text{ }_\\\\text{ }^\\\\text{ }' 
+			},
+			{ 	id: 'positiveion',
+			    	latex: '\\\\positiveion',
+				tooltip: 'postitive ion',
+				icon: '\\\\text{ }^{\\\\text{ }+}' 
+			},
+			{ 	id: 'negativeion',
+			    	latex: '\\\\negativeion',
+				tooltip: 'negative ion',
+				icon: '\\\\text{ }^{\\\\text{ }-}' 
+			},
+			{ 	id: 'rightarrow',
+			    	latex: '\\\\rightarrow',
+				tooltip: 'right arrow',
+				icon: '\\\\rightarrow' 
+			},
+			{
+				id: 'equilibrium',
+			    	latex: '\\\\equilibrium',
+				tooltip: 'equilibrium',
+				icon: '\\\\rightleftharpoons' 
 			},
 		];
 	}
@@ -43,12 +62,10 @@ function disableMathQuill2(){
 }
 
 document.addEventListener('readystatechange', (e)=>{
-    console.log(e);
 	if (document.readyState == 'interactive'){
 		const reg = /(?:MaThQuIlL_)(.*)/g;
 		const inputs = document.querySelectorAll('input[id^=MaThQuIlL_]');
 		for (var i=0; i<inputs.length; i++){
-            console.log("OVERRIDE");
 			inputs[i].parentElement.removeChild(inputs[i]);
 		}
 	}

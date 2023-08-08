@@ -1,22 +1,33 @@
 DOCUMENT();        # This should be the first executable line in the problem.
 
 loadMacros(
-  "PGstandard.pl",
-  "PGML.pl",
-  "PGcourse.pl",
-  "parserRadioButtons.pl",
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
+"chemQuillMath.pl",
 );
 
 TEXT(beginproblem());
 
-$radioA = RadioButtons(["1 ms", "1 μs", "1 ns", "1 ps", "1 fs"], "0", );
+Context("InexactValueWithUnits");
+Context()->flags->set(failOnValueWrong=>0);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0);    # 0% credit for correct answer (default is 50%)
+Context()->flags->set(creditUnits=>1);  # 100% credit for units
+Context()->flags->set(creditSigFigs=>0);  # 25% credit for sig figs
+
+$val1 = random(0,4,1);
+@units = ("ms", "μs", "ns", "ps", "fs");
+
+$from = InexactValueWithUnits([1,Inf], $units[$val1]);
+@conv = InexactValueWithUnits::getConversion('s', $units[$val1]);
 
 BEGIN_PGML
-[`1 \times`] [`10^{-3}`] s is equal to
-Select only the best answer:
+[`[$conv[0]]`] is equal to  [______________]{$conv[1]}
 
-    [______________]{$radioA}
-
+Type the value and units directly into the blank.
 
 END_PGML
 
