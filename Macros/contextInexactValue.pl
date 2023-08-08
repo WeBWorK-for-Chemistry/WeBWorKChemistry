@@ -574,16 +574,29 @@ sub string {
 	} else {
 		# Usually will be here for most numbers.
 		if ($self->sigFigs() == Infinity){
-			
-			return $valAsNumber; # no modification for a number with infinity sig figs.  No reason to write more zeros.
-								 # There's no way to show it has inifinite sig figs.
+			# Too many zeros!  Need a way to remove them.
+			if (sprintf("%e", $valAsNumber) =~ /(1\.\d*?)(0*)(?:e)([-+]?)(\d*)/){
+				# Use groups to remove excess trailing zeros (1000000 is usually 1.000000e6)
+				my $whole = $1;
+				my $sign = $3;
+				my $exp = $4;
+				$whole =~ s/\.$//; #remove decimal if at end
+				$exp =~ s/^0//; # remove leading zeros in exponent
+				$sign =~ s/\+//; # remove plus sign
+				$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
+				if ($scientificNotationThreshold < $exp){
+					return "${whole}x10^${sign}${exp}";
+				} else {
+					return $whole*10**("${sign}${exp}");
+				}
+			}			
+			return $valAsNumber;  
 		} else {
 			
 			# For any non infinite number (non-scientific normally)
 			if ($valAsNumber == 0){
 				return sprintf("%." . ($self->sigFigs()-1) . "f", $valAsNumber);
-			}
-			elsif (abs($valAsNumber) < 1) { # val less than one
+			}elsif (abs($valAsNumber) < 1) { # val less than one
 				# get position of first significant digit i.e. 0.00000001 <= eigth place after decimal
 				# by converting it to sci notation and get the abs of the exponent
 				@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
@@ -1747,7 +1760,6 @@ sub mult {
 	if ($left->isExactZero || $right->isExactZero){
 		return $self->new(0,9**9**9);
 	}
-
 	$minSf = $left->minSf($left, $right);
 	return $self->new($left->valueAsNumber() * $right->valueAsNumber(), $minSf);
 }
@@ -1759,7 +1771,6 @@ sub div {
 	if ($l->isExactZero ){
 		return $self->new(0,9**9**9);
 	}
-
 	$minSf = $self->minSf($l, $r);
 	return $self->new($l->valueAsNumber() / $r->valueAsNumber(), $minSf);
 }
