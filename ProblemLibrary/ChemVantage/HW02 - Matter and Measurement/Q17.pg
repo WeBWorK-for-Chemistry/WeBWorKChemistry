@@ -21,8 +21,6 @@ $val2 = random(0,1,1);
 
 $temp = InexactValue(sprintf("%.${val2}f", $val1));
 $answer = $temp + 273.15; 
-warn $answer;
-warn $answer->valueAsNumber();
 
 BEGIN_PGML
 If the thermometer reads [$temp]°C. What is this temperature expressed in kelvins?

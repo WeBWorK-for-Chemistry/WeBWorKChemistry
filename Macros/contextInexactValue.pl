@@ -1315,6 +1315,7 @@ sub generateAddSubtractExplanation {
 	# $rightmost => need this to limit floating point errors when decimals are present
 	# if rightmost is Inf, this creates errors later on with the sprintf function
 	# calculate this with string positions, not actual sig figs
+	# (Did I already do this with $strPosFirst and $strPosSecond up above???  OK, two methods...)
 	my $posFirstAlt = $first->leastSignificantPosition({useStringPosition=>1});
 	my $posSecondAlt = $second->leastSignificantPosition({useStringPosition=>1});
 	$rightmost = $posFirstAlt > $posSecondAlt ? $posFirstAlt : $posSecondAlt; 
@@ -1534,6 +1535,8 @@ sub getNameOfPosition {
 	$digit = shift;
 	if ($digit == 1){
 		return 'tenths';
+	} elsif ($digit == Inf){
+		return 'infinite digits right of decimal';
 	} elsif ($digit == 2) {
 		return 'hundredths';
 	} elsif ($digit == 3) {
