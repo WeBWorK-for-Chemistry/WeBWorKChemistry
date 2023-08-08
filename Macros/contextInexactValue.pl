@@ -863,7 +863,12 @@ sub TeX {
 
 sub generateSfCountingExplanation {
 	my $self = shift;
-	my $detailedExplanation = shift;
+	#my $detailedExplanation = shift;
+	my $options = shift;
+	my $usePlainText = 0;
+	if (exists $options->{plainText}){
+		$usePlainText = $options->{plainText};
+	}
 	my $useSciNot = $self->preferScientificNotation();
 
 	my $s = $self->string(true);
@@ -873,10 +878,12 @@ sub generateSfCountingExplanation {
 	if ($useSciNot){
 		my @esplit = split(/e/, $s);
 		$exp = $esplit[1] + 0;
-		$explanation = '\\underbrace{' . $esplit[0] . '}_{\\text{coeffecient}}^{\\text{✔}}~' . '\\underbrace{\\times 10^{' . $exp . '}}_{\\text{exponent}}^{\\text{✘}}~';
-		$explanation = $self->TeX . ':' . $explanation . '=' . $self->sigFigs();
-		if ($detailedExplanation ){
-			$explanation = $explanation . '\\\\ \\text{All digits in coefficent of scientific notation are significant.  The exponent is never significant.}'
+		if ($usePlainText ){
+			$explanation .= "For the value ${self->TeX}, the ${esplit[0]} portion in front is not ";
+		} else {
+			$explanation .= '\\underbrace{' . $esplit[0] . '}_{\\text{coeffecient}}^{\\text{✔}}~' . '\\underbrace{\\times 10^{' . $exp . '}}_{\\text{exponent}}^{\\text{✘}}~';
+			$explanation = $self->TeX . ':' . $explanation . '=' . $self->sigFigs();
+			#$explanation .= '\\\\ \\text{All digits in coefficent of scientific notation are significant.  The exponent is never significant.}'
 		}
 		return $explanation;
 	} else {
@@ -925,22 +932,57 @@ sub generateSfCountingExplanation {
 				if (defined $item->{type}){
 					if ($item->{type} eq 'nonzero'){
 						$nomoretrailingzeros = 1;
-						$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{non-zero}}^{\\text{✔}}~' . $explanation;
+						if ($usePlainText){
+							$explanation = "The $item->{val} portion is the internal, non-zero section and is always significant. " . $explanation;
+						} else {
+							$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{non-zero}}^{\\text{✔}}~' . $explanation;
+						}
 					} elsif ($item->{type} eq 'unknownzero'){
 						if ($nomoretrailingzeros) {
-							$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{internal}}^{\\text{✔}}~'. $explanation;
+							if ($usePlainText){
+								
+								$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{internal}}^{\\text{✔}}~'. $explanation;
+							}else {
+								$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{internal}}^{\\text{✔}}~'. $explanation;
+							}
 						} else {
 							$hasTrailingZeros=1;
-							if ($hasDecimal){
-								$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{trailing*}}^{\\text{✔}}~'. $explanation;
+							if ($usePlainText){
+								$item->{val} =~ s/\.//;
+									my $len = length($item->{val});
+									my $d = $len > 1 ? "$len digits" : "digit";
+									my $phrase = $len > 1 ? "are trailing zeroes" : "is a trailing zero";
+									my $phrase2 = $len > 1 ? "These zeroes are" : "This zero is";
+								if ($hasDecimal){									
+									$explanation = "The last $d in the value $phrase and the demical point is present. 
+									$phrase2 significant. " . $explanation;
+								} else {
+									$explanation = "The last $d in the value $phrase and the demical point is not present. 
+									$phrase2 not significant (sometimes just ambiguous). " . $explanation;
+								}
 							} else {
-								$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{trailing*}}^{\\text{✘}}~'. $explanation;
+								if ($hasDecimal){
+									$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{trailing*}}^{\\text{✔}}~'. $explanation;
+								} else {
+									$explanation = '\\underbrace{' . $item->{val} . '}_{\\text{trailing*}}^{\\text{✘}}~'. $explanation;
+								}
 							}
+							
 						}
 					} elsif ($item->{type} eq 'decimal') {
-						$explanation = '.' . $explanation;
+						unless ($usePlainText){
+							$explanation = '.' . $explanation;
+						}
 					} elsif ($item->{type} eq 'leading') {
-						$explanation = '\\underbrace{'. $item->{val} . '}_{\\text{leading}}^{\\text{✘}}~' . $explanation;
+						if ($usePlainText){
+							$item->{val} =~ s/\.//;
+							my $len = length($item->{val});
+							my $phrase = $len > 1 ? "are $len leading zeroes" : "is a leading zero";
+							my $phrase2 =  $len > 1 ? "are" : "is";
+							$explanation = "There $phrase which $phrase2 not significant. " . $explanation;
+						} else {
+							$explanation = '\\underbrace{'. $item->{val} . '}_{\\text{leading}}^{\\text{✘}}~' . $explanation;
+						}
 					} else {
 						$explanation = $item->{type} . 'not' . $explanation;
 					}
@@ -952,12 +994,17 @@ sub generateSfCountingExplanation {
 		}
 		$doOrNot = $hasDecimal ? 'do' : 'do not';
 		$notOrNothing = $hasDecimal ? '' : ' NOT';
-		$explanation = $self->TeX . ':' . $explanation . '=' . $self->sigFigs();
-		if ($detailedExplanation ) {
-			if ($hasTrailingZeros){
-				$explanation = $explanation . "~\\text{signficant figures.} \\\\ \\text{*Trailing zeros $doOrNot count as significant because a decimal point is$notOrNothing present.}";
-			}
+		unless ($usePlainText){
+			$explanation = $self->TeX . ':' . $explanation . '=' . $self->sigFigs();
 		}
+		#if ($detailedExplanation ) {
+			# if ($hasTrailingZeros){
+			# 	if ($plainText){
+
+			# 	}
+			# 	$explanation = $explanation . "~\\text{signficant figures.} \\\\ \\text{*Trailing zeros $doOrNot count as significant because a decimal point is$notOrNothing present.}";
+			# }
+		#}
 		return $explanation;
 		#return '\\underbrace{'.$s.'}_{\\text{leading zero, just placeholders}}';
 	}

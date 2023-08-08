@@ -4,39 +4,54 @@ loadMacros(
 "PGstandard.pl",
 "MathObjects.pl",
 "PGML.pl",
-"PGunion.pl",
-"PGasu.pl",
-"PGstringevaluators.pl",
-"contextInteger.pl",
+"contextInexactValue.pl",
+"contextInexactValueWithUnits.pl",
+"parserDimensionalAnalysis.pl",
 "chemQuillMath.pl",
 );
 
-TEXT(beginproblem());
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct (no partial credit for getting sig figs only)
+Context()->flags->set(creditValue=>0.75);    # 75% credit for correct answer (default is 50%)
+Context()->flags->set(creditSigFigs=>0.25);  # 25% credit for sig figs
 
-Context("Numeric");
-Context()->flags->set(
-    zeroLevel => 1E-40,
-    tolerance => 0.02,
-);
 
-$ans = Compute(3);
+$val1 = random(100, 10000, 1); # generate number from 100 to 10000 out to hundred-millionths place
+$val2 = random(1,3,1);
+for ($i=0;$i<$val2;$i++){
+    $val1 = '0'.$val1;
+}
+$val3 = random(1,3,1);
+for ($i=0;$i<$val3;$i++){
+    $val1 = $val1 . '0';
+}
+
+$value = InexactValue("0.$val1");
+
 
 BEGIN_PGML
-How many significant figures are in the number 0.00510?
+How many significant figures are in the number [$value]?
 
- [______]{$answer}
+ [______]{$value->sigFigs()}
 
 Enter the exact value.
 
- END_PGML
+END_PGML
 
-ANS( $ans->cmp() );
 
 ############################
 #  Solution  Using the PG solution below will supersede the solution block in the ADAPT question framework
 
-#BEGIN_PGML_SOLUTION
-#The answer is [$ans].
-#END_PGML_SOLUTION
+$exp = $value->generateSfCountingExplanation();
+$expText = $value->generateSfCountingExplanation({plainText=>1});
+
+BEGIN_PGML_SOLUTION
+
+[$expText]
+
+[``` [$exp]\ \mathrm{sig figs} ```]
+
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();
