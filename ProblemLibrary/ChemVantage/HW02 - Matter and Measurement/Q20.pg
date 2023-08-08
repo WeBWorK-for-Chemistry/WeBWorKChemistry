@@ -12,15 +12,34 @@ TEXT(beginproblem());
 
 Context("ArbitraryString");
 
-$ans = String("second")->cmp(mathQuillOpts => "disabled",
-    checker => sub {
-        return 1;
-        }
+@physicalQuantity = ('time', 'mass', 'length', 'temperature');
+@units = ('second', 'kilogram', 'meter', 'kelvin');
+%unitLookup = ('s' => 'second', 'kg' => 'kilogram', 'm'=>'meter', 'K' => 'kelvin');
+$val = random(0,3,1);
+$quantity = $physicalQuantity[$val];
+$unit = $units[$val];
+
+$ans = String($unit)->cmp(mathQuillOpts => "disabled",
+  checker => sub {
+    my ($correct,$student,$ans) = @_;
+    $correct = lc($correct->string); # changes both correct and student to   
+    
+    if (exists $unitLookup{$student->string}){
+      # if student wrote a unit abbreviation then lookup the real name
+      $student = $unitLookup{$student->string}; 
+    } else {
+      $student = lc($student->string); # lowercase to compare so case doesn't matter
+    }   
+
+    $student =~ s/s$//; # removes plural s on student if exists
+    
+    return $correct eq $student;
+  }
 );
 
 BEGIN_PGML
 
-In the International System of Units (SI), the fundamental unit of time is the [_]{$ans}
+In the International System of Units (SI), the fundamental unit of [$quantity] is the [___]{$ans}
 
 Enter the correct word or phrase
 
