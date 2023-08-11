@@ -61,7 +61,7 @@ Example:
 ```
 $randomValue = random(100,999,0.001); # get a value from 100 to 999 to the thousandths value
 $randomSigFig = random(3,6,1); # get an integer from 3 to 6
-$decimalsNeeded = 6 - $randomSigFig;
+$decimalsNeeded = $randomSigFig - 3;  # first 3 digits are left of decimal
 $inexactValue = InexactValue(sprintf("%.f${decimalsNeeded}", $randomValue));
 # no need to put the sigFigs parameter because the first parameter is a string with the perfect number of digits
 ```
