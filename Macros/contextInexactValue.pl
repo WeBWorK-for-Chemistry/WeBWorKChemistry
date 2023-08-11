@@ -35,6 +35,7 @@ sub Init {
 		creditValue => 0.5,     # credit for getting correct value
 		failOnValueWrong => 1,  # ignore sig figs (and any further credit) 
 														# if value is wrong
+		precisionMethod => "sigfigs"  # alternative is "uncertainty"
 	);
 	
 
@@ -93,12 +94,12 @@ sub new {
 	my $options = {
 		tolerance => 0, 
 		tolType => 'absolute',
-		scientificNotationThreshold => 6, # can be set to 20 if problem requires conversion from standard to sci and we need to force standard
+		scientificNotationThreshold => 6, # can be set to 20 if problem requires conversion from standard to sci and we need to force standard,
 	};
 
 	#	$tolerance = 0;          # zero tolerance by default
 	#	$tolType = 'absolute';   # absolute tolerance if not zero
-	
+
 	my $matchNumber = '';
 
 	if ($argCount >= 2) {
@@ -215,7 +216,12 @@ sub new {
 	}
 	my $s = bless {data => [$matchNumber], context => $context}, $class;
 
-	$s->sigFigs($sigFigCount);
+	# $sigFigCount is actually an uncertainty, maybe change this...
+	if ($context->flags->get('precisionMethod') eq 'uncertainty'){
+		$s->uncertainty($sigFigCount);
+	}else{
+		$s->sigFigs($sigFigCount);
+	}
 	$s->preferScientificNotation($isScientificNotation);
 	$s->{isInexact} = 1;
 	$s->{precedence}{'InexactValue'} = 3;
@@ -404,6 +410,66 @@ sub make {
 	return $s;
 }
 
+sub uncertainty {
+	#** @method public scalar uncertainty ($value)
+	# @brief Gets or sets the uncertainty.  Can be absolute or relative.  
+	# Relative will be indicated by a percent symbol at the end.
+	# @param value optional Uncertainty to set if needed. 
+    # 
+	#*
+	my ($self, $value) = @_;
+	if (@_ == 2) {
+		$self->{uncertainty} = $value;
+	} 
+	return $self->{uncertainty};
+}
+
+
+sub relativeUncertainty {
+	my $self = shift;
+	if (exists $self->{uncertainty}){
+		my $uncertainty = $self->{uncertainty};
+		if ($uncertainty =~ /\%/){
+			$uncertainty =~ s/\%//;
+			return $uncertainty;
+		} else{
+			my $value = $self->valueAsNumber();
+			my $relative = $value / $uncertainty * 100;			
+			return $relative;
+		}
+	} else {
+		return 0;
+	}	
+}
+
+
+
+sub absoluteUncertainty {
+	my $self = shift;
+	if (exists $self->{uncertainty}){
+		my $uncertainty = $self->{uncertainty};
+		if ($uncertainty =~ /\%/){
+			$uncertainty =~ s/\%//;
+			my $value = $self->valueAsNumber();
+			my $absolute = $uncertainty / 100 * $value;
+			# # need to round it to a value that makes sense, use the length of the relative uncertainty minus decimal points
+			# if ($uncertainty =~ /(\d*)(\.)?(\d*)/){
+			# 	my $whole = $1;
+			# 	$whole =~ s/^0*//;
+			# 	my $decimal = $3;
+			# 	if (length $whole > 0){
+			# 		#only remove 
+			# 	}
+			# }
+			return $absolute;
+		} else{
+			return $uncertainty;
+		}
+	} else {
+		return 0;
+	}
+}
+
 sub sigFigs {
 	#** @method public scalar sigFigs ($value)
 	# @brief Gets or sets number of significant figures. 
@@ -542,12 +608,19 @@ sub string {
 	my $preventClean = shift;
 
 	my $forceScientific = shift;
+	
+
+	my @valArray = $self->value;# + 0;
+	my $valAsNumber = $valArray[0];
+
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		return $valAsNumber . ' ± ' . $self->absoluteUncertainty();
+	}
+
 	if ($self->sigFigs() == 0){
 		return 'zero sig figs';
 	}
 
-	my @valArray = $self->value;# + 0;
-	my $valAsNumber = $valArray[0];
 	
 	# Only here is scientific required or preferred
 	if ($self->preferScientificNotation() || $forceScientific) {
@@ -826,6 +899,7 @@ sub TeX {
 	my $preventClean = shift;
 	my $r = $self->string($preventClean);
 	$r =~ s/x/\\times /;
+	$r =~ s/±/\\pm/;
 	$r =~ s/\^(.*)/^{$1}/;
 	return $r;
 }
@@ -1583,6 +1657,7 @@ sub getNameOfPosition {
 		return "$digit digits right of decimal";
 	}
 }
+
 
 sub simpleUncertainty {
 	$self = shift;
