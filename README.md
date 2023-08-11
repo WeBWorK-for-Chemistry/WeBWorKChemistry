@@ -41,19 +41,29 @@ The methods include getting the number of sig figs.  This is useful for question
 
 ```
 $inexactValue = InexactValue(3e-9, 4);  
-	#the value 4 with 3 sig figs.
+	#the value 3e-9 with 3 sig figs.
 $inexactValue->value  	#outputs: 3e-9
 $inexactValue->sigFigs 	#outputs: 4
 $inexactValue->string  	#outputs: 3.000x10^-9
 $inexactValue->TeX  	#outputs: 3.000\times10^{-9}
 
-$inexactValue2 = $inexactValue / InexactValue(7e-8, 2);  
+$inexactValue2 = $inexactValue / InexactValue(0.0428571428571, 2);  
 	#the value 0.04285714... with 2 sig figs.
 $inexactValue2->value  	#outputs: 0.0428571428571... 
 $inexactValue2->sigFigs #outputs: 2
 $inexactValue2->string  #outputs: 0.043
 $inexactValue2->TeX  	#outputs: 0.043
 
+```
+**Best practice:  Use sprintf to format the exact number when using random/algorithmic values.**  You may find weird rounding errors when doing math with unformatted values since you might have an internal value that is different than what you expect.
+
+Example:
+```
+$randomValue = random(100,999,0.001); # get a value from 100 to 999 to the thousandths value
+$randomSigFig = random(3,6,1); # get an integer from 3 to 6
+$decimalsNeeded = 6 - $randomSigFig;
+$inexactValue = InexactValue(sprintf("%.f${decimalsNeeded}", $randomValue));
+# no need to put the sigFigs parameter because the first parameter is a string with the perfect number of digits
 ```
 
 Best of all, you can do math with InexactValue and the correct significant figures are calculated according to the standard rules taught in most chemistry courses.  
