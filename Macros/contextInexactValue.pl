@@ -138,81 +138,11 @@ sub new {
 		@result = getValue($x->[0]);
 		$isScientificNotation = $result[1];
 		$matchNumber = $result[0];
-		# verify the string contains a number we can match
-		#($matchNumber) = $x->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
-		# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
-		#($matchNumber) = $x->[0] =~ /((?:10\^\+?-?\d+)|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
-		#unless (defined $matchNumber) { 
-		#	$temp = $x->[0];
-		#		Value::Error("Can't convert this to a value. $temp  ");
-		#}
-		
-		# find out if this is standard notation or scientific notation
-		# /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
-		# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
-		#$isScientificNotation = $x->[0] =~ /((?:10\^\+?-?\d+)|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
-		
-		#($isSimpleExponent, $expVal) = $x->[0] =~ /((?:^10\^(\+?-?\d+)))/;
-		#if ($isSimpleExponent) {
-		#	# do the math...
-		#	$matchNumber =  10**$expVal;
-		#	
-		#} 
 
-		# replace fancier scientific notation with plain 'e' so the computer recognizes it
-		#$matchNumber =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
 		# split into coefficient and rest is scientific notation 
 		my @parts = split(/e/, $matchNumber);
 		
-		# split coefficient into left and right side of decimal point 
-		# -1 in 3rd parameter is to make unlimited empty matches (show empty trailing part if there is a decimal point even with nothing afterwards)
-		my @decimalParts = split(/,|\./, $parts[0], -1); 
-		$decimalPartsSize = @decimalParts;
-		
-		# first see if first part is empty string... if so, convert to a zero otherwise next step fails
-		if ($decimalParts[0] eq ''){
-			$decimalParts[0] = 0;
-		}
-		# convert first decimalPart to number and see if it is zero
-		my $firstPartAsNumber = $decimalParts[0] + 0;
-		my $isFirstZero = ($firstPartAsNumber == 0);
-			
-		if ($decimalPartsSize == 2)
-		{
-			# has decimal, get no of sig figs in first part, convert to number, then back to string, then get length
-			$absFirstPartAsNumber = abs($firstPartAsNumber);
-			$sigFigCount = ($isFirstZero ? 0 : length("$absFirstPartAsNumber"));
-			
-			# get no of sig figs in second part if not empty (i.e. 25.  decimal point at end)
-			unless ($decimalParts[1] eq "")
-			{
-					# if starts with 0, then decimal part might have leading zeros... convert to number, then back to string, then get length
-					# if starts with non-zero, decimal part is all significant... just count digits
-					$secondPartAsNumber = $decimalParts[1] + 0;
-					$sigFigCount += ($isFirstZero ? length("$secondPartAsNumber") : length($decimalParts[1]));
-			}
-		}
-		else
-		{
-			 # if decimalPart[0] is a zero, do nothing
-			unless ($isFirstZero)
-			{
-				# use trailing zeros regex
-				@matches = ($decimalParts[0] =~ /[1-9]+|0+/g);
-				$last = pop @matches;
-				if (($last + 0) == 0) #if the last match contains zeros
-				{
-					#remove them and count the rest
-					$piece = substr($decimalParts[0], 0, length($decimalParts[0]) - length($last));
-					$sigFigCount = length($piece);
-				} else {
-					# just count all the digits
-					$sigFigCount = length($decimalParts[0]);
-				}
-			} else {
-				$sigFigCount = $inf;
-			} 
-		}
+		$sigFigCount = countSigFigsFromString($matchNumber);
 	}
 	my $s = bless {data => [$matchNumber], context => $context}, $class;
 
@@ -232,6 +162,7 @@ sub new {
 sub getValue {
 	#** @function private getValue ($x)
 	# @brief Parses string value in multiple formats into number 
+	# Does not remove extraneous zeros.
 	# @param x required Raw string that needs to be parsed into a value.
 	# @retval result Array: 1st item is coefficient, 2nd item is scientific exponent.
 	#*
@@ -338,66 +269,9 @@ sub make {
 		@result = getValue($x->[0]);
 		$isScientificNotation = $result[1];
 		$matchNumber = $result[0]; #$x->[0];
-		# ($matchNumber) = $self->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
-		# unless (defined $matchNumber) { 
-		# 	$temp = $self->[0];
-		# 		Value::Error("Can't convert this to a value. $temp  ");
-		# }
+				
+		$sigFigCount = countSigFigsFromString($matchNumber);
 		
-		# # find out if this is standard notation or scientific notation
-		# $isScientificNotation = $self->[0] =~ /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
-		
-		# # replace fancier scientific notation with plain 'e' so the computer recognizes it
-		# $matchNumber =~ s/\s?(?:x|\*)\s?10(?:\^|\*\*)/e/;
-		
-		# split into coefficient and rest is scientific notation 
-		my @parts = split(/e/, $matchNumber);
-		
-		# split coefficient into left and right side of decimal point 
-		# -1 in 3rd parameter is to make unlimited empty matches (show empty trailing part if there is a decimal point even with nothing afterwards)
-		my @decimalParts = split(/,|\./, $parts[0], -1); 
-		$decimalPartsSize = @decimalParts;
-		
-		# convert first decimalPart to number and see if it is zero
-		$firstPartAsNumber = $decimalParts[0] + 0;
-		my $isFirstZero = ($firstPartAsNumber == 0);
-			
-		if ($decimalPartsSize == 2)
-		{
-			# has decimal, get no of sig figs in first part, convert to number, then back to string, then get length
-			$absFirstPartAsNumber = abs($firstPartAsNumber);
-			$sigFigCount = ($isFirstZero ? 0 : length("$absFirstPartAsNumber"));
-
-			# get no of sig figs in second part if not empty (i.e. 25.  decimal point at end)
-			unless ($decimalParts[1] eq "")
-			{
-					# if starts with 0, then decimal part might have leading zeros... convert to number, then back to string, then get length
-					# if starts with non-zero, decimal part is all significant... just count digits
-					$secondPartAsNumber = $decimalParts[1] + 0;
-					$sigFigCount += ($isFirstZero ? length("$secondPartAsNumber") : length($decimalParts[1]));
-			}
-		}
-		else
-		{
-			 # if decimalPart[0] is a zero, do nothing
-			unless ($isFirstZero)
-			{
-				# use trailing zeros regex
-				@matches = ($decimalParts[0] =~ /[1-9]+|0+/g);
-				$last = pop @matches;
-				if (($last + 0) == 0) #if the last match contains zeros
-				{
-					#remove them and count the rest
-					$piece = substr($decimalParts[0], 0, length($decimalParts[0]) - length($last));
-					$sigFigCount = length($piece);
-				} else {
-					# just count all the digits
-					$sigFigCount = length($decimalParts[0]);
-				}
-			} else {
-				$sigFigCount = $inf;
-			} 
-		}
 	}
 	
 	my $s = bless {data => [$matchNumber], context => $context}, $class;
@@ -409,6 +283,68 @@ sub make {
 	$s->{options} = $options;
 	return $s;
 }
+
+sub countSigFigsFromString {
+	#** @function private scalar countSigFigsFromString ($value)
+	# @brief Counts sig figs in a string number  
+	# "2.000" will have 4 sig figs but "2" will only have 1.
+	# @param value required String value to count sig figs. 
+    # @retval $sigFigs - Number of sig figs
+	#*
+	my $value = shift;
+	my $sigFigs;
+
+	# split into coefficient and rest is potential scientific notation 
+	my @parts = split(/e/, $value);
+	
+	# split coefficient into left and right side of decimal point 
+	# -1 in 3rd parameter is to make unlimited empty matches (show empty trailing part if there is a decimal point even with nothing afterwards)
+	my @decimalParts = split(/,|\./, $parts[0], -1); 
+	my $decimalPartsSize = @decimalParts;
+	
+	# convert first decimalPart to number and see if it is zero
+	my $firstPartAsNumber = $decimalParts[0] + 0;
+	my $isFirstZero = ($firstPartAsNumber == 0);
+		
+	if ($decimalPartsSize == 2)
+	{
+		# has decimal, get no of sig figs in first part, convert to number, then back to string, then get length
+		my $absFirstPartAsNumber = abs($firstPartAsNumber);
+		$sigFigs = ($isFirstZero ? 0 : length("$absFirstPartAsNumber"));
+
+		# get no of sig figs in second part if not empty (i.e. 25.  decimal point at end)
+		unless ($decimalParts[1] eq "")
+		{
+				# if starts with 0, then decimal part might have leading zeros... convert to number, then back to string, then get length
+				# if starts with non-zero, decimal part is all significant... just count digits
+				my $secondPartAsNumber = $decimalParts[1] + 0;
+				$sigFigs += ($isFirstZero ? length("$secondPartAsNumber") : length($decimalParts[1]));
+		}
+	}
+	else
+	{
+		# if decimalPart[0] is a zero, do nothing
+		unless ($isFirstZero)
+		{
+			# use trailing zeros regex
+			my @matches = ($decimalParts[0] =~ /[1-9]+|0+/g);
+			my $last = pop @matches;
+			if (($last + 0) == 0) #if the last match contains zeros
+			{
+				#remove them and count the rest
+				my $piece = substr($decimalParts[0], 0, length($decimalParts[0]) - length($last));
+				$sigFigs = length($piece);
+			} else {
+				# just count all the digits
+				$sigFigs = length($decimalParts[0]);
+			}
+		} else {
+			$sigFigs = Inf;
+		} 
+	}
+	return $sigFigs;
+}
+
 
 sub uncertainty {
 	#** @method public scalar uncertainty ($value)
@@ -426,17 +362,20 @@ sub uncertainty {
 
 
 sub relativeUncertainty {
+	#** @method public scalar relativeUncertainty ($value)
+	# @brief Gets the relative uncertainty from the stored uncertainty. 
+    # @retval $uncertainty Only a value, no percent symbol attached.
+	#*
 	my $self = shift;
 	if (exists $self->{uncertainty}){
 		my $uncertainty = $self->{uncertainty};
 		if ($uncertainty =~ /\%/){
 			$uncertainty =~ s/\%//;
-			return $uncertainty;
 		} else{
 			my $value = $self->valueAsNumber();
-			my $relative = $value / $uncertainty * 100;			
-			return $relative;
+			$uncertainty = $value / $uncertainty * 100;			
 		}
+		return $uncertainty;
 	} else {
 		return 0;
 	}	
@@ -445,26 +384,19 @@ sub relativeUncertainty {
 
 
 sub absoluteUncertainty {
+	#** @method public scalar absoluteUncertainty ($value)
+	# @brief Gets the absolute uncertainty from the stored uncertainty. 
+    # @retval $uncertainty  
+	#*
 	my $self = shift;
 	if (exists $self->{uncertainty}){
 		my $uncertainty = $self->{uncertainty};
 		if ($uncertainty =~ /\%/){
 			$uncertainty =~ s/\%//;
 			my $value = $self->valueAsNumber();
-			my $absolute = $uncertainty / 100 * $value;
-			# # need to round it to a value that makes sense, use the length of the relative uncertainty minus decimal points
-			# if ($uncertainty =~ /(\d*)(\.)?(\d*)/){
-			# 	my $whole = $1;
-			# 	$whole =~ s/^0*//;
-			# 	my $decimal = $3;
-			# 	if (length $whole > 0){
-			# 		#only remove 
-			# 	}
-			# }
-			return $absolute;
-		} else{
-			return $uncertainty;
-		}
+			$uncertainty = $uncertainty / 100 * $value;
+		} 	
+		return $uncertainty;
 	} else {
 		return 0;
 	}
@@ -534,6 +466,11 @@ sub valueAsRoundedScientific {
 # Add a true parameter to force scientific notation. (NOT WORKING YET)
 #
 sub unroundedValueMarked {
+	#** @method public scalar unroundedValueMarked ()
+	# @brief Returns internal unrounded value of InexactValue as a string, 
+	# but the last significant position is marked with an underline.  LaTeX output only.
+	# @retval $unRoundedValue - LaTeX output.
+	#*
 	my $self = shift;
 	my $options = shift;
 
@@ -588,11 +525,8 @@ sub unroundedValueMarked {
 	return $unRoundedValue;
 }
 
-#
-#  Stringify using x notation not E,
-#  using the right number of digits, and trimming
-#  if requested.
-#
+
+
 sub string {
 	#** @method public scalar string ($preventClean, $forceScientific)
 	# @brief Returns string representation of InexactValue.  
@@ -614,6 +548,10 @@ sub string {
 	my $valAsNumber = $valArray[0];
 
 	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		# limit uncertainty "sig figs" to 2, but further limit it by the value last decimal place
+		my $leastSigPosition = $self->leastSignificantPosition({useStringPosition => 1});
+		warn $valAsNumber;
+		warn $leastSigPosition;
 		return $valAsNumber . ' ± ' . $self->absoluteUncertainty();
 	}
 
@@ -1737,7 +1675,11 @@ sub leastSignificantPosition {
 	}
 	my $val = $self->valueAsNumber();
 	my $sf = $self->sigFigs();
-	$val = abs($val);
+	if ($useStringPosition){
+		$val =~ s/\-//;		
+	}else {		
+		$val = abs($val);
+	}
 	if ($val >= 10) {
 		# 10.000 - Inf, 1.2e8		
 		my $p = 1;
@@ -1753,6 +1695,9 @@ sub leastSignificantPosition {
 		}
 		
 	} elsif ($val < 1) {
+		if ($val == 0){
+			return 0;
+		}
 		# 0.0000 - 0.9999
 		my $p = 1;
 		while ($val * (10**$p) < 1) {
@@ -1771,6 +1716,7 @@ sub leastSignificantPosition {
 		# 1.000 - 9.9999
 		if ($useStringPosition){
 			$val =~ s/\d\.?//;
+			
 			return length $val;
 		} else {
 			return $sf - 1;
@@ -1807,14 +1753,58 @@ sub checkOpOrderWithPromote {
 	if ($flag) {return ($l,$r,$l,$r)} else {return ($l,$l,$r,$r)}
 }
 
+sub addSubtractUncertainties {
+	#** @function private hash addSubtractUncertainties ($l, $r, $options)
+	# @brief Combine uncertainties from add or subtract operation.  
+	# @param $l required - First InexactValue with uncertainty
+	# @param $r required - Second InexactValue with uncertainty
+	# @param $%options optional - Hash containing alternate method
+	# @retval $result - InexactValue from operation with new uncertainty
+	#*
+	my ($l, $r, $options) = @_;
+	my $method = 'quadrature';
+	# leaving open another way to calculate uncertainty for the future
+	if ($options && exists $options->{method}){
+		$method = $options->{method};
+	}
+	my $lu = $l->absoluteUncertainty();
+	my $ru = $r->absoluteUncertainty();	
+	return ($lu**2 + $ru**2)**0.5;
+}
+
+sub multiplyDivideUncertainties {
+	#** @function private hash multiplyDivideUncertainties ($l, $r, $options)
+	# @brief Combine uncertainties from add or subtract operation.  
+	# @param $l required - First InexactValue with uncertainty
+	# @param $r required - Second InexactValue with uncertainty
+	# @param $%options optional - Hash containing alternate method
+	# @retval $result - InexactValue from operation with new uncertainty
+	#*
+	my ($l, $r, $options) = @_;
+	my $method = 'quadrature';
+	# leaving open another way to calculate uncertainty for the future
+	if ($options && exists $options->{method}){
+		$method = $options->{method};
+	}
+	my $method = 'quadrature';
+	my $lu = $l->absoluteUncertainty();
+	my $ru = $r->absoluteUncertainty();
+	return (($lu/$l->valueAsNumber())**2 + ($ru/$r->valueAsNumber())**2)**0.5;
+}
+
 sub add {
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
 	#$left= $l->value; $right= $r->value;
-	$leftPos = $l->leastSignificantPosition();
-	$rightPos = $r->leastSignificantPosition();
-	$leftMostPosition = $self->basicMin($leftPos, $rightPos);
-	$newValue = $l->valueAsNumber() + $r->valueAsNumber();
-	$newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my $resultUncertainty = addSubtractUncertainties($l,$r);
+		my $newValue = $l->valueAsNumber() + $r->valueAsNumber();
+		return $self->new($newValue, $resultUncertainty);
+	}
+	my $leftPos = $l->leastSignificantPosition();
+	my $rightPos = $r->leastSignificantPosition();
+	my $leftMostPosition = $self->basicMin($leftPos, $rightPos);
+	my $newValue = $l->valueAsNumber() + $r->valueAsNumber();
+	my $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
 
 	return $self->new($newValue, $newSigFigs);
 }
@@ -1822,33 +1812,51 @@ sub add {
 sub sub {
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
 	#$left= $l->value; $right= $r->value;
-	$leftPos = $l->leastSignificantPosition();
-	$rightPos = $r->leastSignificantPosition();
-	$leftMostPosition = $self->basicMin($leftPos, $rightPos);
-	$newValue = $l->valueAsNumber() - $r->valueAsNumber();
-	$newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my $resultUncertainty = addSubtractUncertainties($l,$r);
+		my $newValue = $l->valueAsNumber() - $r->valueAsNumber();
+		return $self->new($newValue, $resultUncertainty);
+	}
+	my $leftPos = $l->leastSignificantPosition();
+	my $rightPos = $r->leastSignificantPosition();
+	my $leftMostPosition = $self->basicMin($leftPos, $rightPos);
+	my $newValue = $l->valueAsNumber() - $r->valueAsNumber();
+	my $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
 
 	return $self->new($newValue, $newSigFigs);
 }
 
 sub mult {
 	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
+
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my $resultUncertainty = multiplyDivideUncertainties($l,$r);
+		my $newValue = $l->valueAsNumber() * $r->valueAsNumber();
+		return $self->new($newValue, $resultUncertainty);
+	}
+
 	# edge case: multiplication by exact zero gives exact zero
 	if ($left->isExactZero || $right->isExactZero){
 		return $self->new(0,9**9**9);
 	}
-	$minSf = $left->minSf($left, $right);
+	my $minSf = $left->minSf($left, $right);
 	return $self->new($left->valueAsNumber() * $right->valueAsNumber(), $minSf);
 }
 
 sub div {
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
 	Value::Error("Division by zero") if $r->{data}[0] == 0;
+
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my $resultUncertainty = multiplyDivideUncertainties($l,$r);
+		my $newValue = $l->valueAsNumber() / $r->valueAsNumber();
+		return $self->new($newValue, $resultUncertainty);
+	}
 	# edge case: division using exact zero gives exact zero
 	if ($l->isExactZero ){
 		return $self->new(0,9**9**9);
 	}
-	$minSf = $self->minSf($l, $r);
+	my $minSf = $self->minSf($l, $r);
 	return $self->new($l->valueAsNumber() / $r->valueAsNumber(), $minSf);
 }
 
