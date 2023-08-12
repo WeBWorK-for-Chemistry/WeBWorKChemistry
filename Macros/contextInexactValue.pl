@@ -1,9 +1,9 @@
-## @file contextInexactValueFILETHIS
+## @file contextInexactValue
 
-loadMacros("MathObjects.pl");
+loadMacros('MathObjects.pl');
 loadMacros('PGauxiliaryFunctions.pl'); # needed for Round function
 
-sub _contextInexactValue_init {InexactValue::Init()}
+sub _contextInexactValue_init {return InexactValue::Init();}
 
 package InexactValue;
 
@@ -37,21 +37,19 @@ sub Init {
 														# if value is wrong
 		precisionMethod => "sigfigs"  # alternative is "uncertainty"
 	);
-	
 
 	#
 	#  Hook into the Value package lookup mechanism
 	#
 	$context->{value}{InexactValue} = 'InexactValue::InexactValue';
-	$context->{value}{"Value()"} = 'InexactValue::InexactValue';
+	$context->{value}{'Value()'} = 'InexactValue::InexactValue';
 
 	#$context = $main::context{"InexactValue"} = Parser::Context->getCopy("InexactValue");
-	
+
 	#
 	#  Create the constructor function
 	#
-	main::PG_restricted_eval('sub InexactValue {Value->Package("InexactValue")->new(@_)}');
-
+	return main::PG_restricted_eval('sub InexactValue {Value->Package("InexactValue")->new(@_)}');
 }
 
 # The rules for significant figures here are those used in chemistry 
@@ -64,9 +62,6 @@ package InexactValue::InexactValue;
 
 our @ISA = qw(Value);
 
-# practical definition for infinity for sig fig count, can also use MathObject Infinity.
-my $inf    = 9**9**9;  
-
 sub new {
 	#** @method public new ($x)
 	# @param x required - String literal that is converted to number with set sig figs OR a 2-item array where the 1st item is the value and the 2nd item is the number of signififcant digits 
@@ -78,14 +73,14 @@ sub new {
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	my $x = shift; $x = [$x,@_] if scalar(@_) > 0; # not going to worry about this scenario yet.
 	# return $x->inContext($context) if isInexactValue($x);  # if it's already an inexact value object, return it
-	
+
 	# this all seems to deal with turning a single parameter into an array so we can deal with
 	# the generic case of passing multiple arguments.  [ ] creates an array reference, so we need
 	# arrow operator to dereference before using index.
 	$x = [$x] unless ref($x) eq 'ARRAY';
 	# Value::Error("Can't convert ARRAY of length %d to %s",scalar(@{$x}),Value::showClass($self))
 	#   unless (scalar(@{$x}) == 1);
-	
+
 	my $argCount = @$x;
 	my $sigFigCount = 0;
 	my $isScientificNotation = false;
@@ -115,14 +110,14 @@ sub new {
 		} else {
 			# check for infinity string first
 			if (ref $x->[1] eq 'Value::Infinity') {
-				$sigFigCount = $inf;
+				$sigFigCount = Inf;
 			} else {
 				$sigFigCount = $x->[1];
 			}
 		}
 
 		if ($argCount > 2)
-		{	
+		{
 			foreach ( keys%{ $x->[2] } ){
 				$options->{ $_ } = $x->[2]->{ $_ } ; 
 			}
@@ -173,7 +168,10 @@ sub getValue {
 	# verify the string contains a number we can match
 	#($matchNumber) = $x->[0] =~ /((?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
 	# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
-	($result[0]) = $x =~ /((?:10\^\+?-?\d+)|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?(?:x|X|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|X|\*)\s?10\^)\d+)|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/;
+	($result[0]) = $x =~ /((?:10\^\+?-?\d+)
+	|(?:\+?-?\d+(?:\.\d+)?(?:e|e\+|e-|E|E\+|E-|\s?
+	(?:x|X|\*)\s?10\^-|\s?(?:x|\*)\s?10\^\+|\s?(?:x|X|\*)\s?10\^)\d+)
+	|(?:\+?-?\d+(?:\.?\d*)?)|(?:\.\d+))/x;
 	unless (defined $result[0]) { 
 		$temp = $x;
 		$result[0] = 0;
@@ -183,9 +181,11 @@ sub getValue {
 	# find out if this is standard notation or scientific notation
 	# /((?:e|e\+|e-|E|E\+|E-|\s?(?:x|\*)\s?10(?:\^|\*\*)-|\s?(?:x|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|\*)\s?10(?:\^|\*\*))\d+)/;
 	# added short phrase at beginning to detect plain exponent notation i.e. 10^-5
-	$result[1] = $x =~ /((?:10\^\+?-?\d+)|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|X|\*)\s?10(?:\^|\*\*)-|\s?(?:x|X|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|X|\*)\s?10(?:\^|\*\*))\d+)/;
+	$result[1] = $x =~ /((?:10\^\+?-?\d+)
+	|(?:e|e\+|e-|E|E\+|E-|\s?(?:x|X|\*)\s?10(?:\^|\*\*)-|\s?
+	(?:x|X|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|X|\*)\s?10(?:\^|\*\*))\d+)/x;
 
-	($isSimpleExponent, $expVal) = $x =~ /((?:^10\^(\+?-?\d+)))/;
+	($isSimpleExponent, $expVal) = $x =~ /((?:^10\^(\+?-?\d+)))/x;
 	if ($isSimpleExponent) {
 		# do the math...
 		$result[0] =  10**$expVal;
@@ -193,7 +193,7 @@ sub getValue {
 	} 
 
 	# replace fancier scientific notation with plain 'e' so the computer recognizes it
-	$result[0] =~ s/\s?(?:x|X|\*)\s?10(?:\^|\*\*)/e/;
+	$result[0] =~ s/\s?(?:x|X|\*)\s?10(?:\^|\*\*)/e/x;
 	$result[0] =~ s/E/e/;
 	
 	# split into coefficient and rest is scientific notation 
@@ -246,14 +246,14 @@ sub make {
 		} else {
 			# check for infinity string first
 			if ($x->[1] eq 'infinity' || $x->[1] eq 'Infinity') {
-				$sigFigCount = $inf;
+				$sigFigCount = Inf;
 			} else {
 				$sigFigCount = $x->[1];
 			}
 		}
 
 		if ($argCount > 2)
-		{			
+		{
 			foreach ( keys%{ $self->[2] } ){
 				$options->{ $_ } = $self->[2]->{ $_ } ; 
 			}
@@ -299,7 +299,7 @@ sub countSigFigsFromString {
 	
 	# split coefficient into left and right side of decimal point 
 	# -1 in 3rd parameter is to make unlimited empty matches (show empty trailing part if there is a decimal point even with nothing afterwards)
-	my @decimalParts = split(/,|\./, $parts[0], -1); 
+	my @decimalParts = split(/,|\./x, $parts[0], -1); 
 	my $decimalPartsSize = @decimalParts;
 	
 	# convert first decimalPart to number and see if it is zero
@@ -327,12 +327,12 @@ sub countSigFigsFromString {
 		unless ($isFirstZero)
 		{
 			# use trailing zeros regex
-			my @matches = ($decimalParts[0] =~ /[1-9]+|0+/g);
-			my $last = pop @matches;
-			if (($last + 0) == 0) #if the last match contains zeros
+			my @matches = ($decimalParts[0] =~ /[1-9]+|0+/xg);
+			my $lastPart = pop @matches;
+			if (($lastPart + 0) == 0) #if the last match contains zeros
 			{
 				#remove them and count the rest
-				my $piece = substr($decimalParts[0], 0, length($decimalParts[0]) - length($last));
+				my $piece = substr($decimalParts[0], 0, length($decimalParts[0]) - length($lastPart));
 				$sigFigs = length($piece);
 			} else {
 				# just count all the digits
@@ -369,16 +369,16 @@ sub relativeUncertainty {
 	my $self = shift;
 	if (exists $self->{uncertainty}){
 		my $uncertainty = $self->{uncertainty};
-		if ($uncertainty =~ /\%/){
-			$uncertainty =~ s/\%//;
+		if ($uncertainty =~ /\%/x){
+			$uncertainty =~ s/\%//x;
 		} else{
 			my $value = $self->valueAsNumber();
-			$uncertainty = $value / $uncertainty * 100;			
+			$uncertainty = $value / $uncertainty * 100;
 		}
 		return $uncertainty;
 	} else {
 		return 0;
-	}	
+	}
 }
 
 
@@ -391,11 +391,11 @@ sub absoluteUncertainty {
 	my $self = shift;
 	if (exists $self->{uncertainty}){
 		my $uncertainty = $self->{uncertainty};
-		if ($uncertainty =~ /\%/){
-			$uncertainty =~ s/\%//;
+		if ($uncertainty =~ /\%/x){
+			$uncertainty =~ s/\%//x;
 			my $value = $self->valueAsNumber();
 			$uncertainty = $uncertainty / 100 * $value;
-		} 	
+		}
 		return $uncertainty;
 	} else {
 		return 0;
@@ -484,8 +484,8 @@ sub unroundedValueMarked {
 	my $strPos = '';
 	my $trail;
 	
-	if (($self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
-
+	if (($self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/x){
+	##no critic qw(ControlStructures::ProhibitCascadingIfElse)
 		if(defined $1){
 			$strPos = $-[1]; # $-[1] gives the position of the match!
 		} elsif (defined $2){
@@ -498,12 +498,13 @@ sub unroundedValueMarked {
 				$strPos--;
 			}
 		}
+	## use critic
 	}
 	# what if unroundedvalue is scientific?
 	if ($unRoundedValue =~ /e/){
 		$trail = substr($unRoundedValue, $strPos + 2, length($unRoundedValue) - $strPos - 2);
 		if (length $trail > $limit){
-			if ($trail =~ /\./){
+			if ($trail =~ /\./x){
 				$trail = substr($trail, 0, $limit + 1);
 			} else {
 				$trail = substr($trail, 0, $limit);
@@ -513,7 +514,7 @@ sub unroundedValueMarked {
 	} else {
 		$trail = substr($unRoundedValue, $strPos + 1, length($unRoundedValue) - $strPos - 1);
 		if (length $trail > $limit){
-			if ($trail =~ /\./){
+			if ($trail =~ /\./x){
 				$trail = substr($trail, 0, $limit + 1);
 			} else {
 				$trail = substr($trail, 0, $limit);
@@ -525,6 +526,75 @@ sub unroundedValueMarked {
 	return $unRoundedValue;
 }
 
+sub formatScientific {
+	my ($value, $exponent, $digits, $preventClean) = @_;
+
+	if ($preventClean){
+		return sprintf("%.2e", $value);
+	} else{
+		return cleanSciText(sprintf("%.2e", $value));
+	}
+	
+}
+
+sub stringWithUncertainty {
+	#** @method public scalar string ($preventClean, $forceScientific)
+	# @brief Returns string representation of InexactValue with uncertainty.  
+	# Will round to the sig figs set internally.
+	# "Cleaning" converts 'e' computer notation into readable 'x10^' notation.
+	# Scientific notation is normally output when the value's exponent would be 
+	# greater than the positive scientificNotationThreshold (default: 6) or less 
+	# than the negative of that same value.  This can be set as a context option.
+	# @param preventClean optional - Prevent cleaning, i.e. prevent conversion of 'e' to 'x10^'
+	# @param forceScientific optional - Force scientific notation even for easy to read numbers.
+	#*
+
+	my $self = shift;
+	my $preventClean = shift;
+
+	my $forceScientific = shift;
+
+	# limit uncertainty "sig figs" to 2, but further limit it by the value last decimal place
+	my $leastSigPosition = $self->leastSignificantPosition({useStringPosition => 1});
+	my $uncertainty = $self->absoluteUncertainty();
+	my $scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
+	my $valAsNumber = $self->valueAsNumber();
+	warn $valAsNumber;
+	my @esplit = split(/e|E/x, sprintf("%e", $valAsNumber));
+	warn sprintf("%e", $valAsNumber);
+	my $exponent = abs($esplit[1]);
+	warn $leastSigPosition;
+	#smallest sig fig is 
+	if ($leastSigPosition > 0){
+		warn $exponent;
+		warn abs($exponent);
+		warn $scientificNotationThreshold;
+		if ($self->preferScientificNotation() || $forceScientific || abs($exponent) > $scientificNotationThreshold){
+			#sci notation
+			if ($preventClean) {
+				
+				return sprintf("%.${leastSigPosition}e", $valAsNumber) . ' ± ' . formatScientific($uncertainty, $exponent, 2, $preventClean);
+			} else {
+				return cleanSciText(sprintf("%.2e", $valAsNumber)) . ' ± ' . formatScientific($uncertainty, $exponent, 2, $preventClean);
+			}
+			return sprintf("%.${leastSigPosition}e", $valAsNumber) . ' ± ' . sprintf("%.${leastSigPosition}e", $self->absoluteUncertainty()) ;
+		} else {
+			#standard notation
+			return sprintf("%.${leastSigPosition}f", $valAsNumber) . ' ± ' . sprintf("%.${leastSigPosition}f", $self->absoluteUncertainty()) ;
+		}
+	} 
+	else {
+
+	}
+	if ($uncertainty == Inf){
+		$uncertainty = 0;
+	}
+	my $sigfigsUncertainty = countSigFigsFromString($uncertainty);
+	warn $valAsNumber;
+	warn $leastSigPosition;
+	warn $sigfigsUncertainty;
+	return $valAsNumber . ' ± ' . $self->absoluteUncertainty();
+}
 
 
 sub string {
@@ -548,23 +618,19 @@ sub string {
 	my $valAsNumber = $valArray[0];
 
 	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
-		# limit uncertainty "sig figs" to 2, but further limit it by the value last decimal place
-		my $leastSigPosition = $self->leastSignificantPosition({useStringPosition => 1});
-		warn $valAsNumber;
-		warn $leastSigPosition;
-		return $valAsNumber . ' ± ' . $self->absoluteUncertainty();
+		return $self->stringWithUncertainty($preventClean, $forceScientific);
 	}
 
+	# Error checking... we shouldn't get this.
 	if ($self->sigFigs() == 0){
 		return 'zero sig figs';
 	}
-
 	
 	# Only here is scientific required or preferred
 	if ($self->preferScientificNotation() || $forceScientific) {
 		$decimals = $self->sigFigs() - 1;
 		if ($preventClean) {
-			if ($decimals == $inf){
+			if ($decimals == Inf){
 				return sprintf("%e", $self->roundingHack($valAsNumber));
 			} else {
 				$log = main::floor(log(abs($valAsNumber))/log(10));
@@ -572,13 +638,13 @@ sub string {
 				return sprintf("%.${decimals}e", $rounded);
 			}
 		} else {
-			if ($decimals == $inf){	
+			if ($decimals == Inf){
 				# cleaning adds trailing zeros if exact, remove them
-				return $self->cleanSciText(sprintf("%e", $valAsNumber),{trimZeros => 1});				
+				return cleanSciText(sprintf("%e", $valAsNumber),{trimZeros => 1});
 			}else {
 				$log = main::floor(log(abs($valAsNumber))/log(10));
 				$rounded = main::Round($valAsNumber,($log*-1) + $decimals);
-				return $self->cleanSciText(sprintf("%.${decimals}e", $rounded));
+				return cleanSciText(sprintf("%.${decimals}e", $rounded));
 			}
 		}   
 
@@ -586,21 +652,21 @@ sub string {
 		# Usually will be here for most numbers.
 		if ($self->sigFigs() == Infinity){
 			# Too many zeros!  Need a way to remove them.
-			if (sprintf("%e", $valAsNumber) =~ /(1\.\d*?)(0*)(?:e)([-+]?)(\d*)/){
+			if (sprintf("%e", $valAsNumber) =~ /(1\.\d*?)(0*)(?:e)([-+]?)(\d*)/x){
 				# Use groups to remove excess trailing zeros (1000000 is usually 1.000000e6)
 				my $whole = $1;
 				my $sign = $3;
 				my $exp = $4;
-				$whole =~ s/\.$//; #remove decimal if at end
-				$exp =~ s/^0//; # remove leading zeros in exponent
-				$sign =~ s/\+//; # remove plus sign
+				$whole =~ s/\.$//x; #remove decimal if at end
+				$exp =~ s/^0//x; # remove leading zeros in exponent
+				$sign =~ s/\+//x; # remove plus sign
 				$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
 				if ($scientificNotationThreshold < $exp){
 					return "${whole}x10^${sign}${exp}";
 				} else {
 					return $whole*10**("${sign}${exp}");
 				}
-			}			
+			}
 			return $valAsNumber;  
 		} else {
 			
@@ -610,7 +676,7 @@ sub string {
 			}elsif (abs($valAsNumber) < 1) { # val less than one
 				# get position of first significant digit i.e. 0.00000001 <= eigth place after decimal
 				# by converting it to sci notation and get the abs of the exponent
-				@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
+				@esplit = split(/e|E/x, sprintf("%e", $valAsNumber));
 				if (defined $esplit[1]) { #if we make zero scientific, it won't work...
 					$firstNonZeroPosition = abs($esplit[1]);
 					$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
@@ -634,7 +700,7 @@ sub string {
 							# if ($digits > 20) {
 							# 	return $self->cleanSciText(sprintf("%e", $self->roundingHack($valAsNumber)));
 							# }
-							return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $firstNonZeroPosition+$digits)));
+							return cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $firstNonZeroPosition+$digits)));
 						}
 					}
 				} else {
@@ -645,7 +711,7 @@ sub string {
 				# need to show using decimal only if digits are not more than 6 orders of magnitude
 				# this is now set by options parameter via scientificNotationThreshold
 				# get position of first digit
-				@esplit = split(/e|E/, sprintf("%e", $valAsNumber));
+				@esplit = split(/e|E/x, sprintf("%e", $valAsNumber));
 				if (defined $esplit[1]) { 
 					$scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
 					#if we make zero scientific, it won't work... but this shouldn't happen here... must be another case
@@ -724,7 +790,7 @@ sub string {
 									return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
 								} else {
 
-									return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
+									return cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
 								}
 								
 							}
@@ -739,7 +805,7 @@ sub string {
 							return sprintf("%.${digits}e", main::Round($valAsNumber, $digits));
 							#return sprintf("%.${digits}e", $self->roundingHack($valAsNumber));
 						} else {
-							return $self->cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
+							return cleanSciText(sprintf("%.${digits}e", main::Round($valAsNumber, $digits)));
 							#return $self->cleanSciText(sprintf("%.${digits}e", $self->roundingHack($valAsNumber)));
 						}
 					}
@@ -758,47 +824,14 @@ sub string {
 }
 
 # THIS IS NOT FUNCTIONAL.  LEAVING IT HERE UNTIL WE CAN REMOVE IT FROM OTHER PLACES.
-sub roundingHack {	
+sub roundingHack {
 	my $self = shift;
 	my $s = shift;
 	return main::Round($s,20);
-	#Round($val, +for decimal/-for other way);
-	# floating point rounding causes errors
-	# 5.555 is stored as 5.554999999999999999 something... and it will round down to 5.55, when we want it to round up to 5.56!
-	# Hacky way to fix:  tack on a few zeros to the end with a 1 before rounding. 
-	# Need to make sure there's a decimal point first and check it won't become scientific automatically
-	# This HACK will NOT work if you have to ADD more zeros to a number than is shown in the hack...
-	# i.e. if you need to show 1 with 10 sig figs -> 1.000000000
-	#      the hack will screw this up and show -> 1.000000001
-	# Right now, the hack limits us to adding 10 zeros... probably can add more, but I don't know the limit yet.
-	$hackedNumber=0;
-	if ($s =~ /e/){
-		@esplit3 = split(/e/, $s);
-		if ($esplit3[0] =~ /\./){
-			$hackedNumber = $esplit3[0].'000000001e'.$esplit3[1];
-			
-			$hackedNumber = $hackedNumber + 0; 
-		} else {
-			$hackedNumber = $esplit3[0].'.000000001e'.$esplit3[1];
-			
-			$hackedNumber = $hackedNumber + 0;
-		}
-	}else {
-		if ($s =~ /\./){
-			$hackedNumber = "$s".'000000001';
-			
-			$hackedNumber = $hackedNumber + 0; 
-		} else {
-			$hackedNumber = "$s".'.000000001';
-			
-			$hackedNumber = $hackedNumber + 0;
-		}
-	}
-	return $hackedNumber;
 }
 
 sub cleanSciText {
-	#** @method public scalar cleanSciText ($s, %$options)
+	#** @function public scalar cleanSciText ($s, %$options)
 	# @brief Converts 'e' scientific notation to 'x10^' notation.  
 	# Example:  Converts '1e3' to '1x10^3'.
 	# Optionally trims zeros.  Some "exact" values like 1e5 get output
@@ -806,15 +839,14 @@ sub cleanSciText {
 	# @param s required - Value/string to convert
 	# @param options optional - Contains {trimZeros} key as boolean.
 	#*
-	my $self = shift;
 	my $s = shift;
 	my $options = shift;
 	# the or (|) followed by nothing allows perl to populate the group with an empty string 
 	# instead of no variable.
-	$s =~ s/(e)(\+|)?(-|)?(0*)/x10^$3/;
+	$s =~ s/(e)(\+|)?(-|)?(0*)/x10^$3/x;
 	if (defined $options && exists $options->{trimZeros} && $options->{trimZeros}){
 		# e switch at end lets perl use code for regex replacement.  Have to test for undefined group before using it.
-		$s =~ s/(?:(\.[1-9]+)|(?:\.)(test|))0*/defined($1)?$1:q{}/e;	
+		$s =~ s/(?:(\.[1-9]+)|(?:\.)(test|))0*/defined($1)?$1:q{}/xe;
 	}
 	return $s
 }
@@ -836,9 +868,20 @@ sub TeX {
 	my $self = shift;
 	my $preventClean = shift;
 	my $r = $self->string($preventClean);
-	$r =~ s/x/\\times /;
-	$r =~ s/±/\\pm/;
-	$r =~ s/\^(.*)/^{$1}/;
+	
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my @split = split(/±/x, $r);
+		my $num = $split[0];
+		my $unc = $split[1];
+		$num =~ s/x/\\times /x;
+		$num =~ s/\^(.*)/^{$1}/x;
+		$unc =~ s/x/\\times /x;
+		$unc =~ s/\^(.*)/^{$1}/x;
+		return "$num \\pm $unc";
+
+	}
+	$r =~ s/x/\\times /x;
+	$r =~ s/\^(.*)/^{$1}/x;
 	return $r;
 }
 
@@ -909,17 +952,17 @@ sub generateSfCountingExplanation {
 		}
 		return $explanation;
 	} else {
-		($leadingZeros, $rest, $whole) = $s =~ /(?:(0*\.0*)(\S*))|(\S*)/;
+		($leadingZeros, $rest, $whole) = $s =~ /(?:(0*\.0*)(\S*))|(\S*)/x;
 		if (defined $leadingZeros ) {
 			push(@breakdown,{val => $leadingZeros, type => 'leading'}); 
 			$whole = $rest;
 			$hasDecimal = 1;
 		}
 		if (defined $whole){
-			($pre, $dec, $post) = $whole =~ /(\d*)(\.?)(\d*)/;
+			($pre, $dec, $post) = $whole =~ /(\d*)(\.?)(\d*)/x;
 		
 			if ($pre ne ''){
-				while ($pre =~ /([123456789]*)(0*)/g){
+				while ($pre =~ /([123456789]*)(0*)/xg){
 					if ($1 ne ''){
 						push @breakdown, {val => $1, type => 'nonzero'}; 
 						#$explanation = $explanation . '\\underbrace{'. $1 . '}_{\\text{non-zero, significant}}';
@@ -936,7 +979,7 @@ sub generateSfCountingExplanation {
 				push(@breakdown,{val => '.', type => 'decimal'});
 			}
 			if ($post ne ''){
-				while ($post =~ /([123456789]*)(0*)/g){
+				while ($post =~ /([123456789]*)(0*)/xg){
 					if ($1 ne ''){
 						push(@breakdown,{val => $1, type => 'nonzero'}); 
 					}
@@ -948,7 +991,7 @@ sub generateSfCountingExplanation {
 			$nomoretrailingzeros=0;
 			$hasTrailingZeros = 0;
 
-			for ($a = @breakdown -1 ; $a >= 0; $a--){
+			for (my $a = @breakdown -1 ; $a >= 0; $a--){
 				#$explanation = $a . $explanation;
 				$item = $breakdown[$a];
 				if (defined $item->{type}){
@@ -970,17 +1013,15 @@ sub generateSfCountingExplanation {
 						} else {
 							$hasTrailingZeros=1;
 							if ($usePlainText){
-								$item->{val} =~ s/\.//;
+								$item->{val} =~ s/\.//x;
 									my $len = length($item->{val});
 									my $d = $len > 1 ? "$len digits" : "digit";
 									my $phrase = $len > 1 ? "are trailing zeroes" : "is a trailing zero";
 									my $phrase2 = $len > 1 ? "These zeroes are" : "This zero is";
-								if ($hasDecimal){									
-									$explanation = "The last $d in the value $phrase and the demical point is present. 
-									$phrase2 significant. " . $explanation;
+								if ($hasDecimal){
+									$explanation = "The last $d in the value $phrase and the demical point is present. $phrase2 significant. " . $explanation;
 								} else {
-									$explanation = "The last $d in the value $phrase and the demical point is not present. 
-									$phrase2 not significant (sometimes just ambiguous). " . $explanation;
+									$explanation = "The last $d in the value $phrase and the demical point is not present. $phrase2 not significant (sometimes just ambiguous). " . $explanation;
 								}
 							} else {
 								if ($hasDecimal){
@@ -997,7 +1038,7 @@ sub generateSfCountingExplanation {
 						}
 					} elsif ($item->{type} eq 'leading') {
 						if ($usePlainText){
-							$item->{val} =~ s/\.//;
+							$item->{val} =~ s/\.//x;
 							my $len = length($item->{val});
 							my $phrase = $len > 1 ? "are $len leading zeroes" : "is a leading zero";
 							my $phrase2 =  $len > 1 ? "are" : "is";
@@ -1040,8 +1081,8 @@ sub generateSfCountingExplanation {
 sub roundUp {
 	$self = shift;
 	$stringToRoundUp = shift;
-	($digitToRound, $decimal) = $stringToRoundUp =~ /(\d)(\.?\,?)$/; #must be at end, might have decimal point (and comma for international)
-	$pieceTrimmed = $stringToRoundUp =~ s/\d\.?\,?$//r;
+	($digitToRound, $decimal) = $stringToRoundUp =~ /(\d)(\.?\,?)$/x; #must be at end, might have decimal point (and comma for international)
+	$pieceTrimmed = $stringToRoundUp =~ s/\d\.?\,?$//rx;
 	if ($digitToRound == 9) {
 			$pieceTrimmed = $self->roundUp($pieceTrimmed);
 			$digitToRound = 0;
@@ -1087,18 +1128,18 @@ sub generateSfRoundingExplanation {
 
 	# need initial check so we can be sure that $1 is either defined or undefined
 	# the "r" non-destructive substitution parameter seems to be buggy since we can't check for success
-	if ($originalData =~ /^\s*-?\s*(0[.,]0*)/){
-		$trimmedData = $originalData =~ s/^\s*-?\s*(0[.,]0*)//r;
+	if ($originalData =~ /^\s*-?\s*(0[.,]0*)/x){
+		$trimmedData = $originalData =~ s/^\s*-?\s*(0[.,]0*)//xr;
 		if (defined $1){
 			$leadingZeros = $1;
 		}
 	} else {
 		$trimmedData = $originalData;
 	}
-	if ($trimmedData =~ s/e(\+?-?\d*)\s*//){
+	if ($trimmedData =~ s/e(\+?-?\d*)\s*//x){
 		$trailingExponent = $1;
 	}
-	$decimalRemoved = $trimmedData =~ s/\.?\,?//r;
+	$decimalRemoved = $trimmedData =~ s/\.?\,?//xr;
 
 	my $explanation = '';
 	#my $textExplanation = '';
@@ -1113,10 +1154,10 @@ sub generateSfRoundingExplanation {
 	if (length($decimalRemoved) > $roundTo ) {
 		$keepPart = '';
 		$ind = 0;
-		for ($a=0;$a < $roundTo;$a++){
+		for (my $a=0;$a < $roundTo;$a++){
 			$digit = substr($trimmedData, $ind,1);
 			$ind++;
-			unless ($digit =~ /\d/){
+			unless ($digit =~ /\d/x){
 				$keepPart = $keepPart . $digit; # this is the decimal point; keep it, too.
 				$digit = substr($trimmedData, $ind,1);
 				$ind++;
@@ -1128,7 +1169,7 @@ sub generateSfRoundingExplanation {
 		#check to see if there's a trailing zero... put it back on the $keepPart
 		if ($ind < length($trimmedData)){
 			$check = substr($trimmedData, $ind, 1);
-			if ($check =~ /[\.\,]/){
+			if ($check =~ /[\.\,]/x){
 				$keepPart = $keepPart . $check;
 			}
 		}
@@ -1148,7 +1189,7 @@ sub generateSfRoundingExplanation {
 			} else {
 				$explanation .= $leadingZeros .'\\overbrace{'. $keepPart .'}^{\\text{keep}}~'.'\\overbrace{\\underset{↑}{'. $firstDigitToDrop . '}'.$restToDrop . '}^{\\text{reject}}';
 			} 
-		}	
+		}
 
 		$roundingExplanation = $firstDigitToDrop >= 5 ? '5 or greater' : 'less than 5';
 		$roundingDirection = $firstDigitToDrop >= 5 ? 'up' : 'down';
@@ -1159,21 +1200,21 @@ sub generateSfRoundingExplanation {
 		}
 
 		unless ($usePlainText){
-			if ($useSciNot){				
+			if ($useSciNot){
 					$explanation .= $self->TeX;
 				
 			} else {
 				if ($firstDigitToDrop >= 5) {
 					$keepPart = $self->roundUp($keepPart);
 				}
-				unless ($leadingZeros . $keepPart =~ /[\.\,]/) { # if leadingZeros + keepPart does not have a decimal, 
+				unless ($leadingZeros . $keepPart =~ /[\.\,]/x) { # if leadingZeros + keepPart does not have a decimal, 
 																												# then most likely we'll need trailing zeroes to pad out the actual number
-					@decSplit = split(/[\.\,]/, $restToDrop);
+					@decSplit = split(/[\.\,]/x, $restToDrop);
 					$digits = 1;
 					if (defined $decSplit[0]){
 						$digits = $digits + length($decSplit[0]);
 					}
-					for ($a=0;$a < $digits; $a++){
+					for (my $a=0;$a < $digits; $a++){
 						$keepPart = $keepPart . "0";
 					}
 				}
@@ -1189,13 +1230,13 @@ sub generateSfRoundingExplanation {
 			}else{
 				$explanation .= "\\xrightarrow[\\text{required for $roundTo sig figs}]{\\text{scientific notation}}";
 				$explanation .= $self->TeX;
-			}			
+			}
 		} 
 
 	
 	} elsif (length($decimalRemoved) < $roundTo) {
 		if ($usePlainText){
-			$explanation = $textExplanation . " The provided number does not have enough significant figures.";	
+			$explanation = $textExplanation . " The provided number does not have enough significant figures.";
 
 		} else {
 			if ($useSciNot){
@@ -1210,7 +1251,7 @@ sub generateSfRoundingExplanation {
 		$originalSF = $originalValue->sigFigs();
 		$zeroesNeeded = $roundTo - $originalSF;
 		if ($usePlainText){
-			$explanation .= " We must add " . $zeroesNeeded . " extra zeroes to the end of this number.";		
+			$explanation .= " We must add " . $zeroesNeeded . " extra zeroes to the end of this number.";
 		} else {
 			$explanation .= "\\xrightarrow[\\text{Need to add $zeroesNeeded zeros}]{\\text{Only $originalSF sig figs}}";
 		}
@@ -1286,7 +1327,7 @@ sub generateAddSubtractExplanation {
 	}
 
 	my $strPosFirst = '';
-	if ($valueFirst =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+	if ($valueFirst =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/x){
 		if(defined $1){
 			$strPosFirst = $-[1];
 		} elsif (defined $2){
@@ -1300,7 +1341,7 @@ sub generateAddSubtractExplanation {
 	#return Value::Error($strPosFirst);
 	# original regex: /(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/
 	my $strPosSecond = '';
-	if ($valueSecond =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+	if ($valueSecond =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/x){
 		if(defined $1){
 			$strPosSecond = $-[1];
 		} elsif (defined $2){
@@ -1375,7 +1416,7 @@ sub generateAddSubtractExplanation {
 	$answerValue = $self->preferScientificNotation() ? $self->valueAsRoundedScientific() : $self->valueAsRoundedNumber();
 	#this regex is for the purpose of identifying the position of the last significant digit in the rounded value, NOT the unrounded one.
 	my $strActualAnswerPosition = '';
-	if ($answerValue =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+	if ($answerValue =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/x){
 		if(defined $1){
 			$strActualAnswerPosition = $-[1];
 		} elsif (defined $2){
@@ -1419,7 +1460,7 @@ sub generateAddSubtractExplanation {
 		}
 	}
 
-	$explanation;
+	return $explanation;
 }
 
 sub generateMultiplyDivideExplanation {
@@ -1471,7 +1512,7 @@ sub generateMultiplyDivideExplanation {
 	my $valueFirstR = $valueFirst;
 	if ($useUnroundedFirst){
 		my $strPosFirst = '';
-		if (($first->preferScientificNotation() ? $first->valueAsRoundedScientific() : $first->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+		if (($first->preferScientificNotation() ? $first->valueAsRoundedScientific() : $first->valueAsRoundedNumber()) =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/x){
 			if(defined $1){
 				$strPosFirst = $-[1];
 			} elsif (defined $2){
@@ -1483,7 +1524,7 @@ sub generateMultiplyDivideExplanation {
 			}
 		}
 		$firstTrail = substr($valueFirstR, $strPosFirst + 1, length($valueFirstR) - $strPosFirst - 1);
-		$firstTrail =~ s/e/\\times 10^ /r;
+		$firstTrail =~ s/e/\\times 10^ /xr;
 		# if ($first->preferScientificNotation){
 		#   $exp = substr($valueFirstR, $strPosFirst + 2,length($valueFirstR)-$strPosFirst) + 0;
 		#   $firstTrail = "\\times 10^{$exp}";
@@ -1491,15 +1532,15 @@ sub generateMultiplyDivideExplanation {
 
 		$valueFirstR = substr($valueFirstR, 0, $strPosFirst) . '\\underline{' . substr($valueFirstR, $strPosFirst,1) . '}' . $firstTrail;
 	} else {
-		$valueFirstR =~ s/e/\\times 10^ /r;
-		$valueFirstR =~ s/x/\\times /r;
-		$valueFirstR =~ s/\^(.*)/^{$1}/;
+		$valueFirstR =~ s/e/\\times 10^ /rx;
+		$valueFirstR =~ s/x/\\times /rx;
+		$valueFirstR =~ s/\^(.*)/^{$1}/x;
 	}
  
 	my $valueSecondR = $valueSecond;
 	if ($useUnroundedSecond){
 		my $strPosSecond = '';
-		if ($valueSecondR =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/){
+		if ($valueSecondR =~ /(?:\.\d*?([0123456789])$)|(?:([123456789])0*$)|(?:([1234567890])\.$)|(?:([1234567890])(?:e[+-]?\d*)?$)/x){
 			if(defined $1){
 				$strPosSecond = $-[1];
 			} elsif (defined $2){
@@ -1511,7 +1552,7 @@ sub generateMultiplyDivideExplanation {
 			}
 		}
 		$secondTrail = substr($valueSecondR, $strPosSecond + 1, length($valueSecondR) - $strPosSecond - 1);
-		$secondTrail =~ s/e/\\times 10^ /r;
+		$secondTrail =~ s/e/\\times 10^ /xr;
 		# if ($second->preferScientificNotation){
 		#   $exp = substr($valueSecondR, $strPosSecond + 2,length($valueSecondR)-$strPosSecond) + 0;
 		#   $secondTrail = "\\times 10^{$exp}";
@@ -1519,9 +1560,9 @@ sub generateMultiplyDivideExplanation {
 
 		$valueSecondR = substr($valueSecondR, 0, $strPosSecond) . '\\underline{' . substr($valueSecondR, $strPosSecond,1) . '}' . $secondTrail;
 	} else {
-		$valueSecondR =~ s/e/\\times 10^ /r;
-		$valueSecondR =~ s/x/\\times /r;
-		$valueSecondR =~ s/\^(.*)/^{$1}/;
+		$valueSecondR =~ s/e/\\times 10^ /xr;
+		$valueSecondR =~ s/x/\\times /xr;
+		$valueSecondR =~ s/\^(.*)/^{$1}/x;
 	}
 
 	if ($usePlainText){
@@ -1676,7 +1717,7 @@ sub leastSignificantPosition {
 	my $val = $self->valueAsNumber();
 	my $sf = $self->sigFigs();
 	if ($useStringPosition){
-		$val =~ s/\-//;		
+		$val =~ s/^\-//;		
 	}else {		
 		$val = abs($val);
 	}
@@ -1744,7 +1785,7 @@ sub promote {
 	my $context = (Value::isContext($_[0]) ? shift : $self->context);
 	my $x = (scalar(@_) ? shift : $self);
 	return $x->inContext($context) if ref($x) eq $class && scalar(@_) == 0;
-	return $self->new($context,$x,$inf,@_);
+	return $self->new($context, $x, Inf, @_);
 }
 
 # this is exactly the same as the Value version, but called here to use our own promote function
@@ -1934,18 +1975,18 @@ sub ln {
 	}
 }
 
-sub abs {
-	my $self=shift;
-	my $newValue = abs($self->valueAsNumber);
-	return $self->new($newValue,$self->sigFigs());
-}
+# sub abs {
+# 	my $self=shift;
+# 	my $newValue = abs($self->valueAsNumber);
+# 	return $self->new($newValue,$self->sigFigs());
+# }
 
 
 
 #
 #  What to call us in error messages
 #
-sub cmp_class {"Inexact Value"}
+sub cmp_class {return "Inexact Value";}
 
 
 # sub cmp_preprocess {
@@ -1969,7 +2010,7 @@ sub cmp_class {"Inexact Value"}
 sub typeMatch {
 	my $self = shift;  my $other = shift;
 	return 1 unless ref($other);
-	$self->type eq $other->type && !$other->isFormula;
+	return $self->type eq $other->type && !$other->isFormula;
 }
 
 sub cmp {
@@ -1987,7 +2028,7 @@ sub cmp {
 		my $ans = shift;
 		$inexactStudent=0;
 		if ($ans->{student_ans} eq ''){
-			$inexactStudent = $self->new(0,$inf);  #blank answer is zero with infinite sf
+			$inexactStudent = $self->new(0,Inf);  #blank answer is zero with infinite sf
 		} else {
 			$inexactStudent = $self->new($ans->{student_ans});
 		}
@@ -2090,7 +2131,7 @@ sub compareValue {
 	my $student = shift;
 	my $options = shift;
 
-	$creditSF = $options->{"creditSigFigs"};	
+	$creditSF = $options->{"creditSigFigs"};
 	$creditValue = $options->{"creditValue"};
 	$failOnValueWrong = $options->{"failOnValueWrong"};
 
