@@ -1703,8 +1703,7 @@ sub simpleUncertainty {
 #
 #  Binary operations
 #
-sub minSf {
-	$self = shift;
+sub minSigFigs {
 	my $a = shift;
 	my $b = shift;
 	my $minSf = 0;
@@ -1717,7 +1716,6 @@ sub minSf {
 }
 
 sub basicMin {
-	$self = shift;
 	my $a = shift;
 	my $b = shift;
 	my $minSf = 0;
@@ -1752,6 +1750,14 @@ sub isOne {
 # positive values mean last place is in the decimal region, tenths, hundredths, etc
 # 0 is the ones digit
 sub leastSignificantPosition {
+	#** @method private scalar leastSignificantPosition ($val)
+	# @brief Gets the position of the lowest digit from the InexactValue (so trailing zeros are accounted for).
+	# Positive values are decimal positions: 1 = tenths, 2 = hundredths...
+	# Negative values are whole positions: 0 = ones, -1 = tens, -2 = hundreds ...  
+	# @brief [Deprecated] This will be converted to a function where sig figs will be added explicitly as a parameter.
+	# @param $options optional - 
+	# @retval $p - The position of the lowest digit.
+	#*
 	my $self = shift;
 	my $options = shift;
 	my $useStringPosition = 0;
@@ -1808,6 +1814,13 @@ sub leastSignificantPosition {
 }
 
 sub leastSignificantPositionLiteral {
+	#** @function private scalar leastSignificantPositionLiteral ($val)
+	# @brief Gets the position of the lowest digit from a string value (so trailing zeros are accounted for).
+	# Positive values are decimal positions: 1 = tenths, 2 = hundredths...
+	# Negative values are whole positions: 0 = ones, -1 = tens, -2 = hundreds ...  
+	# @param $val required - The value to analyze
+	# @retval $p - The position of the lowest digit.
+	#*
 	my $val = shift;
 	my $options = shift;
 	
@@ -1843,6 +1856,13 @@ sub leastSignificantPositionLiteral {
 }
 
 sub highestDigitPosition {
+	#** @function private scalar highestDigitPosition ($val)
+	# @brief Gets the position of the highest digit.
+	# Positive values are decimal positions: 1 = tenths, 2 = hundredths...
+	# Negative values are whole positions: 0 = ones, -1 = tens, -2 = hundreds ...  
+	# @param $val required - The value to analyze
+	# @retval $p - The position of the highest digit.
+	#*
 	my $val = shift;
 	$val = abs($val);
 	if ($val >= 10) {
@@ -1942,7 +1962,7 @@ sub add {
 	}
 	my $leftPos = $l->leastSignificantPosition();
 	my $rightPos = $r->leastSignificantPosition();
-	my $leftMostPosition = $self->basicMin($leftPos, $rightPos);
+	my $leftMostPosition = basicMin($leftPos, $rightPos);
 	my $newValue = $l->valueAsNumber() + $r->valueAsNumber();
 	my $newSigFigs = calculateSigFigsForPosition($newValue, $leftMostPosition);
 
@@ -1959,7 +1979,7 @@ sub sub {
 	}
 	my $leftPos = $l->leastSignificantPosition();
 	my $rightPos = $r->leastSignificantPosition();
-	my $leftMostPosition = $self->basicMin($leftPos, $rightPos);
+	my $leftMostPosition = basicMin($leftPos, $rightPos);
 	my $newValue = $l->valueAsNumber() - $r->valueAsNumber();
 	my $newSigFigs = calculateSigFigsForPosition($newValue, $leftMostPosition);
 
@@ -1996,7 +2016,7 @@ sub div {
 	if ($l->isExactZero ){
 		return $self->new(0,9**9**9);
 	}
-	my $minSf = $self->minSf($l, $r);
+	my $minSf = minSigFigs($l, $r);
 	return $self->new($l->valueAsNumber() / $r->valueAsNumber(), $minSf);
 }
 
