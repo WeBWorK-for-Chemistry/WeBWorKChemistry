@@ -142,7 +142,7 @@ sub new {
 	my $s = bless {data => [$matchNumber], context => $context}, $class;
 
 	# $sigFigCount is actually an uncertainty, maybe change this...
-	if ($context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($context->flags->get('precisionMethod') && $context->flags->get('precisionMethod') eq 'uncertainty'){
 		$s->uncertainty($sigFigCount);
 	}else{
 		$s->sigFigs($sigFigCount);
@@ -302,6 +302,11 @@ sub countSigFigsFromString {
 	my @decimalParts = split(/,|\./x, $parts[0], -1); 
 	my $decimalPartsSize = @decimalParts;
 	
+	# first see if first part is empty string... if so, convert to a zero otherwise next step fails
+	if ($decimalParts[0] eq ''){
+		$decimalParts[0] = 0;
+	}
+
 	# convert first decimalPart to number and see if it is zero
 	my $firstPartAsNumber = $decimalParts[0] + 0;
 	my $isFirstZero = ($firstPartAsNumber == 0);
@@ -671,7 +676,7 @@ sub string {
 	my @valArray = $self->value;# + 0;
 	my $valAsNumber = $valArray[0];
 
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		return $self->stringWithUncertainty($preventClean, $forceScientific);
 	}
 
@@ -1955,7 +1960,7 @@ sub multiplyDivideUncertainties {
 sub add {
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
 	#$left= $l->value; $right= $r->value;
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $resultUncertainty = addSubtractUncertainties($l,$r);
 		my $newValue = $l->valueAsNumber() + $r->valueAsNumber();
 		return $self->new($newValue, $resultUncertainty);
@@ -1972,7 +1977,7 @@ sub add {
 sub sub {
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
 	#$left= $l->value; $right= $r->value;
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $resultUncertainty = addSubtractUncertainties($l,$r);
 		my $newValue = $l->valueAsNumber() - $r->valueAsNumber();
 		return $self->new($newValue, $resultUncertainty);
@@ -1989,7 +1994,7 @@ sub sub {
 sub mult {
 	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
 
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $resultUncertainty = multiplyDivideUncertainties($l,$r);
 		my $newValue = $l->valueAsNumber() * $r->valueAsNumber();
 		return $self->new($newValue, $resultUncertainty);
@@ -2007,7 +2012,7 @@ sub div {
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
 	Value::Error("Division by zero") if $r->{data}[0] == 0;
 
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $resultUncertainty = multiplyDivideUncertainties($l,$r);
 		my $newValue = $l->valueAsNumber() / $r->valueAsNumber();
 		return $self->new($newValue, $resultUncertainty);
@@ -2028,7 +2033,7 @@ sub power {
 	# propagation of error: derivative=> x^3 = 3x^2 dx
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
 
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $uncertainty = $l->uncertainty();
 		$uncertainty = abs($r*($l->valueAsNumber()**($r-1)))*$uncertainty;
 		my $powerResult = $l->valueAsNumber() ** $r->valueAsNumber();
@@ -2059,7 +2064,7 @@ sub log {
 	my $logResult = log($self->valueAsNumber())/log(10);
 	my $sigFigs = $self->sigFigs();
 		
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $uncertainty = $self->uncertainty();
 		$uncertainty = $uncertainty/(abs($self->valueAsNumber())*log(10));
 		return $self->new($logResult, $uncertainty );
@@ -2088,7 +2093,7 @@ sub ln {
 	my $sigFigs = $self->sigFigs();
 	my $logResult = log($self->valueAsNumber());
 
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $uncertainty = $self->uncertainty();
 		# VERIFY THIS!
 		$uncertainty = $uncertainty/(abs($self->valueAsNumber()));
