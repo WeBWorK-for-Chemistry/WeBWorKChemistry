@@ -23,8 +23,24 @@ loadMacros(
 Context("InexactValue");
 
 @data = (
-	['355 + 150', InexactValue(355,3) + InexactValue(150,2), {value=> 510, sf=> 2}],
-	['5.805e-9 + 4.804e-8', InexactValue(5.805e-9,4) + InexactValue(4.804e-8,4), {value=> 5.385e-8, sf=> 4}],
+	['355 + 150', InexactValue(355,3) + InexactValue(150,2), {result=> "510", value=> 505, sf=> 2}],
+	['5.805e-9 + 4.804e-8', InexactValue(5.805e-9,4) + InexactValue(4.804e-8,4), {result=> "5.385x10^-8", value=> 5.3845e-08, sf=> 4}],
+	
+	['355 - 150', InexactValue(355,3) - InexactValue(150,2), {result=> "210", value=> 205, sf=> 2}],
+	['5.805e-9 - 4.804e-8', InexactValue(5.805e-9,4) - InexactValue(4.804e-8,4), {result=> "-4.224x10^-8", value=> -4.2235e-08, sf=> 4}],
+
+	['355 * 150', InexactValue(355,3) * InexactValue(150,2), {result=> "53000", value=> 53250, sf=> 2}],
+	['5.805e-9 * 4.804e-8', InexactValue(5.805e-9,4) * InexactValue(4.804e-8,4), {result=> "2.789x10^-16", value=> 2.788722e-16, sf=> 4}],
+
+	['355 / 150', InexactValue(355,3) / InexactValue(150,2), {result=> "2.4", value=> 2.36666666666667, sf=> 2}],
+	['5.805e-9 / 4.804e-8', InexactValue(5.805e-9,4) / InexactValue(4.804e-8,4), {result=> "0.1208", value=> 0.120836802664446, sf=> 4}],
+
+	['355^3', InexactValue(355,3)**3, {result=> "4.47x10^7", value=> 44738875, sf=> 3}],
+	['5.805e-9 ^ 3', InexactValue(5.805e-9,4)**3, {result=> "1.956x10^-25", value=> 1.95617035125e-25, sf=> 4}],
+
+	['log 355', log(InexactValue(355,3)), {result=> "2.550", value=> 2.55, sf=> 4}],
+	['ln 355', (InexactValue(355,3))->ln, {result=> "5.872", value=> 5.872, sf=> 4}],
+	
 	
 );
 
@@ -49,6 +65,7 @@ table#results th, table#results td {
 	<tr>
 		<th>Operation</th>
 		<th>Result</th>
+		<th>Value</th>
 		<th>Sig Figs</th>
 		<th>Error</th>
 	</tr>
@@ -75,15 +92,24 @@ foreach $dataItem (@data){
 
 	$html .= "<td>$testString</td>";
 
-	# floating point errors cause == to not work sometimes.  Easier to compare by string equivalent as they both are numbers and should convert to the same.
-	if ($expected->{value} eq $testValue->valueAsRoundedNumber()){
+	if ($expected->{result} eq $testValue->string()){
 		$html .= "<td>";
 	} else {
 		$html .= "<td class='wrong'>";
 		$errorMessage .= "Expected value: " . $expected->{value} . "<br/>";
 		$success=0;
 	}
-	$html .= $testValue->valueAsRoundedNumber() . "</td>";
+	$html .= $testValue->string() . "</td>";
+
+	# floating point errors cause == to not work sometimes.  Easier to compare by string equivalent as they both are numbers and should convert to the same.
+	if ($expected->{value} eq $testValue->valueAsNumber()){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{value} . "<br/>";
+		$success=0;
+	}
+	$html .= $testValue->valueAsNumber() . "</td>";
 
 	if ($expected->{sf} == $testValue->{sigFigs}){
 		$html .= "<td>";

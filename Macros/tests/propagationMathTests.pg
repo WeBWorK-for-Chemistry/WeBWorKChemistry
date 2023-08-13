@@ -42,6 +42,14 @@ Context("InexactValue")->flags->set(precisionMethod=>"uncertainty");
 	['0.355±0.005 / 0.150±0.010', InexactValue(0.355,0.005) / InexactValue(0.150,0.010), {result=> "2.37 ± 0.16", value=> 2.36666666666667, uncertainty=> 0.161260467169127}],
 	['5.805e-9 ± 4e-12 / 4.804e-8 ± 1e-12', InexactValue(5.805e-9,1.2e-11) / InexactValue(4.804e-8,5e-11), {result=> "0.12084 ± 0.00028", value=> 0.120836802664446, uncertainty=> 0.000279666350152643}],
     ['5.805e-9 ± 0.012e-9 / 4.804e-8 ± 0.005e-8', InexactValue(5.805e-9,0.012e-9) / InexactValue(4.804e-8,0.005e-8), {result=> "0.12084 ± 0.00028", value=> 0.120836802664446, uncertainty=> 0.000279666350152643}],
+
+    ['(355 ± 3)^3', (InexactValue(355,3))**3, {result=> "4.47x10^7 ± 0.11x10^7", value=> 44738875, uncertainty=> 1134225}],
+	['(5.805e-9 ± 1.2e-11) ^ 3', InexactValue(5.805e-9,1.2e-11)**3, {result=> "1.96x10^-25 ± 0.012x10^-25", value=> 1.95617035125e-25, uncertainty=> 1.2131289e-27}],
+
+    ['log (355 ± 3)', log(InexactValue(355,3)), {result=> "2.5502 ± 0.0037", value=> 2.55022835305509, uncertainty=> 0.00367009421326692}],
+    ['ln (355 ± 3)', (InexactValue(355,3))->ln, {result=> "5.8721 ± 0.0085", value=> 5.87211778947542, uncertainty=> 0.00845070422535211}],
+
+	
 );
 $test = InexactValue(5.805e-9,1.2e-11) + InexactValue(4.804e-8,5e-11);
 

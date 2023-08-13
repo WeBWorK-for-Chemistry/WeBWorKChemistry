@@ -795,9 +795,9 @@ sub add {
 	my ($self,$l,$r,$other) = InexactValueWithUnits::InexactValueWithUnits::checkOpOrderWithPromote(@_);
 	$leftPos = $l->leastSignificantPosition();    
 	$rightPos = $r->leastSignificantPosition();
-	$leftMostPosition = $self->basicMin($leftPos, $rightPos);
+	$leftMostPosition = InexactValue::InexactValue::basicMin($leftPos, $rightPos);
 	$newValue = $l->valueAsNumber() + $r->valueAsNumber();
-	$newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
+	$newSigFigs = InexactValue::InexactValue::calculateSigFigsForPosition($newValue, $leftMostPosition);
 	#my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
 	#Value::Error("error is $units");
 	return $self->new([$newValue, $newSigFigs], $self->{units});
@@ -807,9 +807,9 @@ sub sub {
   my ($self,$l,$r,$other) = InexactValueWithUnits::InexactValueWithUnits::checkOpOrderWithPromote(@_);
   $leftPos = $l->leastSignificantPosition();
   $rightPos = $r->leastSignificantPosition();
-  $leftMostPosition = $self->basicMin($leftPos, $rightPos);
+  $leftMostPosition = InexactValue::InexactValue::basicMin($leftPos, $rightPos);
   $newValue = $l->valueAsNumber() - $r->valueAsNumber();
-  $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
+  $newSigFigs = InexactValue::InexactValue::calculateSigFigsForPosition($newValue, $leftMostPosition);
   #my $num = Value->Package("InexactValue")->new($newValue, $newSigFigs);
   #Value::Error("error is $units");
   return $self->new([$newValue, $newSigFigs], $self->{units});
@@ -848,17 +848,17 @@ sub mergeUnits {
 }
 
 sub mult {
-	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
-	my $newInexact = $left->{inexactValue} * $right->{inexactValue};
+	my ($self,$l,$r,$flag) = Value::checkOpOrderWithPromote(@_);
+	my $newInexact = $l->{inexactValue} * $r->{inexactValue};
 
 	# merge additional units with standard units
-	my $newOptions = $self->mergeUnits($left,$right); 
+	my $newOptions = $self->mergeUnits($l,$r); 
 	
-	if (defined $left->{context}->flags->get('hasChemicals')){
-	  $newOptions->{hasChemicals} = $left->{context}->flags->get('hasChemicals');
+	if (defined $l->{context}->flags->get('hasChemicals')){
+	  $newOptions->{hasChemicals} = $l->{context}->flags->get('hasChemicals');
 	} 
 	#warn "BEFORE " . $left->{units} . " WITH " . $right->{units};
-	$newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 1, $newOptions);
+	$newUnitString = combineStringUnitsCleanly($l->{units}, $r->{units}, 1, $newOptions);
 	#warn "AFTER MULTIPLY $newUnitString";
 	$result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
 
@@ -866,19 +866,19 @@ sub mult {
 }
 
 sub div {
-  my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
+  my ($self,$l,$r,$flag) = Value::checkOpOrderWithPromote(@_);
   #Value::Error("Division by zero") if $r->{data}[0] == 0;
-  #$minSf = $left->minSf($left, $right);
-  my $newInexact = $left->{inexactValue} / $right->{inexactValue};
+
+  my $newInexact = $l->{inexactValue} / $r->{inexactValue};
 
   # merge additional units with standard units
-  my $newOptions = $self->mergeUnits($left,$right);
+  my $newOptions = $self->mergeUnits($l,$r);
 	
-  if (defined $left->{context}->flags->get('hasChemicals')){
-	$newOptions->{hasChemicals} = $left->{context}->flags->get('hasChemicals');
+  if (defined $l->{context}->flags->get('hasChemicals')){
+	$newOptions->{hasChemicals} = $l->{context}->flags->get('hasChemicals');
   } 
     
-  $newUnitString = combineStringUnitsCleanly($left->{units}, $right->{units}, 0, $newOptions);
+  $newUnitString = combineStringUnitsCleanly($l->{units}, $r->{units}, 0, $newOptions);
   #warn "AFTER Divide $newUnitString";
   $result = $self->new([$newInexact->valueAsNumber, $newInexact->sigFigs], $newUnitString);
   

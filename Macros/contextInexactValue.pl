@@ -934,7 +934,7 @@ sub TeX {
 	my $preventClean = shift;
 	my $r = $self->string($preventClean);
 	
-	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my @split = split(/±/x, $r); # split at plus/minus symbol
 		my $num = $split[0];
 		my $unc = $split[1];
@@ -2001,7 +2001,7 @@ sub mult {
 
 	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $newValue = $l->valueAsNumber() * $r->valueAsNumber();
-		my $resultUncertainty = multiplyDivideUncertainties($l,$r,$newValue);		
+		my $resultUncertainty = multiplyDivideUncertainties($l,$r,$newValue);
 		return $self->new($newValue, $resultUncertainty);
 	}
 
@@ -2009,7 +2009,7 @@ sub mult {
 	if ($l->isExactZero || $r->isExactZero){
 		return $self->new(0,9**9**9);
 	}
-	my $minSf = minSf($l, $r);
+	my $minSf = minSigFigs($l, $r);
 	return $self->new($l->valueAsNumber() * $r->valueAsNumber(), $minSf);
 }
 
@@ -2040,7 +2040,7 @@ sub power {
 
 	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
 		my $uncertainty = $l->uncertainty();
-		$uncertainty = abs($r*($l->valueAsNumber()**($r-1)))*$uncertainty;
+		$uncertainty = abs($r->valueAsNumber()*($l->valueAsNumber()**($r->valueAsNumber() - 1))) * $uncertainty;
 		my $powerResult = $l->valueAsNumber() ** $r->valueAsNumber();
 		return $self->new($powerResult, $uncertainty);
 	}
@@ -2110,24 +2110,24 @@ sub ln {
 
 	} else {
 		my $decimalPortion = abs($logResult) - int(abs($logResult));
-		my $shortCutToCountSigFigs = new InexactValue::InexactValue($decimalPortion, $sigFigs);
+		my $shortCutToCountSigFigs = $self->new($decimalPortion, $sigFigs);
 		# warn $logResult;
 		# warn int(abs($logResult));
 		# warn $shortCutToCountSigFigs;
 		if ($logResult > 0){
 			# warn $self->new(sprintf('%.f',$logResult) + $shortCutToCountSigFigs);
-			return new InexactValue::InexactValue(sprintf('%.f',$logResult) + $shortCutToCountSigFigs);
+			return $self->new(int($logResult) + $shortCutToCountSigFigs);
 		} else {
-			return new InexactValue::InexactValue(sprintf('%.f',$logResult) - $shortCutToCountSigFigs);
+			return $self->new(int($logResult) - $shortCutToCountSigFigs);
 		}
 	}
 }
 
-# sub abs {
-# 	my $self=shift;
-# 	my $newValue = abs($self->valueAsNumber);
-# 	return $self->new($newValue,$self->sigFigs());
-# }
+sub abs {
+	my $self=shift;
+	my $newValue = abs($self->valueAsNumber);
+	return $self->new($newValue,$self->sigFigs());
+}
 
 
 
