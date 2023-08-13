@@ -581,6 +581,9 @@ sub formatScientific {
 			}
 		} else {
 			# just round to correct sig figs
+			if ($decimalCount < 0){
+				$decimalCount = abs($decimalCount);
+			}
 			$scientific = sprintf("%.${decimalCount}e", $scientific);
 		}
 	}
@@ -615,6 +618,8 @@ sub stringWithUncertainty {
 	my $valAsNumber = $self->valueAsNumber();
 	my $leastSigPosition = leastSignificantPositionLiteral($valAsNumber);
 	my $leastSigPositionUncertainty = leastSignificantPositionLiteral($uncertainty);
+	my $highestPosUncertainty= highestDigitPosition($uncertainty);
+	my $targetLeastPosUncertainty = $leastSigPositionUncertainty-$highestPosUncertainty > 1 ? $highestPosUncertainty + 1 : $leastSigPositionUncertainty;
 	my @esplit = split(/e|E/x, sprintf("%e", $valAsNumber));
 	my $exponent = $esplit[1];
 
@@ -628,18 +633,19 @@ sub stringWithUncertainty {
 		return formatScientific($valAsNumber, $exponent, $decimalCount, $preventClean) . ' ± ' . formatScientific($uncertainty, $exponent, $decimalCount, $preventClean);
 	} else {
 		#standard notation
-		if ($leastSigPosition > 0){
-			return sprintf("%.${leastSigPosition}f", $valAsNumber) . ' ± ' . sprintf("%.${leastSigPosition}f", $uncertainty);
+		if ($targetLeastPosUncertainty > 0){
+			return sprintf("%.${targetLeastPosUncertainty}f", $valAsNumber) . ' ± ' . sprintf("%.${targetLeastPosUncertainty}f", $uncertainty);
 		} 
-		elsif ($leastSigPosition < 0) {
+		elsif ($targetLeastPosUncertainty < 0) {
 			# need to round uncertainty to two sig figs
 			my $roundTo =  highestDigitPosition($uncertainty)+1; 
 			$uncertainty = main::Round($uncertainty, $roundTo);
 			$leastSigPosition = abs($leastSigPosition);
 			return sprintf("%d", $valAsNumber) . ' ± ' . sprintf("%d", $uncertainty);
 		} else {
+			
 			# 4 ± 0.8 gives weird results with the branch above
-			my $highestPosUncertainty= highestDigitPosition($uncertainty);
+			
 			my $diff =  $leastSigPositionUncertainty - $highestPosUncertainty;
 			if ($diff > 1){
 				$diff = 1;
@@ -1945,16 +1951,15 @@ sub multiplyDivideUncertainties {
 	# @param $%options optional - Hash containing alternate method
 	# @retval $result - InexactValue from operation with new uncertainty
 	#*
-	my ($l, $r, $options) = @_;
+	my ($l, $r, $result, $options) = @_;
 	my $method = 'quadrature';
 	# leaving open another way to calculate uncertainty for the future
 	if ($options && exists $options->{method}){
 		$method = $options->{method};
 	}
-	my $method = 'quadrature';
 	my $lu = $l->absoluteUncertainty();
 	my $ru = $r->absoluteUncertainty();
-	return (($lu/$l->valueAsNumber())**2 + ($ru/$r->valueAsNumber())**2)**0.5;
+	return ((($lu/$l->valueAsNumber())**2 + ($ru/$r->valueAsNumber())**2)**0.5) * $result;
 }
 
 sub add {
@@ -1992,20 +1997,20 @@ sub sub {
 }
 
 sub mult {
-	my ($self,$left,$right,$flag) = Value::checkOpOrderWithPromote(@_);
+	my ($self,$l,$r,$flag) = Value::checkOpOrderWithPromote(@_);
 
 	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
-		my $resultUncertainty = multiplyDivideUncertainties($l,$r);
 		my $newValue = $l->valueAsNumber() * $r->valueAsNumber();
+		my $resultUncertainty = multiplyDivideUncertainties($l,$r,$newValue);		
 		return $self->new($newValue, $resultUncertainty);
 	}
 
 	# edge case: multiplication by exact zero gives exact zero
-	if ($left->isExactZero || $right->isExactZero){
+	if ($l->isExactZero || $r->isExactZero){
 		return $self->new(0,9**9**9);
 	}
-	my $minSf = $left->minSf($left, $right);
-	return $self->new($left->valueAsNumber() * $right->valueAsNumber(), $minSf);
+	my $minSf = minSf($l, $r);
+	return $self->new($l->valueAsNumber() * $r->valueAsNumber(), $minSf);
 }
 
 sub div {
@@ -2013,8 +2018,8 @@ sub div {
 	Value::Error("Division by zero") if $r->{data}[0] == 0;
 
 	if ($self->context->flags->get('precisionMethod') && $self->context->flags->get('precisionMethod') eq 'uncertainty'){
-		my $resultUncertainty = multiplyDivideUncertainties($l,$r);
 		my $newValue = $l->valueAsNumber() / $r->valueAsNumber();
+		my $resultUncertainty = multiplyDivideUncertainties($l,$r,$newValue);
 		return $self->new($newValue, $resultUncertainty);
 	}
 	# edge case: division using exact zero gives exact zero
