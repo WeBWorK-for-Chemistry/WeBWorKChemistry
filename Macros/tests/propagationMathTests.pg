@@ -1,0 +1,154 @@
+##DESCRIPTION
+##  Inexact Value Tests
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+
+## Date('2/15/2021')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();
+
+loadMacros(
+	"PGstandard.pl",     # Standard macros for PG language
+	"MathObjects.pl",
+	"PGML.pl",
+	"contextInexactValue.pl"
+);
+
+Context("InexactValue")->flags->set(precisionMethod=>"uncertainty");
+
+@data = (
+	['355±3 + 150±2', InexactValue(355,3) + InexactValue(150,2), {result=> "505.0 ± 3.6", value=> 505, uncertainty=> 3.60555127546399}],
+	['0.355±0.005 + 0.150±0.010', InexactValue(0.355,0.005) + InexactValue(0.150,0.010), {result=> "0.505 ± 0.011", value=> 0.505, uncertainty=> 0.0111803398874989}],
+	['5.805e-9 ± 4e-12 + 4.804e-8 ± 1e-12', InexactValue(5.805e-9,1.2e-11) + InexactValue(4.804e-8,5e-11), {result=> "5.38x10^-8 ± 0.0051x10^-8", value=> 5.3845e-08, uncertainty=> 5.14198405287298e-11}],
+    ['5.805e-9 ± 0.012e-9 + 4.804e-8 ± 0.005e-8', InexactValue(5.805e-9,0.012e-9) + InexactValue(4.804e-8,0.005e-8), {result=> "5.38x10^-8 ± 0.0051x10^-8", value=> 5.3845e-08, uncertainty=> 5.14198405287298e-11}],
+	
+    ['355±3 + 150±2', InexactValue(355,3) - InexactValue(150,2), {result=> "205.0 ± 3.6", value=> 205, uncertainty=> 3.60555127546399}],
+	['0.355±0.005 - 0.150±0.010', InexactValue(0.355,0.005) - InexactValue(0.150,0.010), {result=> "0.205 ± 0.011", value=> 0.205, uncertainty=> 0.0111803398874989}],
+	['5.805e-9 ± 4e-12 - 4.804e-8 ± 1e-12', InexactValue(5.805e-9,1.2e-11) - InexactValue(4.804e-8,5e-11), {result=> "-4.22x10^-8 ± 0.0051x10^-8", value=> -4.2235e-08, uncertainty=> 5.14198405287298e-11}],
+    ['5.805e-9 ± 0.012e-9 - 4.804e-8 ± 0.005e-8', InexactValue(5.805e-9,0.012e-9) - InexactValue(4.804e-8,0.005e-8), {result=> "-4.22x10^-8 ± 0.0051x10^-8", value=> -4.2235e-08, uncertainty=> 5.14198405287298e-11}],
+    
+    ['355±3 * 150±2', InexactValue(355,3) * InexactValue(150,2), {result=> "53250 ± 840", value=> 53250, uncertainty=> 840.5950273467}],
+	['0.355±0.005 * 0.150±0.010', InexactValue(0.355,0.005) * InexactValue(0.150,0.010), {result=> "0.0532 ± 0.0036", value=> 0.05325, uncertainty=> 0.00362836051130535}],
+	['5.805e-9 ± 4e-12 * 4.804e-8 ± 1e-12', InexactValue(5.805e-9,1.2e-11) * InexactValue(4.804e-8,5e-11), {result=> "2.79x10^-16 ± 0.0065x10^-16", value=> 2.788722e-16, uncertainty=> 6.45425637002436e-19}],
+    ['5.805e-9 ± 0.012e-9 * 4.804e-8 ± 0.005e-8', InexactValue(5.805e-9,0.012e-9) * InexactValue(4.804e-8,0.005e-8), {result=> "2.79x10^-16 ± 0.0065x10^-16", value=> 2.788722e-16, uncertainty=> 6.45425637002436e-19}],
+	
+    ['355±3 / 150±2', InexactValue(355,3) / InexactValue(150,2), {result=> "2.367 ± 0.037", value=> 2.36666666666667, uncertainty=> 0.0373597789931867}],
+	['0.355±0.005 / 0.150±0.010', InexactValue(0.355,0.005) / InexactValue(0.150,0.010), {result=> "2.37 ± 0.16", value=> 2.36666666666667, uncertainty=> 0.161260467169127}],
+	['5.805e-9 ± 4e-12 / 4.804e-8 ± 1e-12', InexactValue(5.805e-9,1.2e-11) / InexactValue(4.804e-8,5e-11), {result=> "0.12084 ± 0.00028", value=> 0.120836802664446, uncertainty=> 0.000279666350152643}],
+    ['5.805e-9 ± 0.012e-9 / 4.804e-8 ± 0.005e-8', InexactValue(5.805e-9,0.012e-9) / InexactValue(4.804e-8,0.005e-8), {result=> "0.12084 ± 0.00028", value=> 0.120836802664446, uncertainty=> 0.000279666350152643}],
+
+    ['(355 ± 3)^3', (InexactValue(355,3))**3, {result=> "4.47x10^7 ± 0.11x10^7", value=> 44738875, uncertainty=> 1134225}],
+	['(5.805e-9 ± 1.2e-11) ^ 3', InexactValue(5.805e-9,1.2e-11)**3, {result=> "1.96x10^-25 ± 0.012x10^-25", value=> 1.95617035125e-25, uncertainty=> 1.2131289e-27}],
+
+    ['log (355 ± 3)', log(InexactValue(355,3)), {result=> "2.5502 ± 0.0037", value=> 2.55022835305509, uncertainty=> 0.00367009421326692}],
+    ['ln (355 ± 3)', (InexactValue(355,3))->ln, {result=> "5.8721 ± 0.0085", value=> 5.87211778947542, uncertainty=> 0.00845070422535211}],
+
+	
+);
+$test = InexactValue(5.805e-9,1.2e-11) + InexactValue(4.804e-8,5e-11);
+
+$html = '
+<style>
+table#results {
+	border: 1px double black;
+	border-collapse: collapse;
+	}
+table#results th, table#results td {  
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+.wrong {
+	background:salmon;
+}
+.unknown{
+	background:gray;
+}
+</style>
+<table id="results">
+	<tr>
+		<th>Operation</th>
+		<th>Result</th>
+		<th>Value</th>
+		<th>Uncertainty</th>
+		<th>Error</th>
+	</tr>
+	';
+
+sub hashPrint {
+	$hashRef = shift;
+	%hash = %$hashRef;
+	$output='';
+	while(my($k, $v) = each %hash) { 
+		$output .= "$k: $v<br/>";
+	}
+	return $output;
+}
+
+foreach $dataItem (@data){
+	$success=1;
+	$errorMessage='';
+	
+	$html .= "<tr>";
+	$testString = $dataItem->[0];
+	$testValue = $dataItem->[1];
+	$expected = $dataItem->[2];
+
+	$html .= "<td>$testString</td>";
+
+	if ($expected->{result} eq $testValue->string){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{result} . "<br/>";
+		$success=0;
+	}
+	$html .= $testValue->string() . "</td>";
+
+    # floating point errors cause == to not work sometimes.  Easier to compare by string equivalent as they both are numbers and should convert to the same.
+	if ($expected->{value} eq $testValue->valueAsNumber()){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{value} . "<br/>";
+		$success=0;
+	}
+	$html .= $testValue->valueAsNumber() . "</td>";    
+
+	# floating point errors cause == to not work sometimes.  Easier to compare by string equivalent as they both are numbers and should convert to the same.
+	if ($expected->{uncertainty} eq $testValue->{uncertainty}){
+		$html .= "<td>";
+	} else {
+		$html .= "<td class='wrong'>";
+		$errorMessage .= "Expected value: " . $expected->{uncertainty} . "<br/>";
+		$success=0;
+	}
+	$html .= $testValue->uncertainty() . "</td>";
+
+	
+
+	$html .= "<td>";
+	if ($success){
+		$html .='';
+	} else {
+		$html .= $errorMessage;
+	} 
+	$html .= "</td>";
+	$html .= "</tr>";
+}
+
+$html .= '</table>';
+
+BEGIN_PGML
+
+[$html]***
+
+END_PGML
+
+
+ENDDOCUMENT();
