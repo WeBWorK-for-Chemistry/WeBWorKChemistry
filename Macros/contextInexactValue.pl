@@ -527,14 +527,64 @@ sub unroundedValueMarked {
 }
 
 sub formatScientific {
-	my ($value, $exponent, $digits, $preventClean) = @_;
+	my ($value, $targetExponent, $decimalCount, $preventClean) = @_;
+	my $scientific = sprintf("%e", $value);
+	if ($scientific =~ /([+-])?(\d*)(?:\.)?(\d*)?(?:[eE])([+-]?\d*)/x){
+		my $sign = $1;
+		my $whole = $2;
+		my $decimal = $3;
+		my $exp = $4;
+		my $diff = $targetExponent - $exp; # move decimal left (if positive) or right (if negative) by this many digits
+		if ($diff > 0){
+			$decimal = $whole . $decimal;
+			$whole = '';
+			my $roundingTest = 0;
+			if (length($decimal) > $decimalCount){
+				$roundingTest = substr($decimal, $decimalCount, 1); 
+			} else {
+				while (length($decimal) < $decimalCount){
+					$decimal .= '0';
+				}
+			}
+			$decimal = substr($decimal, 0, $decimalCount);
+			if ($roundingTest >= 5){
+				$decimal = roundUp($decimal);
+			}
+			$diff--;
+			while ($diff > 0){
+				$decimal = '0' . $decimal;
+				$diff--;
+			}
+			$scientific = "0.${decimal}e${targetExponent}";
+		} elsif ($diff < 0){
+			# IGNORING SIG FIGS HERE. This is an unusual condition.
+			my @decimalArr = split(//, $decimal);
+			while ($diff < 0){ 
+				if (scalar @decimalArr > 0){
+					my $piece = splice(@decimalArr, 0, 1);
+					$whole .= $piece;
+				} else {
+					$whole .= '0'
+				}
+				$diff++;
+			}
+			if (scalar @decimal > 0){
+				$decimal = join("",@decimalArr);
+				$scientific = "${whole}.${decimal}e${targetExponent}";
+			} else {
+				$scientific = "${whole}e${targetExponent}";
+			}
+		} else {
+			# just round to correct sig figs
+			$scientific = sprintf("%.${decimalCount}e", $scientific);
+		}
+	}
 
 	if ($preventClean){
-		return sprintf("%.2e", $value);
-	} else{
-		return cleanSciText(sprintf("%.2e", $value));
+		return $scientific;
+	} else {
+		return cleanSciText($scientific);
 	}
-	
 }
 
 sub stringWithUncertainty {
@@ -555,45 +605,49 @@ sub stringWithUncertainty {
 	my $forceScientific = shift;
 
 	# limit uncertainty "sig figs" to 2, but further limit it by the value last decimal place
-	my $leastSigPosition = $self->leastSignificantPosition({useStringPosition => 1});
 	my $uncertainty = $self->absoluteUncertainty();
 	my $scientificNotationThreshold = $self->{options}->{scientificNotationThreshold};
 	my $valAsNumber = $self->valueAsNumber();
-	warn $valAsNumber;
+	my $leastSigPosition = leastSignificantPositionLiteral($valAsNumber);
+	my $leastSigPositionUncertainty = leastSignificantPositionLiteral($uncertainty);
 	my @esplit = split(/e|E/x, sprintf("%e", $valAsNumber));
-	warn sprintf("%e", $valAsNumber);
-	my $exponent = abs($esplit[1]);
-	warn $leastSigPosition;
-	#smallest sig fig is 
-	if ($leastSigPosition > 0){
-		warn $exponent;
-		warn abs($exponent);
-		warn $scientificNotationThreshold;
-		if ($self->preferScientificNotation() || $forceScientific || abs($exponent) > $scientificNotationThreshold){
-			#sci notation
-			if ($preventClean) {
-				
-				return sprintf("%.${leastSigPosition}e", $valAsNumber) . ' ± ' . formatScientific($uncertainty, $exponent, 2, $preventClean);
-			} else {
-				return cleanSciText(sprintf("%.2e", $valAsNumber)) . ' ± ' . formatScientific($uncertainty, $exponent, 2, $preventClean);
-			}
-			return sprintf("%.${leastSigPosition}e", $valAsNumber) . ' ± ' . sprintf("%.${leastSigPosition}e", $self->absoluteUncertainty()) ;
-		} else {
-			#standard notation
-			return sprintf("%.${leastSigPosition}f", $valAsNumber) . ' ± ' . sprintf("%.${leastSigPosition}f", $self->absoluteUncertainty()) ;
-		}
-	} 
-	else {
+	my $exponent = $esplit[1];
 
+	if ($self->preferScientificNotation() || $forceScientific || abs($exponent) > $scientificNotationThreshold){
+		# sci notation
+		# Max decimals by uncertainty string OR 2 whichever is smaller.
+		my $decimalCount =  $exponent + $leastSigPositionUncertainty;
+		if ($decimalCount > 2){
+			$decimalCount = 2;
+		}
+		return formatScientific($valAsNumber, $exponent, $decimalCount, $preventClean) . ' ± ' . formatScientific($uncertainty, $exponent, $decimalCount, $preventClean);
+	} else {
+		#standard notation
+		if ($leastSigPosition > 0){
+			return sprintf("%.${leastSigPosition}f", $valAsNumber) . ' ± ' . sprintf("%.${leastSigPosition}f", $uncertainty);
+		} 
+		elsif ($leastSigPosition < 0) {
+			# need to round uncertainty to two sig figs
+			my $roundTo =  highestDigitPosition($uncertainty)+1; 
+			$uncertainty = main::Round($uncertainty, $roundTo);
+			$leastSigPosition = abs($leastSigPosition);
+			return sprintf("%d", $valAsNumber) . ' ± ' . sprintf("%d", $uncertainty);
+		} else {
+			# 4 ± 0.8 gives weird results with the branch above
+			my $highestPosUncertainty= highestDigitPosition($uncertainty);
+			my $diff =  $leastSigPositionUncertainty - $highestPosUncertainty;
+			if ($diff > 1){
+				$diff = 1;
+			}
+			my $minDigit = $highestPosUncertainty + $diff;
+			if ($leastSigPositionUncertainty > 0){
+				return sprintf("%.${minDigit}f", $valAsNumber) . ' ± ' . sprintf("%.${minDigit}f", $uncertainty);
+			} else {
+				return sprintf("%d", $valAsNumber) . ' ± ' . sprintf("%d", $uncertainty);
+			}
+			
+		}
 	}
-	if ($uncertainty == Inf){
-		$uncertainty = 0;
-	}
-	my $sigfigsUncertainty = countSigFigsFromString($uncertainty);
-	warn $valAsNumber;
-	warn $leastSigPosition;
-	warn $sigfigsUncertainty;
-	return $valAsNumber . ' ± ' . $self->absoluteUncertainty();
 }
 
 
@@ -1079,12 +1133,11 @@ sub generateSfCountingExplanation {
 # This manually rounds a number up (using recursion).
 #
 sub roundUp {
-	$self = shift;
 	$stringToRoundUp = shift;
 	($digitToRound, $decimal) = $stringToRoundUp =~ /(\d)(\.?\,?)$/x; #must be at end, might have decimal point (and comma for international)
 	$pieceTrimmed = $stringToRoundUp =~ s/\d\.?\,?$//rx;
 	if ($digitToRound == 9) {
-			$pieceTrimmed = $self->roundUp($pieceTrimmed);
+			$pieceTrimmed = roundUp($pieceTrimmed);
 			$digitToRound = 0;
 	} else {
 		$digitToRound++;
@@ -1205,7 +1258,7 @@ sub generateSfRoundingExplanation {
 				
 			} else {
 				if ($firstDigitToDrop >= 5) {
-					$keepPart = $self->roundUp($keepPart);
+					$keepPart = roundUp($keepPart);
 				}
 				unless ($leadingZeros . $keepPart =~ /[\.\,]/x) { # if leadingZeros + keepPart does not have a decimal, 
 																												# then most likely we'll need trailing zeroes to pad out the actual number
@@ -1646,15 +1699,6 @@ sub simpleUncertainty {
 	return 10**($pos);
 }
 
-sub calculatedUncertainty {
-	$self = shift;
-	# TBD
-	# This is for propagating uncertainty via calculations.  
-	# i.e. adding relative uncertainty when multiplying/dividing 
-	# and adding absolute uncertainty when adding/subtracting.
-	Value::Error("Not implemented yet!"); 
-}
-
 ##################################################
 #
 #  Binary operations
@@ -1717,8 +1761,8 @@ sub leastSignificantPosition {
 	my $val = $self->valueAsNumber();
 	my $sf = $self->sigFigs();
 	if ($useStringPosition){
-		$val =~ s/^\-//;		
-	}else {		
+		$val =~ s/^\-//x;
+	}else {
 		$val = abs($val);
 	}
 	if ($val >= 10) {
@@ -1728,8 +1772,8 @@ sub leastSignificantPosition {
 			$p++;
 		}
 		if ($useStringPosition){
-			my $val = $val/(10**$p);
-			$val =~ s/\d\.?//;
+			$val = $val/(10**$p);
+			$val =~ s/\d\.?//x;
 			return length($val) - $p;
 		}else {
 			return -$p + $sf - 1;
@@ -1745,18 +1789,16 @@ sub leastSignificantPosition {
 			$p++;
 		}
 		if ($useStringPosition){
-			my $val = $val*(10**$p);
-			$val =~ s/\d\.?//;
+			$val = $val*(10**$p);
+			$val =~ s/\d\.?//x;
 			return length($val) + $p;
 		}else {
 			return $p + $sf - 1;
 		}
-		
-
 	} else {
 		# 1.000 - 9.9999
 		if ($useStringPosition){
-			$val =~ s/\d\.?//;
+			$val =~ s/\d\.?//x;
 			
 			return length $val;
 		} else {
@@ -1765,8 +1807,65 @@ sub leastSignificantPosition {
 	}
 }
 
+sub leastSignificantPositionLiteral {
+	my $val = shift;
+	my $options = shift;
+	
+	$val =~ s/^\-//x;
+	
+	if ($val >= 10) {
+		# 10.000 - Inf, 1.2e8		
+		my $p = 1;
+		while ($val / (10**$p) >= 10) {  # this used to be just '>' but 100. would show 1 as the least sig position (tenths) which is WRONG
+			$p++;
+		}
+		$val = $val/(10**$p);
+		$val =~ s/\d\.?//x;
+		return length($val) - $p;
+		
+	} elsif ($val < 1) {
+		if ($val == 0){
+			return 0;
+		}
+		# 0.0000 - 0.9999
+		my $p = 1;
+		while ($val * (10**$p) < 1) {
+			$p++;
+		}
+		$val = $val*(10**$p);
+		$val =~ s/\d\.?//x;
+		return length($val) + $p;
+	} else {
+		# 1.000 - 9.9999
+		$val =~ s/\d\.?//x;
+		return length($val);
+	}
+}
+
+sub highestDigitPosition {
+	my $val = shift;
+	$val = abs($val);
+	if ($val >= 10) {
+		my $p = 1;
+		while ($val / (10**$p) >= 10) {  # this used to be just '>' but 100. would show 1 as the least sig position (tenths) which is WRONG
+			$p++;
+		}
+		return -1*$p;
+	} elsif ($val < 1) {
+		if ($val == 0){
+			return 0;
+		}
+		my $p = 1;
+		while ($val * (10**$p) < 1) {
+			$p++;
+		}
+		return $p;
+	} else {
+		return 0;
+	}
+}
+
 sub calculateSigFigsForPosition {
-	$self = shift;
 	my $val = shift;
 	my $position = shift;
 	#my $sign = $val < 0 ? -1 : 1;
@@ -1845,7 +1944,7 @@ sub add {
 	my $rightPos = $r->leastSignificantPosition();
 	my $leftMostPosition = $self->basicMin($leftPos, $rightPos);
 	my $newValue = $l->valueAsNumber() + $r->valueAsNumber();
-	my $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
+	my $newSigFigs = calculateSigFigsForPosition($newValue, $leftMostPosition);
 
 	return $self->new($newValue, $newSigFigs);
 }
@@ -1862,7 +1961,7 @@ sub sub {
 	my $rightPos = $r->leastSignificantPosition();
 	my $leftMostPosition = $self->basicMin($leftPos, $rightPos);
 	my $newValue = $l->valueAsNumber() - $r->valueAsNumber();
-	my $newSigFigs = $self->calculateSigFigsForPosition($newValue, $leftMostPosition);
+	my $newSigFigs = calculateSigFigsForPosition($newValue, $leftMostPosition);
 
 	return $self->new($newValue, $newSigFigs);
 }
@@ -1906,7 +2005,15 @@ sub power {
 	#       the value of the exponential
 	# rule for intro chem: (used here!)
 	# count decimals in exponent and use that for answer sig figs
+	# propagation of error: derivative=> x^3 = 3x^2 dx
 	my ($self,$l,$r,$other) = Value::checkOpOrderWithPromote(@_);
+
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my $uncertainty = $l->uncertainty();
+		$uncertainty = abs($r*($l->valueAsNumber()**($r-1)))*$uncertainty;
+		my $powerResult = $l->valueAsNumber() ** $r->valueAsNumber();
+		return $self->new($powerResult, $uncertainty);
+	}
 
 	my $decimalPortionOfExponent = abs($r->valueAsRoundedNumber()) - sprintf('%.f',abs($r->valueAsRoundedNumber()));
 		
@@ -1929,10 +2036,15 @@ sub log {
 	# rule for intro chem: (used here!)
 	# count total sig figs in argument and use as decimal count for answer
 	my $self = shift;
-	my $sigFigs = $self->sigFigs();
 	my $logResult = log($self->valueAsNumber())/log(10);
-	# warn "DOING REGULAR LOG";
-	# warn $logResult;
+	my $sigFigs = $self->sigFigs();
+		
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my $uncertainty = $self->uncertainty();
+		$uncertainty = $uncertainty/(abs($self->valueAsNumber())*log(10));
+		return $self->new($logResult, $uncertainty );
+	}
+
 	if (abs($logResult) < 1){
 		return $self->new($logResult, $sigFigs);
 
@@ -1955,7 +2067,13 @@ sub ln {
 	my $self = shift;
 	my $sigFigs = $self->sigFigs();
 	my $logResult = log($self->valueAsNumber());
-	# warn "DOING natural log";
+
+	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
+		my $uncertainty = $self->uncertainty();
+		# VERIFY THIS!
+		$uncertainty = $uncertainty/(abs($self->valueAsNumber()));
+		return $self->new($logResult, $uncertainty);
+	}
 
 	if (abs($logResult) < 1){
 		return $self->new($logResult, $sigFigs);
