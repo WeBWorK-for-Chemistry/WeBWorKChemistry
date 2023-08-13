@@ -924,18 +924,18 @@ sub TeX {
 	my $r = $self->string($preventClean);
 	
 	if ($self->context->flags->get('precisionMethod') eq 'uncertainty'){
-		my @split = split(/±/x, $r);
+		my @split = split(/±/x, $r); # split at plus/minus symbol
 		my $num = $split[0];
 		my $unc = $split[1];
-		$num =~ s/x/\\times /x;
-		$num =~ s/\^(.*)/^{$1}/x;
-		$unc =~ s/x/\\times /x;
-		$unc =~ s/\^(.*)/^{$1}/x;
-		return "$num \\pm $unc";
+		$num =~ s/x/\\times /x; # swap x for times symbol
+		$num =~ s/\^(\S*)/^{$1}/x; # get exponent part, ignoring whitespace, and replace with carat and braces
+		$unc =~ s/x/\\times /x; 
+		$unc =~ s/\^(\S*)/^{$1}/x;
+		return "$num\\pm$unc";
 
 	}
-	$r =~ s/x/\\times /x;
-	$r =~ s/\^(.*)/^{$1}/x;
+	$r =~ s/x/\\times /x; # swap x for times symbol
+	$r =~ s/\^(\S*)/^{$1}/x; # get exponent part, ignoring whitespace, and replace with carat and braces
 	return $r;
 }
 
