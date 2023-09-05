@@ -562,6 +562,12 @@ our %known_units = ('m'  => {
 													 'kg'        => 1,
 													 's'         => -2
 													},
+										'Joule'  => {
+													 'factor'    => 1,
+													 'm'         => 2,
+													 'kg'        => 1,
+													 's'         => -2
+													},
 								
 								'erg'  => {
 													 'factor'    => 1E-7,

@@ -1,7 +1,9 @@
 ## @file contextInexactValue
 
-loadMacros('MathObjects.pl');
-loadMacros('PGauxiliaryFunctions.pl');    # needed for Round function
+loadMacros( 'MathObjects.pl', 'PGasu.pl', 'PGauxiliaryFunctions.pl' );
+
+#loadMacros('PGasu.pl');
+#loadMacros('PGauxiliaryFunctions.pl');    # needed for Round function
 
 sub _contextInexactValue_init { return InexactValue::Init(); }
 
@@ -352,10 +354,11 @@ sub countSigFigsFromString {
 # if starts with 0, then decimal part might have leading zeros... convert to number, then back to string, then get length
 # if starts with non-zero, decimal part is all significant... just count digits
             my $secondPartAsNumber = $decimalParts[1] + 0;
-            $sigFigs +=
-              ( $isFirstZero
+            $sigFigs += (
+                $isFirstZero
                 ? length("$secondPartAsNumber")
-                : length( $decimalParts[1] ) );
+                : length( $decimalParts[1] )
+            );
         }
     }
     else {
@@ -1135,10 +1138,12 @@ sub TeX {
 # "Cleaning" converts 'e' computer notation into readable '\10^' notation
 # which in LaTeX would use \times instead of x.
 # @param preventClean optional - Prevent cleaning, i.e. prevent conversion of 'e' to 'x10^'
+# @param forceScientific optional - Force scientific notation even for easy to read numbers.
 #*
     my $self         = shift;
     my $preventClean = shift;
-    my $r            = $self->string($preventClean);
+	my $forceScientific = shift;
+    my $r            = $self->string($preventClean, $forceScientific);
 
     if (   $self->context->flags->get('precisionMethod')
         && $self->context->flags->get('precisionMethod') eq 'uncertainty' )
@@ -2782,7 +2787,7 @@ sub cmp_class { return "Inexact Value"; }
 # 	return $self->type eq $other->type && !$other->isFormula;
 # }
 
-sub asScientific {
+sub requireScientific {
     my $self = shift;
 
     my $cmp = $self->SUPER::cmp(
@@ -2790,37 +2795,92 @@ sub asScientific {
         correct_ans_latex_string => $self->TeX,
         @_
     );
-
-    $cmp->install_pre_filter('erase');
-    $cmp->install_pre_filter(
-        sub {
-            my $ans = shift;
-            $inexactStudent = 0;
-            if ( $ans->{student_ans} eq '' ) {
-                $inexactStudent =
-                  $self->new( 0, Inf );   #blank answer is zero with infinite sf
-            }
-            else {
-                $inexactStudent = $self->new( $ans->{student_ans} );
-            }
-
-            $ans->{student_value}        = $inexactStudent;
-            $ans->{preview_latex_string} = $inexactStudent->TeX;
-            $ans->{student_ans}          = $inexactStudent->string;
-
-            return $ans;
-        }
-    );
-
-    $ans->install_evaluator(
-        sub {
-            my $ans = shift;
-            $ans->{_filter_name} = "MathObjects answer checker";
-            $ans->{correct_value}->cmp_parse($ans);
-        }
-    );
+	
+    $cmp->install_pre_filter( \&blankInexactValuePrefilter );
+    $cmp->install_pre_filter( \&requireScientificPrefilter );
+    $cmp->install_post_filter( \&catch_errors_filter );
 
     return $cmp;
+
+}
+
+sub requireDecimal {
+    my $self = shift;
+
+	# leaving commented as this might have unintended consequences
+	#$self->context->flags->set('scientificNotationThreshold'=>16);
+
+    my $cmp = $self->SUPER::cmp(
+        correct_ans              => $self->string,
+        correct_ans_latex_string => $self->TeX,
+        @_
+    );
+	
+    $cmp->install_pre_filter( \&blankInexactValuePrefilter );
+    $cmp->install_pre_filter( \&requireDecimalPrefilter );
+    $cmp->install_post_filter( \&catch_errors_filter );
+
+    return $cmp;
+
+}
+
+sub requireScientificPrefilter {
+    my $ans = shift;
+
+    $ans->{_filter_name} = 'requireScientificNotation_prefilter';
+	$ans->{correct_ans} = $ans->{correct_value}->string(0,1);
+	$ans->{correct_ans_latex_string} = $ans->{correct_value}->TeX(0,1);
+
+	# check answer is in scientific notation format of some kind:  3E-3, 3e-3, 3x10^-3, 3*10^-3, etc.
+	unless ($ans->{student_ans} =~ /[\d.]+(?:e|E|\s?(?:x|X|\*)\s?10(?:\^|\*\*)|\s?(?:x|X|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|X|\*)\s?10(?:\^|\*\*))[({]?[+-]?\d+[)}]?/x){
+		$ans->throw_error( 'SYNTAX', "This is not scientific notation." );
+	}    
+
+    return $ans;
+}
+
+sub requireDecimalPrefilter {
+    my $ans = shift;
+
+    $ans->{_filter_name} = 'requireDecimalNotation_prefilter';
+	$ans->{correct_ans} = $ans->{correct_value}->string(0,0);
+	$ans->{correct_ans_latex_string} = $ans->{correct_value}->TeX(0,0);
+
+	# check answer is in scientific notation format of some kind:  3E-3, 3e-3, 3x10^-3, 3*10^-3, etc.
+	if ($ans->{student_ans} =~ /[\d.]+(?:e|E|\s?(?:x|X|\*)\s?10(?:\^|\*\*)|\s?(?:x|X|\*)\s?10(?:\^|\*\*)\+|\s?(?:x|X|\*)\s?10(?:\^|\*\*))[({]?[+-]?\d+[)}]?/x){
+		$ans->throw_error( 'SYNTAX', "This is scientific notation, need decimal notation." );
+	}    
+
+    return $ans;
+}
+
+sub blankInexactValuePrefilter {
+    my $ans = shift;
+    $ans->{_filter_name} = 'blankInexactValue_prefilter';
+    my $inexactStudent;
+    if ( $ans->{student_ans} eq '' ) {
+        $inexactStudent =
+          $self->new( 0, Inf );    #blank answer is zero with infinite sf
+    }
+    else {
+        $inexactStudent =
+          InexactValue::InexactValue->new( $ans->{student_ans} );
+    }
+
+    $ans->{student_value}        = $inexactStudent;
+    $ans->{preview_latex_string} = $inexactStudent->TeX();
+    $ans->{student_ans}          = $inexactStudent->string();
+
+    return $ans;
+}
+
+sub catch_errors_filter {
+    my ($rh_ans) = shift;
+    if ( $rh_ans->catch_error('SYNTAX') ) {
+        $rh_ans->{ans_message} = $rh_ans->{error_message};
+        $rh_ans->clear_error('SYNTAX');
+    }
+    $rh_ans;
 }
 
 sub cmp {
@@ -2833,26 +2893,26 @@ sub cmp {
     );
 
     $cmp->install_pre_filter('erase');
-    $cmp->install_pre_filter(
-        sub {
-            my $ans = shift;
-            $inexactStudent = 0;
-            if ( $ans->{student_ans} eq '' ) {
-                $inexactStudent =
-                  $self->new( 0, Inf );   #blank answer is zero with infinite sf
-            }
-            else {
-                $inexactStudent = $self->new( $ans->{student_ans} );
-            }
+    $cmp->install_pre_filter( \&blankInexactValuePrefilter );
 
-            $ans->{student_value}        = $inexactStudent;
-            $ans->{preview_latex_string} = $inexactStudent->TeX
-              ; #$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
-            $ans->{student_ans} = $inexactStudent->string;
+  #     sub {
+  #         my $ans = shift;
+  #         $inexactStudent = 0;
+  #         if ( $ans->{student_ans} eq '' ) {
+  #             $inexactStudent =
+  #               $self->new( 0, Inf );   #blank answer is zero with infinite sf
+  #         }
+  #         else {
+  #             $inexactStudent = $self->new( $ans->{student_ans} );
+  #         }
 
-            return $ans;
-        }
-    );
+#         $ans->{student_value}        = $inexactStudent;
+#         $ans->{preview_latex_string} = $inexactStudent->TeX()
+#           ; #$inexactStudent->TeX;# "\\begin{array}{l}\\text{".join("}\\\\\\text{",'@student')."}\\end{array}";
+#         $ans->{student_ans} = $inexactStudent->string();
+#         return $ans;
+#     }
+# );
 
     return $cmp;
 }
