@@ -1,10 +1,10 @@
 ##DESCRIPTION
-##  Significant Figures problem: addition or subtraction 
+##  Convert to scientific notation
 ##ENDDESCRIPTION
 
-##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+##KEYWORDS('scientific notation', 'significant', 'figures', 'sigfigs')
 
-## Date('2/15/2021')
+## Date('9/5/2023')
 ## Author('Lee McPherson')
 ## Institution('Portland Community College')
 
