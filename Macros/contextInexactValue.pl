@@ -2892,7 +2892,7 @@ sub cmp {
         @_
     );
 
-    $cmp->install_pre_filter('erase');
+    #$cmp->install_pre_filter('erase');
     $cmp->install_pre_filter( \&blankInexactValuePrefilter );
 
   #     sub {
