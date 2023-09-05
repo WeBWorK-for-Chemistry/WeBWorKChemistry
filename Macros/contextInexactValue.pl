@@ -2155,10 +2155,45 @@ sub cmp_class {return "Inexact Value";}
 # );
 # }
 
-sub typeMatch {
-	my $self = shift;  my $other = shift;
-	return 1 unless ref($other);
-	return $self->type eq $other->type && !$other->isFormula;
+# sub typeMatch {
+# 	my $self = shift;  my $other = shift;
+# 	return 1 unless ref($other);
+# 	return $self->type eq $other->type && !$other->isFormula;
+# }
+
+sub asScientific {
+	my $self = shift;
+
+	my $cmp = $self->SUPER::cmp(
+		correct_ans => $self->string,
+		correct_ans_latex_string =>  $self->TeX,
+		@_
+	);  
+
+	$cmp->install_pre_filter('erase');
+	$cmp->install_pre_filter(sub {
+		my $ans = shift;
+		$inexactStudent=0;
+		if ($ans->{student_ans} eq ''){
+			$inexactStudent = $self->new(0,Inf);  #blank answer is zero with infinite sf
+		} else {
+			$inexactStudent = $self->new($ans->{student_ans});
+		}
+
+		$ans->{student_value} = $inexactStudent;
+		$ans->{preview_latex_string} = $inexactStudent->TeX;
+		$ans->{student_ans} = $inexactStudent->string; 
+
+		return $ans;
+	});
+
+	$ans->install_evaluator(sub {
+    	my $ans = shift;
+     	$ans->{_filter_name} = "MathObjects answer checker";
+     	$ans->{correct_value}->cmp_parse($ans);
+  	});
+
+	return $cmp;
 }
 
 sub cmp {
