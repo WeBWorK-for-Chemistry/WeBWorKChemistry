@@ -23,6 +23,8 @@ sub Init {
     $context->operators->clear;
     $context->functions->clear;
     $context->strings->clear;
+    $context->flags->set('tolerance', 0); # default for InexactValue
+    $context->flags->set('tolType', 'absolute'); # default for InexactValue
 
     $context->strings->add( infinity => { infinite => 1 } );
     $context->strings->add( inf      => { infinite => 1 } );
@@ -103,10 +105,19 @@ sub new {
         scientificNotationThreshold => 6
         , # can be set to 20 if problem requires conversion from standard to sci and we need to force standard,
     };
-
     #	$tolerance = 0;          # zero tolerance by default
     #	$tolType = 'absolute';   # absolute tolerance if not zero
 
+    if ($context->flags->get('tolerance')) {
+        $options->{tolerance} = $context->flags->get('tolerance');
+    }
+    if ($context->flags->get('tolType')){
+        $options->{tolType} = $context->flags->get('tolType');
+    }
+    if ($context->flags->get('scientificNotationThreshold')){
+        $options->{scientificNotationThreshold} = $context->flags->get('scientificNotationThreshold');
+    }
+   
     my $matchNumber = '';
 
     if ( $argCount >= 2 ) {
@@ -3050,6 +3061,7 @@ sub compareValue {
 # While a relative value of tolerance is ok, it's easier to use absolute tolerance since we know approximately how much the last digit will very.
     my $tolerance = $self->{options}{tolerance};
     my $tolType   = $self->{options}{tolType};
+    
 
     if ( $tolerance == 0 ) {
 
@@ -3069,9 +3081,8 @@ sub compareValue {
         }
     }
     else {
-
         if ( $tolType eq 'relative' ) {
-            $tolerance = $correct->valueAsNumber * $tolerance * 0.01;
+            $tolerance = $self->valueAsNumber * $tolerance;
         }
         $correctWithTolerancePlus  = $self->valueAsNumber + $tolerance;
         $correctWithToleranceMinus = $self->valueAsNumber - $tolerance;
