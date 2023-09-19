@@ -46,39 +46,36 @@ Context()->flags->set(
 
 
 $radio1 = RadioButtons(
-  ["Different plants have different characteristics.","Plants that get more sunshine grow larger than plants that get less sunshine.","Plants that grow in the shade grow larger.","Plants that don’t receive water will die.","Plants that receive the same amount of water and plant food will grow the same amount."],
- "Plants that get more sunshine grow larger than plants that get less sunshine.", # correct answer
+  ["Different cookies have different characteristics.","Cookies that steam in the oven longer expand more.","Putting more baking soda in the cookie dough will result in larger cookies.","Putting less baking soda in the cookie dough will result in larger cookies.","Putting more baking soda in the cookies won’t change the volume of the cookies."],
+ "Putting more baking soda in the cookie dough will result in larger cookies.", # correct answer
 );
 
 ANS( $radio1->cmp() );
 
 $radio2 = RadioButtons(
-  ["Gary wanted to determine if the size of the container would affect the plant growth.","Gary wanted to make sure the size of the container did not affect differential plant growth in his experiment.","Gary wanted to control how much plant food his plants received.","Gary wanted his garden to look organized.","There is no possible scientific reason for having the same size containers."],
- "Gary wanted to make sure the size of the container did not affect differential plant growth in his experiment.", # correct answer
+  ["Diameter of the cookies","Height of the cookies","Volume of the cookies","Radius of the cookies","Temperature of the cookies"],
+ "Volume of the cookies", # correct answer
 );
 
 ANS( $radio2->cmp() );
 
 $radio3 = RadioButtons(
-  ["Gary wanted to test the effect of shade on plant growth and therefore, he wanted to
-have no variables other than the amount of sunshine on the plants.","Gary wanted to test the effect of the amount of water on plant growth.","Gary's hypothesis was that water quality was affecting plant growth.","Gary was conserving water.","There is no possible scientific reason for having the same amount of water for each plant
-every day."],
- "Gary wanted to test the effect of shade on plant growth and therefore, he wanted to
-have no variables other than the amount of sunshine on the plants.", # correct answer
+  ["Mateo wanted to test the effect of baking soda quantity on cookie size and therefore, wanted no variables other than the amount of baking soda.","Mateo wanted to test the effect of cooking temperature on cookie size.","Mateo wanted to test the effect of mixer speed on cookie size.","Mateo only had one set of kitchen equipment.","There was no scientific reason to do this."],
+ "Mateo wanted to test the effect of baking soda quantity on cookie size and therefore, wanted no variables other than the amount of baking soda.", # correct answer
 );
 
 ANS( $radio3->cmp() );
 
 $radio4 = RadioButtons(
-  ["the amount of water","the amount of plant food","the amount of soil","the amount of sunshine","the type of soil"],
- "the amount of sunshine", # correct answer
+  ["Changing the volume of cookie dough would affect cookie size, but cookie dough volume was not the variable he was interested in studying.","Mateo didn’t want to adjust cooking temperature to account for different volumes of dough.","Cookies should scientifically always be the same size.","The recipe called for 1 tbsp cookies.","There was no scientific reason to do this."],
+ "Changing the volume of cookie dough would affect cookie size, but cookie dough volume was not the variable he was interested in studying.", # correct answer
 );
 
 ANS( $radio4->cmp() );
 
 $radio5 = RadioButtons(
-  ["individual plant variation","soil temperature due to different colors of containers","water loss due to evaporation from the soil","the effect of insects which may attack one set of plants but not the other","All of the above are possible factors that Gary did not control"],
- "All of the above are possible factors that Gary did not control", # correct answer
+  ["Volume of cookie dough","Amount of baking soda","Time of cooking","Volume of baked cookie","Amount of sugar in cookie"],
+ "Amount of baking soda", # correct answer
 );
 
 ANS( $radio5->cmp() );
@@ -93,29 +90,29 @@ BEGIN_PGML
 
 _Read the following passage, then answer the remaining questions._
 
-Gary noticed that two plants which his mother planted on the same day that were the same size when planted were different in size after three weeks. Since the larger plant was in the full sun all day and the smaller plant was in the shade of a tree most of the day, Gary believed the sunshine was responsible for the difference in the plant sizes. In order to test this, Gary bought ten small plants of the same size and type. He made sure they had the same size and type of pot. He also made sure they have the same amount and type of soil. Then Gary built a frame to hold a canvas roof over five of the plants while the other five were nearby, but out in the sun. Gary was careful to make sure that each plant received exactly the same amount of water and plant food every day.
+Mateo noticed that the one time he accidentally left baking soda out of his sugar cookie dough, his cookies were very small and dense. He, therefore, believed that the baking soda was the ingredient that caused cookies to expand. In order to test this, Mateo cooked 6 batches of sugar cookies with the same recipe, using the same kitchen equipment. He even used the same volume of dough for every cookie. He only changed the quantity of baking soda in each batch.  He then checked to see the effect of the various quantities of baking soda on each batch of cookies.
 
-a) Which of the following is a reasonable statement of Gary’s hypothesis?
+a) Which of the following is a reasonable statement of Mateo’s hypothesis?
 
     [@ $radio1->buttons() @]*
 
-b) What scientific reason might Gary have for insisting that the container size for the all plants be the same?
+b) What is the best measurement that Mateo could have made on the resulting cookies to check the effect of changing the quantity of baking soda?
 
     [@ $radio2->buttons() @]*
 
-c) What scientific reason might Gary have for insisting that all plants receive the same amount of water every day?
+c) What scientific reason did Mateo have for using the same kitchen equipment for every batch of cookies?
 
     [@ $radio3->buttons() @]*
 
-d) What was the variable being tested in Gary's experiment?
+d) What is the scientific reason for using the same volume of dough for each cookie?
 
     [@ $radio4->buttons() @]*
     
-e)  Which of the following factors may be varying in Gary’s experimental setup that he did not control?
+e) What variable is Mateo changing in this experiment? (independent variable)?
 
     [@ $radio5->buttons() @]*
 
-License: CC BY-NC-SA
+
 END_PGML
 ############################################################
 BEGIN_PGML_HINT
