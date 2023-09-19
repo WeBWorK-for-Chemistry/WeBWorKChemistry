@@ -228,7 +228,6 @@ sub getValue {
 # replace fancier scientific notation with plain 'e' so the computer recognizes it
     $result[0] =~ s/\s?(?:x|X|\*)\s?10(?:\^|\*\*)/e/x;
     $result[0] =~ s/E/e/;
-
     # split into coefficient and rest is scientific notation
     #my @parts = split(/e/, $matchNumber);
     return @result;
@@ -3082,10 +3081,11 @@ sub compareValue {
     }
     else {
         if ( $tolType eq 'relative' ) {
-            $tolerance = $self->valueAsNumber * $tolerance;
+            $tolerance = abs($self->valueAsNumber * $tolerance);
         }
         $correctWithTolerancePlus  = $self->valueAsNumber + $tolerance;
         $correctWithToleranceMinus = $self->valueAsNumber - $tolerance;
+        
         if (   $student->valueAsNumber >= $correctWithToleranceMinus
             && $student->valueAsNumber <= $correctWithTolerancePlus )
         {
