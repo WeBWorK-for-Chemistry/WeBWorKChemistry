@@ -505,7 +505,7 @@ sub valueAsRoundedNumber {
     # Will round to the sig figs set internally.
     #*
     my $self = shift;
-    $roundedValue = $self->string(true);
+    $roundedValue = $self->string(1);
     return $roundedValue;
 }
 
@@ -516,7 +516,7 @@ sub valueAsRoundedScientific {
  # but forced as scientific notation. Will round to the sig figs set internally.
  #*
     my $self = shift;
-    $roundedValue = $self->string( true, true );
+    $roundedValue = $self->string( 1, 1 );
     return $roundedValue;
 }
 
@@ -587,7 +587,7 @@ sub unroundedValueMarked {
                 $trail = substr( $trail, 0, $limit );
             }
         }
-        $trail =~ s/e/\\times 10^ /r;
+        $trail =~ s/e/\\times 10^ /;
     }
     else {
         $trail = substr(
