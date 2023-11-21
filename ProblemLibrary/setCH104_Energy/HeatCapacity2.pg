@@ -1,0 +1,93 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",                   "MathObjects.pl",
+    "PGML.pl",                         "PGcourse.pl",
+    "answerHints.pl",                  "niceTables.pl",
+    "parserPopUp.pl",                  "contextInexactValue.pl",
+    "contextInexactValueWithUnits.pl", "parserDimensionalAnalysis.pl",
+    "parserMultiAnswer.pl",            "weightedGrader.pl"
+);
+
+
+
+Context("Numeric");
+
+$m = random(1.25,9.99, 0.01);
+
+#while ($m % 10 == 0) {
+#    $m = 153;
+#}
+
+Context("InexactValueWithUnits");
+Context()->flags->set(
+    'newUnit' => [
+        [ 'Joule',     'Joules',     'J' ],
+        [ 'C', 'Celcius', 'degrees C', 'degrees Celcius']
+    ]
+);
+
+$mass = InexactValue($m, 3);
+$deltaT = InexactValue(128, 3);
+$Cp = InexactValue(0.385);
+
+
+
+
+$heat = $mass*$Cp*$deltaT;
+
+
+
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Calculating Heat Energy
+
+What quantity of heat (in Joules) is transferred when [$mass] grams of copper is heated from  [``\mathrm{25^\circ C}  ``] to  [``\mathrm{153^\circ C}  ``] C? The heat capacity of copper is [``\mathrm{0.385 \frac{J}{g^\circ C}}``] 
+
+
+heat (q) = [____]{$heat} J
+
+
+
+
+
+
+ 
+END_PGML
+
+
+##############################################
+BEGIN_TEXT
+
+END_TEXT
+
+BEGIN_PGML_HINT
+
+
+
+For more information on energy conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104:_Allied_Health_Chemisty_I_(2nd_Edition)/11:_Energy_and_Chemical_Reactions/11.03:_Energy_and_Specific_Heat_Calculations?contentOnly"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+ENDDOCUMENT();
