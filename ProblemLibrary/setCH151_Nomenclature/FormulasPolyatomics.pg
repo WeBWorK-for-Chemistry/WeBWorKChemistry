@@ -134,7 +134,11 @@ foreach $i (0..4) {
     foreach $j (0..2) {
         $anum = $anion_numbers[$j];
         $anion = $anions[$anum];
-        if ($sub_cat[$i] == $sub_anion[$j]){
+        if ($sub_cat[$i] == $sub_anion[$j] && $num == 0 && $anum == 5){
+            $xy[$j][$i] = Formula("H_2O");
+            }
+        elsif ($sub_cat[$i] == $sub_anion[$j]){
+          
             $xy[$j][$i]= Formula("$cat $anion");
         }
         elsif ($sub_anion[$j] == 1) {
