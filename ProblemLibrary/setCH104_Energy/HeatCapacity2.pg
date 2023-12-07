@@ -40,7 +40,7 @@ $Cp = InexactValue(0.385);
 
 
 
-$heat = $mass*$Cp*$deltaT;
+$heat = InexactValue($mass*$Cp*$deltaT);
 
 
 
