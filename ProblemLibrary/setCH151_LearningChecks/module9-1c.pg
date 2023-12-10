@@ -142,9 +142,9 @@ $mp4 = MultiAnswer($prod3, $prod4)->with(
 ############################################################
 
 BEGIN_PGML
-##Writing Balanced Reactions
+##Writing Balanced Equations
 
-Write the complete balanced molecular reaction from the description given.
+Write the complete balanced molecular equation from the description given.
 
 Write the balanced chemical equations for the following reactions based on their descriptions. These descriptions include information about the coefficients used to balance the equations. Do not forget to include the state of each reactant and product, (s) or (aq). You will need to enter all reactants and/or all products before WeBWorK will score your problem correctly.  It does not matter the order in which these are entered.
 
