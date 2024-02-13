@@ -78,17 +78,17 @@ BEGIN_PGML
 
 What is the IUPAC name for the following polyatomic ions?  Use the name and don't include the word ion as it is already there for you.  There is no need to capitalize the name or use an article.  The first one has been done for you to use as an example.  
 
-example: `HCO_3^{+}`  hydrogen carbonate ion
+example: [`HCO_3^{+}`]  hydrogen carbonate ion
 
-a. `[$anion[0]]^{[$c[0]]}` [____________________]{$answer[0]} ion
+a. [`[$anion[0]]^{[$c[0]]}`] [____________________]{$answer[0]} ion
 
-a. `[$anion[1]]^{[$c[1]]}` [____________________]{$answer[1]} ion
+a. [`[$anion[1]]^{[$c[1]]}`] [____________________]{$answer[1]} ion
 
-a. `[$anion[2]]^{[$c[2]]}` [____________________]{$answer[2]} ion
+a. [`[$anion[2]]^{[$c[2]]}`] [____________________]{$answer[2]} ion
 
-a. `[$anion[3]]^{[$c[3]]}` [____________________]{$answer[3]} ion
+a. [`[$anion[3]]^{[$c[3]]}`] [____________________]{$answer[3]} ion
 
-a. `[$anion[4]]^{[$c[4]]}` [____________________]{$answer[4]} ion
+a. [`[$anion[4]]^{[$c[4]]}`] [____________________]{$answer[4]} ion
 
 END_PGML
 
@@ -103,15 +103,15 @@ END_PGML_HINT
 
 BEGIN_PGML_SOLUTION
 
-a. `[$anion[0]]^{[$c[0]]}` is the [$answer[0]] ion.
+a. [`[$anion[0]]^{[$c[0]]}`] is the [$answer[0]] ion.
 
-a. `[$anion[1]]^{[$c[1]]}`is the [$answer[1]] ion.
+a. [`[$anion[1]]^{[$c[1]]}`] is the [$answer[1]] ion.
 
-a. `[$anion[2]]^{[$c[2]]}` is the [$answer[2]] ion.
+a. [`[$anion[2]]^{[$c[2]]}`] is the [$answer[2]] ion.
 
-a. `[$anion[3]]^{[$c[3]]}` is the [$answer[3]] ion.
+a. [`[$anion[3]]^{[$c[3]]}`] is the [$answer[3]] ion.
 
-a. `[$anion[4]]^{[$c[4]]}` is the [$answer[4]] ion.
+a. [`[$anion[4]]^{[$c[4]]}`] is the [$answer[4]] ion.
 
 
 
