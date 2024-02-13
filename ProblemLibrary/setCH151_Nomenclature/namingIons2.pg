@@ -87,17 +87,17 @@ BEGIN_PGML
 
 What is the name for the following ions?  Use the name and don't include the word ion as it is already there for you.  There is no need to capitalize the name or use an article.  The first one has been done for you to use as an example.  
 
-example: `Mn^{2+}`  manganese(II) ion
+example: [`Mn^{2+}`]  manganese(II) ion
 
-a. `[$e[0]]^{[$c[0]]}` [____________________]{$answ[0]} ion
+a. [`[$e[0]]^{[$c[0]]}`] [____________________]{$answ[0]} ion
 
-b. `[$e[1]]^{[$c[1]]}` [____________________]{$answ[1]} ion
+b. [`[$e[1]]^{[$c[1]]}`] [____________________]{$answ[1]} ion
 
-c. `[$e[2]]^{[$c[2]]}` [____________________]{$answ[2]} ion
+c. [`[$e[2]]^{[$c[2]]}`] [____________________]{$answ[2]} ion
 
-d. `[$e[3]]^{[$c[3]]}` [____________________]{$answ[3]} ion
+d. [`[$e[3]]^{[$c[3]]}`] [____________________]{$answ[3]} ion
 
-e. `[$e[4]]^{[$c[4]]}` [____________________]{$answ[4]} ion
+e. [`[$e[4]]^{[$c[4]]}`] [____________________]{$answ[4]} ion
 
 END_PGML
 ############################################################
