@@ -71,9 +71,9 @@ BEGIN_PGML
 
 Choose the name of the polyatomic ion in the following compounds.  You will want to use a list of polyatomic ions to complete this question.
 
-1. `[$fx]` contains the following polyatomic ion : [____]{$popx}
+1. [`[$fx]`] contains the following polyatomic ion : [____]{$popx}
 
-2. `[$fy]` contains the following polyatomic ion : [____]{$popy}
+2. [`[$fy]`] contains the following polyatomic ion : [____]{$popy}
 
 
 END_PGML
