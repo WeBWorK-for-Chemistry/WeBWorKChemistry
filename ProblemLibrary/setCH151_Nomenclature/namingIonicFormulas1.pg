@@ -147,25 +147,25 @@ Formatting hints: Do not put a space between the name and parenthesis if parenth
 
 example: [`MnS_{2}`]  manganese(IV) sulfide
 
-a. `[$formula[0]]` [____________________]{$answer[0]} 
+a. [`[$formula[0]]`] [____________________]{$answer[0]} 
 
-a. `[$formula[1]]` [____________________]{$answer[1]} 
+a. [`[$formula[1]]`] [____________________]{$answer[1]} 
 
-a. `[$formula[2]]` [____________________]{$answer[2]} 
+a. [`[$formula[2]]`] [____________________]{$answer[2]} 
 
-a. `[$formula[3]]` [____________________]{$answer[3]} 
+a. [`[$formula[3]]`] [____________________]{$answer[3]} 
 
-a. `[$formula[4]]` [____________________]{$answer[4]} 
+a. [`[$formula[4]]`] [____________________]{$answer[4]} 
 
-a. `[$formula[5]]` [____________________]{$answer[5]} 
+a. [`[$formula[5]]`] [____________________]{$answer[5]} 
 
-a. `[$formula[6]]` [____________________]{$answer[6]} 
+a. [`[$formula[6]]`] [____________________]{$answer[6]} 
 
-a. `[$formula[7]]` [____________________]{$answer[7]} 
+a. [`[$formula[7]]`] [____________________]{$answer[7]} 
 
-a. `[$formula[8]]` [____________________]{$answer[8]} 
+a. [`[$formula[8]]`] [____________________]{$answer[8]} 
 
-a. `[$formula[9]]` [____________________]{$answer[9]} 
+a. [`[$formula[9]]`] [____________________]{$answer[9]} 
 
 
 
