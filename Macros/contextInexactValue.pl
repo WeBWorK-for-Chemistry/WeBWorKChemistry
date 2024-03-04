@@ -10,8 +10,7 @@ sub _contextInexactValue_init { return InexactValue::Init(); }
 package InexactValue;
 
 sub Init {
-    my $context = $main::context{InexactValue} =
-      Parser::Context->getCopy("Numeric");
+    my $context = $main::context{InexactValue} = Parser::Context->getCopy("Numeric");
     $context->{name} = "InexactValue";
 
     #
@@ -3036,7 +3035,6 @@ sub compareValue {
     if ( $min < 1 ) {
         return 0;    # assume wrong
     }
-
    # This is the greatest acceptable difference in sig figs if student has FEWER
    # sig figs than the correct answer.
    # i.e. Correct answer should be 1.609 and student puts 1.6 -> difference is 2
@@ -3063,10 +3061,8 @@ sub compareValue {
     
 
     if ( $tolerance == 0 ) {
-
         #warn 'here';
         my $transformedCorrect = $self->new( $self->valueAsNumber, $min );
-
         #warn $transformedCorrect;
         #warn $transformedCorrect->valueAsNumber;
         #warn $transformedCorrect->valueAsRoundedNumber;
@@ -3083,8 +3079,8 @@ sub compareValue {
         if ( $tolType eq 'relative' ) {
             $tolerance = abs($self->valueAsNumber * $tolerance);
         }
-        $correctWithTolerancePlus  = $self->valueAsNumber + $tolerance;
-        $correctWithToleranceMinus = $self->valueAsNumber - $tolerance;
+        $correctWithTolerancePlus  = $self->valueAsRoundedNumber + $tolerance;
+        $correctWithToleranceMinus = $self->valueAsRoundedNumber - $tolerance;
         
         if (   $student->valueAsNumber >= $correctWithToleranceMinus
             && $student->valueAsNumber <= $correctWithTolerancePlus )
@@ -3095,7 +3091,6 @@ sub compareValue {
 
 # WHAT ABOUT ROUNDING ERRORS??? NEED ANOTHER CHECK FOR SLIGHT VARIATIONS... TO COME!
     if ( $isAnswerValueGood == 1 ) {
-
         # numbers match, now check sig figs
         $currentCredit += $creditValue;
 
@@ -3110,7 +3105,6 @@ sub compareValue {
     }
     else {
         if ($failOnValueWrong) {
-
             #$ans->{ans_message} = $correct->valueAsRoundedNumber();
         }
         else {

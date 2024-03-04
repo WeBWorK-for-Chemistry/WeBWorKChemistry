@@ -598,13 +598,11 @@ sub compareValuesWithUnits {
 	my $message = '';
 	my $anyPrefixUnitCorrection = false;
 
-
 	my $valueCompare = $self->{inexactValue}->compareValue($student->{inexactValue}, $options);
 
 	if ($anyPrefix && !$valueCompare){
 		$valueCompare = $self->compareValuesAnyPrefix($student, $options);
 	}
-
 	if ($valueCompare){
 		$currentCredit+= $valueCompare;
 	} else {

@@ -8,7 +8,7 @@ loadMacros(
 "contextInexactValueWithUnits.pl",
 "contextChemical.pl",
 "parserDimensionalAnalysis.pl",
-"chemQuillMath.pl",
+"chemQuillChemistry.pl",
 );
 
 TEXT(beginproblem());

@@ -90,7 +90,7 @@ $m = random(0.350, 0.650, 0.001);
 
 Context("InexactValueWithUnits");
 
-$given = InexactValueWithUnits( [$m, 3], 'g');
+$given = InexactValueWithUnits( sprintf('%.3f',$m), 'g');
 
 # using density as a conversion factor
 $n1 = InexactValueWithUnits(['1', 9**9**9], 'mL'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
