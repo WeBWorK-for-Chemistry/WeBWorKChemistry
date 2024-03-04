@@ -1,0 +1,83 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",                   "MathObjects.pl",
+    "PGML.pl",                         "PGcourse.pl",
+    "answerHints.pl",                  "niceTables.pl",
+    "parserPopUp.pl",                  "contextInexactValue.pl",
+    "contextInexactValueWithUnits.pl", "parserDimensionalAnalysis.pl",
+    "parserMultiAnswer.pl",            "weightedGrader.pl"
+);
+
+
+
+Context("Numeric");
+
+$m = random(1.25,9.99, 0.01);
+
+
+Context("InexactValue");
+
+$mass = InexactValue($m,3);
+$deltaT = InexactValue(70.0,3);
+$Cp = InexactValue(4.184,4);
+
+
+
+
+$heat = InexactValue($mass*$Cp*$deltaT);
+$constant = InexactValue(1000, 9**9**9);
+$kheat = InexactValue($heat/$constant);
+
+
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Calculating Heat Energy
+
+What quantity of heat (in Joules) is transferred when [$mass] grams of liquid water is cooled from  [``\mathrm{95.0^\circ C}  ``] to  [``\mathrm{25.0^\circ C}  ``] C? The heat capacity of liquid water is [``\mathrm{4.184 \frac{J}{g^\circ C}}``] Don't forget to convert your answer to kilojoules. 
+
+
+heat (q) = [____]{$heat} J
+
+What is this value in kilojoules? [____]{$kheat} kJ
+
+
+ 
+END_PGML
+
+
+##############################################
+BEGIN_TEXT
+
+END_TEXT
+
+BEGIN_PGML_HINT
+
+
+
+For more information on energy conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104:_Allied_Health_Chemisty_I_(2nd_Edition)/11:_Energy_and_Chemical_Reactions/11.03:_Energy_and_Specific_Heat_Calculations?contentOnly"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+ENDDOCUMENT();

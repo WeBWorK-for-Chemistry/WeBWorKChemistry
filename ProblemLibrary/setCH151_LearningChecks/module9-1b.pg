@@ -121,9 +121,9 @@ $mp4 = $prod3;
 ############################################################
 
 BEGIN_PGML
-##Writing Balanced Reactions
+##Writing Balanced Equations
 
-Write the complete balanced molecular reaction from the description given.
+Write the complete balanced molecular equation from the description given.
 
 Write the balanced chemical equations for the following reactions based on their descriptions. These descriptions include information about the coefficients used to balance the equations. Do not forget to include the state of each reactant and product, (s) or (aq). You will need to enter all reactants and/or all products before WeBWorK will score your problem correctly.  It does not matter the order in which these are entered.
 
@@ -132,7 +132,7 @@ Write the balanced chemical equations for the following reactions based on their
 
     [_________]{$mp1} + [__________]{$mp1} [``\rightarrow``] [_________]{$mp2}
 
-2. 3 moles of elemental iron react with 3 moles of chlorine to form 2 moles of solid iron(III) chloride
+2. 2 moles of elemental iron react with 3 moles of chlorine to form 2 moles of solid iron(III) chloride
 
     [_________]{$mp3} + [__________]{$mp3} [``\rightarrow``] [_________]{$mp4}
 

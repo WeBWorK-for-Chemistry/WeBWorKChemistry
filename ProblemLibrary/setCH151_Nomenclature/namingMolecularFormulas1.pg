@@ -201,21 +201,21 @@ BEGIN_PGML
 Write the name for the following formulas. Please note that these formulas may be fictional and used for naming practice only.  Please do not use the internet for naming but learn the IUPAC rules for naming.  
 
 Formatting hints: Put a space between the first element name and the second element name. 
-example: `C S_{2}`  carbon disulfide
+example: [`C S_{2}`]  carbon disulfide
 
-a. `[$formula[0]]` [____________________]{$answer[0]} 
+a. [`[$formula[0]]`] [____________________]{$answer[0]} 
 
-a. `[$formula[1]]` [____________________]{$answer[1]} 
+a. [`[$formula[1]]`] [____________________]{$answer[1]} 
 
-a. `[$formula[2]]` [____________________]{$answer[2]} 
+a. [`[$formula[2]]`] [____________________]{$answer[2]} 
 
-a. `[$formula[3]]` [____________________]{$answer[3]} 
+a. [`[$formula[3]]`] [____________________]{$answer[3]} 
 
-a. `[$formula[4]]` [____________________]{$answer[4]} 
+a. [`[$formula[4]]`] [____________________]{$answer[4]} 
 
-a. `[$formula[5]]` [____________________]{$answer[5]} 
+a. [`[$formula[5]]`] [____________________]{$answer[5]} 
 
-a. `[$formula[6]]` [____________________]{$answer[6]} 
+a. [`[$formula[6]]`] [____________________]{$answer[6]} 
 
 
 

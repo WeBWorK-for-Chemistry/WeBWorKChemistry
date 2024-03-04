@@ -78,9 +78,9 @@ $coeff64 = "4";
 ############################################################
 
 BEGIN_PGML
-##Balancing Reactions
+##Balancing Chemical Equations
 
-Balance the following reactions with the lowest whole number coeficients.  If the coeffient is one, leave the space blank. 
+Balance the following equations with the lowest whole number coeficients.  If the coeffient is one, leave the space blank. 
 
 1. [___]{$coeff11}[``Fe (s)``] + [___]{$coeff12}[``Cl_2 (g) \rightarrow``] [___]{$coeff13}[``FeCl_2 (s)``]
 

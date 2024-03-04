@@ -266,7 +266,7 @@ END_PGML
 ############################################################
 BEGIN_PGML_HINT
 
-To review solubility rules, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+To review double displacement reactions, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.07%3A_Precipitation_Reactions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
 Remember that precipitation reactions are double displacement reactions.  
 
