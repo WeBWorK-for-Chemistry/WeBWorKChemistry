@@ -3081,7 +3081,7 @@ sub compareValue {
     }
     else {
         if ( $tolType eq 'relative' ) {
-            $tolerance = abs($self->valueAsNumber * $tolerance);
+            $tolerance = CORE::abs($self->valueAsNumber * $tolerance);
         }
         $correctWithTolerancePlus  = $self->valueAsRoundedNumber + $tolerance;
         $correctWithToleranceMinus = $self->valueAsRoundedNumber - $tolerance;

@@ -596,7 +596,7 @@ sub compareValuesWithUnits {
 	my $anyPrefix = $options->{"anyPrefix"};
 	my $currentCredit = 0;
 	my $message = '';
-	my $anyPrefixUnitCorrection = false;
+	my $anyPrefixUnitCorrection = 0;
 
 	my $valueCompare = $self->{inexactValue}->compareValue($student->{inexactValue}, $options);
 
@@ -675,7 +675,7 @@ sub string {
 		foreach my $k (keys %unitTranslation){
 			#warn '/' . $k . '/';
 			#warn 'before: ' . $units;
-			my $special = %unitTranslation{$k};
+			my $special = $unitTranslation{$k};
 			my $leading = '';
 			my $s;
 			if (exists $special->{leading} && $special->{leading} ne ''){
@@ -991,10 +991,10 @@ sub combineStringUnitsCleanly {
 		if ($leftMatch==0){
 			#no match for left unit, just put it into the new unit
 			my %newUnitHash = %{$unitArrayLeft[$l]};
-			if (%newUnitHash{power} > 0){
+			if ($newUnitHash{power} > 0){
 				push @numerator, \%newUnitHash;
 			} else {
-				$newUnitHash{power} = %newUnitHash{power} * -1;  #change it back to positive
+				$newUnitHash{power} = $newUnitHash{power} * -1;  #change it back to positive
 				push @denominator, \%newUnitHash;
 			}
 		}
@@ -1010,14 +1010,14 @@ sub combineStringUnitsCleanly {
 
 			my %newUnitHash = %{$unitArrayRight[$r]};
 			
-			if (%newUnitHash{power} > 0){
+			if ($newUnitHash{power} > 0){
 				if ($isMultiply){
 					push @numerator, \%newUnitHash;
 				} else {
 					push @denominator, \%newUnitHash;
 				}
 			} else {        
-				$newUnitHash{power} = %newUnitHash{power} * -1;  #change it back to positive
+				$newUnitHash{power} = $newUnitHash{power} * -1;  #change it back to positive
 				if ($isMultiply){
 					push @denominator, \%newUnitHash;
 				} else {

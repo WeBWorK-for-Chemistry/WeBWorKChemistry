@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 parserDimensionalAnalysis.pl 
@@ -41,7 +42,7 @@ sub asDimensionalAnalysis {
 			my @correctArray = @{$correct};
 			my @studentArray = @{$student};
 
-			my $studentCalc = $gradeGiven ? @studentArray[0] : $given;
+			my $studentCalc = $gradeGiven ? $studentArray[0] : $given;
 
 			my $factorIndexStart = 0;
 			if ($gradeGiven){
@@ -236,7 +237,7 @@ sub asDimensionalAnalysis {
 			}
 
 			# reload correctArray with the full array since we've been removing stuff.
-			my @correctArray = @{$correct};
+			@correctArray = @{$correct};
 
 			# compute a potential answer with rounding errors from the correct dimensional analysis
 			# This might have problems, but right now, we recalculate the answer by reducing the number
@@ -265,7 +266,7 @@ sub asDimensionalAnalysis {
 			}
 			push @possibleRoundingErrorAnswers, $roundingErrorAnswer;
 
-			my $roundingErrorAnswer = $given;
+			$roundingErrorAnswer = $given;
 			for ($i = $factorIndexStart; $i < scalar @correctArray - 1; $i+=2) {
 				my $numerator = $correctArray[$i]->copy;
 				my $denominator = $correctArray[$i+1]->copy;
@@ -333,7 +334,7 @@ sub asConversionFactor {
 				Value::Error('There should only be two answers in this conversion factor.');
 			}
 
-			my $studentCalc = $gradeGiven ? @studentArray[0] : $given;
+			my $studentCalc = $gradeGiven ? $studentArray[0] : $given;
 
 			for ($i = 0; $i < 2; $i++){
 				if ($studentArray[$i]->isExactZero){
@@ -402,7 +403,7 @@ sub asConversionFactor {
 			}
 
 			$correctRatio = $correctArray[0]->{inexactValue}/$correctArray[1]->{inexactValue};
-			$studentRatio;
+			#$studentRatio = 0;
 			
 			# Equalities MUST have units.  They are pointless without them.  So only grade if the units are there.
 			#if ($studentArray[0]->{units} eq $correctArray[0]->{units} && $studentArray[1]->{units} eq $correctArray[1]->{units}) {
@@ -474,7 +475,7 @@ sub asEquality {
 				Value::Error('There should only be two answers in this equality.');
 			}
 
-			my $studentCalc = $gradeGiven ? @studentArray[0] : $given;
+			my $studentCalc = $gradeGiven ? $studentArray[0] : $given;
 
 			for ($i = 0; $i < 2; $i++){
 				if ($studentArray[$i]->isExactZero){
@@ -543,7 +544,7 @@ sub asEquality {
 			}
 
 			$correctRatio = $correctArray[0]->{inexactValue}/$correctArray[1]->{inexactValue};
-			$studentRatio;
+			#$studentRatio;
 			
 			# Equalities MUST have units.  They are pointless without them.  So only grade if the units are there.
 			#if ($studentArray[0]->{units} eq $correctArray[0]->{units} && $studentArray[1]->{units} eq $correctArray[1]->{units}) {
@@ -615,7 +616,7 @@ sub asPairOfConversionFactors {
 				Value::Error('There should only be a pair of conversion factors.  i.e. only 4 answers');
 			}
 
-			my $studentCalc = $gradeGiven ? @studentArray[0] : $given;
+			my $studentCalc = $gradeGiven ? $studentArray[0] : $given;
 
 			for ($i = 0; $i < 4; $i++){
 				if ($studentArray[$i]->isExactZero){
