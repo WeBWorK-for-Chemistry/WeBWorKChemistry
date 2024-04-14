@@ -1245,7 +1245,6 @@ sub process_term {
                         }
                     }
                     else {
-
                         $unit_hash{$u} =
                           $unit_hash{$u} +
                           $factor_hash{$u}

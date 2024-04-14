@@ -94,7 +94,7 @@ sub new {
 
     my $argCount             = @$x;
     my $sigFigCount          = 0;
-    my $isScientificNotation = false;
+    my $isScientificNotation = 0;
 
 # Tolerance is useful when asking students to record an inexact value from an analog instrument (i.e. ruler).  The last digit will always vary by a little bit.
 # While a relative value of tolerance is ok, it's easier to use absolute tolerance since we know approximately how much the last digit will very.
@@ -223,7 +223,7 @@ sub getValue {
         $result[0] = 10**$expVal;
         return @result;
     }
-
+    
 # replace fancier scientific notation with plain 'e' so the computer recognizes it
     $result[0] =~ s/\s?(?:x|X|\*)\s?10(?:\^|\*\*)/e/x;
     $result[0] =~ s/E/e/;
@@ -255,7 +255,7 @@ sub make {
 
     my $argCount             = @$self;
     my $sigFigCount          = 0;
-    my $isScientificNotation = false;
+    my $isScientificNotation = 0;
     my $matchNumber          = '';
 
     # my %options = (
@@ -855,8 +855,13 @@ sub string {
                 $scientificNotationThreshold =
                   $self->{options}->{scientificNotationThreshold};
 
+     
                 if ( $scientificNotationThreshold < $exp ) {
-                    return "${whole}x10^${sign}${exp}";
+                    if ($preventClean){
+                        return "${whole}e${sign}${exp}";
+                    } else {
+                        return "${whole}x10^${sign}${exp}";
+                    }
                 }
                 else {
                     return $whole * 10**("${sign}${exp}");
@@ -1226,7 +1231,7 @@ sub generateSfCountingExplanation {
     }
     my $useSciNot = $self->preferScientificNotation();
 
-    my $s           = $self->string(true);
+    my $s           = $self->string(1); # prevent clean
     my @breakdown   = ();
     my $explanation = '';
     my $hasDecimal  = 0;
@@ -1234,8 +1239,7 @@ sub generateSfCountingExplanation {
         my @esplit = split( /e/, $s );
         $exp = $esplit[1] + 0;
         if ($usePlainText) {
-            $explanation .=
-"For the value ${self->TeX}, the ${esplit[0]} portion in front is not ";
+            $explanation .= "For the value " . $self->TeX . ", the ${esplit[0]} portion in front is not ";
         }
         else {
             $explanation .=
@@ -1412,8 +1416,8 @@ sub generateSfCountingExplanation {
 
             }
         }
-        $doOrNot      = $hasDecimal ? 'do' : 'do not';
-        $notOrNothing = $hasDecimal ? ''   : ' NOT';
+        #$doOrNot      = $hasDecimal ? 'do' : 'do not';
+        #$notOrNothing = $hasDecimal ? ''   : ' NOT';
         unless ($usePlainText) {
             $explanation =
               $self->TeX . ':' . $explanation . '=' . $self->sigFigs();
@@ -1483,7 +1487,7 @@ sub generateSfRoundingExplanation {
 
     my $useSciNot = $self->preferScientificNotation();
 
-    my $s = $self->string(true);
+    my $s = $self->string(1); # prevent clean
 
     $leadingZeros  = '';
     $originalData  = $self->{data}[0];
@@ -1904,7 +1908,7 @@ sub generateAddSubtractExplanation {
       $operation > 0 ? $valueFirst + $valueSecond : $valueFirst - $valueSecond;
 
 #if there are any floating point errors, this will show up here.  Need to limit the digits displayed.
-    $simpleAsInexact;
+    $simpleAsInexact = 0;
     if ( $rightmost > 0 ) {    #it's got decimals...round to smallest decimal!
         $simpleAsInexact =
           $self->new( sprintf( "%.${rightmost}f", $simpleOperation ) );
@@ -2086,7 +2090,7 @@ sub generateMultiplyDivideExplanation {
             $strPosFirst + 1,
             length($valueFirstR) - $strPosFirst - 1
         );
-        $firstTrail =~ s/e/\\times 10^ /xr;
+        $firstTrail =~ s/e/\\times 10^ /x;
 
 # if ($first->preferScientificNotation){
 #   $exp = substr($valueFirstR, $strPosFirst + 2,length($valueFirstR)-$strPosFirst) + 0;
@@ -2100,8 +2104,8 @@ sub generateMultiplyDivideExplanation {
           . $firstTrail;
     }
     else {
-        $valueFirstR =~ s/e/\\times 10^ /rx;
-        $valueFirstR =~ s/x/\\times /rx;
+        $valueFirstR =~ s/e/\\times 10^ /x;
+        $valueFirstR =~ s/x/\\times /x;
         $valueFirstR =~ s/\^(.*)/^{$1}/x;
     }
 
@@ -2130,7 +2134,7 @@ sub generateMultiplyDivideExplanation {
             $strPosSecond + 1,
             length($valueSecondR) - $strPosSecond - 1
         );
-        $secondTrail =~ s/e/\\times 10^ /xr;
+        $secondTrail =~ s/e/\\times 10^ /x;
 
 # if ($second->preferScientificNotation){
 #   $exp = substr($valueSecondR, $strPosSecond + 2,length($valueSecondR)-$strPosSecond) + 0;
@@ -2144,8 +2148,8 @@ sub generateMultiplyDivideExplanation {
           . $secondTrail;
     }
     else {
-        $valueSecondR =~ s/e/\\times 10^ /xr;
-        $valueSecondR =~ s/x/\\times /xr;
+        $valueSecondR =~ s/e/\\times 10^ /x;
+        $valueSecondR =~ s/x/\\times /x;
         $valueSecondR =~ s/\^(.*)/^{$1}/x;
     }
 
@@ -2688,7 +2692,7 @@ sub log {
     # rule for intro chem: (used here!)
     # count total sig figs in argument and use as decimal count for answer
     my $self      = shift;
-    my $logResult = log( $self->valueAsNumber() ) / log(10);
+    my $logResult = CORE::log( $self->valueAsNumber() ) / CORE::log(10);
     my $sigFigs   = $self->sigFigs();
 
     if (   $self->context->flags->get('precisionMethod')
@@ -2696,7 +2700,7 @@ sub log {
     {
         my $uncertainty = $self->uncertainty();
         $uncertainty =
-          $uncertainty / ( abs( $self->valueAsNumber() ) * log(10) );
+          $uncertainty / ( abs( $self->valueAsNumber() ) * CORE::log(10) );
         return $self->new( $logResult, $uncertainty );
     }
 
@@ -2727,7 +2731,7 @@ sub ln {
     # count total sig figs in argument and use as decimal count for answer
     my $self      = shift;
     my $sigFigs   = $self->sigFigs();
-    my $logResult = log( $self->valueAsNumber() );
+    my $logResult = CORE::log( $self->valueAsNumber() );
 
     if (   $self->context->flags->get('precisionMethod')
         && $self->context->flags->get('precisionMethod') eq 'uncertainty' )

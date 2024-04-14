@@ -84,7 +84,7 @@ sub type { return 'String'; }
 sub ans_rule {
 	my $self = shift;
 	my $out  = main::NAMED_HIDDEN_ANS_RULE($self->ANS_NAME);
-	my $inputs = $self->getPG('$inputs_ref');	
+	my $inputs = $self->getPG('$inputs_ref');
 	my $ans_name = $self->ANS_NAME;
 
 	#warn %$inputs;
