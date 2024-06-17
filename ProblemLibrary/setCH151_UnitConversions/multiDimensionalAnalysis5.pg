@@ -127,7 +127,7 @@ TEXT(beginproblem());
 BEGIN_PGML
 ##Unit Conversion
 
-Convert [$display] to [``\frac{g}{\mu L}``]. [``\ ``]Use uL for microliters.    
+Convert [``[$m]\frac{mg}{L}``] to [``\frac{g}{\mu L}``]. [``\ ``]Use uL for microliters.    
 
 [@conversionEQ($display,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
  
@@ -148,10 +148,7 @@ WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
 # each answer blank will be worth the same amount of points.
 
 ##############################################
-BEGIN_TEXT
-$PAR
-If you don't get this in $showHint tries, you can get a hint.
-END_TEXT
+
 
 BEGIN_PGML_HINT
 
@@ -178,5 +175,4 @@ BEGIN_PGML_SOLUTION
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
-
 
