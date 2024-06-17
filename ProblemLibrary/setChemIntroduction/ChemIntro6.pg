@@ -26,7 +26,7 @@ For many reasons, you might not be able to work through an entire problem set wh
 
 This file is something that you can read onscreen while you are not online. You can even print it off and take it to a tutoring center or your favorite coffee shop to work on. (Please do not waste paper by actually printing an assignment unless you feel that it is necessary.)
 
-To make sure that you understand how this works, download the PDF version of this Orientation assignment. At the end of this problem in the PDF, you will find the answer to this answer blank: [___________]{Compute("$a")->cmp(tolType=>absolute,tolerance=>0.1)} 
+To make sure that you understand how this works, download the PDF version of this Orientation assignment. At the end of this problem in the PDF, you will find the answer to this answer blank: [___________]{Compute("$a")} 
 
 
 END_PGML
@@ -41,4 +41,3 @@ TEXT("The answer is $a.");
 
 
 ENDDOCUMENT();
-
