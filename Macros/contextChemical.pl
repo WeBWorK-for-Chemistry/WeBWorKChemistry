@@ -187,12 +187,7 @@ sub compareKekuleCTABAndHash(){
 	
 	return isIsomorphic($startNode, $kekuleCTAB, $startAtom, $moleculeHash);
 
-	# if ($nodes[0]->{isotopeId} ne  $Chemical::Chemical::elements[$atoms[0]->{atomNum} - 1] ){
-	# 	my %failure = (atomsCorrect=>0, bondOrderCorrect=>0, formalChargesCorrect=>0, lonePairsCorrect=>0, badConnectors=>[], badLonePairNodes=>[], badFormalChargeNodes=>[]);
-	# 	return \%failure;
-	# }
-	
-	# isIsomorphic($nodes[0], $kekuleCTAB, $atoms[0], $moleculeHash);
+
 }
 
 sub isIsomorphic() {
@@ -210,16 +205,6 @@ sub isIsomorphic() {
 
 	my %success = (atomsCorrect=>1, bondOrderCorrect=>1, formalChargesCorrect=>1, lonePairsCorrect=>1, badConnectors=>[], badLonePairNodes=>[], badFormalChargeNodes=>[]);
 	
-	# if (undef $node && undef $atom){
-	# 	return true;
-	# }
-	# if ($node == null || $atom == null){
-	# 	return false;
-	# }
-
-	# make sure nodes are the same atom
-	# warn 'atom';
-	# warn %$atom;
 	if ($node->{isotopeId} ne $Chemical::Chemical::elements[$atom->{atomNum} - 1]){
 		# warn "NOT SAME ATOMS";
 		# # warn %$node;
@@ -1278,8 +1263,8 @@ our %polyatomicFormulaVariations = (
 	'C2O4' => 'oxalate',
 	'C_2O_4' => 'oxalate',
 	# Not going to watch for peroxide since it is indistinguishable from plain oxygen.  Will find it when comparing charges.
-	'O2' => 'peroxide',
-	'O_2' => 'peroxide',
+	#'O2' => 'peroxide',
+	#'O_2' => 'peroxide',
 	'SiO3' => 'silicate',
 	'SiO_3' => 'silicate',
 	'SO4' => 'sulfate',
@@ -1460,13 +1445,6 @@ our %polyatomicIons = (
 		'SMILES'=>'[O-]S(=O)[O-]',
 		'alternate'=> [{atomNum=>16,count=>1},{atomNum=>8,count=>3}]
 	},
-	'peroxide'=> {
-		'atomNum'=> [8,8],
-		'charge'=>-2,
-		'TeX'=>'O_2^{2-}',
-		'SMILES'=>'[O-][O-]'
-	},
-
 	'arsenate'=> {
 		'atomNum'=> [33,8,8,8],
 		'charge'=>-3,
@@ -1733,7 +1711,7 @@ sub parseValue {
 		push @chemical, $chemicalPiece;		
 	}
 	
-	
+	# if this is true, then we couldn't parse any names.  This chemical is written as a formula.  
 	if (scalar @chemical == 0) {
 
 		# formula units will always have no spaces, so first split the leading units (if any) from the formula
@@ -1748,6 +1726,7 @@ sub parseValue {
 		while($y =~ /(?:\(?)($symbolsResult)(?:\)?)(?:_?\{?)([\d₁₂₃₄₅₆₇₈₉₀]*)(?:\}?)(?:\^?\{?)([\d¹²³⁴⁵⁶⁷⁸⁹⁰]*[+\-⁺⁻]?)(?:\}?)/g) {
 			my $chemicalPiece = {};
 			if ($1){
+				# check for polyatomic ions to make parsing simpler... finds' name of polyatomic ion, then gets hash for it
 				if (exists $polyatomicFormulaVariations{$1}){
 					if (exists $polyatomicIons{$polyatomicFormulaVariations{$1}}){
 						my $name = $polyatomicFormulaVariations{$1};
@@ -1756,7 +1735,6 @@ sub parseValue {
 						$chemicalPiece->{atomNum} = $polyatomic->{atomNum};
 						$chemicalPiece->{polyAtomicName} = $polyatomicFormulaVariations{$1};
 						$chemicalPiece->{polyAtomic} = $polyatomic;
-						#warn %$chemicalPiece;
 					}
 				} else {
 					my ($index) = grep { $elements[$_] eq $1 } 0 .. (@elements-1);
@@ -1793,6 +1771,7 @@ sub parseValue {
 			#warn $x;
 		}
 
+		# binary compound
 		if (scalar @chemical == 2){
 			my $comp1 = $chemical[0];
 			my $comp2 = $chemical[1];
@@ -2213,11 +2192,27 @@ sub asFormulaTeX {
 	return $self->TeX({'asFormula'=>1});
 }
 
+# method for debugging, do not use!
+sub printRef {
+	$hashRef = shift;
+	%hash = %$hashRef;
+	foreach my $key (keys %hash){
+		if (defined($hash{$key})){
+			warn $key . ' : ' . $hash{$key};
+		} else {
+			warn $key . ' : ' . 'undefined';
+		}
+		
+	}
+}
+
 sub string {
 	my $self = shift;
 	my $options = shift;
 	my $text = '';
-	my $overallCharge=0;
+	my $overallCharge = 0;
+
+	# default return what was entered, but override with options
 	my $nameOutput = $self->{nameInputed};
 	if (exists $options->{asFormula}){
 		$nameOutput = 0;
@@ -2225,7 +2220,9 @@ sub string {
 	if (exists $options->{asName}){
 		$nameOutput = 1;
 	}
+
 	if ($nameOutput == 1 && defined $self->{commonName}){
+		# skip the logic below and just return the common name
 		return $self->{commonName};
 	}
 
@@ -2300,8 +2297,7 @@ sub string {
 				# no matches.  sodium in sodium chloride won't match because "sodium" has no charge as the default element,
 				# but the compound version does.  Need to relax charge restrictions
 				# Only metal ions here.
-				my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) } 
-				keys %namedRecognitionTargets;
+				my @allMatches = grep { compareAtomNums($namedRecognitionTargets{$_}->{atomNum}, $component->{atomNum}) } keys %namedRecognitionTargets;
 				if (scalar @allMatches > 0){
 					if (scalar @allMatches > 1){
 						#warn "There shouldn't be more than 1 match. ";
@@ -2322,28 +2318,38 @@ sub string {
 				}
 				$component->{atomNum}
 			}
+
+
 		} else {
 			# write formula!
+			#warn @{$self->{data}};
+			#warn ref($component);
+			#warn %{$component};
+			#warn $component;
 			
 			if (exists $component->{charge}) {
 				$overallCharge += $component->{charge} * $component->{count};
 			}
-			if (ref($component->{atomNum}) eq 'ARRAY'){
-				# warn %$component;
-				# warn @{ $component->{atomNum} };
-				#warn @{ $component->{atomNum}};
-				$polyatomic = $component->{polyAtomic}->{TeX};
-				$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
-				$polyatomic =~ s/\_//g;
-				$polyatomic = subscript($polyatomic);
-				if ($component->{count} > 1){
-					#warn 'more than 1  ' . $polyatomic;
-					$text .= "($polyatomic)";
+			if (exists($component->{atomNum}) && ref($component->{atomNum}) eq 'ARRAY'){
+				# polyatomic will NOT be present for peroxide.  
+				#printRef($component);
+				if (exists $component->{polyAtomic}) {
+					$polyatomic = $component->{polyAtomic}->{TeX};
+					$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
+					$polyatomic =~ s/\_//g;
+					#printRef($component->{polyAtomic});
+					$polyatomic = subscript($polyatomic);
+					if ($component->{count} > 1){
+						#warn 'more than 1  ' . $polyatomic;
+						$text .= "($polyatomic)";
+					} else {
+						#warn 'only 1  ' . $polyatomic;
+						$text .= $polyatomic;
+					}
 				} else {
-					#warn 'only 1  ' . $polyatomic;
-					$text .= $polyatomic;
+					# edge case peroxide
+					$text .= 'O' . subscript(2);
 				}
-
 			}else{
 				$text .= @elements[$component->{atomNum}-1];
 			}
@@ -2356,6 +2362,7 @@ sub string {
 		$index++;
 	}
 	if ($overallCharge != 0){
+		# $overallCharge is only being checked in formula writing
 		my $sign = $overallCharge > 0 ? "⁺" : "⁻"; #these are unicode superscript + and -
 		my $value = '';
 		if (abs($overallCharge) != 1){
@@ -2363,6 +2370,23 @@ sub string {
 		}
 		$text .= superscript("$value$sign");
 	}
+	if ($nameOutput 
+		&& scalar @{$self->{data}} == 1 
+		&& exists $self->{data}->[0]->{charge} 
+		&& $self->{data}->[0]->{charge} != 0
+		#&& exists($standardIons{$self->{data}->[0]->{atomNum}}) ){
+	){
+		# if one component and is a cation without a roman numeral, MUST put "ion" after name
+		#printRef($self->{data}->[0]);
+		$text .= " ion";
+	}
+	
+
+		
+
+
+
+
 	return $text;
 }
 
@@ -2484,17 +2508,22 @@ sub TeX {
 			if (exists $component->{charge}) {
 				$overallCharge += $component->{charge} * $component->{count};
 			}
-			if (ref($component->{atomNum}) eq 'ARRAY'){
+			if (ref($component->{atomNum}) eq 'ARRAY') {
 
-				$polyatomic = $component->{polyAtomic}->{TeX};
-				$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
-				
-				if ($component->{count} > 1){
-					$text .= "($polyatomic)";
+				# edge case: peroxide won't have polyAtomic if from formula
+				if (exists $component->{polyAtomic}) {
+					$polyatomic = $component->{polyAtomic}->{TeX};
+					$polyatomic =~ s/\^.*//g; # removing these because it's in a compound.  We don't show charge.
+					
+					if ($component->{count} > 1){
+						$text .= "($polyatomic)";
+					} else {
+						$text .= $polyatomic;
+					}
 				} else {
-					$text .= $polyatomic;
+					# patch for peroxide (it gets confused with O2 the element so it's not in the match list by default for polyatomics)
+					$text .= 'O_2';
 				}
-
 			}else{
 				$text .= @elements[$component->{atomNum}-1];
 			}
