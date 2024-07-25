@@ -2064,9 +2064,11 @@ sub isElement {
 		if (ref $component->{atomNum} eq 'ARRAY'){
 			# This part is a mess mostly due to weirdos like O_2.  This gets detected as peroxide (same formula), but without a charge.
 			foreach my $subComponent (@{$component->{atomNum}}) {
-				unless (exists $uniqueElements{$component->{atomNum}}){
-					$uniqueElements{$component->{atomNum}} = 1;
+				unless (exists $uniqueElements{$subComponent}){
+					$uniqueElements{$subComponent} = 1;
+
 				}
+				
 			}
 		} else {
 			unless (exists $uniqueElements{$component->{atomNum}}){
