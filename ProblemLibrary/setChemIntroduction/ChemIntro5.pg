@@ -33,7 +33,7 @@ When you use this button, you should write a message to your instructor explaini
 
 Writing for help is OK! Yes, it is last on this list, but that is just because it is good for you to try to be self sufficient. There is a lot you can gain from WeBWorK's feedback, your textbook, and your notes. If you feel it is appropriate to contact your instructor for help, then do so!
 
-This answer blank is expecting a certain answer: [___________]{Real(112358)->cmp(tolType=>absolute,tolerance=>0.1)}. The only way to get the answer is to use the *Email Instructor* button and politely ask for the answer to this Orientation Problem. The instructor will reply to your email as soon as they are able to, which may be the following day. (Instructors: you can check the box to show "Correct Answers" and then use the "Check" button to see the answer and write a response to your student.)
+This answer blank is expecting a certain answer: [___________]{112358}. The only way to get the answer is to use the *Email Instructor* button and politely ask for the answer to this Orientation Problem. The instructor will reply to your email as soon as they are able to, which may be the following day. (Instructors: you can check the box to show "Correct Answers" and then use the "Check" button to see the answer and write a response to your student.)
 
 If you don't get a reply within 12 hours, please check your SPAM folder. Google mail will sometimes direct WeBWorK emails to SPAM. This only happens to about 1 in 30 people, but it does happen. If this happens to you just click the option telling Google mail that email from that sender is not SPAM and you should be good for the rest of the term. If you do not find anything in your SPAM folder either, contact your instructor with email outside of WeBWorK.
 
@@ -53,3 +53,6 @@ END_PGML
 
 ENDDOCUMENT();
 
+Page generated June 17, 2024 at 2:05:41 PM PDT
+WeBWorK © 1996-2024 | theme: math4 | ww_version: 2.19 | pg_version 2.19
+The WeBWorK Project

@@ -56,7 +56,7 @@ This is the shift-8 key on most keyboards.
 Try literally entering [`[$a]\cdot[$b]+[$c]`] by typing it exactly as:
 :       [$a]\*[$b]+[$c]
 
-    [_________]{Compute($a*$b+$c)->cmp(formatStudentAnswer=>parsed)}
+    [_________]{Compute($a*$b+$c)}
 
 Of course you could also simplify this to [`[$d]`].
 
@@ -107,4 +107,3 @@ END_PGML
 
 
 ENDDOCUMENT();
-

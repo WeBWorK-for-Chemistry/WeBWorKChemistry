@@ -131,7 +131,7 @@ TEXT(beginproblem());
 BEGIN_PGML
 ##Unit Conversion
 
-Convert [$display] to [``\frac{mi}{min}``].  Use the fact that 0.6214 mi = 1 km.    
+Convert [``[$m]\frac{m}{hr}``] to [``\frac{mi}{min}``].  Use the fact that 0.6214 mi = 1 km.    
 
 [@conversionEQ($display,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
  
@@ -152,10 +152,7 @@ WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
 # each answer blank will be worth the same amount of points.
 
 ##############################################
-BEGIN_TEXT
-$PAR
-If you don't get this in $showHint tries, you can get a hint.
-END_TEXT
+
 
 BEGIN_PGML_HINT
 
@@ -184,3 +181,5 @@ END_PGML_SOLUTION
 ENDDOCUMENT();
 
 
+Page generated June 17, 2024 at 2:13:26 PM PDT
+WeBWorK © 1996-2024 | theme: math4 | ww_version: 2.19 | pg_version 2.19

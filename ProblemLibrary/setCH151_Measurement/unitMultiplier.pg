@@ -91,7 +91,7 @@ DataTable([
 [PGML('[`[$text[4]]`]') , PGML('[___]{$ans[4]}'), PGML('10^[___]{$mult[4]}')]],
 midrules=>1 ,
 tablecss=>'border:solid 1px;     border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
-align=>'p{50pt}|p{50pt}|p{150pt}',
+align=>'p{50pt}|p{50pt}|p{160pt}',
 captioncss=>'font-variant:small-caps; ',
 columnscss=>[' '],
 );

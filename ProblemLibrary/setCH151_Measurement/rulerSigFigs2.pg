@@ -71,8 +71,10 @@ foreach (0..1) {
 
 $m0 = InexactValue($ans[0], $sf[0], { tolerance => 0.03});
 $m0uncert = $m0->simpleUncertainty;
+$tick0 = $m0uncert*10;
 $m1 = InexactValue($ans[1], $sf[1], { tolerance => 0.03});
 $m1uncert = $m1->simpleUncertainty;
+$tick1 = $m1uncert*10;
 $image0 = $image[0];
 $alt0 = $alt[0];
 $image1 = $image[1];
@@ -113,6 +115,13 @@ END_PGML
 ############################################################
 BEGIN_PGML_HINT
 
+What is the quantity measured by the smallest lines on the ruler in these examples? In other words, how far apart are these markings?
+
+        a. [$tick0] cm
+    
+        b. [$tick1] cm
+
+This means that the measurement for these devices should be *one digit more precise* than this. This is called the guess digit and this will define the uncertainty for that measurement. 
 
 To review significant figures and measurement, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
