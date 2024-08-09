@@ -94,7 +94,7 @@ package Chemical::LewisStructure;
 our %idealBondCount = ( 
 1=>1,2=>0,3=>1,4=>2,5=>3,6=>4,7=>3,8=>2,9=>1);
 
-sub compareKekuleCTABAndHash(){
+sub compareKekuleCTABAndHash {
 	my $kekuleCTAB = shift;
 	my $moleculeHash = shift;
 
@@ -190,7 +190,7 @@ sub compareKekuleCTABAndHash(){
 
 }
 
-sub isIsomorphic() {
+sub isIsomorphic {
 	my $node = shift;
 	my $kekuleCTAB = shift;
 	my $atom = shift;

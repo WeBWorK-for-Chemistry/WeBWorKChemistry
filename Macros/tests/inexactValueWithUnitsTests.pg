@@ -22,7 +22,6 @@
       "contextInexactValueWithUnits.pl"
    );
 
-
    Context("InexactValueWithUnits");
 
    @data = (
