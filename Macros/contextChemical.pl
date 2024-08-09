@@ -2316,7 +2316,7 @@ sub string {
 						$text .= ' (' . $romanNumerals{$component->{charge}} . ')';
 					}
 				}
-				$component->{atomNum}
+				# $component->{atomNum}  # commented out after warning for void context
 			}
 
 
@@ -2500,7 +2500,7 @@ sub TeX {
 						$text .= '\\ (' . $romanNumerals{$component->{charge}} . ')';
 					}
 				}
-				$component->{atomNum}
+				# $component->{atomNum} # commented out after void context warning
 			}
 		} else {
 			# write formula!
@@ -2783,7 +2783,7 @@ sub grade {
 				}
 
 				# now check count
-				if ($secondCopy[$j]->{count} == @firstCopy[$i]->{count}){
+				if ($secondCopy[$j]->{count} == $firstCopy[$i]->{count}){
 					# same number!
 					# if covalent and first element, make sure no prefix was recorded if only 1 of them.
 					unless ($correct->{bonding} == 2 && $i == 0  && exists($secondCopy[$j]->{prefix}) && $secondCopy[$j]->{prefix}==1){
