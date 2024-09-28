@@ -29,7 +29,7 @@ loadMacros(
 @moleculeFormulaLatex = ('NH_3', 'CH_4', 'CCl_4', 'PON', 'C_2H_6', 'C_2H_4', 'SF_6', 'SF_4', 'XeF_4', 'C_3H_8', 'C_4H_10', 'N_2O', 'O_3', 'SO_4^{2-}', 'NO_3^-');
 $rand_num_generator = new PGrandom();
 $index = random(0,scalar @moleculeFormulaLatex,1);
-$index = 8;  # in case you don't want to make it random...
+$index = 14;  # in case you don't want to make it random...
 
 $formula = $moleculeFormulaLatex[$index];
 

@@ -710,7 +710,7 @@ sub hashToMolFile {
 		if (!$noCharges){
 			#
 			if (exists $atom->{charge}){
-				if  ($atom->{charge} == 3) {
+				if ($atom->{charge} == 3) {
 					$charge = 1
 				} elsif ($atom->{charge} == 2){
 						$charge = 2;
@@ -1146,9 +1146,9 @@ sub generateHashFromLaTeXFormula {
 		my $formalCharge = $atom->{valence} - ($atomElectrons / 2) - (exists($atom->{lonePairs}) ? $atom->{lonePairs} * 2 : 0);
 		$atom->{charge} = $formalCharge;
 		if ($saveSteps){
-			warn $formalCharge;
-			warn %$atom;		
-			warn "ADDED FORMAL CHARGES";
+			# warn $formalCharge;
+			# warn %$atom;		
+			# warn "ADDED FORMAL CHARGES";
 			$details .= $atom->{charge} . '  ';
 		}
 	}

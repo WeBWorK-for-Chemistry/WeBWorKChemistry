@@ -1,3 +1,9 @@
+# This macro was created by Lee McPherson to allow students to "draw" basic Lewis Structures
+# and have them grade their structure on the server.  This tool is NOT designed for complex
+# organic chemistry structures and is intended more for the general chemistry Lewis Structures
+# with a focus on correct number of Lone Pair Electrons and basic geometries including dash/wedge
+# bonds.
+
 =head1 NAME
 
 lewisStructureTool.pl - Allow students to draw Lewis Structures with interactive javascript.
