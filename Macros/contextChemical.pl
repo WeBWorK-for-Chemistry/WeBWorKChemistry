@@ -715,7 +715,7 @@ sub hashToMolFile {
 		my $charge = 0;# = $atom->{charge};
 		if (!$noCharges){
 			#
-			if (exists $atom->{charge}){
+			if ($atom->{charge}){
 				if ($atom->{charge} == 3) {
 					$charge = 1
 				} elsif ($atom->{charge} == 2){

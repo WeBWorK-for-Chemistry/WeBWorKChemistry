@@ -50,10 +50,10 @@ Draw the structure for [`\mathrm{[$formula]}`] in the box below:
 
 END_PGML
 #[____]{$lewisStructure}
-#[@ $lewisStructure->showSolutionGuide() @]*
+#
 BEGIN_PGML_SOLUTION
 
-test
+[@ $lewisStructure->showSolutionGuide() @]*
 
 END_PGML_SOLUTION
 
