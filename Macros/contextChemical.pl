@@ -693,8 +693,14 @@ sub hashToMolFile {
 			$totalLonePairs += $_->{lonePairs};
 		}
 	} @{$structure->{atoms}};
-	
-	my $mol = $structure->{formula} . "\n";
+	my $mol = "";
+	#warn %$structure;
+	#warn $structure->{formula};
+	if ($structure->{formula}){
+		$mol .= $structure->{formula} . "\n";
+	} else {
+		$mol .= "Unknown formula\n";
+	}
 	#$mol .= $structure->{atoms}->[1]->{charge};
 	$mol .= "WeBWorKChemistry" . time . "\n";
 	$mol .= "Comment line \n";
@@ -739,7 +745,7 @@ sub hashToMolFile {
 			if (defined $atom->{lonePairs} && $atom->{lonePairs} > 0){
 				my $lonePairs = $atom->{lonePairs};
 				foreach my $LPIndex (0..$lonePairs-1){
-					warn "LONE PAIR: $LPIndex";
+					#warn "LONE PAIR: $LPIndex";
 					$mol .= "$zero$zero$zero " . sprintf('%3s', 'LP') . ' 0' . sprintf('%3s', '0') . '  0' . '  1' . '  0' . '  0' . '  0' . '  0'. '  0'. '  0'. '  0'. '  0'. "\n";
 					my $futureBond = sprintf('%3s', $lonePairIndex) . sprintf('%3s', $atomIndex) . sprintf('%3s', '1') . '  0' . '  0' . '  0' . '  0' ."\n";
 					push(@futureBonds,$futureBond); 

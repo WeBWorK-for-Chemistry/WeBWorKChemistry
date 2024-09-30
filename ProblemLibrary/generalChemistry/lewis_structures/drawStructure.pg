@@ -32,27 +32,28 @@ $index = random(0,scalar @moleculeFormulaLatex,1);
 $index = 14;  # in case you don't want to make it random...
 
 $formula = $moleculeFormulaLatex[$index];
-
-$lewisStructure = LewisStructureTool($formula)->with(cmpOptions => {'showFormalCharges'=> 0, 'formalChargePenalty'=>0.4});
-
+$lewisStructure = LewisStructureTool($formula)->with(cmpOptions => {'debug'=> 1,'showFormalCharges'=> 0, 'formalChargePenalty'=>0.4});
 # With optional parameters for grading.
 # $lewisStructure = LewisStructureTool($formula)->with(cmpOptions => { "bondOrderPenalty" => 0.333 } );
 
 ##############################################################
 #
 #  Problem
-
+#
 BEGIN_PGML
 Draw the structure for [`\mathrm{[$formula]}`] in the box below:
-[_]{$lewisStructure}
+
+[@ LABELED_ANS($lewisStructure->ANS_NAME, $lewisStructure->cmp); $lewisStructure->ans_rule @]*
+
+
 
 
 END_PGML
-
-
+#[____]{$lewisStructure}
+#[@ $lewisStructure->showSolutionGuide() @]*
 BEGIN_PGML_SOLUTION
 
-[@ $lewisStructure->showSolutionGuide() @]*
+test
 
 END_PGML_SOLUTION
 
