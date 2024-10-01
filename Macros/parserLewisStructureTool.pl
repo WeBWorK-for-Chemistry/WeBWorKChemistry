@@ -249,7 +249,7 @@ sub cmp {
             $ansHash->{ans_message} = $message;
 			
 			# show Lewis Structure, not raw code
-			$ansHash->{student_ans} = "A";
+			$ansHash->{student_ans} = $self->showStudentAnswer();
 
 			# hide the preview
 			undef $ansHash->{preview_latex_string};
@@ -447,28 +447,12 @@ sub showStudentAnswer {
     $self = shift;
     my $formula = $self->{data};
 
-    #my $inputs = $self->getPG('$inputs_ref');
-    my $ans_name  = $self->ANS_NAME;
-    my $iteration = $correctAnswerIteration++;
-    my $showFormalCharges =
-      $self->{cmpOptions}{showFormalCharges} ? "show-formal-charges" : "";
+	my $inputs   = $self->getPG('$inputs_ref');
+    my $ans_name = $self->ANS_NAME;
 
-    #my $kekuleOutput = $inputs->{$ans_name} if (defined $inputs->{$ans_name});
 
-    my $answerHash =
-      Chemical::LewisStructure::generateHashFromLaTeXFormula( $formula,
-        { saveSteps => 0, showFormalCharges => $showFormalCharges } );
+	return $main::PG->decode_base64($inputs->{"${ans_name}_svgOutput"});
 
-# With Lone Pairs adds lone pairs as an atom item (that gets hacked in drawing tool)
-    my $answerMol = Chemical::LewisStructure::hashToMolFile( $answerHash,
-        { noCharges => 0, onlySingleBonds => 0, withLonePairs => 0 } );
-
-    #warn $answerMol;
-    my $correctAnswer = <<END_SCRIPT;
-<lewis-structure-canvas id='${ans_name}_answerTool_$iteration' mol='$answerMol' $showFormalCharges readonly></lewis-structure-canvas>
-
-END_SCRIPT
-    return $correctAnswer;
 }
 
 sub showCorrectAnswer {
