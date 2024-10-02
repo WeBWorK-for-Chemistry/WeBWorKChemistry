@@ -100,16 +100,17 @@ sub ans_rule {
     my $out      = main::NAMED_HIDDEN_ANS_RULE( $self->ANS_NAME );
     my $inputs   = $self->getPG('$inputs_ref');
     my $ans_name = $self->ANS_NAME;
+	my $answer_value = $main::envir{inputs_ref}{ $self->ANS_NAME } // '';
 
-    #warn %$inputs;
+    # warn %$inputs;
 
     if ( $main::displayMode eq 'TeX' ) {
         return &{ $self->{printGraph} }
           if defined( $self->{printGraph} )
           && ref( $self->{printGraph} ) eq 'CODE';
 
-        # ADD CODE HERE TO PRODUCE A BOX FOR DRAWING ON PAPER.
-        # TO-DO !!!!
+        # PRODUCE A BOX FOR DRAWING ON PAPER.
+		return "\\framebox(200,200){}";
 
     }
     elsif ( $main::displayMode ne 'PTX' ) {
@@ -122,6 +123,7 @@ sub ans_rule {
           if ( defined $inputs->{$ans_name} );
         my $showFormalCharges =
           $self->{cmpOptions}{showFormalCharges} ? "show-formal-charges" : "";
+
 
         $out .= <<END_SCRIPT;
 <lewis-structure-canvas id='$drawingToolName' $showFormalCharges></lewis-structure-canvas>
@@ -159,14 +161,16 @@ sub ans_rule {
 				flag=true;
 			}         
 		});
-
-		if ('$kekuleOutput'.length > 0){
-			//console.log(JSON.parse(atob('$kekuleOutput')));
-			drawingTool.loadKekuleCompressed(JSON.parse(atob('$kekuleOutput')).kekuleMimeCompressed);
+		if ('$answer_value'.length > 0){
+		//if (kekuleOutput.value > 0){
+			//console.log(JSON.parse(atob('$answer_value')));
+			drawingTool.loadKekuleCompressed(JSON.parse(atob('$answer_value')).kekuleMimeCompressed);
+			//drawingTool.loadKekuleCompressed(JSON.parse(atob(kekuleOutput.value)).kekuleMimeCompressed);
 			//console.log('LOADING');
 		}
 	};
 
+	//window.addEventListener('DOMContentLoaded', initialize${ans_name} );
 	if (document.readyState === 'loading') {window.addEventListener('DOMContentLoaded', initialize${ans_name} );}
 	else {initialize${ans_name}();}
 </script>
