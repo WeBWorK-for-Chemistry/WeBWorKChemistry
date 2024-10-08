@@ -475,7 +475,8 @@ sub asEquality {
 				Value::Error('There should only be two answers in this equality.');
 			}
 
-			my $studentCalc = $gradeGiven ? $studentArray[0] : $given;
+			# used in dimensionalAnalysis, not equality
+			#my $studentCalc = $gradeGiven ? $studentArray[0] : $given;
 
 			for ($i = 0; $i < 2; $i++){
 				if ($studentArray[$i]->isExactZero){

@@ -690,9 +690,9 @@ sub string {
 			#warn 'after: ' . $units;
 		}
 
-		return InexactValue::InexactValue::string($self) . ' ' . $units;
+		return InexactValue::InexactValue::string($self->{inexactValue}) . ' ' . $units;
 	} else {
-		return InexactValue::InexactValue::string($self);
+		return InexactValue::InexactValue::string($self->{inexactValue});
 	}
 }
 
