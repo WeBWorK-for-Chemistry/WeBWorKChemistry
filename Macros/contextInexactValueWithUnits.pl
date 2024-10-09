@@ -33,6 +33,8 @@ sub Init {
 #               class => 'InexactValueWithUnits::InexactValueWithUnits', eval => 'evalGreaterThan', combine => 1, perl => '>'}
 #   );
 
+    $context->flags->set('tolerance', 0); # default for InexactValue, but needed for InexactValueWithUnits since it's not technically a base class
+    $context->flags->set('tolType', 'absolute'); # default for InexactValue, but needed for InexactValueWithUnits since it's not technically a base class
   #
   #  Don't reduce constant values (so 10^2 won't be replaced by 100)
   #
