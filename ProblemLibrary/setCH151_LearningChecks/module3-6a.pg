@@ -85,7 +85,7 @@ To convert to from Celcuis to Kelvin, remember that the constants in this equati
 
 Then to convert from Celsius to Fahrenheit.  Again remember that the constants in this equation are all exact.
 
-1.8*([$degC]) + 32 = [$degF][``^\circ F``]
+1.8([$degC]) + 32 = [$degF][``^\circ F``]
 
 END_PGML_SOLUTION
 
