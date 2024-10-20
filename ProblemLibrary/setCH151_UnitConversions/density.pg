@@ -114,7 +114,7 @@ $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given]
 TEXT(beginproblem());
 
 BEGIN_PGML
-##Unit Conversion - One Step
+##Unit Conversion - Using Density as a Conversion Factor
 
 A mercury thermometer for measuring a patient’s temperature contains [$given] of mercury. The density of mercury is 13.6 g/mL.  What is the volume of this mass of mercury?
 
