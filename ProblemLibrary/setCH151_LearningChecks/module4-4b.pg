@@ -70,7 +70,7 @@ $popg = PopUp( [ @options ], $options[1] );
 ############################################################
 
 BEGIN_PGML
-##Physical vs Chemical Properties
+##Physical vs Chemical Changes
 
 _Classify each of the following as a physical or chemical change._  
 
