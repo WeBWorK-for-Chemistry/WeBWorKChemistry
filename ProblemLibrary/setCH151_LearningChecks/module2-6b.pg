@@ -79,11 +79,11 @@ _In the following table, round each number to the given number of significant fi
 [@ 
 DataTable([
 [['Number ',headerrow=>1],'1 significant figure ','2 significant figures'],
-[PGML('`[$val1]`'),PGML('[_____]{$ans11}'),PGML('[_____]{$ans12}')],
-[PGML('`[$val2]`'),PGML('[_____]{$ans21}'),PGML('[_____]{$ans22}')],
-[PGML('`[$val3]`'),PGML('[_____]{$ans31}'),PGML('[_____]{$ans32}')], 
-[PGML('`[$val4]`'),PGML('[_____]{$ans41}'),PGML('[_____]{$ans42}')],
-[PGML('`[$val5]`'),PGML('[_____]{$ans51}'),PGML('[_____]{$ans52}')]],
+[PGML('[```[$val1]```]'),PGML('[_____]{$ans11}'),PGML('[_____]{$ans12}')],
+[PGML('[```[$val2]```]'),PGML('[_____]{$ans21}'),PGML('[_____]{$ans22}')],
+[PGML('[```[$val3]```]'),PGML('[_____]{$ans31}'),PGML('[_____]{$ans32}')], 
+[PGML('[```[$val4]```]'),PGML('[_____]{$ans41}'),PGML('[_____]{$ans42}')],
+[PGML('[```[$val5]```]'),PGML('[_____]{$ans51}'),PGML('[_____]{$ans52}')]],
 midrules=>1 ,
 tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
 captioncss=>'font-variant:small-caps; ',
@@ -114,11 +114,11 @@ BEGIN_PGML_SOLUTION
 [@ 
 DataTable([
 [['Number ',headerrow=>1],'1 significant figure ','2 significant figures'],
-[PGML('`[$val1]`'),PGML('[$ans11]'),PGML('[$ans12]')],
-[PGML('`[$val2]`'),PGML('[$ans21]'),PGML('[$ans22]')],
-[PGML('`[$val3]`'),PGML('[$ans31]'),PGML('[$ans32]')], 
-[PGML('`[$val4]`'),PGML('[$ans41]'),PGML('[$ans42]')],
-[PGML('`[$val5]`'),PGML('[$ans51]'),PGML('[$ans52]')]],
+[PGML('[```[$val1]```]'),PGML('[$ans11]'),PGML('[$ans12]')],
+[PGML('[```[$val2]```]'),PGML('[$ans21]'),PGML('[$ans22]')],
+[PGML('[```[$val3]```]'),PGML('[$ans31]'),PGML('[$ans32]')], 
+[PGML('[```[$val4]```]'),PGML('[$ans41]'),PGML('[$ans42]')],
+[PGML('[```[$val5]```]'),PGML('[$ans51]'),PGML('[$ans52]')]],
 midrules=>1 ,
 tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
 captioncss=>'font-variant:small-caps; ',
