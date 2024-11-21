@@ -187,12 +187,12 @@ Fill in the following table with the neutral compound formed from the ions.
 *Rules for entering formulas:* Instead of subscriping the numbers in formulas, you will type an underscore when you want the next number to be a subscript.  The 2 in the formula [`H_2 O`], the formula for water, is a subscript.  It sits lower than the rest.  The formula for water will be written H_2O in a WeBWorK answer blank. The _ before the 2 tells the computer it is a subscript.  You can type that character on a Windows computer using shift and the dash button.
 
 [@ DataTable([
-[[' ',headerrow=>1],PGML('`[$anion1]^{[$acharge1]}`'),PGML('`[$anion2]^{[$acharge2]}`'), PGML('`[$anion3]^{[$acharge3]}`')],
-[PGML('`[$cat1]^{[$pcharge1]}`'),PGML('[_________]'), PGML('[_________]') , PGML('[_________]')],
-[PGML('`[$cat2]^{[$pcharge2]}`'),PGML('[_________]'), PGML('[_________]'),  PGML('[_________]')],
-[PGML('`[$cat3]^{[$pcharge3]}`'),PGML('[_________]'), PGML('[_________]'),  PGML('[_________]')],
-[PGML('`[$cat4]^{[$pcharge4]}`'),PGML('[_________]'), PGML('[_________]'),  PGML('[_________]')], 
-[PGML('`[$cat5]^{[$pcharge5]}`'),PGML('[_________]'),PGML('[_________]'), PGML('[_________]')]],
+[[' ',headerrow=>1],PGML('[```[$anion1]^{[$acharge1]}```]'),PGML('[```[$anion2]^{[$acharge2]}```]'), PGML('[```[$anion3]^{[$acharge3]}```]')],
+[PGML('[```[$cat1]^{[$pcharge1]}```]'),PGML('[_________]'), PGML('[_________]') , PGML('[_________]')],
+[PGML('[```[$cat2]^{[$pcharge2]}```]'),PGML('[_________]'), PGML('[_________]'),  PGML('[_________]')],
+[PGML('[```[$cat3]^{[$pcharge3]}```]'),PGML('[_________]'), PGML('[_________]'),  PGML('[_________]')],
+[PGML('[```[$cat4]^{[$pcharge4]}```]'),PGML('[_________]'), PGML('[_________]'),  PGML('[_________]')], 
+[PGML('[```[$cat5]^{[$pcharge5]}```]'),PGML('[_________]'),PGML('[_________]'), PGML('[_________]')]],
 midrules=>1 ,
 tablecss=>'border:solid 1px;     border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
 captioncss=>'font-variant:small-caps; ',
