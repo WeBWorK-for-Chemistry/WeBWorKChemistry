@@ -45,7 +45,7 @@ Context("Numeric");
 
 @solution_text = ( "placeholder", "are", "are not");
 
-@elements = ("molybednum, tungsten, and chromium", "yttrium, zirconium, and selenium", "sodium, rubidium, and lithium", "barium, calcium, and radium", "scandium, bromine, and manganese", "nitrogen, phosphorus, and bismuth", "copper, silver, and gold", "magnesium, strontium, and samarium","cesium, tungstun, and mercury", "carbon, nitrogen and neon", "iron, osmium, and ruthenium", "chlorine, astatine, and iodine", "platinum, palladium, and nickel");
+@elements = ("molybednum, tungsten, and chromium", "yttrium, zirconium, and selenium", "sodium, rubidium, and lithium", "barium, calcium, and radium", "scandium, bromine, and manganese", "nitrogen, phosphorus, and bismuth", "copper, silver, and gold", "magnesium, strontium, and samarium","cesium, tungsten, and mercury", "carbon, nitrogen and neon", "iron, osmium, and ruthenium", "chlorine, astatine, and iodine", "platinum, palladium, and nickel");
 
 @ans = (1,2,1,1,2,1,1,2,2,2,1,1,1);
 
