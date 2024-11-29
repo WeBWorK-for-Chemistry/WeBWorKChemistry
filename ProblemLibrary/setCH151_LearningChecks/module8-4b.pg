@@ -54,17 +54,10 @@ Context("InexactValue");
 $massC = InexactValue(12.01, 4);
 $massH = InexactValue(1.01, 3);
 
+$subtotalC = InexactValue($massC*$i, 4);
 
-$subtotalC = 0;
-while ($i > 0) {
- $subtotalC = $subtotalC + $massC;
- $i = $i-1;
- }
-$subtotalH = 0;
-while ($j > 0) {
- $subtotalH = $subtotalH + $massH;
- $j = $j-1;
- }
+$subtotalH = InexactValue($massH*$j, 3);
+
  
 
 
@@ -100,7 +93,7 @@ _Use the following table to calculate the molar mass of the formula given._
 [@ 
 DataTable([
 [['Element ',headerrow=>1],'Quantity (mol)','', 'molar mass (g/mol)', '', 'Subtotal (g/mol)'],
-[PGML('C'),PGML('3'),PGML('x'),PGML('[_____]{$massH}'),PGML('='),PGML('[_____]{$subtotalH}')],[PGML('H'),PGML('8'),PGML('x'),PGML('[_____]{$massC}'),PGML('='),PGML('[_____]{$subtotalC}')],[PGML(''),PGML(''),PGML(''),PGML('Total'),PGML('='),PGML('[_____]{$total}')]
+[PGML('C'),PGML('3'),PGML('x'),PGML('[_____]{$massC}'),PGML('='),PGML('[_____]{$subtotalC}')],[PGML('H'),PGML('8'),PGML('x'),PGML('[_____]{$massH}'),PGML('='),PGML('[_____]{$subtotalH}')],[PGML(''),PGML(''),PGML(''),PGML('Total'),PGML('='),PGML('[_____]{$total}')]
 ],
 midrules=>1 ,
 tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
