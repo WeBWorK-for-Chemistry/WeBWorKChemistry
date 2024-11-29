@@ -175,7 +175,7 @@ BEGIN_PGML
 
 1. How many inches are in 2.00 feet? 
 
-    Use the conversion factor [``\mathrm{\frac{12 in}{1 ft}}``].
+    Use the conversion factor [``\mathrm{\frac{12\ in}{1\ ft}}``].
 
 
     [@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
@@ -185,7 +185,7 @@ BEGIN_PGML
   
     [``\mathrm{2.00\ ft \times 2.00\ ft = 4.00\ ft^2}``]
     
-    Use the conversion factor [``\mathrm{\frac{12 in}{1 ft}}``] twice to convert [``\mathrm{ft \times ft = ft^2}``]
+    Use the conversion factor [``\mathrm{\frac{12\ in}{1\ ft}}``] twice to convert [``\mathrm{ft \times ft = ft^2}``]
     
     [@conversionEQ($display,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
     
@@ -193,7 +193,7 @@ BEGIN_PGML
  
     [``\mathrm{2.00\ ft \times 2.00\ ft \times 2.00\ ft= 8.00\ ft^3}``]
     
-    Use the conversion factor [``\mathrm{\frac{12 in}{1 ft}}``] three times to convert [``\mathrm{ft \times ft \times ft= ft^3}``]
+    Use the conversion factor [``\mathrm{\frac{12\ in}{1\ ft}}``] three times to convert [``\mathrm{ft \times ft \times ft= ft^3}``]
     
     [@conversionEQ($display3,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
 END_PGML
