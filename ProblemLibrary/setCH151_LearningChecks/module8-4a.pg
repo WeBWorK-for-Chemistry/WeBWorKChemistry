@@ -52,16 +52,12 @@ $j = 3;
 Context("InexactValue");
 
 $massAl = InexactValue(26.98, 4);
-$massSe = InexactValue(78.97, 4);
+$massSe= InexactValue(78.97, 4);
+$massSeSF = InexactValue(78.97, 5);
 
 
-$subtotalAl = $massAl*$i;
-$subtotalSe = 0;
-while ($j > 0) {
- $subtotalSe = $subtotalSe + $massSe;
- $j = $j-1;
- }
- 
+$subtotalAl = InexactValue($massAl*$i, 4);
+$subtotalSe = InexactValue($massSeSF*$j, 5);
 
 
 $total = $subtotalAl + $subtotalSe;
@@ -143,3 +139,4 @@ END_PGML_SOLUTION
 ############################################################
 
 ENDDOCUMENT();
+
