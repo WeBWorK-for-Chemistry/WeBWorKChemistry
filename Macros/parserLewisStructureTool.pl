@@ -52,13 +52,11 @@ trigger this penalty (i.e. two wedge bonds instead of one dash and one wedge).
 
 =cut
 
-sub _parserLewisStructureTool_init {
-    ADD_JS_FILE(
-'https://cdn.jsdelivr.net/gh/limefrogyank/LewisStructuresWeb@latest/dist/bundle.js',
-        1, { defer => undef }
-    );
-    main::PG_restricted_eval(
-        'sub LewisStructureTool { parser::LewisStructureTool->new(@_) }');
+sub _parserLewisStructureTool_init {#
+  #ADD_JS_FILE('http://localhost:5173/src/main.ts', 1, { type => "module" }); # For development
+	#ADD_JS_FILE('http://localhost:3000/index.js', 1, { type => "module" });  # For development
+  ADD_JS_FILE('https://cdn.jsdelivr.net/gh/limefrogyank/LewisStructuresWeb@latest/dist/index.js', 1, { defer => undef });
+  main::PG_restricted_eval('sub LewisStructureTool { parser::LewisStructureTool->new(@_) }');
 }
 
 loadMacros( 'MathObjects.pl', 'contextChemical.pl',
