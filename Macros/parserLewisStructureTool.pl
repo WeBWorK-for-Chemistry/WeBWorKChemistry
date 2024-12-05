@@ -55,7 +55,7 @@ trigger this penalty (i.e. two wedge bonds instead of one dash and one wedge).
 sub _parserLewisStructureTool_init {#
   #ADD_JS_FILE('http://localhost:5173/src/main.ts', 1, { type => "module" }); # For development
 	#ADD_JS_FILE('http://localhost:3000/index.js', 1, { type => "module" });  # For development
-  ADD_JS_FILE('https://cdn.jsdelivr.net/gh/limefrogyank/LewisStructuresWeb@latest/dist/index.js', 1, { type => "module", defer => undef });
+  ADD_JS_FILE('https://cdn.jsdelivr.net/gh/limefrogyank/LewisStructuresWeb@v1/dist/index.js', 1, { type => "module", defer => undef });
   main::PG_restricted_eval('sub LewisStructureTool { parser::LewisStructureTool->new(@_) }');
 }
 
@@ -352,7 +352,7 @@ sub cmp {
             }
             else {
                 $message .=
-"You're either missing atoms or some atoms aren't connected to the correct atoms. ";
+"You either have an incorrect number of atoms or some atoms aren't connected to the correct atoms. ";
                 return $cmp;
             }
             if ( !$structureAnalysis->{bondOrderCorrect} ) {
