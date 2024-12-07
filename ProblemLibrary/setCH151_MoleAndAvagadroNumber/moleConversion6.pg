@@ -167,8 +167,7 @@ WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
 ##############################################
 
 BEGIN_TEXT
-$PAR
-If you don't get this in $showHint tries, you can get a hint.
+
 END_TEXT
 
 BEGIN_PGML_HINT
