@@ -45,7 +45,7 @@ TEXT(beginproblem());
 ############################################################
 Context("Numeric");
 $mc = RadioButtons(
-    [ "\( PbO (s) + 2 NH_3 (g) \rightarrow Pb (s) + N_2 (g) + H_2O (l) \)", "\( Ni_S (s) + O_2 (g) \rightarrow NiO (s) + SO_2 (g) \)", "\( 2 N_2H_4 (g) + N_2O_4 (g) \rightarrow 3 N_2 (g) + 4 H_2O (g) \)","\( Rb (s) + H_2O (l) \rightarrow RbOH (aq) + H_2 (g) \)", "None of these" ],
+    [ "\( PbO (s) + 2 NH_3 (g) \rightarrow Pb (s) + N_2 (g) + H_2O (l) \)", "\( NiS (s) + O_2 (g) \rightarrow NiO (s) + SO_2 (g) \)", "\( 2 N_2H_4 (g) + N_2O_4 (g) \rightarrow 3 N_2 (g) + 4 H_2O (g) \)","\( Rb (s) + H_2O (l) \rightarrow RbOH (aq) + H_2 (g) \)", "None of these" ],
     "\( 2 N_2H_4 (g) + N_2O_4 (g) \rightarrow 3 N_2 (g) + 4 H_2O (g) \)",
     last => ["None of these"],
      );
