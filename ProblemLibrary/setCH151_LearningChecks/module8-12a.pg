@@ -172,7 +172,7 @@ TeX =>
 
 Context("InexactValue");
 $IvMassAl = InexactValue(26.98, 4);
-$IvMassSe = InexactValue(78.96, 4);
+$IvMassSe = InexactValue(78.97, 4);
 
 $IvSubtotalAl = InexactValue($subtotalAl, $sfAl);
 $IvSubtotalSe = InexactValue($subtotalSe, $sfSe);
