@@ -60,9 +60,9 @@ _Classify each statement as a law, a theory, an experiment, a hypothesis, or an 
 
 1. Ice always floats on liquid water.  [__]{$pop1}
 
-2. Birds evolved from dinosaurs.  [__]{$pop2}
+2. A student in CH 151 proposes that the more sleep students get at night, the better they will perform on the first exam.  [__]{$pop2}
 
-3. Hot air is less dense than cold air, probably because the components of hot air are          moving more rapidly.  [__]{$pop3}
+3. Numerous experiments by a large body of scientists have reinforced the concept that organisms can change their characteristics over time using the process of natural selection.   [__]{$pop3}
 
 4. When ice was added to water, the temperature of the water decreased after the ice            melted.  [__]{$pop4}
 
@@ -96,9 +96,9 @@ END_PGML_HINT
 BEGIN_PGML_SOLUTION
 1. This is a general statement of a relationship between the properties of liquid and solid water, so it is a **law**.
 
-2. This is a possible explanation for the origin of birds, so it is a **hypothesis**.
+2. This is a possible explanation for better exam scores, so it is a **hypothesis**.
 
-3. This is a statement that tries to explain the relationship between the temperature and the density of air based on fundamental principles, so it is a **theory**.
+3. This is a statement that explains how sepcies change their characteriestics over time using the support of many experiments by numerous people, so it is a **theory**.
 
 4. The temperature is observed before and after a change is made in a system, so these are **observations**.
 
@@ -116,6 +116,5 @@ END_PGML_SOLUTION
 
 
 ENDDOCUMENT();
-
 
 
