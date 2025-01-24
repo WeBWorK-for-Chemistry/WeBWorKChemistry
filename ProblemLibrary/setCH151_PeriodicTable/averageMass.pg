@@ -72,7 +72,7 @@ else {
     }
 
 $ave = ($imass1*$iabun1 + $imass2*$iabun2 + $imass3*$iabun3)/100;
-   
+
 
 ##############################################
 
@@ -98,12 +98,18 @@ columnscss=>[' '],
 );
 @]*
 
-The average average atomic mass of [$element[$x1]] is [_________]{$ave}.
+The average atomic mass of [$element[$x1]] is [_________]{$answer} amu.
 
 END_PGML
 
 ##############################################
 BEGIN_PGML_HINT
+
+First calculate the weighted average of each isotope:
+
+[```\text{weighted average of isotope 1} = \frac{%\, \text{abundance of isotope 1}}{100} \times (\text{atomic mass of isotope 1})```]
+
+Then add up the weighted averages to get the final answer which is the average atomic maess of all the isotopes on earth.
 
 To review how to calculate atomic mass, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151:_Preparatory_Chemistry/05:_The_Nuclei_of_Atoms/5.05:_Atomic_Masses?contentOnly"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
@@ -112,7 +118,7 @@ END_PGML_HINT
 
 BEGIN_PGML_SOLUTION
 
-[`\frac{1}{100}([$imass1]\times[$iabun1] + [$imass2]\times[$iabun2] + [$imass3]\times[$iabun3]) = [$ave] `]
+[`\frac{1}{100}([$imass1]\times[$iabun1] + [$imass2]\times[$iabun2] + [$imass3]\times[$iabun3]) = [$ave] `] amu
 
 
 END_PGML_SOLUTION
