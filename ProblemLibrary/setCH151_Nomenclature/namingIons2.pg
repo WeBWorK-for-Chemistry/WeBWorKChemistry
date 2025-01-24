@@ -62,6 +62,7 @@ foreach (0..4) {
     $x = $numbers[$_];
     $e[$_] = $elements[$x];
     $c[$_] = $charge[$x];
+    $solution[$_] = $name[$x];
     $answ[$_] = Compute($name[$x])->cmp(
             checker => sub {
                my ($correct,$student,$ans) = @_;
@@ -154,11 +155,11 @@ END_PGML_HINT
 
 
 BEGIN_PGML_SOLUTION
-a. [`[$e[0]]^{[$c[0]]}`] is the [$answ[0]] ion.
-b. [`[$e[1]]^{[$c[1]]}`] is the [$answ[1]] ion.
-c. [`[$e[2]]^{[$c[2]]}`] is the [$answ[2]] ion.
-d. [`[$e[3]]^{[$c[3]]}`] is the [$answ[3]] ion.
-e. [`[$e[4]]^{[$c[4]]}`] is the [$answ[4]] ion.
+a. [`[$e[0]]^{[$c[0]]}`] is the [$solution[0]] ion.
+b. [`[$e[1]]^{[$c[1]]}`] is the [$solution[1]] ion.
+c. [`[$e[2]]^{[$c[2]]}`] is the [$solution[2]] ion.
+d. [`[$e[3]]^{[$c[3]]}`] is the [$solution[3]] ion.
+e. [`[$e[4]]^{[$c[4]]}`] is the [$solution[4]] ion.
 
 
 
