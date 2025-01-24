@@ -14,132 +14,109 @@
 
 DOCUMENT();
 
-############################################################
-# Load Macros
-############################################################
+# Try to only load the macro files that are needed.
 loadMacros(
   "PGstandard.pl",
   "PGML.pl",
-  "PGunion.pl",
-  "contextReaction.pl",
-  "PGcourse.pl",
   "parserPopUp.pl",
-  "answerHints.pl",
-  "MathObjects.pl",
-  "contextInexactValue.pl",
-  "contextInexactValueWithUnits.pl",
-  "parserDimensionalAnalysis.pl",
-  "parserMultiAnswer.pl",
-  "weightedGrader.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
 );
 
-############################################################
-# Header
-############################################################
-#COMMENT('');
-TEXT(beginproblem());
+# It seemed like a good idea to logically group the elements
+# with meaningful names
+@metals = qw(Na K  Rb Be Cs Mg Ca Sr Ba);
+@nonMetals = qw(O  F  Ne Cl S  P  Br Se I);
+@transitionMetals = qw(Ti V  Cr Mn Fe Co Ni Cu Zn);
+@innerTransitionMetals = qw(U  Np Pu Am Cm Bk Cf Es Fm);
 
-############################################################
-# PG Setup
-############################################################
-Context("Numeric");
+# map {do stuff} @array
+# will produce an array, feeding the elements of @array to whatever
+# is described in "do stuff". Use $_ for the variable that is running
+# through elements of @array.
+# Here, we get a big array from all this that is like:
+# (NA => 'metal', ..., Fm => 'inner transition metal')
+# The "=>" is just a suggestive comma where you also don't need quotes
+# on the strings to the left.
+# So then this array is interpreted as a hash because of the % sign
+# in %elementClasses
+%elementClasses = (
+    (map {$_ => 'metal'} @metals),
+    (map {$_ => 'nonmetal'} @nonMetals),
+    (map {$_ => 'transition metal'} @transitionMetals),
+    (map {$_ => 'inner transition metal'} @innerTransitionMetals)
+);
 
-@elementList = ( { element => "Li", type => 1,},
-                 { element => "Na", type => 1,},
-                 { element => "K", type => 1,},
-                 { element => "Rb", type => 1,},
-                 { element => "Be", type => 1,},
-                 { element => "Cs", type => 1,},
-                 { element => "Mg", type => 1,},
-                 { element => "Ca", type => 1,},
-                 { element => "Sr", type => 1,},
-                 { element => "Ba", type => 1,},
-                 { element => "N", type => 2,},
-                 { element => "O", type => 2,},
-                 { element => "F", type => 2,},
-                 { element => "Ne", type => 2,},
-                 { element => "Cl", type => 2,},
-                 { element => "S", type => 2,},
-                 { element => "P", type => 2,},
-                 { element => "Br", type => 2,},
-                 { element => "Se", type => 2,},
-                 { element => "I", type => 2,},
-                 { element => "Sc", type => 3,},
-                 { element => "Ti", type => 3,},
-                 { element => "V", type => 3,},
-                 { element => "Cr", type => 3,},
-                 { element => "Mn", type => 3,},
-                 { element => "Fe", type => 3,},
-                 { element => "Co", type => 3,},
-                 { element => "Ni", type => 3,},
-                 { element => "Cu", type => 3,},
-                 { element => "Zn", type => 3,},
-                 { element => "Pa", type => 4,},
-                 { element => "U", type => 4,},
-                 { element => "Np", type => 4,},
-                 { element => "Pu", type => 4,},
-                 { element => "Am", type => 4,},
-                 { element => "Cm", type => 4,},
-                 { element => "Bk", type => 4,},
-                 { element => "Cf", type => 4,},
-                 { element => "Es", type => 4,},
-                 { element => "Fm", type => 4,},);
+# randomly pick two of each type
+@metal_elements = random_subset(2, @metals);
+@nonMetal_elements = random_subset(2, @nonMetals);
+@transitionMetal_elements = random_subset(2, @transitionMetals);
+@innerTransitionMetal_elements = random_subset(2, @innerTransitionMetals);
 
-for (0..7) {
-    my $number = random(0,39);
-    redo if $unique{$number}++;
-    push @numbers, $number;
- }
+# merge them and randomize order:
+@elements = random_subset(8,
+    @metal_elements,
+    @nonMetal_elements,
+    @transitionMetal_elements,
+    @innerTransitionMetal_elements
+);
 
-@problemList = ();
+@options = (
+    'metal',
+    'nonmetal',
+    'transition metal',
+    'inner transition metal'
+);
 
-foreach (0..7) {
-    $x = $numbers[$_];
-    $problemList[$_]{element} = $elementList[$x]{element};
-    $problemList[$_]{type} = $elementList[$x]{type};
-}
-@options = ( "?", "metal", "nonmetal", "transition metal", "inner transition metal");
+# DropDown is better than PopUp. You don't do something like include a '?'
+# in the list. Instead, there is the placeholder option.
+# This uses map again to create the 8 dropdowns directly from the 8 elements.
+@dropdown = map {
+    DropDown(
+        ~~@options,
+        $elementClasses{$_},
+        placeholder => 'Choose One'
+    )
+} @elements;
 
+BEGIN_PGML
+##Metal, Nonmetal, or Transition Metal
 
-$pop1 = PopUp( [@options], $problemList[0]{type});
-$pop2 = PopUp( [@options], $problemList[1]{type});
-$pop3 = PopUp( [@options], $problemList[2]{type});
-$pop4 = PopUp( [@options], $problemList[3]{type});
-$pop5 = PopUp( [@options], $problemList[4]{type});
-$pop6 = PopUp( [@options], $problemList[5]{type});
-$pop7 = PopUp( [@options], $problemList[6]{type});
-$pop8 = PopUp( [@options], $problemList[7]{type});
+Classify each element as metal, nonmetal, transition metal or inner transition metal.
 
+END_PGML
 
-############################################################
-# Body
-############################################################
+# Sacrifice the parts numbering to use a grid layout.
+# Just an alternative to consider.
+
+# This has an outer layout table (as indicated by the star at the end)
+# with two cells. Each cell has a regular table.
 
 BEGIN_PGML
 
-##Metal, Nonmetal, or Transition Metal
+[#
+    [.
+        [#
+            [.[$elements[0]].] [.[_]{$dropdown[0]}.]*
+            [.[$elements[1]].] [.[_]{$dropdown[1]}.]*
+            [.[$elements[2]].] [.[_]{$dropdown[2]}.]*
+            [.[$elements[3]].] [.[_]{$dropdown[3]}.]
+        #]
+    .]
+    [.
+        [#
+            [.[$elements[4]].] [.[_]{$dropdown[4]}.]*
+            [.[$elements[5]].] [.[_]{$dropdown[5]}.]*
+            [.[$elements[6]].] [.[_]{$dropdown[6]}.]*
+            [.[$elements[7]].] [.[_]{$dropdown[7]}.]
+        #]
+    .]
 
-_Classify each element as metal, nonmetal, transition metal or inner transition metal._
-
-1. [$problemList[0]{element}]  [__]{$pop1}
-
-1. [$problemList[1]{element}]  [__]{$pop2}
-
-1. [$problemList[2]{element}]  [__]{$pop3}
-
-1. [$problemList[3]{element}]  [__]{$pop4}
-
-1. [$problemList[4]{element}]  [__]{$pop5}
-
-1. [$problemList[5]{element}]  [__]{$pop6}
-
-1. [$problemList[6]{element}]  [__]{$pop7}
-
-1. [$problemList[7]{element}]  [__]{$pop8}
-
-
+#]*
 
 END_PGML
+
+
 ############################################################
 BEGIN_PGML_HINT
 
@@ -148,26 +125,31 @@ Remember the 4 general areas discussed in this problem are located on the period
 1. Metals are to the left of the metal/nonmetal line that goes down like stairsteps through the periodic table starting betoween Al and B.
 2. Nonmetals are to the right of this metal/nonmetal line.
 3. Transition metals are the 10 shorter columns in the middle of the periodic table.
-4. Inner transition metals are the two rows and 14 columns that are usually placed below the rest of the periodic table because of space-saving purposes. 
+4. Inner transition metals are the two rows and 14 columns that are usually placed below the rest of the periodic table because of space-saving purposes.
 
-For more information on the periodic table, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table', 'More information on the periodic table.'); @]*
 
 
 
 END_PGML_HINT
 
+BEGIN_PGML_SOLUTION
+[$elements[0]] is a [$dropdown[0]].
 
-############################################################
-#Answers
+[$elements[1]] is a [$dropdown[1]].
 
-############################################################
+[$elements[2]] is a [$dropdown[2]].
 
+[$elements[3]] is a [$dropdown[3]].
 
-############################################################
-# End Problem
-############################################################
+[$elements[4]] is a [$dropdown[4]].
 
+[$elements[5]] is a [$dropdown[5]].
 
+[$elements[6]] is a [$dropdown[6]].
 
+[$elements[7]] is a [$dropdown[7]].
 
+END_PGML_SOLUTION
 ENDDOCUMENT();
+
