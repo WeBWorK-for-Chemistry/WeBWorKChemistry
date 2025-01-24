@@ -107,7 +107,7 @@ BEGIN_PGML_SOLUTION
 
 [`[$row2[$x2]]`]: The atomic number is [$Zrow2]. This is the number of protons.  The mass number is [$Arow2].  The number of neutrons can be calculated by subtracting the number of protons from the mass number.  [$Arow2] - [$Zrow2] = [$Nrow2]  This atom has a charge of +1 so the number of protons is one greater than the number of electrons. Therefore the number of electrons is [$Erow2].
 
-[`[$row3[$x3]]`]: The atomic number is [$Zrow3]. This is the number of protons.  The mass number is [$Arow3].  The number of neutrons can be calculated by subtracting the number of protons from the mass number.  [$Arow3] - [$Zrow3] = [$Nrow3]  This atom is neutral so the number of protons equals the number of electrons and is [$Zrow3].  
+[`[$row3x[$x3]]`]: The atomic number is [$Zrow3]. This is the number of protons.  The mass number is [$Arow3].  The number of neutrons can be calculated by subtracting the number of protons from the mass number.  [$Arow3] - [$Zrow3] = [$Nrow3]  This atom is neutral so the number of protons equals the number of electrons and is [$Zrow3].  
 
 END_PGML_SOLUTION
 
