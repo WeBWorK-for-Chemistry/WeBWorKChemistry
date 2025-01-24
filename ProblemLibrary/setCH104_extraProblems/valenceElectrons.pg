@@ -47,7 +47,7 @@ Context("Numeric");
 @elements = ("hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine", "neon", "sodium", "magnesium", "aluminum", "silicon", "phosphorus", "sulfur", "chlorine", "argon");
 
 $png = ".png";
-my @elementPics = map {$elements[$_].$png}@elements;
+my @elementPics = map {$_.$png}@elements;
 
 @options = ( "?", "yes", "no");
 
