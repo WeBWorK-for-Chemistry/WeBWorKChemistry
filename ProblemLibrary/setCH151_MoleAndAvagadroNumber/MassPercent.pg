@@ -210,6 +210,8 @@ _Aluminum silicates are a name commonly used for chemical compounds derived from
 
 The following molar masses can be used to solve this problem.  They have been taken from [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]*.
 
+All molar masses should be rounded to the hundredths place.
+
 molar mass of Al = [$IvMassAl] [``\frac{g}{mol}``]
 
 molar mass of Si = [$IvMassSi] [``\frac{g}{mol}``]
