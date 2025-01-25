@@ -20,10 +20,7 @@ loadMacros(
   "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
-  "answerHints.pl",
   "niceTables.pl",
-  "parserPopUp.pl",
-  "contextScientificNotation.pl",
   "contextReaction.pl",
   "contextString.pl"
 
@@ -188,7 +185,7 @@ BEGIN_PGML
 
 Fill in the following table with the neutral compound formed from the ions.
 
-*Rules for entering formulas:* Instead of subscriping the numbers in formulas, you will type an underscore when you want the next number to be a subscript.  The 2 in the formula [`H_2 O`], the formula for water, is a subscript.  It sits lower than the rest.  The formula for water will be written H_2O in a WeBWorK answer blank. The _ before the 2 tells the computer it is a subscript.  You can type that character on a Windows computer using shift and the dash button.
+*Rules for entering formulas:* Instead of subscriping the numbers in formulas, you will type an underscore when you want the next number to be a subscript.  The 2 in the formula [`H_2 O`], the formula for water, is a subscript.  It sits lower than the rest.  The formula for water will be written H_2O in a WeBWorK answer blank. The _ before the 2 tells the computer it is a subscript.  You can type that character on a Windows computer using shift and the dash button. To get out of the subscript press the up arrow and the cursor will start writing standard characters.
 
 [@ DataTable([
 [[' ',headerrow=>1],PGML('[`[$anion1]^{[$acharge1]}`]'),PGML('[`[$anion2]^{[$acharge2]}`]'), PGML('[`[$anion3]^{[$acharge3]}`]')],
@@ -207,9 +204,16 @@ columnscss=>[' '],
 END_PGML
 
 ##############################################
-#BEGIN_TEXT
+BEGIN_PGML_HINT
 
-#END_PGML_HINT
+Some things to check:
+1. Did you use correct capital and lower case letters for element symbols? 
+2. Did you charge balance the formula? 
+3. Did you use subscripts properly? (see instructions in the problem)
+
+A Review of writing binary Ionic Formulas can be found at [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/05%3A_Molecules_and_Compounds/5.05%3A_Writing_Formulas_for_Ionic_Compounds#Writing_Formulas_for_Ionic_Compounds_Containing_Polyatomic_Ions"), protect_underbar("this link"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
 ##############################################
 
 #BEGIN_PGML_SOLUTION
