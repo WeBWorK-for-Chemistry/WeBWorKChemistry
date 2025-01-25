@@ -147,7 +147,8 @@ Formatting hints: Do not put a space between the name and parenthesis if parenth
 
 example: [`MnS_{2}`]  manganese(IV) sulfide
 
-a. [`[$formula[0]]`] [____________________]{$answer[0]} 
+
+a. [`[$formula[0]]`]     [____________________]{$answer[0]} 
 
 a. [`[$formula[1]]`] [____________________]{$answer[1]} 
 
@@ -171,12 +172,12 @@ a. [`[$formula[9]]`] [____________________]{$answer[9]}
 
 END_PGML
 ############################################################
-#BEGIN_PGML_HINT
+BEGIN_PGML_HINT
+
+A review of naming ionic compounds can be found at [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.05%3A_Naming_Ionic_Compounds"), protect_underbar("this link"), "TARGET='_blank'" ); @]*
 
 
-
-
-#END_PGML_HINT
+END_PGML_HINT
 
 ############################################################
 
