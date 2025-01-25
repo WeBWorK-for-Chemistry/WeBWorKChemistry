@@ -21,7 +21,6 @@ loadMacros(
   "PGstandard.pl",
   "MathObjects.pl",
   "PGML.pl",
-  "PGunion.pl",
   "contextReaction.pl",
   "PGcourse.pl",
   "parserPopUp.pl",
@@ -78,7 +77,10 @@ Choose the name of the polyatomic ion in the following compounds.  You will want
 
 END_PGML
 
-
+#########################################################
+BEGIN_PGML_HINT
+A Review of writing binary Ionic Formulas can be found at [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.03%3A_Polyatomic_Ions"), protect_underbar("this link"), "TARGET='_blank'" ); @]*
+END_PGML_HINT
 ############################################################
 # Solution
 ############################################################
