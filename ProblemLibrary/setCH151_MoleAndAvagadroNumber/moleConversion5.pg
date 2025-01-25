@@ -148,10 +148,6 @@ Be sure to use molecules [`\mathrm{[$compound]}`] in the units of your answer.
 
 END_PGML
 
-BEGIN_TEXT
-$PAR
-$periodicTable
-END_TEXT
 
 # This weights the final answer with X percentage and splits the rest among the conversion factors.
 my $finalAnswerWeight = 50;
