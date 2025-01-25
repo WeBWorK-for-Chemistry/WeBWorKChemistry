@@ -24,7 +24,6 @@ loadMacros(
   "PGunion.pl",
   "contextReaction.pl",
   "PGcourse.pl",
-  "parserPopUp.pl",
   "answerHints.pl",
   "contextString.pl",
   "contextArbitraryString.pl"
@@ -145,7 +144,7 @@ BEGIN_PGML
 
 Write the formula for the following names. 
 
-*Rules for entering formulas:* Instead of subscriping the numbers in formulas, you will type an underscore when you want the next number to be a subscript.  The 2 in the formula [`H_2 O`], the formula for water, is a subscript.  It sits lower than the rest.  The formula for water will be written H_2O in a WeBWorK answer blank. The _ before the 2 tells the computer it is a subscript.  You can type that character on a Windows computer using shift and the dash button.
+*Rules for entering formulas:* Instead of subscriping the numbers in formulas, you will type an underscore when you want the next number to be a subscript.  The 2 in the formula [`H_2 O`], the formula for water, is a subscript.  It sits lower than the rest.  The formula for water will be written H_2O in a WeBWorK answer blank. The _ before the 2 tells the computer it is a subscript.  You can type that character on a Windows computer using shift and the dash button. You can stop subscripting by pressing the up arrow.
 
 Use [`CH_3COO^{-}`] for acetate in this problem.  This would be entered as CH_3COO in the formula. 
 
@@ -175,12 +174,13 @@ a. [$answ[9]] [____________________]{$finalAns[9]}
 
 END_PGML
 ############################################################
-#BEGIN_PGML_HINT
+
+BEGIN_PGML_HINT
+
+A review of writing ionic formulas can be found at [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.04%3A_The_Crystaline_Struture_of_Ionic_Compounds"), protect_underbar("this link"), "TARGET='_blank'" ); @]*
 
 
-
-
-#END_PGML_HINT
+END_PGML_HINT
 
 ############################################################
 
