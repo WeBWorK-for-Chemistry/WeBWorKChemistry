@@ -143,7 +143,7 @@ BEGIN_PGML
 
 Write the name for the following formulas. 
 
-Formatting hints: Do not put a space between the name and parenthesis if parenthesis are needed. Formula names do not need to be capitalized here.
+Formatting hints: Do not put a space between the name and parenthesis if parentheses are needed. Formula names do not need to be capitalized here.
 
 example: [`MnS_{2}`]  manganese(IV) sulfide
 
