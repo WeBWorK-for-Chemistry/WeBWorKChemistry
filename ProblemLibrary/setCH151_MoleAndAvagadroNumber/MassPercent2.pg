@@ -204,6 +204,8 @@ _Carboxylic Acids are a type of organic acids. The following problem gives the m
 
 The following molar masses can be used to solve this problem.  They have been taken from [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]*.  
 
+All molar masses should be rounded to the hundredths place.
+
 molar mass of C = [$IvMassC] [``\frac{g}{mol}``]
 
 molar mass of H = [$IvMassH] [``\frac{g}{mol}``]
