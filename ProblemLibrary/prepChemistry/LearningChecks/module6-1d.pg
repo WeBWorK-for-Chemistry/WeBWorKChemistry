@@ -1,0 +1,168 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "contextString.pl",
+  "contextArbitraryString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+Context("ArbitraryString");
+
+
+@elements = ("H", "Li", "Ga", "N", "O", "F", "Na", "Mg", "Al", "P", "S", "Cl", "K", "Ca", "Pb", ,"Pb", "Fe", "Fe", "Cu", "Cu", "Mn", "Sn", "Sn", "Co", "Co", "Cr", "Cr");
+
+@charge = ("+", "+", "3+", "3-", "2-", "-", "+", "2+", "3+", "3-", "2-", "-", "+", "2+", "2+", "4+","2+","3+","+","2+","7+","2+","4+","2+","3+","2+","3+");
+    
+@name = ("hydrogen", "lithium", "gallium", "nitride", "oxide", "fluoride", "sodium", "magnesium", "aluminum", "phosphide", "sulfide", "chloride", "potassium", "calcium", "lead(II)", "lead(IV)", "iron(II)", "iron(III)", "copper(I)", "copper(II)", "manganese(VII)", "tin(II)", "tin(IV)", "cobalt(II)", "cobalt(III)", "chromium(II)", "chromium(III)");
+
+my @numbers;
+my %unique;
+
+for (0..4) {
+    my $number = random(0,26);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+
+foreach (0..4) {
+    $x = $numbers[$_];
+    $e[$_] = $elements[$x];
+    $c[$_] = $charge[$x];
+    $answ[$_] = Compute($name[$x])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               if ($student =~ s/~~s~~(i//) { 
+                    $ans->{ans_message} = "Do not put a space between the cation name and the roman numeral.";}
+               return $correct eq $student;
+            });
+    }
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Monatomic Ion Formation
+
+What is the name for the following ions?  Use the name and don't include the word ion as it is already there for you.  There is no need to capitalize the name or use an article.  The first one has been done for you to use as an example.  
+
+example: [``Mn^{2+}``]  manganese(II) ion
+
+a. [``[$e[0]]^{[$c[0]]}``] [____________________]{$answ[0]} ion
+
+b. [``[$e[1]]^{[$c[1]]}``] [____________________]{$answ[1]} ion
+
+c. [``[$e[2]]^{[$c[2]]}``] [____________________]{$answ[2]} ion
+
+d. [``[$e[3]]^{[$c[3]]}``] [____________________]{$answ[3]} ion
+
+e. [``[$e[4]]^{[$c[4]]}``] [____________________]{$answ[4]} ion
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Ionic compounds consist of cations (positive ions) and anions (negative ions) held
+together by electrostatic attraction. They are usually composed of a metal + nonmetal(s).
+
+There are three types of cations:
+1. Type 1 Monatomic cations: consist of a single metal atom that has a consistent
+ionization pattern (usually a Main Group metal).
+2. Type 2 Monoatomic cations: consist of a single metal atom that has a
+variable ionization pattern (usually a Transition Metal).
+3. Polyatomic cations: covalently bonded group of non-metals that ionize.
+
+There are two types of anions:
+1. Monatomic anions: consist of a single non-metal atom that has a
+consistent ionization pattern. (There are no anions that have variable
+ionization patterns).
+2. Polyatomic anions: covalently bonded groups of non-metals that ionize.
+
+
+*NAMING MONATOMIC CATIONS:* Metal atoms lose valence electrons to form positively charged
+ions, called cations. An ion formed from an individual atom is a monatomic (or monoatomic)
+cation.
+I. Groups IA, IIA, IIIA elements, silver (Ag), cadmium (Cd) and zinc (Zn) form only one type of ion:
+    a. Group IA elements form +1 ions: [`H^{+}`], [`Li^{+}`], [`Na^{+}`], [`K^{+}`]
+    a. Group IIA elements form +2 ions: [`Be^{2+}`], [`Mg^{2+}`], [`Ca^{2+}`], [`Sr^{2+}`], [`Ba^{2+}`]
+    a. Group IIIA elements form +3 ions: [`Al^{3+}`]
+    a. also silver ion = [`Ag^{+}`]; cadmium ion = [`Cd^{2+}`]; zinc ion = [`Zn^{2+}`]
+
+When these elements form ions, the ion is named: *element name + ion*
+
+e.g. [`Na^{+}`] = sodium ion; [`Sr^{2+}`] = strontium ion; [`Zn^{2+}`] = zinc ion
+
+II. The Stock system is used to name transition metals and other metals that form more than one ion: e.g. iron (Fe) forms two ions: [`Fe^{2+}`] and [`Fe^{3+}`]; 
+
+When a metal can form more than one ion, each ion is named: *element name (charge in Roman Numerals) + ion*
+
+e.g. [`Fe^{2+}`]= iron (II) ion; [`Fe^{3+}`] = iron (III) ion 
+
+*NAMING MONATOMIC ANIONS:* Nonmetal atoms gain valence electrons to form negatively
+charged ions called anions. 
+
+A nonmetal anion is named: *element stem + “ide” + ion*
+
+e.g. O = oxygen atom → [`O^{2-}`] = oxide ion; and N = nitrogen atom → [`N^{3-}`] = nitride ion
+
+
+
+END_PGML_HINT
+
+############################################################
+
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

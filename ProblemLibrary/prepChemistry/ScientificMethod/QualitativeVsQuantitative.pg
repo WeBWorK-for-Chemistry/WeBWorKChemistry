@@ -1,0 +1,148 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+@options = ( "choose an answer", "quantitative", "qualitative" );
+@quant = ( "The boiling point of water is 100 degrees Celcius.", "The freezing point of helium is -269 degrees Celcius.", "Two molecules of water are formed when two molecules of hydrogen react with one molecule of oxygen.", "Water has a hydrogen to oxygen ratio of 2:1.","The freezing point of water is zero degrees Celcius.", "3.2 pounds of table salt will dissolve in one gallon of room temperature water.", "The melting point of lead is 327 degrees Celcius.");
+@qual = ( "Hydrogren will react with oxygen to form water.", "Acids taste sour.", "Iron rusts when water and air are present.", "Paper will burn in air.", "Copper sulfate is blue.", "Gasoline combusts in a car engine.", "Sulfur is yellow.");
+
+my @choice;
+my %unique;
+
+for (0..3) {
+    my $choice = random(0,6);
+    redo if $unique{$choice}++;
+    push @choice, $choice;
+ }
+ 
+$c=0;
+
+my @popa;
+
+while ($c < 4) {
+    $a = list_random(0,1);
+    $x = $choice[$c];
+    $popa[$c] = PopUp( [ @options ], $options[$a+1] );
+
+    if ($a == 0) {
+    $problem_text[$c] = $quant[$x];
+    } else{
+    $problem_text[$c] = $qual[$x];
+    }
+    $c = $c+1;
+    $b = $b+1;
+    }
+$pop0 = $popa[0];
+ANS( $pop0->cmp() );
+$pop1 = $popa[1];
+ANS( $pop1->cmp() );
+$pop2 = $popa[2];
+ANS( $pop2->cmp() );
+$pop3 = $popa[3];
+ANS( $pop3->cmp() );
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Qualitative or Quantitative?
+
+_Classify each of the following as a qualitative or quantitative observation._
+
+
+a) [$problem_text[0]]
+  
+     [@ $pop0->menu() @]*
+  
+b) [$problem_text[1]]
+  
+     [@ $pop1->menu() @]*
+
+c) [$problem_text[2]] 
+ 
+     [@ $pop2->menu() @]*
+
+d) [$problem_text[3]] 
+ 
+     [@ $pop3->menu() @]*
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Science can be either qualitative or quantitative. Qualitative implies a description of the quality of an object. For example, physical properties are generally qualitative descriptions: sulfur is yellow, your math book is heavy, or that statue is pretty. A quantitative description represents the specific amount of something; it means knowing how much of something is present, usually by counting or measuring it. As such, some quantitative descriptions would include 25 students in a class, 650 pages in a book, or a velocity of 66 miles per hour. Quantitative expressions are very important in science; they are also very important in chemistry.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+a)The correct answer is [$pop0->correct_ans()].
+
+b)The correct answer is [$pop1->correct_ans()].
+
+c)The correct answer is [$pop2->correct_ans()].
+
+d)The correct answer is [$pop3->correct_ans()].
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+

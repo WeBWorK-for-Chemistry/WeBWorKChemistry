@@ -1,0 +1,99 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "true", "false");
+
+$pop1 = PopUp( [@options], 2);
+
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Stoichiometric Coefficients
+
+_Classify the statement as true or false._
+
+ Coefficients in a balanced chemical equation represent particles (i.e. molecules, atoms, ions, etc.), moles, or grams. [__]{$pop1}
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/10%3A_Mass_Relations_in_Chemical_Reactions/10.01%3A_Stoichiometry"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+This is false.  Chemists most commonly interpret the coefficients as moles or the number of particles involved in a reaction. However, while chemists are often interested in mass relationships in chemical reactions, this information is not directly represented in the coefficients. Molar mass is used as a conversion between moles and mass.
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

@@ -1,0 +1,162 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "parserRadioButtons.pl",
+  "PGchoicemacros.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+$mc1 = new_checkbox_multiple_choice();
+$mc1 -> qa ( "", "the mass of magnesium sulfate added$BR"
+);
+$mc1 -> extra(
+"the temperature of the solution$BR",
+"the identity of the solid being dissolved$BR",
+"the volume of water used$BR",                
+"the size of the container used$BR"
+);
+$mc1 -> makeLast("None of the above");
+ANS( checkbox_cmp( $mc1->correct_ans() ) );
+
+$mc2 = new_checkbox_multiple_choice();
+$mc2 -> qa ( "", "the temperature of the solution$BR"
+);
+$mc2 -> extra(
+"the mass of magnesium sulfate added$BR",
+"the identity of the solid being dissolved$BR",
+"the volume of water used$BR",                
+"the size of the container used$BR"
+);
+$mc2 -> makeLast("None of the above");
+ANS( checkbox_cmp( $mc2->correct_ans() ) );
+
+$mc3 = new_checkbox_multiple_choice();
+$mc3 -> qa ( "There may be more than one answer possible.$BR", 
+"the identity of the solid being dissolved$BR",
+"the volume of water used$BR",                
+"the size of the container used$BR",
+);
+$mc3 -> extra(
+"the temperature of the solution$BR",
+"the mass of magnesium sulfate added$BR",
+);
+$mc3 -> makeLast("None of the above");
+ANS( checkbox_cmp( $mc3->correct_ans() ) );
+
+
+$mc4 = new_checkbox_multiple_choice();
+$mc4 -> qa ( "", 
+"The temperature of the solution increases as the mass of solid
+increases, because when more solid is added, more heat is given off.$BR"
+);
+$mc4 -> extra(
+"The temperature of the solution increases as the mass of solid
+increases$BR",
+"The mass of the solution increases as the temperature of the solution increases$BR","The temperature of the solution increases as the volume of the solution increases, because as more water is added more heat is given off$BR"
+);
+$mc4 -> makeLast("None of the above");
+ANS( checkbox_cmp( $mc4->correct_ans() ) );
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Scientific Method
+
+_Read the following passage, then answer the remaining questions._
+
+A student added 100 mL of water to a Styrofoam cup. The student measured the temperature
+of the water, then added 5 g of solid magnesium sulfate and recorded the temperature of the solution. The student continued to increase the mass of magnesium sulfate added to the
+water in increments of 5 grams and recorded the temperature of the solution after each
+addition of solid.
+
+1. What is the independent variable in this experiment?
+
+    [@ $mc1 -> print_q() @]***
+    [@ $mc1 -> print_a() @]***
+
+2. What is the dependent variable in this experiment?
+
+    [@ $mc2 -> print_q() @]***
+    [@ $mc2 -> print_a() @]***
+
+3. Identify the controlled variable(s).
+
+    [@ $mc3 -> print_q() @]***
+    [@ $mc3 -> print_a() @]***
+    
+4. Which of the following could be a complete hypothesis for this experiment?  Remember that a hypothesis should state the predicted relationship between the independent and dependent variables with an explanation why this relationship would exist.
+
+    [@ $mc4 -> print_q() @]***
+    [@ $mc4 -> print_a() @]***
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+Scientists search for answers to questions and solutions to problems by using a procedure called the scientific method. This procedure consists of making observations, formulating hypotheses, and designing experiments; which leads to additional observations, hypotheses, and experiments in repeated cycles.  To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/01%3A_The_Chemical_World/1.04%3A_The_Scientific_Method_-_How_Chemists_Think"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. The correct answer is [$mc1->correct_ans()].
+2. The correct answer is [$mc2->correct_ans()].
+3. The correct answer is [$mc3->correct_ans()].
+4. The correct answer is [$mc4->correct_ans()].
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

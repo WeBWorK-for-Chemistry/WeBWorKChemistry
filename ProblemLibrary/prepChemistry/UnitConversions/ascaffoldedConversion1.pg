@@ -1,0 +1,290 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "scaffold.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: -30px;
+    justify-content: space-evenly;
+  }
+  .conversionEQ > div {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  .conversionFactorGrouping{
+      display:flex;
+      justify-content: space-around;
+      align-items: center;
+  }
+  </style>  
+EOF
+
+##############################################
+
+sub conversionEQ {
+    my $start = shift;
+    my $colsref = shift;
+    my $n = scalar @{$colsref};
+    my $end = shift;
+    my $html;
+    my $tex;
+    $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+    $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+        $html .= '<div class="conversionEQmath">';
+        $html .= math_ev3('\times');
+        $html .= '</div>';
+        $html .= '<div class="conversionEQcol">';
+        $html .= '<div>';
+        $html .= $colsref->[$i];
+        $html .= '</div>';       
+        $html .= '<div class="conversionFractionBar">';
+        $html .= '<svg height="1" width="40">';
+        $html .= '<desc>per</desc>';
+        $html .= '</svg>';
+        $html .= '</div>';       
+        $html .= '<div>';
+        $html .= $colsref->[$i+1];
+        $html .= '</div>';       
+        $html .= '</div>';
+    }
+    $html .= '<div  class="conversionEQmath">';
+    $html .= math_ev3('{}={}');
+    $html .= '</div>';
+    $html .= '<div>';
+    $html .= $end;
+    $html .= '</div>';
+    $html .= '</div>';
+    MODES(HTML=>$html, TeX=>'');
+}
+
+sub conversionFactor {
+    my $numerator = shift;
+    my $denominator = shift;
+    my $html;
+    $html .= '<div class="conversionEQ">';
+        $html .= '<div class="conversionEQcol">';
+            $html .= '<div>';
+                $html .= $numerator;
+            $html .= '</div>';       
+            $html .= '<div class="conversionFractionBar">';
+                $html .= '<svg height="1" width="40">';
+                $html .= '<desc>per</desc>';
+                $html .= '</svg>';
+            $html .= '</div>';       
+            $html .= '<div>';
+                $html .= $denominator;
+            $html .= '</div>';       
+        $html .= '</div>';
+    $html .= '</div>';
+
+    MODES(HTML=>$html, TeX=>'');
+}
+
+install_weighted_grader();
+
+Context("Numeric");
+$r = random(0.01, 0.09, 0.0001);
+
+Context("InexactValueWithUnits");
+
+$givenForText = InexactValue($r,4);
+$given = InexactValueWithUnits([$r, 4], 'L');
+
+# using 1 L = 1000 mL
+$inf = 9**9**9;
+$n1 = InexactValueWithUnits(['1000', $inf], 'mL'); 
+$d1 = InexactValueWithUnits(['1', $inf], 'L'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+$answer = $given * $n1 / $d1;
+
+$equalityMultiAnswer = MultiAnswer($n1,$d1)->asEquality();
+
+$conversionFactorsMultiAnswer = MultiAnswer($n1,$d1,$d1,$n1)->asPairOfConversionFactors();
+
+
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter (not ready yet!) will adjust how the scoring is done.
+
+$ma = MultiAnswer($given,$n1,$d1,$answer)->asDimensionalAnalysis($given,{gradeGiven=>1});
+
+$texConversionFactor = '\frac\{\hspace\{2cm\}\}\{\hspace\{2cm\}\}';
+$tconversionFactor = '\frac{a}{b}'; 
+#$texProblem = '' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}';
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+##############################################
+
+TEXT(beginproblem());
+BEGIN_PGML
+
+## Conversion Problem
+
+#### The volume of soda remaining in a can after a spill is [$givenForText] liters.  Convert this volume to milliliters.
+
+In this problem if you use the abbreviation for liters, note that liters is always a capital L, not lowercase.  So milliliters is mL.
+
+END_PGML
+$scaffold = Scaffold::Begin(
+    open_first_section => 1,
+    can_open => "always",
+    instructor_can_open => "always",
+    is_open  => "correct_or_first_incorrect",
+    hardcopy_is_open  => "always",
+);
+
+
+Section::Begin("Part 1: Equality Statement");
+BEGIN_PGML
+
+Write the equality statement you'll need to do the conversion:  
+
+[@ ans_rule(10) @]* = [@ ans_rule(10) @]*
+
+END_PGML
+
+# Equality Statement Checker
+ANS($equalityMultiAnswer->cmp);
+
+Section::End();
+
+
+Section::Begin("Part 2: Conversion Factors");
+$groupStart = '';
+$groupEnd = '';
+BEGIN_PGML
+
+Write the conversion factors that you can create from the equality:  
+
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+
+[@ conversionFactor(ans_rule(10), ans_rule(10)) @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ MODES(HTML=>'&amp;', TeX=>'\&') @]*
+[@ conversionFactor(ans_rule(10), ans_rule(10)) @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+
+[@ MODES(HTML=>'</div>', TeX=>'') @]*
+
+END_PGML
+
+# Conversion Factors Checker
+ANS($conversionFactorsMultiAnswer->cmp);
+
+Section::End();
+
+
+Section::Begin("Part 3: Dimensional Analysis");
+$texProblem = '[``' . $given->TeX . ' \times \frac{\hspace{2cm}}{\hspace{2cm}} = \fbox{\phantom{placeholder}}``]';
+BEGIN_PGML
+
+Finish the problem by solving it using dimensional analysis:
+
+[@ conversionEQ(ans_rule(10),[ans_rule(10),ans_rule(10)],ans_rule(10)) @]*
+[@ MODES(HTML=>'', TeX=>$texProblem); @]**
+
+ 
+END_PGML
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+Section::End();
+
+Scaffold::End();
+
+
+
+
+##############################################
+
+
+BEGIN_PGML_HINT
+
+The general steps in performing dimensional analysis
+
+1.  Identify the "given" information in the problem. Look for a number with units to start this problem with.
+2.  What is the problem asking you to "find"? In other words, what unit will your answer have?
+3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
+4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
+
+
+For more information on unit conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemistry_I_(Southeast)/2%3A_Measurement_and_Problem_Solving/2.5%3A_Problem_Solving_and_Unit_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+
+BEGIN_PGML_SOLUTION
+The goal is to convert a value with units of [$given->{units}] to [$answer->{units}].
+
+You'll first need to come up with the appropriate equality that can do this conversion.  One equality is enough in this case.
+
+[```[$n1] = [$d1]```]
+
+Next, you can convert this equality to a conversion factor.  The two conversion factors you can generate are:
+
+[```\frac{[$n1]}{[$d1]} \text{ & } \frac{[$d1]}{[$n1]} ```]
+
+Finally, construct your problem with the given value of [$given] at the beginning and multiply the one conversion factor that will cancel out the [``[$given->{units}]``] and leave you with [``[$answer->{units}]``] in the answer.
+
+[```[$dimensionalAnalysisSolution]```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
+

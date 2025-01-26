@@ -1,0 +1,163 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Lee McPherson, Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "contextInexactValue.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "contextInexactValueWithUnits.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+#$rand_num_generator = new PGrandom();
+
+my @val;
+
+Context("InexactValue");
+
+$num = random(0.001,0.1,0.001);
+$sfs = random(1,4,1);
+$val[0] = InexactValue($num, $sfs);
+$ans[0] = $val[0] -> sigFigs();
+$units[0] = list_random('grams', 'mL', 'L', 'mg', 'miles', 'gal', 'meters', 'cm');
+
+$num = random(10,200,1);
+$val[1] = InexactValue($num, Infinity);
+$ans[1] = $val[1] -> sigFigs();
+$units[1] = list_random('people', 'students', 'pencils', 'papers', 'jelly beans');
+
+$num = random(100,10000,1);
+$zeroes = random(1,3,1);
+$val[2] = InexactValue($num*(10**$zeroes), length($num));
+$ans[2] = $val[2] -> sigFigs();
+$units[2] = list_random('grams', 'mL', 'L', 'mg', 'miles', 'gal', 'meters', 'cm');
+
+$num = random(0.0001,0.1,0.0001);
+$sfs = random(1,4,1);
+$val[3] = InexactValue($num, $sfs);
+$ans[3] = $val[3] -> sigFigs();
+$units[3] = list_random('grams', 'mL', 'L', 'mg', 'miles', 'gal', 'meters', 'cm');
+
+$num = random(10,200,1);
+$val[4] = InexactValue($num, Infinity);
+$ans[4] = $val[4] -> sigFigs();
+$units[4] = list_random('people', 'students', 'pencils', 'papers', 'jelly beans');
+
+$num = random(10,20000,1);
+$val[5] = InexactValue($num, length($num));
+$ans[5] = $val[5] -> sigFigs();
+$units[5] = list_random('grams', 'mL', 'L', 'mg', 'miles', 'gal', 'meters', 'cm');
+
+$num = random(10,200,1);
+$val[6] = InexactValue($num, Infinity);
+$ans[6] = $val[6] -> sigFigs();
+$units[6] = list_random('people', 'students', 'pencils', 'papers', 'jelly beans');
+
+for (0..6) {
+    my $order = random(0,6);
+    redo if $unique{$order}++;
+    push @order, $order;
+ }
+
+foreach (0..6) {
+        $y = $order[$_];
+        $prob[$_] = $val[$y];
+        $answer[$_] = $ans[$y];
+        $unitFinal[$_] = $units[$y];
+        }
+
+
+##############################################################
+#
+#  Problem
+#
+#
+TEXT(beginproblem());
+
+
+BEGIN_PGML
+
+##Counting Significant Digits in Numbers with Units.
+
+_Indicate the number of significant digits in each of the following.  If a number contains digits that are of uncertain significance, do not count these.  Answers should be in numerical form, 2 rather than two, for example.  If a number is a counted number, the number of significant digits is *infinity* and can be entered as "Inf"._
+
+a. [``[$prob[0]]``][``\ [$unitFinal[0]]``]  [____]{$answer[0]} 
+
+b. [``[$prob[1]]``][``\ [$unitFinal[1]]``]  [____]{$answer[1]} 
+
+c. [``[$prob[2]]``][``\ [$unitFinal[2]]``]  [____]{$answer[2]} 
+
+d. [``[$prob[3]]``][``\ [$unitFinal[3]]``]  [____]{$answer[3]} 
+
+e. [``[$prob[4]]``][``\ [$unitFinal[4]]``]  [____]{$answer[4]} 
+
+f. [``[$prob[5]]``][``\ [$unitFinal[5]]``]  [____]{$answer[5]} 
+
+g. [``[$prob[6]]``][``\ [$unitFinal[6]]``]  [____]{$answer[6]}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+*Significant Figure Rules*
+
+1. All nonzero digits in a measurement are significant.
+
+2. Zeros that appear between other nonzero digits (middle zeros) are always significant.
+
+3. Zeros that appear in front of all of the nonzero digits are called leading zeros. Leading zeros are never significant.
+
+4. Zeros that appear after all nonzero digits are called trailing zeros. A number with trailing zeros that lacks a decimal point may or may not be significant. *Use scientific notation to indicate the appropriate number of significant figures.*
+
+5. Trailing zeros in a number with a decimal point are significant. This is true whether the zeros occur before or after the decimal point.
+
+To review counting significant figures, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+a. [``[$prob[0]]``][``\ [$unitFinal[0]]``] has [$answer[0]] significant figures.
+
+b. [``[$prob[1]]``][``\ [$unitFinal[1]]``] has [$answer[1]] significant figures.
+
+c. [``[$prob[2]]``][``\ [$unitFinal[2]]``] has [$answer[2]] significant figures.
+
+d. [``[$prob[3]]``][``\ [$unitFinal[3]]``] has [$answer[3]] significant figures.
+
+e. [``[$prob[4]]``][``\ [$unitFinal[4]]``] has [$answer[4]] significant figures. 
+
+f. [``[$prob[5]]``][``\ [$unitFinal[5]]``] has [$answer[5]] significant figures.
+
+g. [``[$prob[6]]``][``\ [$unitFinal[6]]``] has [$answer[6]] significant figures.
+
+
+END_PGML_SOLUTION
+
+
+
+ENDDOCUMENT();        

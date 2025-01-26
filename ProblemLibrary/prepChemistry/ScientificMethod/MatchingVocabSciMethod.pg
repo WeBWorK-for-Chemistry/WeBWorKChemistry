@@ -1,0 +1,163 @@
+## DESCRIPTION
+## ENDDESCRIPTION
+
+## KEYWORDS('matching', 'chemistry')
+
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## Date(06/01/2015)
+## Institution('')
+## Author(Stephanie Bryan)
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+
+###########################
+#  Initialization
+
+DOCUMENT();  
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "PGgraders.pl",
+  "unionTables.pl",
+  "PGML.pl",
+  "PGcourse.pl"
+);
+
+TEXT(beginproblem());
+
+
+###########################
+#  Setup
+
+#
+#  Create a matching list and use popups
+#
+$ml = new_match_list();
+$ml->rf_print_q(~~&pop_up_list_print_q);
+$ml->ra_pop_up_list([
+"No answer" => "?",
+"A" => "A", "B" => "B", "C" => "C", 
+"D" => "D", "E" => "E", "F" => "F",
+"G" => "G", "H" => "H", "I" => "I",
+"J" => "J", "K" => "K", "L" => "L",
+]);
+
+#
+#  Add correct questions and answers
+#
+$ml->qa(
+"a tentative explanation why something was observed for a small number of experiments", "hypothesis",
+"an explanation why something was observed for numerous experiments", "theory",
+"a statement about what was observed from numerous experiments", "law"
+);
+$ml->choose(3);
+
+#
+#  Add extra incorrect answers
+#
+$ml->extra(
+"experiment",
+"qualitative observation"
+);
+$ml->choose_extra(2);
+  
+$ml->makeLast("None of the above");
+
+@correctAns = @{$ml->ra_correct_ans};
+
+@explanations = (
+"a hypothesis is only a tentetive explanation based on just a small number of experiements",
+"a theory is based on a large number of experiments",
+"a law is a statement of fact or observation rather than an explanation"
+);
+
+@askedQuestions = ();
+foreach $q ( @{$ml->selected_q} ) {
+  $i = 0;
+  foreach $mq ( @{$ml->questions} ) {
+    if ( $q eq $mq ) {
+      push(@askedQuestions, $i);
+      last;
+    }
+    $i++;
+  } 
+}
+
+###########################
+#  Main text
+
+BEGIN_PGML
+##Vocabulary Matching
+
+_Match each statement with the most correct answer._
+[@ ColumnMatchTable($ml) @]***
+END_PGML
+
+
+############################
+#  Answer evaluation
+
+$showPartialCorrectAnswers = 1;
+
+#
+#  Incremental grader
+#
+
+
+#
+#  All or nothing grader
+#  
+# install_problem_grader(~~&std_problem_grader);
+
+ANS( str_cmp( $ml->ra_correct_ans ) );
+
+############################
+############################################################
+BEGIN_PGML_HINT
+Scientists search for answers to questions and solutions to problems by using a procedure called the scientific method. This procedure consists of making observations, formulating hypotheses, and designing experiments; which leads to additional observations, hypotheses, and experiments in repeated cycles.  To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/01%3A_The_Chemical_World/1.04%3A_The_Scientific_Method_-_How_Chemists_Think"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+
+############################################################
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The answer to the number 1 is
+[$correctAns[0]], because
+[$explanations[$askedQuestions[0]]].
+
+
+The answer to the number 2 is
+[$correctAns[1]], because
+[$explanations[$askedQuestions[1]]].
+
+The answer to the number 3 is
+[$correctAns[2]], because
+[$explanations[$askedQuestions[2]]].
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+
+
+ENDDOCUMENT();

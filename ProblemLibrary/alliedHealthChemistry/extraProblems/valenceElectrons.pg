@@ -1,0 +1,156 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "parserRadioButtons.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+#Context()->flags->set(
+#  tolerance => 0.2,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+@elements = ("hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine", "neon", "sodium", "magnesium", "aluminum", "silicon", "phosphorus", "sulfur", "chlorine", "argon");
+
+$png = ".png";
+my @elementPics = map {$_.$png}@elements;
+
+@options = ( "?", "yes", "no");
+
+for (0..3) {
+    my $number = random(0,17);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+
+
+foreach (0..3) {
+    $x = $numbers[$_];
+    $atom[$_] = $elements[$x];
+    $atompic[$_] = $elementPics[$x];
+    $altText[$_] = "Bohr model for an atom of $atom[$_]"; 
+    $electrons[$_] = $x + 1;
+    $e = $electrons[$_];
+    if ($e <= 2) {
+         $val[$_] = $e;
+         }
+    elsif ($e <= 10) {
+        $val[$_] = $e-2;
+         }
+    else {
+        $val[$_] = $e-10;
+        }
+    if ($e == 2) {
+        $i[$_] = 1;
+        }
+    elsif ($e == 10) {
+        $i[$_] = 1;
+        }
+    elsif ($e == 18) {
+        $i[$_] = 1;
+        }
+    else {
+        $i[$_] = 2;
+        }
+    $pop[$_] = PopUp( [ @options ], $i[$_] );
+    }
+
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Valence Electrons and the Periodic Table
+
+_Use the image above the questions to help answer each set of questions._  
+
+1. [@ image( $atompic[0], width=>300, height=>300,extra_html_tags=>"alt='$altText[0]'"  )@]*
+
+    a. How many electrons does a [$atom[0]] atom have? [__]{$electrons[0]}  
+    b. How many of the electrons in a [$atom[0]] atom are valence electrons? [__]{$val[0]}  
+    c. Is [$atom[0]]’s valence shell full? [__]{$pop[0]}
+
+2. [@ image( $atompic[1], width=>300, height=>300,extra_html_tags=>"alt='$altText[1]'"  )@]*
+
+    a. How many electrons does a [$atom[1]] atom have? [__]{$electrons[1]}  
+    b. How many of the electrons in a [$atom[1]] atom are valence electrons? [__]{$val[1]}  
+    c. Is [$atom[1]]’s valence shell full? [__]{$pop[1]}
+    
+3. [@ image( $atompic[2], width=>300, height=>300,extra_html_tags=>"alt='$altText[2]'"  )@]*
+
+    a. How many electrons does a [$atom[2]] atom have? [__]{$electrons[2]}  
+    b. How many of the electrons in a [$atom[2]] atom are valence electrons? [__]{$val[2]}  
+    c. Is [$atom[2]]’s valence shell full? [__]{$pop[2]}
+
+4. [@ image( $atompic[3], width=>300, height=>300,extra_html_tags=>"alt='$altText[3]'"  )@]*
+
+    a. How many electrons does a [$atom[3]] atom have? [__]{$electrons[3]}  
+    b. How many of the electrons in a [$atom[3]] atom are valence electrons? [__]{$val[3]}  
+    c. Is [$atom[3]]’s valence shell full? [__]{$pop[3]}
+
+
+
+END_PGML
+############################################################
+#BEGIN_PGML_HINT
+
+
+
+#END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

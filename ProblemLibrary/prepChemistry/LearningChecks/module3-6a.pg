@@ -1,0 +1,94 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+
+
+##############################################
+
+
+Context("Numeric");
+
+#$m = random(70.1,99.9,0.1);
+
+Context("InexactValue");
+
+$degK = InexactValue(90.2, 3);
+
+$scale = InexactValue(1.8, 10);
+
+$shift = InexactValue(32, 10);
+
+$kelvin = InexactValue(273.15, 5);
+
+$degC = InexactValue(-183.0, 4);
+
+$degF =InexactValue($degC*$scale + $shift);
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Unit Conversion - Temperature
+
+1. Liquid oxygen boils at 90.2 K. What is the boiling point of oxygen in [``^\circ C\ ``]? You only need to put the numerical answer in the blank.
+
+    90.2 K  = [_________]{$degC} [``^\circ C``]
+
+2. What is this boiling point in [``^\circ F\ ``]?  Use your answer from problem 1 to find the answer here.  Otherwise you may end up with a slightly different answer due to rounding.
+
+    90.2 K = [_________]{$degF} [``^\circ F``]
+
+ 
+END_PGML
+
+
+
+##############################################
+
+
+BEGIN_PGML_HINT
+
+Remember that temperature conversions cannot be done via the conversion factor method that is used for many other conversions.  For more information on temperature conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/03%3A_Dimensional_Anlaysis_and_Density/3.06%3A_Temperature"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+To convert to from Celcuis to Kelvin, remember that the constants in this equation are exact. 
+
+[$degK] + 273.15 = [$degC] [``^\circ C``]
+
+Then to convert from Celsius to Fahrenheit.  Again remember that the constants in this equation are all exact.
+
+1.8([$degC]) + 32 = [$degF][``^\circ F``]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
+

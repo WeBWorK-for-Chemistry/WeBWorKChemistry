@@ -1,0 +1,179 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+
+@options = ( "choose an answer", "law", "theory", "experiment", "hypothesis", "quantitative observation", "qualitative observation" );
+@law = ( "Heat always flows from hot objects to cooler ones, not in the opposite direction.", "Any compound is always made up of elements in the same proportion by mass.", "An object speeds up or slows down only when there is a push or a pull applied to it.", "In the process of a chemical reaction, the amount of matter involved remains the same before and after the reaction occurs." );
+@theory = ( "Experiments have confirmed that wax candles disappear over time when burned, because the wax reacts with the oxygen in the air to form carbon dioxide gas and water vapor.", "As supported by valid experiments, the universe was formed by a massive explosion that propelled matter into a vacuum.", "Many decades of experiments have confirmed that gases are made up of particles that essentially do not interact with each other. This explains why one mole of gas has a volume of 22.4 L.", "As supported by valid experiments, light can be given off by electrons moving to lower energy levels in atoms.");
+@experiment = ( "Measured amounts of acid were added to a Rolaids tablet to see whether it really “consumes 47 times its weight in excess stomach acid.”", "The mass of Vitamin C per volume of fruit juice is measured for apple juice, orange juice, and lemon juice.", "The density of a liquid was found by measuring the volume and mass of repeated samples and calulating the average result.", "The amount of acid in the beaker was determined by slowly adding a known amount of base." );
+@hypothesis = ( "A student exploring the properties of gases proposes that if she decreases the volume of a sample of gas, then the pressure exerted by the sample of gas will increase, because the particles will collide with the container walls more frequently.", "The pressure inside the red mylar balloon will increase when the temperature is increased, because the particles will move faster.", "A student is exploring solubility and proposes that if she increases the temperature of her solution the solute will increase in solubility.", "A student is studying liquids and proposes that because liquids take the shape of any container, the particles within them must be able to move.");
+@quant = ( "The silver carbonate solid melted at 423 °F.", "The mass of the candle before lighting was 10.762 g and after it burned for 10 minutes the mass was 8.981 g.", "The melting point of lead is 660.3 degrees Celcius.", "Ammonia has a hydrogen to nitrogen ratio of 3:1.");
+@qual = ( "The burning candle generates heat and light and gradually disappears over time.", "Limestone is relatively insoluble in water, but dissolves readily in dilute acid with the evolution of a gas.", "Adding KSCN to the solution with iron(III) ions created a deept red solution.", "Copper nitrate trihydrate forms blue crystals.");
+
+my @order;
+my @choice;
+my %unique;
+
+for (0..5) {
+    my $order = random(0,5);
+    redo if $unique{$order}++;
+    push @order, $order;
+ }
+my @popa;
+
+foreach (0..5) {
+        $x = random(0,3);
+        $y = $order[$_];
+        if ($y == 0) {
+         $problem_text[$_] = $law[$x];
+        } elsif ($y == 1) {
+        $problem_text[$_] = $theory[$x];
+        } elsif ($y == 2 ) {
+        $problem_text[$_] = $experiment[$x];
+        } elsif ($y == 3 ) {
+        $problem_text[$_] = $hypothesis[$x];
+        } elsif ($y == 4 ) {
+        $problem_text[$_] = $quant[$x];
+        } else {
+        $problem_text[$_] = $qual[$x];
+        }
+        $popa[$_] = PopUp( [ @options ], $options[$y+1] );
+       
+    }
+$pop0 = $popa[0];
+ANS( $pop0->cmp() );
+$pop1 = $popa[1];
+ANS( $pop1->cmp() );
+$pop2 = $popa[2];
+ANS( $pop2->cmp() );
+$pop3 = $popa[3];
+ANS( $pop3->cmp() );
+$pop4 = $popa[4];
+ANS( $pop4->cmp() );
+$pop5 = $popa[5];
+ANS( $pop5->cmp() );
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Law, Theory, Experiment, Hypothesis, or Observation
+
+_Classify each statement as a law, a theory, an experiment, a hypothesis, a qualitative
+observation or a quantitative observation._
+
+
+ a) [$problem_text[0]]
+ 
+     [@ $pop0->menu() @]* 
+
+ b) [$problem_text[1]] 
+     
+     [@ $pop1->menu() @]* 
+
+ c) [$problem_text[2]] 
+ 
+     [@ $pop2->menu() @]* 
+
+ d) [$problem_text[3]] 
+ 
+     [@ $pop3->menu() @]* 
+
+ e) [$problem_text[4]] 
+ 
+     [@ $pop4->menu() @]* 
+
+ f) [$problem_text[5]] 
+ 
+     [@ $pop5->menu() @]* 
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Review:
+
+- A hypothesis is a tentative explanation that can be tested by further investigation.
+- A theory is a well-supported explanation of observations.
+- A scientific law is a statement that summarizes the relationship between variables.
+- An experiment is a controlled method of testing a hypothesis.
+- Qualitative implies a description of the quality of an object.
+- A quantitative description represents the specific amount of something.
+
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/01%3A_The_Chemical_World/1.03%3A_Hypothesis_Theories_and_Laws"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+a)The correct answer is [$pop0->correct_ans()].
+
+b)The correct answer is [$pop1->correct_ans()].
+
+c)The correct answer is [$pop2->correct_ans()].
+
+d)The correct answer is [$pop3->correct_ans()].
+
+e)The correct answer is [$pop4->correct_ans()].
+
+f)The correct answer is [$pop5->correct_ans()].
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
