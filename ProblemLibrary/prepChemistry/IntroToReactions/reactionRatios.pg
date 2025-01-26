@@ -1,0 +1,136 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+@reaction = ( "2Fe + 3H_2SO_4 \rightarrow Fe_2(SO_4)_3 + 3H_2", "CH_4 + 2O_2 \rightarrow CO_2 + 2H_2O", "SiCl_4 + 2H_2O \rightarrow SiO_2 + 4HCl","2AgI + Na_2S \rightarrow Ag_2S + 2NaI") ;
+
+@coeff1 = (2,1,1,2);
+@unit1 = ("atoms", "molecules","molecules","formula units");
+@reactant1 = ("Fe", "CH_4","SiCl_4","AgI");
+@coeff2 = (3,2,2,1);
+@unit2 = ("molecules", "molecules","molecules","formula units");
+@reactant2 = ("H_2SO_4", "O_2","H_2O","Na_2S");
+
+@coeff3 = (1,1,1,1);
+@unit3 = ("formula units", "molecules","molecules","formula units");
+@product1 = ("Fe_2(SO_4)_3", "CO_2","SiO_2","Ag_2S");
+@coeff4 = (3,2,4,2);
+@unit4 = ("molecules", "molecules","molecules","formula units");
+@product2 = ("H_2", "H_2O","HCl","NaI");
+
+
+#my @numbers;
+#my %unique;
+
+#for (0..4) {
+#    my $number = random(0,13);
+#    redo if $unique{$number}++;
+#    push @numbers, $number;
+# }
+
+$a = random(0,3);
+$x = random(2,20,2);
+$r2 = $x*($coeff2[$a]/$coeff1[$a]);
+$p1 = $x*($coeff3[$a]/$coeff1[$a]);
+$p2 = $x*($coeff4[$a]/$coeff1[$a]);
+
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Understanding Reaction Coefficents
+
+Using the following reaction,
+
+[``[$reaction[$a]]``]
+
+If there are [$x] [``[$reactant1[$a]]``] [$unit1[$a]] reacting, 
+
+how many [``[$reactant2[$a]]``] [$unit2[$a]] are reacting?  [____]{$r2}
+
+how many [``[$product1[$a]]``] [$unit3[$a]] are produced?   [____]{$p1}
+
+how many [``[$product2[$a]]``] [$unit4[$a]] are produced?   [____]{$p2}
+
+
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review chemical equations, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.02%3A_Balancing_Chemical_Equations"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+One way to solve this is to remember that the coefficents are ratios of individual units (or later you will learn that they are ratios of moles as well).  So the ratio of [``[$reactant1[$a]]``] to [``[$reactant2[$a]]``] is [``[$coeff1[$a]]/[$coeff2[$a]]``]. Therefore,
+
+amount of [``[$reactant2[$a]] = [$x]\times[$coeff2[$a]]/[$coeff1[$a]]``] = [$r2] [$unit2[$a]]
+
+amount of [``[$product1[$a]] = [$x]\times[$coeff3[$a]]/[$coeff1[$a]]``] = [$p1] [$unit3[$a]]
+
+amount of [``[$product2[$a]] = [$x]\times[$coeff4[$a]]/[$coeff1[$a]]``] = [$p2] [$unit4[$a]]
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
