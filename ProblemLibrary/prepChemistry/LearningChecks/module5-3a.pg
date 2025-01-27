@@ -1,0 +1,103 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl",
+  "contextInexactValue.pl"
+
+);
+
+##############################################
+
+
+
+Context("InexactValue");
+
+$element = 'antimony';
+$row1 = '^{121}Sb';
+$row2 = '^{123}Sb';
+
+$mass1 = 120.90;
+$mass2 = 122.90;
+
+$abun1 = 57.50;
+$abun2 = 42.50;
+
+$imass1 = InexactValue($mass1, 5);
+$imass2 = InexactValue($mass2, 5);
+$iabun1 = InexactValue($abun1, 4);
+$iabun2 = InexactValue($abun2, 4);
+
+
+$ave = ($imass1*$iabun1 + $imass2*$iabun2)/100;
+   
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Atomic Weight and Natural Abundance
+
+There are only two naturally occurring isotopes of antimony: [`^{121}Sb`] (120.90 amu) and [`^{123}Sb`] (122.90 amu).  Their abundances in nature are 57.50% and 42.50% respectively.  Calculate the atomic weight of antimony.
+
+This data has been summarized in the following table to help you.
+
+
+[@ 
+DataTable([
+[['Isotope',headerrow=>1], "Percent  Abundance ($PERCENT)",'Atomic Mass (amu)'],
+[PGML('[`[$row1]`]'), PGML('[$iabun1]'), PGML('[$imass1]') ],
+[PGML('[`[$row2]`]'), PGML('[$iabun2]'), PGML('[$imass2]'),]],
+midrules=>1 ,
+tablecss=>'border:solid 1px;     border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]*
+
+The atomic weight of [$element] is [_________]{$ave}amu.
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+To review calculating atomic weights, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/05%3A_The_Nuclei_of_Atoms/5.05%3A_Atomic_Masses"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[`\frac{1}{100}([$imass1]\times[$iabun1] + [$imass2]\times[$iabun2]) = [$ave]\ amu`]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

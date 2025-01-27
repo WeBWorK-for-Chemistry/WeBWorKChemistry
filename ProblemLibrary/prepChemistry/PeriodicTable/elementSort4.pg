@@ -1,0 +1,207 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+
+);
+
+##############################################
+Context("Numeric");
+my @numbers;
+my %unique;
+
+for (0..9) {
+    my $number = random(0,29);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+
+Context("ArbitraryString");       
+
+@elements = ("lithium", "beryllium", "sodium", "magnesium", "aluminum", "potassium", "calcium", "scandium","titanium", "manganese", "iron", "copper", "strontium", "molybdenum", "silver", "tin", "silicon", "germanium", "arsenic", "antimony", "tellurium", "argon","carbon", "nitrogen", "oxygen", "neon", "phosphorus", "sulfur", "chlorine", "radon");
+
+
+@symbols = ("Li", "Be", "Na", "Mg", "Al", "K", "Ca", "Sc","Ti", "Mn", "Fe", "Cu", "Sr", "Mo", "Ag", "Sn", "Si", "Ge", "As", "Sb", "Te", "Ar","C", "N", "O", "Ne", "P", "S", "Cl", "Rn");
+
+@mains = ('MG', 'MG','MG', 'MG', 'MG', 'MG', 'MG', 'TM', 'TM', 'TM', 'TM', 'TM','MG', 'TM', 'TM', 'MG', 'MG','MG','MG','MG','MG','MG','MG','MG','MG','MG','MG','MG','MG','MG');
+@metals= ('M', 'M','M','M','M','M','M','M','M','M','M','M','M','M','M','M','SM', 'SM','SM','SM','SM','NM', 'NM','NM','NM','NM','NM','NM','NM','NM');
+@classes = ('AM', 'AEM', 'AM', 'AEM', 'NA', 'AM', 'AEM', 'NA', 'NA', 'NA', 'NA','NA','AEM', 'NA','NA','NA','NA','NA','NA','NA','NA','NG', 'NA','NA','NA','NG', 'NA','NA','HG', 'NG');  
+
+@groups = (1, 2, 1, 2, 13, 1, 2, 3, 4, 7, 8, 11, 2, 6, 11, 14, 14, 14, 15, 15, 16, 18, 14, 15, 16, 18, 15, 16, 17, 18);
+@periods = (2,2,3,3,3,4,4,4,4,4,4,4,5,5,5,5,3,4,4,5,5,3,2,2,2,2,3,3,3,6);
+
+for (0..9) {
+        $y = $numbers[$_];
+        $element[$_] = $elements[$y];
+        $elementAns[$_] = Compute($element[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        $symbol[$_] = $symbols[$y];  
+        $symbolAns[$_] = Compute($symbol[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               #no case correction because symbol must be case correct
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        $main[$_] = $mains[$y];
+        $mainAns[$_] = Compute($main[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        $metal[$_] = $metals[$y];
+        $metalAns[$_] = Compute($metal[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        $class[$_] = $classes[$y];
+        $classAns[$_] = Compute($class[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        $group[$_] = $groups[$y];
+        $groupAns[$_] = Compute($group[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        $period[$_] = $periods[$y];
+        $periodAns[$_] = Compute($period[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        }
+        
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##The Periodic Table
+
+Complete the following table regarding the element names, symbols, location on the periodic table, and classifications using the first row as an example. Use the indicated abbreviations. Use group numbers 1-18.
+
+• For column 5 indicate if the element is in the main-group (MG), a transition metal
+(TM), or inner transition metal (ITM).
+
+• For column 6 indicate if the element is a metal (M), semimetal/ metalloid (SM), or
+nonmetal (NM).
+
+• For Column 7 if the element is a main-group element, indicate if it’s a halogen (HG),
+noble gas (NG), alkali metal (AM), or alkaline earth metal (AEM). If one of these
+classifications do not apply, then indicate not applicable (NA).
+
+[@ 
+DataTable([
+[['1.<br> Element Name',headerrow=>1],'2. <br> Element Symbol','3. <br> Group Number ', '4. <br> Period Number','5. <br> MG or TM', '6. <br> M, SM, or NM', '7. <br> HG, NG, AM, AEM, or NA' ],
+['helium', 'He', 18, 1, MG, NM, NG ],
+[PGML('[$element[0]]'), PGML('[___]{$symbolAns[0]}'), PGML('[___]{$groupAns[0]}'), PGML('[___]{$periodAns[0]}'), PGML('[___]{$mainAns[0]}'), PGML('[___]{$metalAns[0]}'), PGML('[___]{$classAns[0]}')], 
+[PGML('[_______]{$elementAns[1]}'), PGML('[$symbol[1]]'), PGML('[___]{$groupAns[1]}'), PGML('[___]{$periodAns[1]}'), PGML('[___]{$mainAns[1]}'), PGML('[___]{$metalAns[1]}'), PGML('[___]{$classAns[1]}')],
+[PGML('[_______]{$elementAns[2]}'), PGML('[___]{$symbolAns[2]}'), PGML('[$group[2]]'), PGML('[$period[2]]'), PGML('[___]{$mainAns[2]}'), PGML('[___]{$metalAns[2]}'), PGML('[___]{$classAns[2]}')],
+[PGML('[$element[3]]'), PGML('[___]{$symbolAns[3]}'), PGML('[___]{$groupAns[3]}'), PGML('[___]{$periodAns[3]}'), PGML('[___]{$mainAns[3]}'), PGML('[___]{$metalAns[3]}'), PGML('[___]{$classAns[3]}')],
+[PGML('[_______]{$elementAns[4]}'), PGML('[$symbol[4]]'), PGML('[___]{$groupAns[4]}'), PGML('[___]{$periodAns[4]}'), PGML('[___]{$mainAns[4]}'), PGML('[___]{$metalAns[4]}'), PGML('[___]{$classAns[4]}')],
+[PGML('[_______]{$elementAns[5]}'), PGML('[___]{$symbolAns[5]}'), PGML('[$group[5]]'), PGML('[$period[5]]'), PGML('[___]{$mainAns[5]}'), PGML('[___]{$metalAns[5]}'), PGML('[___]{$classAns[5]}')],
+[PGML('[$element[6]]'), PGML('[___]{$symbolAns[6]}'), PGML('[___]{$groupAns[6]}'), PGML('[___]{$periodAns[6]}'), PGML('[___]{$mainAns[6]}'), PGML('[___]{$metalAns[6]}'), PGML('[___]{$classAns[6]}')],
+[PGML('[_______]{$elementAns[7]}'), PGML('[$symbol[7]]'), PGML('[___]{$groupAns[7]}'), PGML('[___]{$periodAns[7]}'), PGML('[___]{$mainAns[7]}'), PGML('[___]{$metalAns[7]}'), PGML('[___]{$classAns[7]}')],
+[PGML('[_______]{$elementAns[8]}'), PGML('[___]{$symbolAns[8]}'), PGML('[$group[8]]'), PGML('[$period[8]]'), PGML('[___]{$mainAns[8]}'), PGML('[___]{$metalAns[8]}'), PGML('[___]{$classAns[8]}')],
+[PGML('[$element[9]]'), PGML('[___]{$symbolAns[9]}'), PGML('[___]{$groupAns[9]}'), PGML('[___]{$periodAns[9]}'), PGML('[___]{$mainAns[9]}'), PGML('[___]{$metalAns[9]}'), PGML('[___]{$classAns[9]}')]],
+midrules=>1 ,
+align=>'p{50pt}|p{50pt}|p{50pt}|p{50pt}|p{50pt}|p{50pt}|p{50pt}',
+tablecss=>'border:solid 1px;     border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]*
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+To review isotopes and isotope symbols, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/General_Chemistry/Map%3A_Chemistry_(Zumdahl_and_Decoste)/02%3A_Atoms_Molecules_and_Ions/2.07_An_Introduction_to_the_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[@ 
+DataTable([
+[['1. ',headerrow=>1],'2. ','3. ', '4. ','5. ', '6.', '7. ' ],[['Element Name',headerrow=>1],'Element Symbol','Group Number', 'Period Number','MG or TM', 'M, SM, or NM', 'HG, NG, AM, AEM, or NA' ],
+['helium', 'He', 18, 1, MG, NM, NG ],
+[PGML('[$element[0]]'), PGML('[$symbol[0]]'), PGML('[$group[0]]'), PGML('[$period[0]]'), PGML('[$main[0]]'), PGML('[$metal[0]]'), PGML('[$class[0]]')],
+[PGML('[$element[1]]'), PGML('[$symbol[1]]'), PGML('[$group[1]]'), PGML('[$period[1]]'), PGML('[$main[1]]'), PGML('[$metal[1]]'), PGML('[$class[1]]')],
+[PGML('[$element[2]]'), PGML('[$symbol[2]]'), PGML('[$group[2]]'), PGML('[$period[2]]'), PGML('[$main[2]]'), PGML('[$metal[2]]'), PGML('[$class[2]]')],
+[PGML('[$element[3]]'), PGML('[$symbol[3]]'), PGML('[$group[3]]'), PGML('[$period[3]]'), PGML('[$main[3]]'), PGML('[$metal[3]]'), PGML('[$class[3]]')],
+[PGML('[$element[4]]'), PGML('[$symbol[4]]'), PGML('[$group[4]]'), PGML('[$period[4]]'), PGML('[$main[4]]'), PGML('[$metal[4]]'), PGML('[$class[4]]')],
+[PGML('[$element[5]]'), PGML('[$symbol[5]]'), PGML('[$group[5]]'), PGML('[$period[5]]'), PGML('[$main[5]]'), PGML('[$metal[5]]'), PGML('[$class[5]]')],
+[PGML('[$element[6]]'), PGML('[$symbol[6]]'), PGML('[$group[6]]'), PGML('[$period[6]]'), PGML('[$main[6]]'), PGML('[$metal[6]]'), PGML('[$class[6]]')],
+[PGML('[$element[7]]'), PGML('[$symbol[7]]'), PGML('[$group[7]]'), PGML('[$period[7]]'), PGML('[$main[7]]'), PGML('[$metal[7]]'), PGML('[$class[7]]')],
+[PGML('[$element[8]]'), PGML('[$symbol[8]]'), PGML('[$group[8]]'), PGML('[$period[8]]'), PGML('[$main[8]]'), PGML('[$metal[8]]'), PGML('[$class[8]]')],
+[PGML('[$element[9]]'), PGML('[$symbol[9]]'), PGML('[$group[9]]'), PGML('[$period[9]]'), PGML('[$main[9]]'), PGML('[$metal[9]]'), PGML('[$class[9]]')]
+],
+midrules=>1 ,
+tablecss=>'border:solid 1px;     border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+captioncss=>'font-variant:small-caps; ',
+columnscss=>[' '],
+);
+@]*
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

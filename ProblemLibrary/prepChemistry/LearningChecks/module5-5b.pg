@@ -1,0 +1,107 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "true", "false");
+
+$pop1 = PopUp( [@options], 2);
+$pop2 = PopUp( [@options], 1);
+$pop3 = PopUp( [@options], 1);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Metal, Nonmetal or Metalloid
+
+_Classify each statement as true or false._
+
+1. Nonmetals are lustrous, good conductors of electricity, and readily shaped (malleable). [__]{$pop1}
+
+2. Metalloids exhibit properties intermediate between those of metals and nonmetals.
+ [__]{$pop2}
+
+3. There are 7 nonmetals that exist as diatomic elements. [__]{$pop3}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. This is false.  Nonmetals are poor conductors and are not usually malleable.
+
+2. This is true. Metalloids do exhibit properties between those of metals and nonmetals.
+
+3.This is true.  The 7 elements that exist as diatomic molecules are hydrogen, nitrogen, fluorine, oxygen, iodine, chlorine, and bromine.
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

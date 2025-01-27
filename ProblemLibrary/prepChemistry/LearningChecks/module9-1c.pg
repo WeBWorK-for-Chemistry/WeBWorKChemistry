@@ -1,0 +1,193 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+
+Context("Reaction");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+
+
+
+$react1 = Formula("NH_4NO_3(aq)");
+$prod1 = Formula("N_2O(g)");
+$prod2 = Formula("2 H_2O(l)");
+
+$mp1 = $react1;
+ 
+$mp2 = MultiAnswer($prod1, $prod2)->with(
+   singleResult => 0,
+   separator => " + ",
+   tex_separator => " + ",
+   checker => sub {
+     my $correct= shift; my $student = shift;
+     my ($ca,$cb) = @$correct;
+     my ($sa,$sb) = @$student;
+    if ( ($ca == $sa && $cb == $sb) ||
+           ($ca == $sb && $cb == $sa) ) {
+          return [1,1];
+      } else {
+          if ($ca == $sa || $cb == $sa) {
+              return [1,0];
+          } elsif ($cb == $sb || $ca == $sb) {
+              return [0,1];
+          } else {
+              return [0,0];
+          }
+          }
+   },
+ );
+
+$react3 = Formula("2 NaOH(aq)");
+$react4 = Formula("H_2SO_4(aq)");
+$prod3 = Formula("Na_2SO_4(aq)");
+$prod4 = Formula("2 H_2O(l)");
+
+$mp3 = MultiAnswer($react3, $react4)->with(
+   singleResult => 0,
+   separator => " + ",
+   tex_separator => " + ",
+   checker => sub {
+     my $correct= shift; my $student = shift;
+     my ($ca,$cb) = @$correct;
+     my ($sa,$sb) = @$student;
+    if ( ($ca == $sa && $cb == $sb) ||
+           ($ca == $sb && $cb == $sa) ) {
+          return [1,1];
+      } else {
+          if ($ca == $sa || $cb == $sa) {
+              return [1,0];
+          } elsif ($cb == $sb || $ca == $sb) {
+              return [0,1];
+          } else {
+              return [0,0];
+          }
+          }
+   },
+ );
+ 
+
+$mp4 = MultiAnswer($prod3, $prod4)->with(
+   singleResult => 0,
+   separator => " + ",
+   tex_separator => " + ",
+   checker => sub {
+     my $correct= shift; my $student = shift;
+     my ($ca,$cb) = @$correct;
+     my ($sa,$sb) = @$student;
+    if ( ($ca == $sa && $cb == $sb) ||
+           ($ca == $sb && $cb == $sa) ) {
+          return [1,1];
+      } else {
+          if ($ca == $sa || $cb == $sa) {
+              return [1,0];
+          } elsif ($cb == $sb || $ca == $sb) {
+              return [0,1];
+          } else {
+              return [0,0];
+          }
+          }
+   },
+ );
+
+
+ 
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Writing Balanced Equations
+
+Write the complete balanced molecular equation from the description given.
+
+Write the balanced chemical equations for the following reactions based on their descriptions. These descriptions include information about the coefficients used to balance the equations. Do not forget to include the state of each reactant and product, (s) or (aq). You will need to enter all reactants and/or all products before WeBWorK will score your problem correctly.  It does not matter the order in which these are entered.
+
+1. 1 formula unit of aqueous ammonium nitrate decomposes to 1 molecule of dinitrogen monoxide gas and 2 molecules of liquid water
+
+
+    [_________]{$mp1} [``\rightarrow``] [_________]{$mp2} + [_________]{$mp2}
+
+2. 2 moles of aqueous sodium hydroxide react with 1 mole of aqueous sulfuric acid to produce 1 mole of aqueous sodium sulfate and 2 moles of liquid water.
+
+    [_________]{$mp3} + [__________]{$mp3} [``\rightarrow``] [_________]{$mp4} + [_________]{$mp4}
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review balancing and writing chemical equations, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.01%3A_Chemical_Equations"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. The reactant is ammonium nitrate,[``\mathrm(NH_4NO_3)``]. Ammonium nitrate is a solid ionic compound formed from ammonium ions and nitrate ions. Make sure to choose subscripts so that the overall charge of the formula is neutral! It has a phase lable of (s). The product dinitrogen monoxide (N2O) is a gas, so it has phase label of (g). This is a covalent compound, so be sure to follow covalent nomenclature rules when determining its formula from its name. Water [``\mathrm(H_2O)``] is a liquid, so it has phase label of (l). 
+Next you are ready to fill in the coefficients used to balance. The coefficients can represent either the number of particles in the smallest possible reaction or they can represent the number of moles of particles in a scaled-up version of the reaction. This problem describes the reaction at the particle level.
+
+2. Feedback: Both reactants are aqueous and have phase labels of (aq). Sodium hydroxide is an ionic compound formed from sodium ions and hydroxide ions. Make sure to choose subscripts so that the overall charge of the formula is neutral! You are given the formula of sulfuric acid [``\mathrm(H_2SO_4)``]. The product sodium sulfate [``\mathrm(Na_2SO_4)``] is aqueous, so it has a phase label of (aq). Sodium sulfate is an ionic compound formed from sodium ions and sulfate ions. Make sure to choose subscripts so that the overall charge of the formula is neutral! Water [``\mathrm(H_2O)``] is a liquid, so it has a phase label of (l). 
+Next you are ready to fill in the coefficients used to balance. The coefficients can represent either the number of particles in the smallest possible reaction or they can represent the number of moles of particles in a scaled-up version of the reaction. This problem describes the reaction at the scaled-up molar level.
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

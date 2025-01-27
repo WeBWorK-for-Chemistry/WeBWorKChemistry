@@ -1,0 +1,111 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "true", "false");
+
+$pop1 = PopUp( [@options], 1);
+$pop2 = PopUp( [@options], 2);
+$pop3 = PopUp( [@options], 1);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Scientific Notation
+
+_Answer the True/False Questions._
+
+
+1. Chemist generally find it convenient to write very large and very small numbers in scientific notation. [__]{$pop3}
+
+
+2. Numbers written in scientific notation will always contain 1 digit to the right of the decimal place. [__]{$pop2}
+
+
+3. Scientific calculators contain special key(s) to help input numbers in scientific notation. [__]{$pop3}
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/02%3A_Measurement_and_Significant_Figures/2.02%3A_Scientific_Notation"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. This is true.  Chemists generally find it inconvenient to use standard notation to write very large and very small numbers! Using scientific notation simplifies writing these numbers.
+
+2. This is false. There will always be one digit to the left of the decimal but not necessarily to the right. 
+
+3. This is true. Scientific calculators are designed to used scientfiic notiaton! Using the built-in functions included on your calculator will simplify woking with the calculator and reduce the likelihood of calculator errors.
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

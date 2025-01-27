@@ -1,0 +1,108 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "metal", "nonmetal", "metalloid");
+
+$pop1 = PopUp( [@options], 2);
+$pop2 = PopUp( [@options], 1);
+$pop3 = PopUp( [@options], 3);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Metal, Nonmetal or Metalloid
+
+_Based on its position in the periodic table, classify each element below as metal, a nonmetal, or a metalloid._
+
+1. Se [__]{$pop1}
+
+2. Mg [__]{$pop2}
+
+3. Ge [__]{$pop3}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. Selenium lies above and to the right of the diagonal line marking the boundary between metals and nonmetals, so it should be a nonmetal.
+
+2. Magnesium lies to the left of the diagonal line marking the boundary between metals and nonmetals, so it should be a metal. 
+
+3. Germanium lies within the diagonal line marking the boundary between metals and nonmetals, so it should be a metalloid. 
+
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

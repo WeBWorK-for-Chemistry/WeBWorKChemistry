@@ -1,0 +1,321 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+
+Context("ArbitraryString");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+sub solubility {
+        my($cation,$anion) = @_;
+        if ($cation eq 'Na') {$sol = 1;}
+        elsif ($cation eq 'NH_4') {$sol = 1;}
+        elsif ($cation eq 'K') {$sol = 1;}
+        elsif ($cation eq 'Li') {$sol = 1;}
+        elsif ($anion eq 'NO_3') {$sol = 1;}
+        elsif ($anion eq 'CH_3COO') {$sol = 1;}
+        elsif ($anion eq 'ClO_3') {$sol = 1;}
+        elsif ($anion eq 'SO_4') {
+            if ($cation eq 'Ca') {$sol = 2;}
+            elsif ($cation eq 'Ba') {$sol = 2;}
+            elsif ($cation eq 'Sr') {$sol = 2;}
+            elsif ($cation eq 'Pb') {$sol = 2;}
+            else {$sol = 1;}
+            }
+        elsif ($anion eq 'Cl') {
+            if ($cation eq 'Ag') {$sol = 2;}
+            elsif ($cation eq 'Pb') {$sol = 2;}
+            else {$sol = 1;}
+                }
+        elsif ($anion eq 'Br') {
+            if ($cation eq 'Ag') {$sol = 2;}
+            elsif ($cation eq 'Pb') {$sol = 2;}
+            else {$sol = 1;}
+                }
+        elsif ($anion eq 'I') {
+            if ($cation eq 'Ag') {$sol = 2;}
+            elsif ($cation eq 'Pb') {$sol = 2;}
+            else {$sol = 1;}
+                }
+         elsif ($anion eq 'F') {
+            if ($cation eq 'Mg') {$sol = 2;}
+            elsif ($cation eq 'Ca') {$sol = 2;}
+            elsif ($cation eq 'Sr') {$sol = 2;}
+            elsif ($cation eq 'Ba') {$sol = 2;}
+            elsif ($cation eq 'Pb') {$sol = 2;}
+            else {$sol = 1;}
+                }
+          elsif ($anion eq 'OH') {
+            if ($cation eq 'Mg') {$sol = 1;}
+            elsif ($cation eq 'Sr') {$sol = 1;}
+            elsif ($cation eq 'Ba') {$sol = 1;}
+            else {$sol = 2;}
+                }
+          elsif ($anion eq 'S') {
+            if ($cation eq 'Ba') {$sol = 1;}
+            else {$sol = 2;}
+                }
+          else {$sol = 2;}
+          return ($sol);
+            }
+            
+sub formula_writing {
+    my($cation,$anion,$c,$a) = @_;
+    if ($c == 1) {
+            if ($a == 1) {
+                $molec = "$cation $anion";
+                }
+            elsif ($a > 1) {
+                $molec = "${cation}_$a $anion";
+                }
+            }
+       else {
+            if ($a == 1) {
+                if ($anion eq 'Cl') {
+                $molec = "$cation ${anion}_$c";
+                }
+                elsif ($anion eq 'Br') {
+                $molec = "$cation ${anion}_$c";
+                }
+                elsif ($anion eq 'I') {
+                $molec = "$cation ${anion}_$c";
+                }
+                elsif ($anion eq 'F') {
+                $molec = "$cation ${anion}_$c";
+                }
+                elsif ($anion eq 'O') {
+                $molec = "$cation ${anion}_$c";
+                }
+                else {
+                $molec = "$cation (${anion})_$c";
+                }
+                }
+            elsif ($a == $c) {
+                $molec = "$cation $anion";
+                }
+            else {
+                if ($anion eq 'Cl') {
+                $molec = "${cation}_$a ${anion}_$c";
+                }
+                elsif ($anion eq 'Br') {
+                $molec = "${cation}_$a ${anion}_$c";
+                }
+                elsif ($anion eq 'I') {
+                $molec = "${cation}_$a ${anion}_$c";
+                }
+                elsif ($anion eq 'F') {
+                $molec = "${cation}_$a ${anion}_$c";
+                }
+                elsif ($anion eq 'O') {
+                $molec = "${cation}_$a ${anion}_$c";
+                }
+                else {
+                $molec = "${cation}_$a (${anion})_$c";
+                }
+               } 
+             }
+             return($molec);
+    }
+    
+@cations = ('Na','K','Li','Ca','Ba','Sr','Pb','Mg', 'Cu', 'Fe', 'Ag');
+@cat_charge = (1,1,1,2,2,2,2,2,2,2,1);
+@anions = ('NO_3','CH_3COO','ClO_3','SO_4','Cl', 'Br', 'I','F','CO_3', 'PO_4','CrO_4','C_2O_4', 'O');
+@anion_charge = (1,1,1,2,1,1,1,1,2,3,2,2,2);
+
+#soluble anions (except 1 where all are soluble) with exception cations for being insoluble
+
+
+my @numbers;
+my %unique;
+my @numbers2;
+my %unique2;
+my @sol;
+
+
+ 
+@options = ('?','soluble', 'insoluble', 'none of the above');
+
+#picking reactants and checking solubility of reactants
+#pick 2 cations
+$numbers[0] = random(0,2);
+$numbers[1] = random(3,9);
+
+
+ #pick 2 anions
+$numbers2[0] = random(3,12);
+$numbers2[1] = random(0,2);
+
+            
+
+$sol[0] = 2;
+
+while ($sol[0] == 2 || $sol[1] == 2) {
+    for (0..1) {
+       $x = $numbers[$_];
+       $y = $numbers2[$_];
+       $cat = $cations[$x];
+       $an = $anions[$y];
+       $sol[$_] = solubility($cat, $an);
+            }
+            }
+  
+$sol0= $sol[0];
+$sol1= $sol[1];            
+           
+#switch anions for products
+my @numbers3;
+$numbers3[0] = $numbers2[1];
+$numbers3[1] = $numbers2[0];
+
+for (2..3) { 
+       $i = $_-2;
+       $x = $numbers[$i];
+       $y = $numbers3[$i];
+       $cat = $cations[$x];
+       $an = $anions[$y];
+       $sol[$_] = solubility($cat, $an); 
+            }
+            
+$sol2= $sol[2];
+$sol3= $sol[3];   
+
+# writing formulas for reactants
+
+for (0..1) {
+       $x = $numbers[$_];
+       $y = $numbers2[$_];
+       $cat = $cations[$x];
+       $c = $cat_charge[$x];
+       $an = $anions[$y];
+       $a = $anion_charge[$y];
+       $molecule[$_] = formula_writing($cat,$an,$c,$a);
+        }
+        
+# writing formulas for products
+for (2..3) {
+       $i = $_-2;
+       $x = $numbers[$i];
+       $y = $numbers3[$i];
+       $cat = $cations[$x];
+       $c = $cat_charge[$x];
+       $an = $anions[$y];
+       $a = $anion_charge[$y];
+       $molecule[$_] = formula_writing($cat,$an,$c,$a);
+        }
+
+#@options = ("?", "yes", "no", "not enough information");
+
+#does a precipitate form and what is it?
+if ($sol2==1 && $sol3==1) {
+    $answ = "no";
+    $answ2 = "";
+    }
+elsif ($sol2==2 || $sol3==2) {
+    $answ = "yes";
+    }
+     
+#$pop1 = PopUp( [ @options ], $answ );  
+Context("Reaction");
+Context()->variables->add(NVR => $context::Reaction::CONSTANT);
+
+
+    if ($sol2 ==2) {
+        $answ2 = Formula($molecule[2]);
+      }
+    elsif ($sol3 ==2) {
+       $answ2 = Formula($molecule[3]);
+        }
+    else {
+       $answ2 = Formula(NVR);
+       }
+    
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Precipitation Reactions
+
+Using the [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("Solubility Rules in your textbook"), "TARGET='_blank'" ); @]*, answer the following questions.  
+
+An aqueous solution of [``\mathrm{[$molecule[0]]}``]  is combined with an aqueous solution of [``\mathrm{[$molecule[1]]}``]. 
+
+If a precipitate forms when these two solutions combine, what is the formula of this compound that precipitates? If no precipitate forms, put NVR in this blank for "no visible reaction".
+[_________]{$answ2}
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review solubility rules, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+Remember that precipitation reactions are double displacement reactions.  Check the products that are possible from your reactants.  What are the ions formed from each of your reactants?
+
+[``[$molecule[0]]``] and [``[$molecule[1]]``]
+
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+A double displacement reaction with the two reactants [``[$molecule[0]]``] and [``[$molecule[1]]``] would produce [``[$molecule[2]]``] and [``[$molecule[3]]``].  Check the solubility rules to see if these are soluble.  The compound that is insoluble will form a precipitate.  If none of the compounds are insoluble, there is no visible reaction, "NVR".  In this case the answer is [``[$answ2]``].
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

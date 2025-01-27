@@ -1,0 +1,194 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextChemical.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+  }
+  .conversionEQ > div {
+    text-align: center;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  </style>  
+EOF
+
+##############################################
+
+sub conversionEQ {
+  my $start = shift;
+  my $colsref = shift;
+  my $n = scalar @{$colsref};
+  my $end = shift;
+  my $html;
+  $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+      $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+      $html .= '<div class="conversionEQmath">';
+         $html .= math_ev3('\times');
+      $html .= '</div>';
+      $html .= '<div class="conversionEQcol">';
+         $html .= '<div>';
+             $html .= $colsref->[$i];
+         $html .= '</div>';       
+         $html .= '<div class="conversionFractionBar">';
+             $html .= '<svg height="1" width="40">';
+                 $html .= '<desc>per</desc>';
+             $html .= '</svg>';
+         $html .= '</div>';       
+         $html .= '<div>';
+             $html .= $colsref->[$i+1];
+         $html .= '</div>';       
+      $html .= '</div>';
+  }
+  $html .= '<div  class="conversionEQmath">';
+      $html .= math_ev3('{}={}');
+  $html .= '</div>';
+  $html .= '<div>';
+      $html .= $end;
+  $html .= '</div>';
+  $html .= '</div>';
+  MODES(HTML=>$html);
+}
+
+install_weighted_grader();
+
+Context("Numeric");
+
+$m = 4.56;
+
+
+#Context("InexactValueWithUnits");
+Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);
+
+
+$compound = "C_3H_8";
+
+$formMass = 44.11;
+
+$given = InexactValueWithUnits( [$m , 3], "g $compound");
+
+
+$n1 = InexactValueWithUnits(['1', 9**9**9], "mol $compound");
+$d1 = InexactValueWithUnits([$formMass,4], "g $compound"); 
+
+$n2 = InexactValueWithUnits(['8', 9**9**9], 'mol H');
+$d2 = InexactValueWithUnits(['1', 9**9**9], "mol $compound");
+
+$n3 = InexactValueWithUnits(['6.022E23',4], 'atoms H'); 
+$d3 = InexactValueWithUnits(['1', 9**9**9], 'mol H');
+
+$answer = $given * $n1 / $d1* $n2 / $d2* $n3 / $d3;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$answer)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2,$n3,$d3],$answer);
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+###Conversions - Grams of an Element from Grams of a Compound
+
+How many hydrogen atoms are in 4.56 grams of propane ([`\mathrm{C_3H_8}`])? Please use the rounded value of [`\mathrm{6.022 \times 10^{23}}`] for Avogadro’s number (4 significant figures) in your calculations when required.  Hint: you calculated the molar mass of aluminum selenide in an earlier question! 
+
+Use [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]*  to find the molar mass needed.  Use molar masses rounded to the nearest hundredth.
+
+Be sure to use atoms H the units of your answer.
+
+[@conversionEQ('$$'. $given->TeX . '$$',[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+
+
+END_PGML
+
+BEGIN_TEXT
+$PAR
+$periodicTable
+END_TEXT
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+
+
+BEGIN_PGML_HINT
+
+This problem requires the use of more than one conversion factor! Multiply 4.56 g [`\mathrm{C_3H_8}`] by a conversion factor built from the molar mass of [`\mathrm{C_3H_8}`] followed by a conversion factor built from the formula and another built from the definition of a mole. Build the conversion factors such that units will cancel until only the desired unit remains. Cross off units and confirm that the remaining unit is the desired unit. Perform the calculation and report your answer. Be sure to consider significant figures when reporting your answer!
+
+The general steps in performing dimensional analysis
+
+1.  Identify the "given" information in the problem. Look for a number with units to start this problem with.
+2.  What is the problem asking you to "find"? In other words, what unit will your answer have?
+3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
+4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
+
+
+For more information on using formulas as conversion factors, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/08%3A_Counting_Atoms_Ions_and_Molecules/8.03%3A_Chemical_Formulas_as_Conversion_Factors"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+

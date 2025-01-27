@@ -1,0 +1,125 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "parserRadioButtons.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+#Context()->flags->set(
+#  tolerance => 0.2,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+
+$atom1 = "magnesium.png";
+
+$alt1  = "One inner circle representing the nuclues is labeled +12.  This is surrounded by three outer circles. The closest to the nucleus contains 2 black dots.  The second closest contains 8 black dots and the furthest contains 2.  These black dots represent electrons.";
+
+$h = 1;
+$hv = 1;
+
+@options = ( "?", "gain", "lose");
+@options2 = ( "?", "1", "2", "3", "4");
+@options3 = ( "?", "1+", "2+", "3+", "4+","1-", "2-", "3-", "4-");
+@options4 = ( "?", "cation", "anion");
+
+$pop1 = PopUp( [ @options ], 2);
+$number1 = PopUp( [ @options2 ], 2);
+$charge1 = PopUp( [ @options3 ], 2);
+$ion1 = PopUp( [ @options4 ], 1);
+
+$atom2 = "oxygen.png";
+
+$alt2  = "One inner circle representing the nuclues is labeled +8.  This is surrounded by two outer circles. The closest to the nucleus contains 2 black dots.  The furthest contains 6 black dots.  These black dots represent electrons.";
+
+$oe = 8;
+$oev = 6;
+
+
+$pop2 = PopUp( [ @options ], 1);
+$number2 = PopUp( [ @options2 ], 2);
+$charge2 = PopUp( [ @options3 ], 6);
+$ion2 = PopUp( [ @options4 ], 2);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Valence Electrons and Ion Formation
+
+_Use the images to help fill in the statements below each image._  
+
+
+1. [@ image( $atom1, width=>300, height=>300,extra_html_tags=>"alt='$alt1'"  )@]*
+
+    The atom above is magnesium.  In order to have a full valence (outer) shell, magnesium needs to [____]{$pop1} [____]{$number1} electrons.  This will give magnesium a charge of [___]{$charge1}. Therefore when magnesium forms an ion, it forms a [_____]{$ion1}. 
+
+2. [@ image( $atom2, width=>300, height=>300,extra_html_tags=>"alt='$alt1'"  )@]*
+
+    The atom above is oxygen.  In order to have a full valence (outer) shell, oxygen needs to [____]{$pop2} [____]{$number2} electrons.  This will give oxygen a charge of [___]{$charge2}. Therefore when oxygen forms an ion, it forms a(n) [_____]{$ion2}.
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.01%3A_Ions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

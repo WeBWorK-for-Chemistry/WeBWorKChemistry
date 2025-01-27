@@ -1,0 +1,107 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "metal", "nonmetal", "transition metal", "inner transition metal");
+
+$pop1 = PopUp( [@options], 1);
+$pop2 = PopUp( [@options], 2);
+$pop3 = PopUp( [@options], 4);
+$pop4 = PopUp( [@options], 3);
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Metal, Nonmetal, or Transition Metal
+
+_Classify each element as metal, nonmetal, transition metal or inner transition metal._
+
+1. Li [__]{$pop1}
+
+2. Ar [__]{$pop2}
+
+3. Am [__]{$pop3}
+
+4. Fe [__]{$pop4}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. Lithium is a metal. 
+2. Argon is a non metal. 
+3. Americium is an inner transition metal.
+4. Iron is a transition metal. 
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

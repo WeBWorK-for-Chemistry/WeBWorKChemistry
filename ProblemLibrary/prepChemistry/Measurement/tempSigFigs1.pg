@@ -1,0 +1,149 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+#  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+#  "answerHints.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("InexactValue");
+#Context()->flags->set(
+#  tolerance => 0.1,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+
+@temp = ("temp13.png", "temp14.png", "temp16.png", "temp17.png", "temp18.png", "temp19.png", "temp20.png", "temp21.png", "temp22.png");
+
+@alttemp  = ("There are labels indicating 80, 90, 100 and 110 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on the 9th tick mark after 100." , "There are labels indicating 80, 90, 100 and 110 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway between the 2nd and 3rd mark after 90.", "There are labels indicating 80, 90, 100 and 110 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exacly on the 5th mark after 80.", "There are labels indicating 10, 20, 30 and 40 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends one third past the 7th mark after 10.", "There are labels indicating 10, 20, 30 and 40 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on the 6th mark after 20.", "There are labels indicating 10, 20, 30 and 40 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends halfway before the first mark after 30.", "There are labels indicating 10, 20, 30 and 40 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on the 5th mark after 30.", "There are labels indicating 10, 20, 30 and 40 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends exactly on 20.", "There are labels indicating 10, 20, 30 and 40 degrees Celcius.  There are 10 tick marks between each.  The red bar indicating temperature ends two thirds between the first and second marks after 10.");
+
+@measurement = (109.0, 92.5, 85.0, 17.3, 26.0, 30.5, 35.0, 20.0, 11.6 );
+
+
+for (0..1) {
+    my $order = random(0,8);
+    redo if $unique{$order}++;
+    push @order, $order;
+ }
+
+my @image;
+
+foreach (0..1) {
+        $y = $order[$_];
+        $image[$_] = $temp[$y];
+        $alt[$_] = $alttemp[$y];
+        $ans[$_] = $measurement[$y];
+        if ($ans[$_] > 100) {
+            $sf[$_] = 4;
+            }
+        else {
+           $sf[$_] = 3;
+           }
+      }
+      
+$m0 = InexactValue($ans[0], $sf[0], { tolerance => 0.2});
+$m0uncert = $m0->simpleUncertainty;
+$tick0 = $m0uncert*10;
+$m1 = InexactValue($ans[1], $sf[1], { tolerance => 0.2});
+$m1uncert = $m1->simpleUncertainty;
+$tick1 = $m1uncert*10;
+$image0 = $image[0];
+$alt0 = $alt[0];
+$image1 = $image[1];
+$alt1 = $alt[1];
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Measuring with a Thermometer
+
+_Measure the temperature shown by each thermometer.  Include the measurement with the correct number of signigficant digits and uncertainty for the units shown.  Place the measurement and uncertainty *in separate boxes* in the answer field._ 
+    
+
+a)  [@ image( $image0, width=>435, height=>269,  
+ extra_html_tags=>"alt='$alt0'"  )@]*
+
+    The thermometer above measures [____]{$m0} +/- [___]{$m0uncert} [``^\circ C  ``].
+
+
+b)  [@ image( $image1, width=>435, height=>269,  
+ extra_html_tags=>"alt='$alt1'"  )@]*
+ 
+    The thermometer above measures [____]{$m1} +/- [___]{$m1uncert} [``^\circ C  ``].
+
+
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+What is the quantity measured by the smallest lines on the thermometer in these examples? In other words, how far apart are these markings?
+
+        a. [$tick0] [``^\circ C  ``]
+    
+        b. [$tick1] [``^\circ C  ``]
+
+This means that the measurement for these devices should be *one digit more precise* than this.  This is called the guess digit and this will define the uncertainty for that measurement. 
+
+
+To review significant figures and measurement, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+a) The thermometer above measures [$ans[0]] +/- [$m0uncert] [``^\circ C  ``].
+
+b) The thermometer above measures [$ans[1]] +/- [$m1uncert] [``^\circ C  ``].
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

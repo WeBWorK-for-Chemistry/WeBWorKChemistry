@@ -1,0 +1,95 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "the number of each type of atom",  "the number of each type of molecule", "the sum of all of the coefficients");
+
+$pop1 = PopUp( [@options], 1);
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Balanced Chemical Equations
+
+_Choose the best answer the following question._
+
+Which quantity must always be the same on both sides of a balanced chemical equation?
+ [__]{$pop1}
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+
+To review balanced equations, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.01%3A_Chemical_Equations"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+*The number of each type of atom* must be the same on both sides of a balanced chemical equation. Since molecules change during a chemical reaction, their number is not the same on both sides.
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

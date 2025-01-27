@@ -1,0 +1,118 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextArbitraryString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "true", "false");
+@options2 = ( "?", "carbon with oxygen", "magnesium with oxygen");
+
+$pop1 = PopUp( [@options2], 1);
+$pop2 = PopUp( [@options], 2);
+
+Context("ArbitraryString");
+
+$blank = Compute('share')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;;
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Polyatomic Ions
+
+1. Fill in the blank: A covalent bond is formed when two atoms [_______]{$blank} electrons.
+
+2. Choose the best answer: Which pair of atoms will most likely share electrons to form a covalent bond? [__]{$pop1}
+
+3. True or False: Scientists prefer the systematic name dihydrogen monoxide when naming the covalent compound formed from two hydrogen atoms and one oxygen atom. [__]{$pop2}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.01%3A_Covalent_Bonds_and_Molecules"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. A covalent bond is formed when two atoms share electrons.
+
+2. Carbon and oxygen are both nonmetals and will most likely share electrons.  Magnesium is a metal and oxygen is a nonmetal.  These will form an ionic bond.
+
+3. This is false.  There are a small number of very common compounds (including [``H_2O``]) where even most scientists choose to use the common name.
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

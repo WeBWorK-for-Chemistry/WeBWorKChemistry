@@ -1,0 +1,79 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl",
+"unionTables.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+
+Context("Numeric");
+$showPartialCorrectAnswers = 1;
+
+#
+#  Create a matching list and use popups
+#
+$ml = new_match_list();
+$ml->rf_print_q(~~&pop_up_list_print_q);
+$ml->ra_pop_up_list([
+"No answer" => "?",
+"A" => "A", "B" => "B", "C" => "C", 
+"D" => "D", "E" => "E", "F" => "F",
+"G" => "G", "H" => "H", "I" => "I",
+]);
+
+#
+#  Add correct questions and answers
+#
+$ml->qa(
+"In a chemical reaction, all of the atoms present at the start of the reaction are present at the end of the reaction.", "conservation of mass","A number that is placed in front of a chemical formula in an equation.", "coefficent",
+"A number that is part of the chemical formula that cannot be changed when balancing a reaction.", "subscript",
+"This indicates the substance is a solid.", "(s)",
+"This indicates the substance is dissoved in water.", "(aq)",
+"These are substances present at the beginning of a reaction.", 
+  "reactants",
+"These are substances written after the arrow in a reaction.", 
+  "products",
+);
+$ml->choose(7);
+
+#
+#  Add extra incorrect answers
+#
+$ml->extra(
+"(l)",
+"(g)", 
+"solution",
+);
+$ml->choose_extra(2);
+  
+#$ml->makeLast("None of the above");
+
+
+######################################
+
+
+BEGIN_PGML
+## Chemical Reaction Matching
+
+Match the phrase on the left with the best symbol or concept that it describes on the right.
+
+[@ ColumnMatchTable($ml,valign => TOP) @]* 
+
+
+
+END_PGML
+
+
+######################################
+
+ANS( str_cmp( $ml->ra_correct_ans ) );
+
+
+ENDDOCUMENT();

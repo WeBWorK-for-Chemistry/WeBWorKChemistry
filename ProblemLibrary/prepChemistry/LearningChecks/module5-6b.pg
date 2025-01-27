@@ -1,0 +1,136 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextArbitraryString.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "alkai metal", "alkaline earth metal", "chalcogen", "halogen", "noble gas");
+
+$pop1 = PopUp( [@options], 1);
+$pop2 = PopUp( [@options], 5);
+$pop3 = PopUp( [@options], 4);
+
+Context("ArbitraryString");
+$group1 = Compute('1A')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               if ($student == '1') { $student = '1a'; }
+               return $correct eq $student;
+            });;
+$group2 = Compute('8A')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               if ($student == '18') { $student = '8a'; }
+               return $correct eq $student;
+            });;
+$group3 = Compute('7A')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               if ($student == '17') { $student = '7a'; }
+               return $correct eq $student;
+            });;            
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Family Name and Group Number
+
+_Classify each element with its family name and then place its group number in the box._
+
+1. Li [__]{$pop1}  [____]{$group1}
+
+2. Ar [__]{$pop2}  [____]{$group2}
+
+3. Cl [__]{$pop3}  [____]{$group3}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. Lithium is an alkali metal. This is group 1A.
+2. Argon is a noble gas.  This is group 8A.
+3. Chlorine is a halogen. This is group 7A.
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+

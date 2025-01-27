@@ -1,0 +1,132 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl",
+  "parserRadioButtons.pl",
+  "PGchoicemacros.pl"
+);
+
+##############################################
+
+
+
+Context("Numeric");
+
+
+$row1 = '^{13}_{6}C';
+$row2 = '^{14}_{6}C';
+
+$prow1 = 6;
+$prow2 = 6;
+$nrow1 = 7;
+$nrow2 = 8;
+
+Context("ArbitraryString");
+
+$element = Compute('carbon')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+            
+Context("Numeric");
+
+$mc1 = new_checkbox_multiple_choice();
+$mc1 -> qa ( "What do you notice is the same about these two atomic nuclei symbols?$BR Check all that apply.$BR", "the element$BR", "the atomic number$BR", "the number of protons$BR"
+);
+$mc1 -> extra(
+"the number of neutrons$BR",
+"the mass number$BR"
+);
+$mc1 -> makeLast("None of the above");
+#ANS( checkbox_cmp( $mc1->correct_ans() ) );
+
+$mc2 = new_checkbox_multiple_choice();
+$mc2 -> qa ( "What do you notice is different about these two atomic nuclei symbols?$BR Check all that apply.$BR", "the number of neutrons$BR",
+"the mass number$BR"
+);
+$mc2 -> extra(
+"the element$BR", "the atomic number$BR", "the number of protons$BR"
+);
+$mc2 -> makeLast("None of the above");
+#ANS( checkbox_cmp( $mc2->correct_ans() ) );
+   
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Atoms and Subatomic Particles
+
+Complete the following table and then use the information in the table to complete the following questions.
+
+[@ 
+DataTable([
+[['Atomic Nuclei Symbol',headerrow=>1], 'number of protons','number of neutrons'],
+[PGML('[`[$row1]`]'), PGML('[___]{$prow1}'), PGML('[___]{$nrow1}') ],
+[PGML('[`[$row2]`]') ,PGML('[___]{$prow2}'),PGML('[___]{$nrow2}')]],
+midrules=>1 ,
+tablecss=>'border:solid 1px;border-collapse: separate;border-radius: 5px; border: 1px solid; padding: 5px; ',
+align=>'p{75pt}|p{50pt}|p{50pt}',
+captioncss=>'font-variant:small-caps; ', 
+columnscss=>[' '],
+);
+@]*
+
+1. What is the name of element that these two atomic nuclei symbols describe? [_________]{$element}
+
+2. [@ $mc1 -> print_q() @]***
+   [@ $mc1 -> print_a() @]***
+   
+3. [@ $mc2 -> print_q() @]***
+   [@ $mc2 -> print_a() @]***
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+To review isotopes and isotope symbols, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/05%3A_The_Nuclei_of_Atoms/5.04%3A_The_Nuclei_of_Atoms"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+##############################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+#END_PGML_SOLUTION
+ANS( checkbox_cmp( $mc1->correct_ans() ) );
+ANS( checkbox_cmp( $mc2->correct_ans() ) );
+ENDDOCUMENT();

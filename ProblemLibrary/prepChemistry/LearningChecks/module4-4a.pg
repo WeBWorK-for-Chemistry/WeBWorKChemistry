@@ -1,0 +1,113 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+@options = ( "choose an answer", "physical change", "chemical change" );
+
+$pic1 = "change1.png";
+$pic2 = "change12.png";
+$alt1 = "atoms packed together at the bottom of a box spreading out throughtout the whole box";
+$alt2 = "Two diatomic elements forming a compound.", "A compound formed of two elements breaking apart into its individual atoms.";
+$pop1 = PopUp( [ @options ], $options[1] );
+$pop2 = PopUp( [ @options ], $options[2] );
+$solution1 ="because no bonds are broken in this process.";
+$solution2 ="because chemical bonds are broken in this process.";
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Physical or Chemical Changes - Particulate View
+
+_Classify each of the following as either a physical or chemical change by selecting the correct answer from the dropdown menu after the image._
+
+1. [@ image( $pic1, width=>600, height=>250,  
+ extra_html_tags=>"alt=$alt1"  )@]*
+
+    The image above shows a [_________________]{$pop1}.
+
+
+2. [@ image( $pic2, width=>600, height=>250,  
+ extra_html_tags=>"alt=$alt2"  )@]*
+
+    The image above shows a [_________________]{$pop2}.
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Physical changes are changes in which no bonds are broken or formed. This means that the same types of compounds or elements that were there at the beginning of the change are there at the end of the change. Because the ending materials are the same as the beginning materials, the properties (such as color, boiling point, etc) will also be the same. Physical changes involve moving molecules around, but not changing them.
+
+Chemical changes occur when bonds are broken and/or formed between molecules or atoms. This means that one substance with a certain set of properties (such as melting point, color, taste, etc) is turned into a different substance with different properties. Chemical changes are frequently harder to reverse than physical changes.
+
+To review physical and chemical changes, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/03%3A_Matter_and_Energy/3.06%3A_Changes_in_Matter_-_Physical_and_Chemical_Changes"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+1. The image above shows a [$pop1] [$solution1].
+2. The image above shows a [$pop2] [$solution2].
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

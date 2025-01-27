@@ -1,0 +1,174 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl",
+  "contextInexactValue.pl"
+
+);
+
+##############################################
+
+
+
+Context("ArbitraryString");
+
+$br = Compute('Br')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = $correct->string;
+               $student = $student->string;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$b = Compute('B')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = $correct->string;
+               $student = $student->string;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$c = Compute('C')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = $correct->string;
+               $student = $student->string;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$ca = Compute('Ca')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = $correct->string;
+               $student = $student->string;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$au = Compute('Au')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = $correct->string;
+               $student = $student->string;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$na = Compute('sodium')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$hg = Compute('mercury')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$p = Compute('phosphorus')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$k = Compute('potassium')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;
+$i = Compute('iodine')->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string);
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });;            
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##The Periodic Table and the Elements
+
+1. Write the chemical symbol for each element.
+
+    a) bromine [____]{$br}
+    b) boron [____]{$b}
+    c) carbon  [____]{$c}
+    d) calcium [____]{$ca}
+    e) gold [____]{$au}
+
+
+2. What element is represented by each chemical symbol?
+
+    a) Na [________]{$na}
+    b) Hg [________]{$hg}
+    c) P  [________]{$p}
+    c) K [________]{$k}
+    d) I [________]{$i}
+   
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+To review the elements, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+##############################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+ENDDOCUMENT();

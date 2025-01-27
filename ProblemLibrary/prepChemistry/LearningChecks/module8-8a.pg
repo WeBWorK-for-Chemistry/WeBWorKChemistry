@@ -1,0 +1,128 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextChemical.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <script type="text/javascript" language="javascript" src="/webwork2_course_files/chem-sandbox/periodicTable.js"></script>  
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+  }
+  .conversionEQ > div {
+    text-align: center;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  </style>  
+EOF
+
+##############################################
+
+Context("Numeric");
+
+
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Mole Relationships in Formulas
+
+
+1.  How many aluminum ions in a formula unit of aluminum selenide, [``\mathrm{Al_2Se_3}``]? [___________]{2} aluminium ions
+
+    How many selenide ions are in a formula unit of aluminum selenide, [``\mathrm{Al_2Se_3}``]? [___________]{3} selenide ions
+     
+    How many moles of aluminum ions are in a mole of aluminum selenide, [``\mathrm{Al_2Se_3}``]? [___________]{2} moles aluminium ions
+     
+    How many moles of selenide ions are in a mole of aluminum selenide, [``\mathrm{Al_2Se_3}``]?  [___________]{3} moles selenide ions
+    
+    
+    
+2.  How many carbon atoms are in a molecule of propane, [``\mathrm{C_3H_8}``]?  [___________]{3} carbon atoms
+
+    How many hydrogen atoms are in a molecule of propane, [``\mathrm{C_3H_8}``]?  [___________]{8} hydrogen atoms
+    
+    How many moles of carbon atoms are in a mole of propane, [``\mathrm{C_3H_8}``]?  [___________]{3} moles carbon atoms
+    
+    How many moles of hydrogen atoms are in a mole of propane, [``\mathrm{C_3H_8}``]?  [___________]{8} moles hydrogen atoms
+
+    
+
+
+
+END_PGML
+
+
+
+
+##############################################
+
+
+BEGIN_PGML_HINT
+
+
+For more information on mole relationships in chemical formulas, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/08%3A_Counting_Atoms_Ions_and_Molecules/8.03%3A_Chemical_Formulas_as_Conversion_Factors"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+##############################################
+
+
+BEGIN_PGML_SOLUTION
+
+1. There are 2 aluminum ions in each formula unit of aluminum selenide. The subscripts in the formula of an ionic compound tell us how many of each ion are in a formula unit of the ionic compound.
+
+There are 3 selenide ions in each formula unit of aluminum selenide. The subscripts in the formula of an ionic compound tell us how many of each ion are in a formula unit of the ionic compound.
+
+There are 2 moles of aluminum ions in each mole of aluminum selenide. The subscripts in the formula of an ionic compound also tell us how many moles of each ion are in a mole of the ionic compound.
+
+There are 3 moles of selenide ions in each mole of aluminum selenide. The subscripts in the formula of an ionic compound also tell us how many moles of each ion are in a mole of the ionic compound.
+
+2. There are 3 carbon atoms in each molecule of propane. The subscripts in the formula of a covalent compound tell us how many of each atom are in a molecule of the covalent compound.
+
+There are 8 hydrogen atoms in each molecule of propane. The subscripts in the formula of a covalent compound tell us how many of each atom are in a molecule of the covalent compound.
+
+There are 3 moles of carbon atoms in each mole of propane. The subscripts in the formula of a covalent compound also tell us how many moles of each atom are in a mole of the covalent compound.
+
+There are 8 moles of hydrogen atoms in each mole of propane. The subscripts in the formula of a covalent compound also tell us how many moles of each atom are in a mole of the covalent compound.
+
+END_PGML_SOLUTION
+##############################################
+
+
+ENDDOCUMENT();
+

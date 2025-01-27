@@ -1,0 +1,111 @@
+##DESCRIPTION
+##  Significant Figures problem: addition or subtraction 
+##ENDDESCRIPTION
+
+##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
+
+## Date('2/15/2021')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "contextInexactValue.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("InexactValue");
+Context()->flags->set(failOnValueWrong=>1);  # must have value correct, but...
+Context()->flags->set(creditSigFigs=>1);  # all credit for sig figs
+Context()->flags->set(creditValue=>0);
+
+
+
+$val1 = random(1.00, 9.99, 0.01);
+$val2 = random(100, 900, 1);
+$ival1 = InexactValue($val1."e+3", 3);
+$ival2 = InexactValue(sprintf('%.2f',$val2)."e-25", 4);
+$ans1 = InexactValue($ival1 / $ival2);
+
+$val3 = random(1.00, 9.999, 0.001);
+$val4 = random(100, 900, 1);
+$val5 = random(1.00, 9.999, 0.001);
+$exp1 = random(9,36);
+$exp2 = random(9,36);
+$ival3 = InexactValue($val3."e-6", 4);
+$ival4 = InexactValue(sprintf('%.2f',$val4)."e-".$exp1, 4);
+$ival5 = InexactValue($val5."e-".$exp2, 5);
+$ans2 = InexactValue($ival3 / ($ival4*$ival5));
+
+$val6 = random(1.00, 9.99, 0.01);
+$val7 = random(100, 900, 1);
+$val8 = random(1.00, 9.999, 0.001);
+$val9 = random(100, 900, 1);
+$exp3 = random(9,20);
+$exp4 = random(9,20);
+$exp5 = random(9,20);
+$ival6 = InexactValue($val6."e-4", 3);
+$ival7 = InexactValue(sprintf('%.2f',$val7)."e-".$exp3, 3);
+$ival8 = InexactValue(sprintf('%.2f',$val8)."e-".$exp4, 4);
+$ival9 = InexactValue($val9."e-".$exp5, 5);
+$ans3 = InexactValue($ival6 / ($ival7*$ival8*$ival9));
+
+
+##############################################################
+#
+#  Problem
+#
+#
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+
+BEGIN_PGML
+
+##Using your Calulator
+
+When putting scientific notation into your calculator, it is important to make sure that you use parenthesis properly especially when the number is in the denominator. 
+
+If you have an EE button on your calculator you should also practice using this. Remember that EE means times 10 raised to a power ( x 10^). You don't need to put these characters in when using this button.  [`9.37 \times 10^{15}`] would be input as 9.37 EE 15.  You may then see the read out on the screen as 9.37E15.
+
+Try the following problems.  Pay careful attention to the parenthesis. Each problem gives  you the number of digits in your reported answer.
+  
+a. report the number to 2 digits after the decimal in scientific notation.
+
+    [``\frac{[$ival1]}{([$ival2])} = ``] [________]{$ans1}
+
+
+b. report the number to 3 digits after the decimal in scientific notation.
+
+    [``\frac{[$ival3]}{([$ival4])([$ival5])} = ``] [________]{$ans2}
+
+
+c. report the number to 2 digits after the decimal in scientific notation.
+
+    [``\frac{[$ival6]}{([$ival7])([$ival8])([$ival9])} = ``] [________]{$ans3}
+
+
+END_PGML
+
+#BEGIN_PGML_SOLUTION
+
+#END_PGML_SOLUTION
+
+#BEGIN_PGML_HINT
+
+
+#END_PGML_HINT
+
+ENDDOCUMENT();        

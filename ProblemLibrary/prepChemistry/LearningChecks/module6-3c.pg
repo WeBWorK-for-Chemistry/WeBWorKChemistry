@@ -1,0 +1,199 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "contextString.pl",
+  "contextArbitraryString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+Context("ArbitraryString");
+
+
+@cations = ("Rb", "Li", "Sr",  "Na", "Mg", "Al", "K", "Ca", "Pb", ,"Pb", "Fe", "Fe", "Cu", "Cu", "Mn", "Sn", "Sn", "Co", "Co", "Cr", "Cr");
+
+@cat_charge = ("+", "+", "2+",  "+", "2+", "3+", "+", "2+", "2+", "4+","2+","3+","+","2+","7+","2+","4+","2+","3+","2+","3+");
+
+@anion_sub = (1,1,2,1,2,3,1,2,2,4,2,3,1,2,7,2,4,2,3,2,3);
+    
+@cname = ("rubidium", "lithium", "strontium", "sodium", "magnesium", "aluminum",  "potassium", "calcium", "lead(II)", "lead(IV)", "iron(II)", "iron(III)", "copper(I)", "copper(II)", "manganese(VII)", "tin(II)", "tin(IV)", "cobalt(II)", "cobalt(III)", "chromium(II)", "chromium(III)");
+
+@anions = ("CH_3COO", "ClO_3", "ClO_2", "CN", "OH", "NO_3", "NO_2", "MnO_4", "CO_3", "Cr_2O_7", "SO_4", "SO_3", "PO_4", "N", "P","F", "Cl", "Br","I","S", "O");
+
+@aname = ("acetate", "chlorate", "chlorite", "cyanide", "hydroxide", "nitrate", "nitrite", "permanganate", "carbonate", "dichromate","sulfate", "sulfite", "phosphate", "nitride", "phosphide", "fluoride", "chloride", "bromide","iodide","sulfide", "oxide");
+
+@anion_charge = ("-", "-", "-", "-", "-", "-", "-", "-", "2-", "2-", "2-", "2-", "3-", "3-", "3-","-", "-", "-", "-","2-", "2-");
+
+@cation_sub = (1,1,1,1,1,1,1,1,2,2,2,2,3,3,3,1,1,1,1,2,2);
+
+
+
+my @numbers;
+my %unique;
+
+for (0..9) {
+    my $number = random(0,20);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+    }
+for (0..9) {
+    my $number2 = random(0,20);
+    redo if $unique{$number2}++;
+    push @numbers2, $number2;
+ }
+
+foreach (0..9) {
+    $i = $numbers[$_];
+    $j = $numbers2[$_];   
+    
+    $cat[$_] = $cations[$i];
+    $cc[$_] = $cat_charge[$i];
+    $asub[$_] = $anion_sub[$i];
+    
+    $an[$_] = $anions[$j];
+    $ac[$_] = $anion_charge[$j];
+    $csub[$_] = $cation_sub[$j];
+    
+    if ($csub[$_] == 2 && $asub[$_] == 4) {
+        $csub[$_] = 1;
+        $asub[$_] = 2;
+        }
+
+    
+    if ($csub[$_] == 1 && $asub[$_] == 1) {
+        $formula[$_] = "$cat[$_] $an[$_]";
+        }
+    elsif ($csub[$_] == 1) {
+        if ($j < 13) {
+        $formula[$_] = "$cat[$_] (${an[$_]})_$asub[$_]";
+            }
+        else {
+        $formula[$_] = "$cat[$_] ${an[$_]}_$asub[$_]";
+            }
+        }
+    elsif ($asub[$_] == 1) {
+        $formula[$_] = "${cat[$_]}_$csub[$_] $an[$_]";
+        }
+    elsif ($csub[$_] == $asub[$_]) {
+        $formula[$_] = "$cat[$_] $an[$_]";
+        }
+    elsif ($j < 13) {
+        $formula[$_] = "${cat[$_]}_$csub[$_] (${an[$_]})_$asub[$_]";
+        }
+    else {
+        $formula[$_] = "${cat[$_]}_$csub[$_] ${an[$_]}_$asub[$_]";
+        }
+        
+    $answ[$_] = $cname[$i]." ".$aname[$j];
+    $answer[$_] = Compute($answ[$_])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $correct = lc($correct->string);
+               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               if ($student =~ s/~~s~~(i//) { 
+                    $ans->{ans_message} = "Do not put a space between the cation name and the roman numeral.";}
+               if ($student =~ s/~~si//) { 
+                    $ans->{ans_message} = "Do not put a space between the cation name and the roman numeral. Don't forget to use parentheses.";}
+               return $correct eq $student;
+            });
+    }
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Naming Ionic Compounds
+
+Write the name for the following formulas. 
+
+Formatting hints: Do not put a space between the name and parenthesis if parenthesis are needed. Formula names do not need to be capitalized here.
+
+example: [``MnS_{2}``]  manganese(IV) sulfide
+
+a. [``[$formula[0]]``] [____________________]{$answer[0]} 
+
+a. [``[$formula[1]]``] [____________________]{$answer[1]} 
+
+a. [``[$formula[2]]``] [____________________]{$answer[2]} 
+
+a. [``[$formula[3]]``] [____________________]{$answer[3]} 
+
+a. [``[$formula[4]]``] [____________________]{$answer[4]} 
+
+a. [``[$formula[5]]``] [____________________]{$answer[5]} 
+
+a. [``[$formula[6]]``] [____________________]{$answer[6]} 
+
+a. [``[$formula[7]]``] [____________________]{$answer[7]} 
+
+a. [``[$formula[8]]``] [____________________]{$answer[8]} 
+
+a. [``[$formula[9]]``] [____________________]{$answer[9]} 
+
+
+
+END_PGML
+############################################################
+#BEGIN_PGML_HINT
+
+
+
+
+#END_PGML_HINT
+
+############################################################
+
+
+#BEGIN_PGML_SOLUTION
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+

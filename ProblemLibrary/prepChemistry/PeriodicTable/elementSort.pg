@@ -1,0 +1,158 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "contextString.pl",
+  "contextArbitraryString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("ArbitraryString");
+
+
+@options = ( "choose an answer", "metal", "semimetal","nonmetal");
+
+@elements = ("Lithium", "Beryllium", "Sodium", "Magnesium", "Aluminum", "Potassium", "Calcium", "Scandium","Titanium", "Manganese", "Iron", "Copper", "Strontium", "Molybdenum", "Silver", "Tin", "Silicon", "Germanium", "Arsenic", "Antimony", "Tellurium", "Helium","Carbon", "Nitrogen", "Oxygen", "Neon", "Phosphorus", "Sulfur", "Chlorine", "Radon");
+
+#Context("String");
+
+#Context()->strings->are ( Li => {},   Be => {}, Na => {},  Mg => {},Al => {},K => {}, Ca => {},Sc => {},Ti => {},Mn => {}, Fe => {}, Cu => {}, Sr => {}, Mo => {}, Ag => {}, Sn => {}, Si => {},  Ge => {},  As => {},  Sb => {},  Te => {},  He => {},  C => {}, N => {}, O => {}, Ne => {}, P => {}, S => {}, Cl => {}, Rn => {});
+
+@symbols = ("Li", "Be", "Na", "Mg", "Al", "K", "Ca", "Sc","Ti", "Mn", "Fe", "Cu", "Sr", "Mo", "Ag", "Sn", "Si", "Ge", "As", "Sb", "Te", "He","C", "N", "O", "Ne", "P", "S", "Cl", "Rn");
+
+my @numbers;
+my %unique;
+
+for (0..5) {
+    my $number = random(0,29);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+
+for (0..5) {
+        $x = $numbers[$_];
+        if ($x < 16) {
+            $a = 1;
+            }
+        elsif ($x > 20) {
+            $a = 3;
+            }
+        else {
+            $a = 2;
+            }
+        $text[$_] = $elements[$x];
+        $ans[$_] = Compute($symbols[$x])->cmp(
+            checker => sub {
+               my ($correct,$student,$ans) = @_;
+               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+               # the previous regex removes leading and trailing whitespace
+               return $correct eq $student;
+            });
+        $pop[$_] = PopUp( [ @options ], $options[$a] );
+        }
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Metal, Nonmetal, or Semimetal?
+
+_Write the symbol for the following elements in the box next to each name and then classify each as a metal, nonmetal or a semimetal._
+
+a. [$text[0]]  [____]{$ans[0]}   [________]{$pop[0]}
+
+
+a. [$text[1]]  [____]{$ans[1]}   [________]{$pop[1]}
+
+
+a. [$text[2]]  [____]{$ans[2]}   [________]{$pop[2]}
+
+
+a. [$text[3]]  [____]{$ans[3]}   [________]{$pop[3]}
+
+
+a. [$text[4]]  [____]{$ans[4]}   [________]{$pop[4]}
+
+
+a. [$text[5]]  [____]{$ans[5]}   [________]{$pop[5]}
+
+
+
+
+
+
+END_PGML
+
+############################################################
+BEGIN_PGML_HINT
+
+To review classifying elements click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/General_Chemistry/Map%3A_Chemistry_(Zumdahl_and_Decoste)/02%3A_Atoms_Molecules_and_Ions/2.07_An_Introduction_to_the_Periodic_Table"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+To access a periodic table with names and symbols, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Ancillary_Materials/Reference/Periodic_Table_of_the_Elements"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+a. The symbol for [$text[0]] is [$ans[0]]. This is a [$pop[0]].
+
+a. The symbol for [$text[1]] is [$ans[1]]. This is a [$pop[1]].
+
+a. The symbol for [$text[2]] is [$ans[2]]. This is a [$pop[2]].
+
+a. The symbol for [$text[3]] is [$ans[3]]. This is a [$pop[3]].
+
+a. The symbol for [$text[4]] is [$ans[4]]. This is a [$pop[4]].
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
