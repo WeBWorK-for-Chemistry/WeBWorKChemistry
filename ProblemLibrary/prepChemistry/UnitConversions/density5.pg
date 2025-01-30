@@ -1,0 +1,183 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+#  "parserDimensionalAnalysis.pl",
+   "parserMultiAnswer.pl",
+);
+############################################################
+# Header
+############################################################
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: -30px;
+    justify-content: space-evenly;
+  }
+  .conversionEQ > div {
+    text-align: center;
+    margin-top: 30px;
+    padding: 1em;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  .conversionFactorGrouping{
+      display:flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1em;
+  }
+  </style>  
+EOF
+
+TEXT(beginproblem());
+
+sub conversionEQ {
+    my $start = shift;
+    my $colsref = shift;
+    my $n = scalar @{$colsref};
+    my $end = shift;
+    my $html;
+    my $tex;
+    $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+    $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+        $html .= '<div class="conversionEQmath">';
+        $html .= math_ev3('\times');
+        $html .= '</div>';
+        $html .= '<div class="conversionEQcol">';
+        $html .= '<div>';
+        $html .= $colsref->[$i];
+        $html .= '</div>';       
+        $html .= '<div class="conversionFractionBar">';
+        $html .= '<svg height="1" width="40">';
+        $html .= '<desc>per</desc>';
+        $html .= '</svg>';
+        $html .= '</div>';       
+        $html .= '<div>';
+        $html .= $colsref->[$i+1];
+        $html .= '</div>';       
+        $html .= '</div>';
+    }
+    $html .= '<div  class="conversionEQmath">';
+    $html .= math_ev3('{}={}');
+    $html .= '</div>';
+    $html .= '<div>';
+    $html .= $end;
+    $html .= '</div>';
+    $html .= '</div>';
+    MODES(HTML=>$html, TeX=>'');
+}
+
+sub conversionFactor {
+    my $numerator = shift;
+    my $denominator = shift;
+    my $html;
+    $html .= '<div class="conversionEQ">';
+        $html .= '<div class="conversionEQcol">';
+            $html .= '<div>';
+                $html .= $numerator;
+            $html .= '</div>';       
+            $html .= '<div class="conversionFractionBar">';
+                $html .= '<svg height="1" width="40">';
+                $html .= '<desc>per</desc>';
+                $html .= '</svg>';
+            $html .= '</div>';       
+            $html .= '<div>';
+                $html .= $denominator;
+            $html .= '</div>';       
+        $html .= '</div>';
+    $html .= '</div>';
+
+    MODES(HTML=>$html, TeX=>'');
+}
+
+Context("InexactValueWithUnits");
+
+$v = random(10.0, 20.0, 0.1);
+$volume = InexactValueWithUnits([$v,3], mL);
+$m1 = random(10.000, 40.000, 0.001);
+$m2 = random(50.000, 90.000, 0.001);
+$mass1 = InexactValueWithUnits([$m1,5], g);
+$mass2 = InexactValueWithUnits([$m2,5], g);
+$mass = $mass2 - $mass1;
+$answer = $mass/$volume;
+
+ANS($mass->cmp);
+ANS($volume->cmp);
+ANS($answer->cmp);
+
+
+##############################################
+
+BEGIN_PGML
+##Density
+
+An empty beaker has a mass of [$mass1]. You add [$volume] of solution, and the beaker now has a mass of [$mass2]. What is the density of your solution in [`\mathrm{\frac{g}{mL}}`]?
+
+First find the mass in grams of the solutions and place that value with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers.
+
+
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+[@ MODES(HTML=>'  `\text{density  =  }``\frac{\text{mass}}{\text{volume}} = `') @]*
+[@ conversionFactor(ans_rule(6), ans_rule(6)) @]*
+[@ MODES(HTML=>'`\text{= }`') @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm} grams}{\hspace{2cm} mL}``]') @]**
+[@ ans_rule(6) @]*
+
+[@ MODES(HTML=>'</div>', TeX=>'') @]*
+
+END_PGML
+##############################################
+
+BEGIN_PGML_HINT
+
+
+
+For more information on density, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Introductory_Chemistry_(LibreTexts)/02%3A_Measurement_and_Problem_Solving/2.09%3A_Density"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
+[@ MODES(HTML=>'  `\text{density  =  }``\frac{\text{mass}}{\text{volume}} = `') @]*
+[@ conversionFactor($mass, $volume) @]*
+[@ MODES(HTML=>'`\text{= }`') @]*
+[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm} grams}{\hspace{2cm} mL}``]') @]** [``[$answer]``] 
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
+
