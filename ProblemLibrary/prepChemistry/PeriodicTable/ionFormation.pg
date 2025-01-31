@@ -1,0 +1,164 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "parserRadioButtons.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+#Context()->flags->set(
+#  tolerance => 0.2,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+@elements = ("hydrogen", "helium", "lithium", "beryllium", "boron","carbon", "nitrogen", "oxygen", "fluorine", "neon", "sodium", "magnesium", "aluminum", "silicon", "phosphorus", "sulfur", "chlorine", "argon");
+
+@symbols = ("H", "He", "Li", "Be","B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar");
+
+$png = ".png";
+my @elementPics = map {$_.$png}@elements;
+
+@options1 = ("?","lose", "gain");
+@options2 = ("?", "cation", "anion");
+@options3 = ("?", "1+", "2+", "3+", "3-","2-","1-");
+
+my @numbers = (0,2,3,6,7,8,10,11,12,14,15,16);
+
+# Generate 2 random indexes within the array bounds
+
+for (0..1) {
+    my $index = int(random(scalar(@numbers)));
+    redo if $unique{$index}++;
+    push @indexes, $index;
+ }
+
+# Access the random number from the array
+my @random;
+    
+$random[0] = $numbers[$indexes[0]];
+$random[1] = $numbers[$indexes[1]];
+
+foreach (0..1) {
+    $x = $random[$_];
+    $atom[$_] = $elements[$x];
+    $atompic[$_] = $elementPics[$x];
+    $symbolA[$_] = $symbols[$x];
+    $altText[$_] = "Bohr model for an atom of $atom[$_]"; 
+    $electrons[$_] = $x + 1;
+    $e = $electrons[$_];
+    if ($e <= 2) {
+         $val[$_] = $e;
+    }
+    elsif ($e <= 10) {
+        $val[$_] = $e-2;
+    }
+    else {
+        $val[$_] = $e-10;
+    }
+
+    if ($val[$_] < 4){
+        $choice2[$_] = 1;
+        $choice1[$_] = 1;
+        $choice3[$_] = $val[$_];
+        $nelectrons[$_] = $val[$_];
+        }
+    else {
+        $choice2[$_] = 2;
+        $choice1[$_] = 2;
+        $choice3[$_] = $val[$_] - 1;
+        $nelectrons[$_] = 8 - $val[$_];
+    }
+
+    $pop1[$_] = PopUp( [ @options1 ], $choice1[$_] );
+    $pop2[$_] = PopUp( [ @options2 ], $choice2[$_] );
+    $pop3[$_] = PopUp( [ @options3 ], $choice3[$_] );
+    }
+
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Valence Electrons and Ion Formation
+
+_Use the images to help fill in the statements below each image._
+
+
+1. [@ image( $atompic[0], width=>300, height=>300,extra_html_tags=>"alt='$altText[0]'"  )@]*
+
+    The atom above is [$atom[0]].  In order to have a full valence (outer) shell, [$atom[0]] needs to [____]{$pop1[0]} [____]{$nelectrons[0]} electron(s).  This will give [$atom[0]] a charge of [___]{$pop3[0]}. 
+
+1. [@ image( $atompic[1], width=>300, height=>300,extra_html_tags=>"alt='$altText[1]'"  )@]*
+
+    The atom above is [$atom[1]].  In order to have a full valence (outer) shell, [$atom[1]] needs to [____]{$pop1[1]} [____]{$nelectrons[1]} electron(s).  This will give [$atom[1]] a charge of [___]{$pop3[1]}.
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.01%3A_Ions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. [@ image( $atompic[0], width=>300, height=>300,extra_html_tags=>"alt='$altText[0]'"  )@]*
+
+    The atom above is [$atom[0]].  In order to have a full valence (outer) shell, [$atom[0]] needs to [$pop1[0]] [$nelectrons[0]] electron(s).  This will give [$atom[0]] a charge of [$pop3[0]]. 
+
+1. [@ image( $atompic[1], width=>300, height=>300,extra_html_tags=>"alt='$altText[1]'"  )@]*
+
+    The atom above is [$atom[1]].  In order to have a full valence (outer) shell, [$atom[1]] needs to [$pop1[1]] [$nelectrons[1]] electron(s).  This will give [$atom[1]] a charge of [$pop3[1]]. 
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
