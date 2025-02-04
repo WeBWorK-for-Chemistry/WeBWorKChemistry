@@ -86,7 +86,7 @@ for (0..4) {
     push @numbers2, $number2;
  }
  
-@options = ('?','soluble', 'insoluble', 'none of the above');
+@options = ('?','soluble', 'insoluble', 'not enough information');
 
 #checking solubility rules
 for (0..4) {
