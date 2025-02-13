@@ -1,0 +1,63 @@
+##DESCRIPTION
+##  Lewis Structures
+##ENDDESCRIPTION
+
+##KEYWORDS('lewis structures')
+
+## Date('3/5/2023')
+## Author('Lee McPherson')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "parserLewisStructureTool.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+
+
+@moleculeFormulaLatex = ('O_2','N_2', 'F_2', 'Cl_2', 'Br_2', 'CN^-', 'CO');
+$rand_num_generator = new PGrandom();
+$size = @moleculeFormulaLatex;
+$index = random(0,$size-1);
+
+$formula = $moleculeFormulaLatex[$index];
+$lewisStructure = LewisStructureTool($formula)->with(cmpOptions => {'debug'=> 1,'showFormalCharges'=> 0, 'formalChargePenalty'=>0.4, 'requirePerspective'=>0});
+# With optional parameters for grading.
+# $lewisStructure = LewisStructureTool($formula)->with(cmpOptions => { "bondOrderPenalty" => 0.333 } );
+
+##############################################################
+#
+#  Problem
+#
+BEGIN_PGML
+
+##Lewis Structure - Diatomic Molecules
+
+Draw the Lewis Structure for [`\mathrm{[$formula]}`] in the box below. Don't forget to include all lone pairs.
+
+[@ LABELED_ANS($lewisStructure->ANS_NAME, $lewisStructure->cmp); $lewisStructure->ans_rule @]*
+
+
+
+
+END_PGML
+#[____]{$lewisStructure}
+#
+BEGIN_PGML_SOLUTION
+
+[@ $lewisStructure->showSolutionGuide() @]*
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        
