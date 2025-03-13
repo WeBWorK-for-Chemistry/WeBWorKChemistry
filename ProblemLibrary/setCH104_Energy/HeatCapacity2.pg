@@ -25,7 +25,7 @@ $m = random(1.25,9.99, 0.01);
 #    $m = 153;
 #}
 
-Context("InexactValueWithUnits");
+Context("InexactValue");
 Context()->flags->set(
     'newUnit' => [
         [ 'Joule',     'Joules',     'J' ],
