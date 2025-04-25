@@ -98,7 +98,7 @@ columnscss=>[' '],
 );
 @]*
 
-The average atomic mass of [$element[$x1]] is [_________]{$answer} amu.
+The average atomic mass of [$element[$x1]] is [_________]{$ave} amu.
 
 END_PGML
 
