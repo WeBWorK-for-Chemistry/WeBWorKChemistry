@@ -1,0 +1,139 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+# It seemed like a good idea to logically group the reactions
+# with meaningful names
+@alpha_decay = ("^{238}_{92}U \rightarrow ^{4}_{2}He + ^{234}_{90}Th", "^{230}_{90}Th \rightarrow ^{4}_{2}He + ^{226}_{88}Ra", "^{210}_{86}Rn \rightarrow ^{206}_{84}Po + ^{4}_{2}He");
+@beta_decay = ("^{203}_{80}Hg \rightarrow ^{203}_{81}Tl + ^{0}_{-1}e", "^{234}_{90}Th \rightarrow  ^{0}_{-1}e + ^{234}_{91}Pa", "^{14}_{6}C \rightarrow  ^{0}_{-1}e + ^{14}_{7}N");
+@gamma_decay = ("^{125}_{53}I^{*} \rightarrow ^{125}_{53}I + ^{0}_{0}\gamma", "^{60}_{27}Co^{*} \rightarrow ^{60}_{27}Co + ^{0}_{0}\gamma", "^{99}_{43}Tc^{*} \rightarrow ^{99}_{43}Tc + ^{0}_{0}\gamma");
+
+
+%reactionClasses = (
+    (map {$_ => 'alpha decay'} @alpha_decay),
+    (map {$_ => 'beta decay'} @beta_decay),
+    (map {$_ => 'gamma decay'} @gamma_decay)
+);
+
+# randomly pick one of each type
+@alpha_reactions = random_subset(1, @alpha_decay);
+@beta_reactions = random_subset(1, @beta_decay);
+@gamma_reactions = random_subset(1, @gamma_decay);
+
+# merge them and randomize order:
+@reactions = random_subset(3,
+    @alpha_reactions,
+    @beta_reactions,
+    @gamma_reactions
+);
+
+@options = (
+    'alpha decay',
+    'beta decay',
+    'gamma decay'
+);
+
+# DropDown is better than PopUp. You don't do something like include a '?'
+# in the list. Instead, there is the placeholder option.
+# This uses map again to create the 8 dropdowns directly from the 8 elements.
+@dropdown = map {
+    DropDown(
+        ~~@options,
+        $reactionClasses{$_},
+        placeholder => 'Choose One'
+    )
+} @reactions;
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Classifying Nuclear Reactions
+
+Identify the following nuclear reactions as alpha, beta or gamma decay. Pick the best choice from the drop down menu.
+
+a. [``[$reactions[0]]``]
+
+    This reaction is an example of  [_]{$dropdown[0]}.
+
+a. [``[$reactions[1]]``]
+
+    This reaction is an example of  [_]{$dropdown[1]}.
+
+a. [``[$reactions[2]]``]
+
+    This reaction is an example of  [_]{$dropdown[2]}.
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+Remember that emission or decay means that the particle is a product in the reaction. The three types of radiation that are being discussed here are:
+1. *An alpha particle* is composed of two protons and two neutrons, and so it is the same as a helium nucleus. (We often use  [``^{4}_{2}He``] to represent an alpha particle.)
+2. *A beta particle* is an electron ejected from the nucleus (not from the shells of electrons about the nucleus) and has a 1− charge. We can also represent a beta particle as [``^{0}_{-1}e``]
+  or [``β^−``].
+3. *Gamma rays* are not really particles but rather a very energetic form of electromagnetic radiation, symbolized by the Greek letter γ. Gamma rays have no mass. 
+
+To review radioactivity, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.09%3A_Radioactivity"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
