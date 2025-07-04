@@ -5,7 +5,7 @@
 ##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
 
 ## Date('2/15/2021')
-## Author('Lee McPherson')
+## Author('Lee McPherson and Stephanie Bryan')
 ## Institution('Portland Community College')
 
 
@@ -103,6 +103,7 @@ d.  [$ival7] has [$ival7->sigFigs] sig figs;
 END_PGML_SOLUTION
 
 BEGIN_PGML_HINT
+When performing multiplication and division with significant figures, the answer should have the same number of significant figures as the factor with the least number of significant figures
 
 To review how to do calculations using significant figures, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.04%3A_Significant_Figures_in_Calculations"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
