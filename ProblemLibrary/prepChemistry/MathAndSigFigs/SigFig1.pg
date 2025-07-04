@@ -107,6 +107,13 @@ BEGIN_PGML_HINT
 
 5. Trailing zeros in a number with a decimal point are significant. This is true whether the zeros occur before or after the decimal point.
 
+*Rounding Hints*
+
+1. Start counting digits at the left most significant digit. This will be the first column of the given number for any number that is greater than 1. When looking at decimal numbers less than 1, do not count the leading zeros. For example 0.053046 rounded to 2 sig figs is 0.053. 
+
+2. The column to the right of the last significant digit will tell you whether to round the last digt up or leave it the same. If the column to the right contains a 5 or higher round the previous column up in your final answer. If the column to the right contains a 4 or lower, leave the previous column alone in your final answer. For example, 0.053046 rounded to 2 sig figs is 0.053. The zero in the column after the 3 tells us to leave the 3. However, 0.053546 rounded to 2 sig figs is 0.054 because the 5 in the column after the 3 tells us to raise it to a 4 when rounding.
+
+3. If you end up with a number that has significant zeroes in it and writing the number in standard form makes it unclear that the zeroes are significant, you will need to use scientific notation.  For example when rounding 32976 to 3 sig figs, the answer would be 33000 because the 7 in the 4th column tells us to round the 9 in the 3rd colum to a 10 (or rather to a zero and the 2 next to it to a 3).  However when writing the number in standard form, 33000, it is impossible to tell that the 0 in the hundreds place is significant but the other 2 zeroes are not. We can solve this problem by placing the number in scientific notation, [``3.30 \times 10^4``]. 
 
 To review the rules of significant figures, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
