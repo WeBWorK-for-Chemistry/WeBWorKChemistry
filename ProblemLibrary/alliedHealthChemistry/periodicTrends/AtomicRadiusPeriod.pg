@@ -1,0 +1,71 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+  "contextArbitraryString.pl",
+);
+
+Context("ArbitraryString");
+@sets = ([qw(O N C B)], [qw(Cl S P Si)], [qw(C B Be Li)], [qw(V Ti Sc Ca)], [qw(Br Se As Ge)]);
+
+
+# randomly pick one isotope set
+$index = random(0,$#sets);
+
+@problem_set = ($sets[$index]->[0], $sets[$index]->[1], $sets[$index]->[2], $sets[$index]->[3]) ;
+
+my @numbers;
+my %unique;
+
+for (0..3) {
+    my $number = random(0,3);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+for (0..3) {
+    $randomized_set[$_] = $problem_set[$numbers[$_]];
+}
+
+
+BEGIN_PGML
+##Atomic Size - Across a Period
+
+Put the following in order from smallest to largest.
+
+[``[$randomized_set[0]], [$randomized_set[1]], [$randomized_set[2]], [$randomized_set[3]]``]
+
+[_]{$problem_set[0]} [_]{$problem_set[1]} [_]{$problem_set[2]} [_]{$problem_set[3]}
+
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+Across a period on the periodic table, atomic size generally decreases from left to right. This happens because, as you move across a period, the number of protons in the nucleus increases, leading to a stronger positive charge. This stronger attraction pulls the electrons closer to the nucleus, resulting in a smaller atomic radius.
+
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.07%3A_Periodic_Trends-_Atomic_Radius', 'Read here if you need information on atomic radius.'); @]*
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
