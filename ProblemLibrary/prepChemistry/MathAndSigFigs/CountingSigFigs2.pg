@@ -131,6 +131,8 @@ BEGIN_PGML_HINT
 
 5. Trailing zeros in a number with a decimal point are significant. This is true whether the zeros occur before or after the decimal point.
 
+These rules apply to numbers that have limited precision.  *If a number is a counted number, meaning it is a count of whole items, then the number has infinite significant figures. *
+
 To review counting significant figures, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
 
@@ -160,4 +162,4 @@ END_PGML_SOLUTION
 
 
 
-ENDDOCUMENT();        
+ENDDOCUMENT();          
