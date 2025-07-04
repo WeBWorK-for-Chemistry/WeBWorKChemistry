@@ -5,7 +5,7 @@
 ##KEYWORDS('chemistry', 'significant', 'figures', 'sigfigs')
 
 ## Date('2/15/2021')
-## Author('Lee McPherson')
+## Author('Lee McPherson', 'Stephanie Bryan')
 ## Institution('Portland Community College')
 
 
@@ -94,6 +94,12 @@ END_PGML
 
 
 BEGIN_PGML_HINT
+
+*When solving calculations involving both multiplication/division and addition/subtraction:*
+1. *Follow Order of Operations*: Perform calculations according to parentheses, exponents, multiplication, division, addition, and subtraction. 
+2. *Track Significant Figures*: After each step identify the limiting significant figure. This is the one with the fewest significant figures (for multiplication/division) or the fewest decimal places (for addition/subtraction). 
+3. *Don't Round During Intermediate Steps*: Avoid rounding intermediate results. Instead, keep extra digits to minimize rounding errors. 
+4. *Round at the End*: Once all operations are complete, round the final answer to the correct number of significant figures based on the limiting term in the entire calculation
 
 To review how to do calculations using significant figures, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.04%3A_Significant_Figures_in_Calculations"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
