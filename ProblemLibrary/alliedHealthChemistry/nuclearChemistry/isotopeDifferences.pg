@@ -1,0 +1,109 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+);
+
+@elements = qw(Bromine Chlorine Rubidium Indium Rhenium Carbon Oxygen Uranium Hydrogen Neon Helium Iodine);
+@isotopes = ([79, 81], [35, 37], [85, 87], [113, 115], [185, 187], [12,13], [16, 17], [235,238], [1,3], [20,22], [3,4], [127,131]);
+
+my %isotopeClasses;
+@isotopeClasses{@elements} = @isotopes;
+
+# randomly pick one isotope set
+$index = random(0,$#elements);
+$problem_isotope = $elements[$index];
+
+@options1 = (
+    'neutrons',
+    'protons'
+);
+
+@options2 = (
+    'atomic number',
+    'mass number',
+    'number of neutrons'
+);
+
+@options3 = (
+    'neutrons',
+    'electrons',
+    'protons'
+);
+@selected_isotope = @{$isotopeClasses{$problem_isotope}};
+$extraNeutrons = $selected_isotope[1] - $selected_isotope[0];
+$dropdown1 = DropDown(
+    [
+        ~~@options1
+    ],
+    1,
+    placeholder => 'Choose One'
+);
+$dropdown2 = DropDown(
+    [
+        ~~@options2
+    ],
+    0,
+    placeholder => 'Choose One'
+);
+
+$dropdown3 = DropDown(
+    [
+        ~~@options3
+    ],
+    0,
+    placeholder => 'Choose One'
+);
+
+
+BEGIN_PGML
+##Isotope Differences and Similarities
+
+[$problem_isotope]-[$selected_isotope[0]] and [$problem_isotope]-[$selected_isotope[1]] are isotopes.
+
+[$problem_isotope]-[$selected_isotope[0]] has the same number of [_]{$dropdown1} as [$problem_isotope]-[$selected_isotope[1]].
+
+[$problem_isotope]-[$selected_isotope[0]] and [$problem_isotope]-[$selected_isotope[1]] have the same [_]{$dropdown2}.
+
+[$problem_isotope]-[$selected_isotope[1]] has [_]{$extraNeutrons} more [_]{$dropdown3} than [$problem_isotope]-[$selected_isotope[0]].
+
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+Atoms of the same element (i.e., same atomic number, Z) that have different numbers of neutrons are called isotopes. Most elements exist as mixtures of isotopes. In fact, there are currently over 3,500 isotopes known for all the elements. When scientists discuss individual isotopes, they need an efficient way to specify the number of neutrons in any particular nucleus. The mass number (A) of an atom is the sum of the numbers of protons and neutrons in the nucleus. Given the mass number for a nucleus (and knowing the atomic number of that particular atom), you can determine the number of neutrons by subtracting the atomic number from the mass number.
+
+A simple way of indicating the mass number of a particular isotope is to list it as a superscript on the left side of an element’s symbol. Atomic numbers are often listed as a subscript on the left side of an element’s symbol. Thus, we might see
+
+>> [``^{56}_{26}Fe\hspace{1cm}``] or [``\hspace{1cm}iron-56``] <<
+
+which indicates a particular isotope of iron. The 26 is the atomic number (which is the same for all iron atoms), while the 56 is the mass number of the isotope. To determine the number of neutrons in this isotope, we subtract 26 from 56: 56 − 26 = 30, so there are 30 neutrons in this atom.
+
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.04%3A_The_Nuclei_of_Atoms', 'Read here if you need information on isotopes'); @]*
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+
