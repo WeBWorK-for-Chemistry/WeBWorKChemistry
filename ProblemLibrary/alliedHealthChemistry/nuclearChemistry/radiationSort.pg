@@ -1,0 +1,99 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+# Try to only load the macro files that are needed.
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+);
+
+@alpha = ("Consists of helium nuclei (2 protons and 2 neutrons)", "Positively charged", "Ability to penetrate materials is very low", "Easily stopped by a sheet of paper", "Hazardous if inhaled or ingested, as it can cause significant damage to internal organs");
+@beta = ("Consists of high-energy electrons", "Negatively charged", "Ability to penetrate materials is moderate.", "Can penetrate a few millimeters of aluminum or skin", "Can cause skin burns and internal damage if absorbed in *large* quantities");
+@gamma = ("Consists of electromagnetic radiation (photons)","Has no charge", "Ability to penetrate materials is high", "Can penetrate several centimeters of lead or several feet of concrete.", "Can easily penetrate the body and damage internal organs");
+
+
+%radiationClasses = (
+    (map {$_ => 'alpha'} @alpha),
+    (map {$_ => 'beta'} @beta),
+    (map {$_ => 'gamma'} @gamma),
+);
+
+# randomly pick two of each type
+@alpha_choice = random_subset(2, @alpha);
+@beta_choice = random_subset(2, @beta);
+@gamma_choice = random_subset(2, @gamma);
+
+
+# merge them and randomize order:
+@properties = random_subset(6,
+    @alpha_choice,
+    @beta_choice,
+    @gamma_choice,
+);
+
+@options = (
+    'alpha',
+    'beta',
+    'gamma'
+);
+
+# DropDown is better than PopUp. You don't do something like include a '?'
+# in the list. Instead, there is the placeholder option.
+# This uses map again to create the 8 dropdowns directly from the 8 elements.
+@dropdown = map {
+    DropDown(
+        ~~@options,
+        $radiationClasses{$_},
+        placeholder => 'Choose One'
+    )
+} @properties;
+
+BEGIN_PGML
+##Alpha, Beta or Gamma
+
+Which type of radiation exhibits each of the properties listed. Choose the best answer in the dropdown menu next to that property.
+
+
+a. [_]{$dropdown[0]} [$properties[0]]
+
+a. [_]{$dropdown[1]} [$properties[1]]
+
+a. [_]{$dropdown[2]} [$properties[2]]
+
+a. [_]{$dropdown[3]} [$properties[3]]
+
+a. [_]{$dropdown[4]} [$properties[4]]
+
+a. [_]{$dropdown[5]} [$properties[5]]
+
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+
+[@ htmlLink('https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Introductory_Chemistry_(LibreTexts)/17%3A_Radioactivity_and_Nuclear_Chemistry/17.03%3A_Types_of_Radioactivity-_Alpha_Beta_and_Gamma_Decay', 'Read here if you need information on the properties of alpha, beta, and gamma radiation'); @]*
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+
