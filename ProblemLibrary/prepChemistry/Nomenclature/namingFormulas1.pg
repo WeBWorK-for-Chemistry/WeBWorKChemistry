@@ -269,16 +269,41 @@ for (0..13) {
 
 for (0..13) {
     $a = $numbers5[$_];
- #   $finalans[$_] = $answ[$a];
     $finalans[$_] = Compute($answ[$a])->cmp(
             checker => sub {
-               my ($correct,$student,$ans) = @_;
-               $correct = lc($correct->string);
-               $student = lc($student->string); #changes both correct and student to                      # lowercase to compare so case doesn't matter
-               $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
-               # the previous regex removes leading and trailing whitespace
-               if ($student =~ s/~~s~~(i//) { 
+                my ($correct,$student,$ans) = @_;
+                $correct = lc($correct->string);
+                $student = lc($student->string); #changes both correct and student to lowercase to 
+                                                #compare so case doesn't matter
+
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+
+                # check that space is not between roman numeral and cation name
+                if ($student =~ s/~~s~~(i//) { 
                     $ans->{ans_message} = "Do not put a space between the cation name and the roman numeral.";}
+                
+                 # if aluminum or aluminium is correctly entered
+                if ($correct =~ m/aluminum/ && ($student =~ m/aluminium/ || $student =~ m/aluminum/) ) {
+                    $student =~ s/aluminium/aluminum/;
+                    $ans->{ans_message} = "Either aluminium or aluminum are correct spellings for Al";}
+                
+                # if sulphur or sulfur is correctly entered
+                if ($correct =~ m/sulfur/ && ($student =~ m/sulfur/ || $student =~ m/sulphur/) ) { 
+                    $student =~ s/sulphur/sulfur/;
+                    $ans->{ans_message} = "Either sulfur or sulphur are correct spellings for S in the first position of a binary covalent compound";}
+
+                 # if sulphide or sulfide is correctly entered
+                if ($correct =~ m/sulfide/ && ($student =~ m/sulfide/ || $student =~ m/sulphide/) ) {
+                    $student =~ s/sulphide/sulfide/;
+                    $ans->{ans_message} = "Either sulfide or sulphide are correct spellings for S in the anion position of a compound";}
+
+                if ($student ne $correct) {
+                    $ans->{ans_message} = "Check spelling of the elements on an official periodic table and check that all prefixes are correct.";
+                    if ($student !~ m/^(.*)(ite|ide|ate)$/) {
+                    $ans->{ans_message} = "Check the ending on the name of the second element or groups of elements.";
+                }
+                }
                return $correct eq $student;
             });
     $fformula[$_] = $formula[$a];
