@@ -44,7 +44,19 @@ for (0..3) {
     $randomized_set[$_] = $problem_set[$numbers[$_]];
 }
 
+$ans = Compute($problem_set[0])->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                #$correct = $correct->string;
+               # $student = $student->string; 
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
 
+                
+                if ($student eq $problem_set[3]) { 
+                    $ans->{ans_message} = "Be sure to order with the smallest atom first.";}
+               return $correct eq $student;
+            });
 BEGIN_PGML
 ##Atomic Size - Across a Period
 
@@ -52,7 +64,7 @@ Put the following in order from smallest to largest.
 
 [``[$randomized_set[0]], [$randomized_set[1]], [$randomized_set[2]], [$randomized_set[3]]``]
 
-[_]{$problem_set[0]} [_]{$problem_set[1]} [_]{$problem_set[2]} [_]{$problem_set[3]}
+[_]{$ans} [_]{$problem_set[1]} [_]{$problem_set[2]} [_]{$problem_set[3]}
 
 END_PGML
 
