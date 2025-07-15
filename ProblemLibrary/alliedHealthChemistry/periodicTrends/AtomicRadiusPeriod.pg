@@ -47,11 +47,9 @@ for (0..3) {
 $ans = Compute($problem_set[0])->cmp(
             checker => sub {
                 my ($correct,$student,$ans) = @_;
-                #$correct = $correct->string;
-               # $student = $student->string; 
+
                 #remove leading and trailing whitespace
                 $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
-
                 
                 if ($student eq $problem_set[3]) { 
                     $ans->{ans_message} = "Be sure to order with the smallest atom first.";}
