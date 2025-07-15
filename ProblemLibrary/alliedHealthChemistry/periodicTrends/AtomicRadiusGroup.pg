@@ -1,0 +1,79 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+  "contextArbitraryString.pl",
+);
+
+Context("ArbitraryString");
+@sets = ([qw(Li Na K Rb)], [qw(Be Mg Ca Sr)], [qw(Sc Y La Ac)], [qw(B Al Ga In)], [qw(C Si Ge Sn)], [qw(N P As Sb)], [qw(O S Se Te)], [qw(F Cl Br I)]);
+
+
+# randomly pick one isotope set
+$index = random(0,$#sets);
+
+@problem_set = ($sets[$index]->[0], $sets[$index]->[1], $sets[$index]->[2], $sets[$index]->[3]) ;
+
+my @numbers;
+my %unique;
+
+for (0..3) {
+    my $number = random(0,3);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+for (0..3) {
+    $randomized_set[$_] = $problem_set[$numbers[$_]];
+}
+$ans = Compute($problem_set[0])->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_; 
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                if ($student eq $problem_set[3]) { 
+                    $ans->{ans_message} = "Be sure to order with the smallest atom first.";}
+               return $correct eq $student;
+            });
+
+BEGIN_PGML
+##Atomic Size - Down a Group
+
+Put the following in order from smallest to largest.
+
+[``[$randomized_set[0]], [$randomized_set[1]], [$randomized_set[2]], [$randomized_set[3]]``]
+
+[_]{$ans} [_]{$problem_set[1]} [_]{$problem_set[2]} [_]{$problem_set[3]}
+
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+Down a group in the periodic table, atomic radius generally increases. This is because as you move down a group, the number of electron shells (energy levels) increases. More electron shells mean the outermost electrons are further away from the nucleus, resulting in a larger atomic radius. While the nuclear charge also increases down a group, the effect of added electron shells is more significant in determining the atomic radius.
+
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.07%3A_Periodic_Trends-_Atomic_Radius', 'Read here if you need information on atomic radius.'); @]*
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
