@@ -1,0 +1,130 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "parserRadioButtons.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextArbitraryString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+
+$dropdown1 = DropDown([ 
+    [ "remove an electron", "break a bond", "move an electron to a higher energy state", "add an electron" ] ],
+    0,
+    placeholder => 'Choose One');
+
+$dropdown2 = DropDown([ 
+    [ "positive", "negative"] ],
+    0,
+    placeholder => 'Choose One');
+
+$dropdown3 = DropDown([ 
+    [ "increases", "decreases", "doesn't change"] ],
+    0,
+    placeholder => 'Choose One');
+
+$dropdown4 = DropDown([ 
+    [ "increases", "decreases", "doesn't change"] ],
+    1,
+    placeholder => 'Choose One');
+
+@elements = qw(H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar);
+@element_names = qw(hydrogen helium lithium beryllium boron carbon nitrogen oxygen fluorine neon sodium magnesium aluminum silicon phosphorus sulfur chlorine argon);
+
+$num = random(0,$#elements);
+$element = $elements[$num];
+$element_name = $element_names[$num];
+
+$radio1 = RadioButtons(
+  ["\($element^{+}(g) + e^{-} \rightarrow $element(s)\)",
+   "\($element(g) \rightarrow $element^{+}(g) + e^{-}\)",
+   "\($element(g) + e^{-} \rightarrow $element^{-}(g)\)",
+   "\($element^{+}(g) → $element^{2+}(g) + e^{-}\)"],
+ 1 # correct answer
+    
+);
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Ionization Energy
+
+Ionization Energy is the energy required to [__]{$dropdown1}.  Ionization Energies are always [__]{$dropdown2} numbers. Going across a period left to right on the periodic table, the ionization energy of the atoms [__]{$dropdown3} and going down a group on the periodic table, the ionization energy [__]{$dropdown4}.
+
+Which of the following chemical equations correctly represents the first ionization energy of a neutral [$element_name] atom?
+    [__]{$radio1}
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+Ionization energy is the energy required to remove an electron from a specific atom. It is measured in  kJ/mol, which is an energy unit, much like calories.
+
+Moving from left to right across the periodic table, the number of protons in the nucleus increases and causes a stronger the attraction of the nucleus to electrons. This stronger attraction makes it more difficult to remove electrons. How would this affect the value of the ionization energy?
+
+Within a group, the size of the atom gets larger as we move down the group. In this situation, the first electron removed is farther from the nucleus as the atomic number (number of protons) increases. Being farther away from the positive attraction makes it easier for that electron to be pulled off. How would this affect the value of the ionization energy?
+
+For more information on Ionization Energy, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.08%3A_Periodic_Trends-_Ionization_Energy"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+
