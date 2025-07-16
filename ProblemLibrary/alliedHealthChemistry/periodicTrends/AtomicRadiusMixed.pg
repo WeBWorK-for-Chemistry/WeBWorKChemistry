@@ -54,7 +54,7 @@ $ans = Compute($problem_set[0])->cmp(
             });
 
 BEGIN_PGML
-##Atomic Size - Down a Group
+##Atomic Size
 
 Put the following in order from smallest to largest.
 
