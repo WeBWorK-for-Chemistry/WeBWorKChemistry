@@ -16,7 +16,7 @@ loadMacros(
   "niceTables.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
-#  "parserDimensionalAnalysis.pl",
+  "parserDimensionalAnalysis.pl",
    "parserMultiAnswer.pl",
 );
 ############################################################
@@ -29,7 +29,7 @@ HEADER_TEXT(<<EOF);
     align-items: center;
     flex-wrap: wrap;
     margin-top: -30px;
-    justify-content: space-evenly;
+    justify-content: center;
   }
   .conversionEQ > div {
     text-align: center;
@@ -124,13 +124,23 @@ $v = random(100.0, 800.0, 0.1);
 $volume = InexactValueWithUnits([$v,4], mL);
 $m1 = random(1.00, 9.99, 0.01);
 $masskg = InexactValueWithUnits([$m1,3],kg);
+$given = $masskg;
 $mass = InexactValueWithUnits([$m1*1000,3], g);
 $answer = $mass/$volume;
 
+
+# convert to g from kg
+$n1 = InexactValueWithUnits(['1000', 9**9**9], 'g'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+$d1 = InexactValueWithUnits(['1', 9**9**9], 'kg');
+
+$answer = $given * $n1 / $d1;
+
+ANS($n1->cmp);
+ANS($d1->cmp);
+ANS($mass->cmp);
 ANS($mass->cmp);
 ANS($volume->cmp);
 ANS($answer->cmp);
-
 
 ##############################################
 
@@ -139,7 +149,12 @@ BEGIN_PGML
 
  Find the density in[`\mathrm{\frac{g}{mL}}`] of an object that has a mass of [$masskg] and a volume of [$volume]?
 
-First find the mass in grams of the solution and place that value with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers.
+First find the mass in grams of the solution. 
+
+[@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+
+
+Place the answer from above into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. Note: mL has a capital L.
 
 
 [@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
@@ -156,9 +171,11 @@ END_PGML
 
 BEGIN_PGML_HINT
 
+1. Check that your solution displays all the numbers with the correct sig figs. For example if you need to display 2700 g as a number with 3 sig figs, it must be written as [``2.70 \times 10^3``].
 
+2. Don't forget to put units in your answer.
 
-For more information on density, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Introductory_Chemistry_(LibreTexts)/02%3A_Measurement_and_Problem_Solving/2.09%3A_Density"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+For more information on calculating density, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Introductory_Chemistry_(LibreTexts)/02%3A_Measurement_and_Problem_Solving/2.09%3A_Density"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
 
 
@@ -177,4 +194,3 @@ BEGIN_PGML_SOLUTION
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
-
