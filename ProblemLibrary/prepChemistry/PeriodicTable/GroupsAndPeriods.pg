@@ -139,6 +139,45 @@ Context("ArbitraryString");
 );
 
 @group = (map {$elementClasses{$_}} @elements);
+foreach (0..7) {
+    $symbols[$_] = Compute($elements[$_]{symbol})->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                $lower = lc($correct->string);
+                 #changes both correct to lowercase to compare to student
+                if ($student eq $lower) {
+                    $ans->{ans_message} = "Make sure your capitalization is correct.";
+                }
+
+                return $correct eq $student;
+                }
+            )
+}
+foreach (0..7) {
+    $a = $_+8;
+    $names[$_] = Compute($elements[$a]{name})->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                $correct = lc($correct->string);
+                $student = lc($student->string); #changes both correct and student to lowercase to 
+                                                #compare so case doesn't matter
+
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                
+                 # if aluminum or aluminium is correctly entered
+                if ($correct =~ m/aluminum/ && ($student =~ m/aluminium/ || $student =~ m/aluminum/) ) {
+                    $student =~ s/aluminium/aluminum/;
+                    $ans->{ans_message} = "Either aluminium or aluminum are correct spellings for Al";}
+                
+                # if sulphur or sulfur is correctly entered
+                if ($correct =~ m/sulfur/ && ($student =~ m/sulfur/ || $student =~ m/sulphur/) ) { 
+                    $student =~ s/sulphur/sulfur/;
+                    $ans->{ans_message} = "Either sulfur or sulphur are correct spellings for S";}
+                return $correct eq $student;
+                }
+            )
+}
 
 ##############################################
 
@@ -154,18 +193,18 @@ Write the *chemical symbol* for each element below based on their group number a
 [#
     [.
         [#
-            [.Group [$group[0]], [$elements[0]{period}] period.] [.[_]{$elements[0]{symbol}}.]*
-            [.Group [$group[1]], [$elements[1]{period}] period.] [.[_]{$elements[1]{symbol}}.]*
-            [.Group [$group[2]], [$elements[2]{period}] period.] [.[_]{$elements[2]{symbol}}.]*
-            [.Group [$group[3]], [$elements[3]{period}] period.] [.[_]{$elements[3]{symbol}}.]*
+            [.Group [$group[0]], [$elements[0]{period}] period.] [.[_]{$symbols[0]}.]*
+            [.Group [$group[1]], [$elements[1]{period}] period.] [.[_]{$symbols[1]}.]*
+            [.Group [$group[2]], [$elements[2]{period}] period.] [.[_]{$symbols[2]}.]*
+            [.Group [$group[3]], [$elements[3]{period}] period.] [.[_]{$symbols[3]}.]*
         #]
     .]
     [.
         [#
-            [.Group [$group[4]], [$elements[4]{period}] period.] [.[_]{$elements[4]{symbol}}.]*
-            [.Group [$group[5]], [$elements[5]{period}] period.] [.[_]{$elements[5]{symbol}}.]*
-            [.Group [$group[6]], [$elements[6]{period}] period.] [.[_]{$elements[6]{symbol}}.]*
-            [.Group [$group[7]], [$elements[7]{period}] period.] [.[_]{$elements[7]{symbol}}.]*
+            [.Group [$group[4]], [$elements[4]{period}] period.] [.[_]{$symbols[4]}.]*
+            [.Group [$group[5]], [$elements[5]{period}] period.] [.[_]{$symbols[5]}.]*
+            [.Group [$group[6]], [$elements[6]{period}] period.] [.[_]{$symbols[6]}.]*
+            [.Group [$group[7]], [$elements[7]{period}] period.] [.[_]{$symbols[7]}.]*
         #]
     .]
 
@@ -176,18 +215,18 @@ Write the *chemical name* for each element below based on their group number and
 [#
     [.
         [#
-            [.Group [$group[8]], [$elements[8]{period}] period.] [.[_]{$elements[8]{name}}.]*
-            [.Group [$group[9]], [$elements[9]{period}] period.] [.[_]{$elements[9]{name}}.]*
-            [.Group [$group[10]], [$elements[10]{period}] period.] [.[_]{$elements[10]{name}}.]*
-            [.Group [$group[11]], [$elements[11]{period}] period.] [.[_]{$elements[11]{name}}.]*
+            [.Group [$group[8]], [$elements[8]{period}] period.] [.[_]{$names[0]}.]*
+            [.Group [$group[9]], [$elements[9]{period}] period.] [.[_]{$names[1]}.]*
+            [.Group [$group[10]], [$elements[10]{period}] period.] [.[_]{$names[2]}.]*
+            [.Group [$group[11]], [$elements[11]{period}] period.] [.[_]{$names[3]}.]*
         #]
     .]
     [.
         [#
-            [.Group [$group[12]], [$elements[12]{period}] period.] [.[_]{$elements[12]{name}}.]*
-            [.Group [$group[13]], [$elements[13]{period}] period.] [.[_]{$elements[13]{name}}.]*
-            [.Group [$group[14]], [$elements[14]{period}] period.] [.[_]{$elements[14]{name}}.]*
-            [.Group [$group[15]], [$elements[15]{period}] period.] [.[_]{$elements[15]{name}}.]*
+            [.Group [$group[12]], [$elements[12]{period}] period.] [.[_]{$names[4]}.]*
+            [.Group [$group[13]], [$elements[13]{period}] period.] [.[_]{$names[5]}.]*
+            [.Group [$group[14]], [$elements[14]{period}] period.] [.[_]{$names[6]}.]*
+            [.Group [$group[15]], [$elements[15]{period}] period.] [.[_]{$names[7]}.]*
         #]
     .]
 
@@ -215,3 +254,4 @@ END_PGML_HINT
 #END_PGML_SOLUTION
 
 ENDDOCUMENT();
+
