@@ -44,9 +44,9 @@ Context()->flags->set(
 );
 # It seemed like a good idea to logically group the reactions
 # with meaningful names
-@alpha_decay = ("^{238}_{92}U \rightarrow ^{4}_{2}He + ^{234}_{90}Th", "^{230}_{90}Th \rightarrow ^{4}_{2}He + ^{226}_{88}Ra", "^{210}_{86}Rn \rightarrow ^{206}_{84}Po + ^{4}_{2}He");
-@beta_decay = ("^{203}_{80}Hg \rightarrow ^{203}_{81}Tl + ^{0}_{-1}e", "^{234}_{90}Th \rightarrow  ^{0}_{-1}e + ^{234}_{91}Pa", "^{14}_{6}C \rightarrow  ^{0}_{-1}e + ^{14}_{7}N");
-@gamma_decay = ("^{125}_{53}I^{*} \rightarrow ^{125}_{53}I + ^{0}_{0}\gamma", "^{60}_{27}Co^{*} \rightarrow ^{60}_{27}Co + ^{0}_{0}\gamma", "^{99}_{43}Tc^{*} \rightarrow ^{99}_{43}Tc + ^{0}_{0}\gamma");
+@alpha_decay = ("^{238}_{92}U \rightarrow\: ^{4}_{2}He + ^{234}_{90}Th", "^{230}_{90}Th \rightarrow\: ^{4}_{2}He + ^{226}_{88}Ra", "^{210}_{86}Rn \rightarrow\: ^{206}_{84}Po + ^{4}_{2}He");
+@beta_decay = ("^{203}_{80}Hg \rightarrow\: ^{203}_{81}Tl + ^{\:\:0}_{-1}e", "^{234}_{90}Th \rightarrow\:  ^{\:\:0}_{-1}e + ^{234}_{91}Pa", "^{14}_{6}C \rightarrow\: ^{\:\:0}_{-1}e + ^{14}_{7}N");
+@gamma_decay = ("^{125}_{53}I^{*} \rightarrow\: ^{125}_{53}I + ^{0}_{0}\gamma", "^{60}_{27}Co^{*} \rightarrow\: ^{60}_{27}Co + ^{0}_{0}\gamma", "^{99}_{43}Tc^{*} \rightarrow\: ^{99}_{43}Tc + ^{0}_{0}\gamma");
 
 
 %reactionClasses = (
