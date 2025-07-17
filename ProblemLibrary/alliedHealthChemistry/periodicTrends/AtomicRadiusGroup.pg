@@ -43,15 +43,35 @@ for (0..3) {
 for (0..3) {
     $randomized_set[$_] = $problem_set[$numbers[$_]];
 }
-$ans = Compute($problem_set[0])->cmp(
+$ans[0] = Compute($problem_set[0])->cmp(
             checker => sub {
                 my ($correct,$student,$ans) = @_; 
                 #remove leading and trailing whitespace
                 $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                $lower = lc($correct->string);
+                 #changes correct to lowercase to compare to student
+                if ($student eq $lower) {
+                    $ans->{ans_message} = "Make sure your capitalization is correct.";
+                }
                 if ($student eq $problem_set[3]) { 
                     $ans->{ans_message} = "Be sure to order with the smallest atom first.";}
                return $correct eq $student;
             });
+
+foreach (1..3) {
+    $ans[$_] = Compute($problem_set[$_])->cmp(
+                checker => sub {
+                    my ($correct,$student,$ans) = @_; 
+                    #remove leading and trailing whitespace
+                    $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                    $lower = lc($correct->string);
+                    #changes correct to lowercase to compare to student
+                    if ($student eq $lower) {
+                    $ans->{ans_message} = "Make sure your capitalization is correct.";
+                }
+                    return $correct eq $student;
+            });
+}
 
 BEGIN_PGML
 ##Atomic Size - Down a Group
@@ -60,7 +80,7 @@ Put the following in order from smallest to largest.
 
 [``[$randomized_set[0]], [$randomized_set[1]], [$randomized_set[2]], [$randomized_set[3]]``]
 
-[_]{$ans} [_]{$problem_set[1]} [_]{$problem_set[2]} [_]{$problem_set[3]}
+[_]{$ans[0]} [_]{$ans[1]} [_]{$ans[2]} [_]{$ans[3]}
 
 END_PGML
 
