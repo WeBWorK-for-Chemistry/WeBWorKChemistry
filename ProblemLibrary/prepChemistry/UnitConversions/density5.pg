@@ -141,7 +141,11 @@ BEGIN_PGML
 
 An empty beaker has a mass of [$mass1]. You add [$volume] of solution, and the beaker now has a mass of [$mass2]. What is the density of your solution in [`\mathrm{\frac{g}{mL}}`]?
 
-First find the mass in grams of the solutions and place that value with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers.
+First find the mass in grams of the solution by subtracting the mass of the beaker.
+
+>> [``\mathrm{mass\:of\:the\:solution} = [$mass2] - [$mass1] = ``][__]{$mass} <<
+
+Place the answer above with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. Note: mL has a capital L.
 
 
 [@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
@@ -158,7 +162,9 @@ END_PGML
 
 BEGIN_PGML_HINT
 
+1. Make sure that you are using the addition/subtraction rules for sig figs in the first part of the problem.
 
+2. Make sure all units are included and properly capitalized. mL has a capital L.
 
 For more information on density, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Introductory_Chemistry_(LibreTexts)/02%3A_Measurement_and_Problem_Solving/2.09%3A_Density"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
