@@ -1,0 +1,199 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+HEADER_TEXT(<<EOF);
+  <style>
+  .conversionEQ {
+    display: flex;
+    align-items: center;
+  }
+  .conversionEQ > div {
+    text-align: center;
+  }
+  .conversionFractionBar {
+  line-height: 1px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 4px;
+  }
+  .conversionEQmath {
+    padding: 1em;
+  }
+  </style>  
+EOF
+
+##############################################
+
+sub conversionEQ {
+  my $start = shift;
+  my $colsref = shift;
+  my $n = scalar @{$colsref};
+  my $end = shift;
+  my $html;
+  $html .= '<div class="conversionEQ">';
+    $html .= '<div>';
+      $html .= $start;
+    $html .= '</div>';
+    for ($i=0; $i < $n; $i+=2) {
+      $html .= '<div class="conversionEQmath">';
+         $html .= math_ev3('\times');
+      $html .= '</div>';
+      $html .= '<div class="conversionEQcol">';
+         $html .= '<div>';
+             $html .= $colsref->[$i];
+         $html .= '</div>';       
+         $html .= '<div class="conversionFractionBar">';
+             $html .= '<svg height="1" width="40">';
+                 $html .= '<desc>per</desc>';
+             $html .= '</svg>';
+         $html .= '</div>';       
+         $html .= '<div>';
+             $html .= $colsref->[$i+1];
+         $html .= '</div>';       
+      $html .= '</div>';
+  }
+  $html .= '<div  class="conversionEQmath">';
+      $html .= math_ev3('{}={}');
+  $html .= '</div>';
+  $html .= '<div>';
+      $html .= $end;
+  $html .= '</div>';
+  $html .= '</div>';
+  MODES(HTML=>$html);
+}
+
+install_weighted_grader();
+
+Context("Numeric");
+
+$m = random(30.0, 70.0, 0.1);
+
+Context("InexactValueWithUnits");
+
+$given = InexactValueWithUnits( sprintf('%.1f',$m), 'g');
+$correct = sprintf('%.1f',$m)/1000;
+$incorrect = sprintf('%.1f',$m)*1000;
+
+# using density as a conversion factor
+$n1 = InexactValueWithUnits(['1', 9**9**9], 'kg'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+$d1 = InexactValueWithUnits(['1000', 9**9**9], 'g');
+
+$answer = $given * $n1 / $d1;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Unit Conversion - What to Check When Your Answer is Incorrect
+
+Here is a sample conversion problem. Please read all of the text. This will help you troubleshoot any incorrect answers and minimize your frustration. 
+
+Convert [$given] of carbon tetrachloride to kilograms of carbon tetrachloride.  
+
+[@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+
+You may know how to solve this problem already but some time in your work, you will likely get feedback that something you entered is incorrect. How can you interpret this to help you?
+
+Do not randomly try and put any answer in to get the problem correct. This homework is trying to help you learn. There is a systematic way that WeBWorK is grading and you can use this systematic grading to your advantage. You can apply the scientific method to your homework problem solving. 
+
+* Try putting in the following answers and clicking the Check Answers button:
+
+[```[$given] \times \frac{1000g}{1kg} = [$answer] ```]
+
+    You should see that both the numerator and denominator is marked incorrect but the answer is correct. If you left click on the green check mark with the yellow circle you will see the following meassage: Your dimensional analysis returns this value: [$incorrect] g^2/kg. This is telling you that, even though you entered the correct answer, the work you entered doesn't produce this answer. You can use this to see what is incorrect about your solution. Here it is that the conversion factor is inverted. Try inverting the conversion factor and click the Check Answers button. You should see all green check marks indicating a correct answer and soluion. 
+
+* Now try putting in the word kilogram instead of kg or the word grams instead of g. WeBWorK allows all these inputs. If it tells you there is a mistake, be sure to check your spelling and capitalization. Remember kilograms is abbrievated kg and not Kg. Milliliters is abbrieviated mL and not ml. WeBWorK will count this spelling and capitalization incorrect. This is because these answers are incorrect. The feedback is available to help you know the correct answer. 
+
+* Now try and input something unexpected into one of the blanks. For example put [``[$correct]^{kg}``] into the final answer blank. Notice that you are to put kg in as a superscript in the answer. You can use the ^ key to do this or use the pop up buttons. Click the Check Answer button. This should give you the following message in red:
+
+    Warning: There may be something wrong with this question. Please inform your instructor including the warning messages below.
+
+    This message comes up most often when WeBWorK recieves an answer that is really unexpected (like having units as a superscript). You can click the Email Instructor button and they can troubleshoot this for you but it is strongly suggested to look at your solution and check for anything like this before doing so. Once you fix this and click Check Answers again this message will go away. 
+
+* If you receive partial credit on any answer this is nearly always an issue with the units or with the significant figures in your solution. Go back and check that you followed the correct sig fig rules and that your units are present and formatted correctly.
+
+Hopefully this helps you solve some of the problems you might encounter when doing your homework. If you find yourself randomly guess to get the correct answer, please email your instructor for help. Just like you wouldn't randomly perform any science experiement to solve a science question, don't randomly guess to solve your homework problems. 
+
+Before going to the next problem, make sure that you put in the correct answer for the problem at the top and click Check Answers:
+
+[```[$given] \times \frac{1kg}{1000g} = [$answer] ```]
+
+END_PGML
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+BEGIN_TEXT
+
+END_TEXT
+
+BEGIN_PGML_HINT
+
+The general steps in performing dimensional analysis
+
+1.  Identify the "given" information in the problem. Look for a number with units to start this problem with.
+2.  What is the problem asking you to "find"? In other words, what unit will your answer have?
+3.  Use conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
+4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
+
+
+For more information on unit conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemistry_I_(Southeast)/2%3A_Measurement_and_Problem_Solving/2.5%3A_Problem_Solving_and_Unit_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
