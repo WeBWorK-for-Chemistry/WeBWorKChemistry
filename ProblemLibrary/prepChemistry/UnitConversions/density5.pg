@@ -128,7 +128,7 @@ $mass1 = InexactValueWithUnits([$m1,5], g);
 $mass2 = InexactValueWithUnits([$m2,5], g);
 $mass = $mass2 - $mass1;
 $answer = $mass/$volume;
-
+ANS($mass->cmp);
 ANS($mass->cmp);
 ANS($volume->cmp);
 ANS($answer->cmp);
@@ -143,7 +143,7 @@ An empty beaker has a mass of [$mass1]. You add [$volume] of solution, and the b
 
 First find the mass in grams of the solution by subtracting the mass of the beaker.
 
->> [``\mathrm{mass\:of\:the\:solution} = [$mass2] - [$mass1] = ``][__]{$mass} <<
+>> [``\mathrm{mass\:of\:the\:solution} = [$mass2] - [$mass1] = ``][@ ans_rule(6) @]* <<
 
 Place the answer above with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. Note: mL has a capital L.
 
