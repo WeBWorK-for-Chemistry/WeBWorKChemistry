@@ -128,9 +128,11 @@ $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given]
 TEXT(beginproblem());
 
 BEGIN_PGML
-##Unit Conversion
+## Unit Conversion - Units Raised to a Power
 
-Convert [``[$m]\ cm^{3}``] to [``m^{3}``].  
+The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. Remember to look at the units to know which conversion factor to use. For units raised to a power, you will need to use the conversion factor the number of times in that power.
+
+#### Convert [``[$m]\ cm^{3}``] to [``m^{3}``].  
 
 Use the fact that 100 cm = 1 m.  You may need to use this conversion factor more than once in this problem.  Make sure that you understand how the units are cancelling.
 
@@ -164,6 +166,7 @@ The general steps in performing dimensional analysis
 3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
 4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
 
+Please Note: If you get feedback that the answer is fractionally correct you likely have issues with significant figures in your answer. The conversion factor is considered incorrect unless both the numerator and denominator is scored as correct. If one of these is incorrect look at the entire conversion factor for corrections.
 
 For more information on multistep unit conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.07%3A_Solving_Multistep_Conversion_Problems"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
@@ -180,5 +183,3 @@ BEGIN_PGML_SOLUTION
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
-
-
