@@ -121,9 +121,11 @@ TEXT(beginproblem());
 BEGIN_PGML
 ##Unit Conversion - One Step
 
-There are 0.6214 miles (mi) in one kilometer (km). Place the conversion factor in the problem and report the answer with correct significant figures and units.  If you get feedback that the answer is fractionally correct you likely have issues with significant figures in your answer.  Use appropriate abbreviations for units.
+The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factor into the problem. Remember to look at the units to know which conversion factor to use.
 
 ####Convert [`[$given->TeX]`] to kilometers. 
+
+There are 0.6214 miles (mi) in one kilometer (km). 
 
 [@conversionEQ('$$'. $given->TeX . '$$',[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
  
@@ -157,6 +159,7 @@ The general steps in performing dimensional analysis
 3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
 4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
 
+Please Note: If you get feedback that the answer is fractionally correct you likely have issues with significant figures in your answer. The conversion factor is considered incorrect unless both the numerator and denominator is scored as correct. If one of these is incorrect look at the entire conversion factor for corrections.
 
 For more information on unit conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemistry_I_(Southeast)/2%3A_Measurement_and_Problem_Solving/2.5%3A_Problem_Solving_and_Unit_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
@@ -173,5 +176,3 @@ BEGIN_PGML_SOLUTION
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
-
-
