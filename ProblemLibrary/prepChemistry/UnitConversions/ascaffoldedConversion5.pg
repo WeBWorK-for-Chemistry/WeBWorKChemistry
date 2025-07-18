@@ -158,7 +158,7 @@ $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given]
 TEXT(beginproblem());
 BEGIN_PGML
 
-## A Scaffolded Conversion Problem
+## Scaffolded Conversion Problem
 
 This problem has 3 steps. Once you get a step correct the next step will open.
 
@@ -252,10 +252,7 @@ Scaffold::End();
 
 
 ##############################################
-BEGIN_TEXT
-$PAR
-If you don't get this in $showHint tries, you can get a hint.
-END_TEXT
+
 
 BEGIN_PGML_HINT
 
