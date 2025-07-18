@@ -46,8 +46,9 @@ TEXT(beginproblem());
 BEGIN_PGML
 ##Unit Conversion - Temperature - Celcius to Kelvin
 
+Convert the following temperature. Remember that temperature conversions use both multiplication/division and addition/subtraction so you will need to use the correct sig fig rules when doing these calculations.
 
-What is the temperature in Kelvin of a substance at [$given] [``^\circ C``].
+####What is the temperature in Kelvin of a substance at [$given] [``^\circ C``].
 
 [$given] [``^\circ C``] = [_________]{$degK} K
 
@@ -77,5 +78,6 @@ To convert from Celsius to Kelvin,
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
+
 
 
