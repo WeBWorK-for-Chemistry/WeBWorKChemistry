@@ -134,28 +134,32 @@ $n1 = InexactValueWithUnits(['1000', 9**9**9], 'g'); # make this exact (infinite
 $d1 = InexactValueWithUnits(['1', 9**9**9], 'kg');
 
 $answer = $given * $n1 / $d1;
+$answer_units = InexactValueWithUnits([$answer, 3], 'g/mL');
 
 ANS($n1->cmp);
 ANS($d1->cmp);
 ANS($mass->cmp);
 ANS($mass->cmp);
 ANS($volume->cmp);
-ANS($answer->cmp);
+ANS($answer_units->cmp);
 
 ##############################################
 
 BEGIN_PGML
-##Density
+## Density
 
- Find the density in[`\mathrm{\frac{g}{mL}}`] of an object that has a mass of [$masskg] and a volume of [$volume]?
+The following problem has two steps. First complete the conversion from kg to g and then use this result to find the density.
+
+#### Find the density in[`\mathrm{\frac{g}{mL}}`] of an object that has a mass of [$masskg] and a volume of [$volume]?
 
 First find the mass in grams of the solution. 
 
 [@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
 
 
-Place the answer from above into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. Note: mL has a capital L.
+Second, place the answer from above into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. 
 
+Note: mL has a capital L. Also check the format of your final answer. It should be formatted like this [`\mathrm{number\frac{g}{mL}}`], not [`\mathrm{\frac{number\:g}{mL}}`]. 
 
 [@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
 [@ MODES(HTML=>'  `\text{density  =  }``\frac{\text{mass}}{\text{volume}} = `') @]*
