@@ -137,15 +137,19 @@ ANS($answer->cmp);
 ##############################################
 
 BEGIN_PGML
-##Density
+## Density
 
-An empty beaker has a mass of [$mass1]. You add [$volume] of solution, and the beaker now has a mass of [$mass2]. What is the density of your solution in [`\mathrm{\frac{g}{mL}}`]?
+The following problem has two steps. First find the mass by taking the difference and then use this result to find the density.
+
+#### An empty beaker has a mass of [$mass1]. You add [$volume] of solution, and the beaker now has a mass of [$mass2]. What is the density of your solution in [`\mathrm{\frac{g}{mL}}`]?
 
 First find the mass in grams of the solution by subtracting the mass of the beaker.
 
 >> [``\mathrm{mass\:of\:the\:solution} = [$mass2] - [$mass1] = ``][@ ans_rule(6) @]* <<
 
-Place the answer above with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. Note: mL has a capital L.
+Second, place the answer above with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. 
+
+Note: mL has a capital L. Also check the format of your final answer. It should be formatted like this [`\mathrm{number\frac{g}{mL}}`], not [`\mathrm{\frac{number\:g}{mL}}`]. 
 
 
 [@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
