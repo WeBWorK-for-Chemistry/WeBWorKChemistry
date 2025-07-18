@@ -119,9 +119,12 @@ $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given]
 TEXT(beginproblem());
 
 BEGIN_PGML
-##Unit Conversion
+##Unit Conversion - One Step
 
-Convert [$given] to miles. There are 0.6214 miles (mi) in one kilometer (km). Place the conversion factor in the problem and report the answer with correct significant figures and units.  Use appropriate abbreviations for units.
+The given value has been placed into the single line of dimensional analysis for you.  Place the correct conversion factor into the problem.  Remember to look at the units to know which conversion factor to use. 
+
+####Convert [$given] to miles using the fact that there are 0.6214 miles (mi) in one kilometer (km).
+
 
 [@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
  
@@ -169,5 +172,3 @@ BEGIN_PGML_SOLUTION
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
-
-
