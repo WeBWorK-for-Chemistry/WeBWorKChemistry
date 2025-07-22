@@ -80,7 +80,7 @@ $molecule4 = Formula(" Mg $halogen[$m]_2");
 ############################################################
 
 BEGIN_PGML
-##Writing Binary Ionic Formulas
+##Writing Binary Ionic Formulas - Fixed Charge Cations
 
 Name the following compounds.  These compounds contain cations that have only one possible charge.  One example has been done for you.  
 
@@ -119,7 +119,7 @@ Some things to check:
 2. Did you charge balance the formula? 
 3. Did you use subscripts properly? (see instructions in the problem)
 
-A Review of writing binary Ionic Formulas can be found at [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/05%3A_Molecules_and_Compounds/5.05%3A_Writing_Formulas_for_Ionic_Compounds#Writing_Formulas_for_Ionic_Compounds_Containing_Polyatomic_Ions"), protect_underbar("this link"), "TARGET='_blank'" ); @]*
+A review of writing binary ionic formulas can be found at [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/05%3A_Molecules_and_Compounds/5.05%3A_Writing_Formulas_for_Ionic_Compounds#Writing_Formulas_for_Ionic_Compounds_Containing_Polyatomic_Ions"), protect_underbar("this link"), "TARGET='_blank'" ); @]*
 
 
 END_PGML_HINT
