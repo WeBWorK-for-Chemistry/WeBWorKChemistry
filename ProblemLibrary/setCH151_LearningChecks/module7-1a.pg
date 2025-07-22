@@ -70,7 +70,7 @@ $blank = Compute('share')->cmp(
 
 BEGIN_PGML
 
-##Polyatomic Ions
+##Covalent Bonds
 
 1. Fill in the blank: A covalent bond is formed when two atoms [_______]{$blank} electrons.
 
