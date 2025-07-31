@@ -1,0 +1,105 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+# Try to only load the macro files that are needed.
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+);
+
+%alt_text = (
+    methane            => 'four H connected to a central C',
+    tetrachloromethane => 'four chlorines connected to a central C',
+    ethane             => 'a CH3 group connected to another CH3 group',
+    dichloromethane    => 'two hydrogens and two chlorines connected to a central C',
+    trichloromethane   => 'one hydrogen and three chlorines connected to a central C',
+    methanol           => 'CH3OH',
+    ethanol            => 'CH3CH2OH',
+    dimethylether      => 'CH3OCH3 There are 2 lone pairs on the oxygen',
+    water              => 'H2O',
+);
+
+
+@nonpolar_molecules = qw (methane tetrachloromethane ethane);
+
+
+@polar_molecules = qw(dichloromethane trichloromethane methanol ethanol dimethylether water);
+
+%polarity = (
+    (map {$_ => 'polar'} @polar_molecules),
+    (map {$_ => 'nonpolar'} @nonpolar_molecules),
+);
+
+# randomly pick two of each type
+@polar_choice = random_subset(2, @polar_molecules);
+@nonpolar_choice = random_subset(2, @nonpolar_molecules);
+
+@molecules = random_subset(4,
+   @polar_choice,
+   @nonpolar_choice
+);
+
+@options = (
+    'polar',
+    'nonpolar',
+);
+
+
+@checks = map {
+    DropDown(
+        ~~@options,
+        $polarity{$_},
+        placeholder => 'Choose One'
+    )
+} @molecules;
+
+for (0..3) {
+    $image[$_] = "$molecules[$_].png";
+    $alt[$_] = $alt_text{$molecules[0]};
+}
+BEGIN_PGML
+
+1. [@ image( $image[0], width=>300, height=>300,  
+ extra_html_tags=>"alt=$alt[0]" )@]* is a [_]{$checks[0]} molecule.
+
+1. [@ image( $image[1], width=>300, height=>300,  
+ extra_html_tags=>"alt=$alt[1]"  )@]* is a [_]{$checks[1]} molecule.
+
+1. [@ image( $image[2], width=>300, height=>300,  
+ extra_html_tags=>"alt=$alt[2]"  )@]* is a [_]{$checks[2]} molecule.
+
+1. [@ image( $image[3], width=>300, height=>300,  
+ extra_html_tags=>"alt=$alt[3]"  )@]* is a [_]{$checks[3]} molecule.
+
+
+END_PGML
+
+BEGIN_PGML_HINT
+
+1. Bonds with with atoms that have an electronegativity difference greater than 0.5 are polar. 
+2. C-H bonds are not polar. A molecule with only C-H bonds will always be nonpolar.
+3. Polar bonds arranged unsymetrically around a central atom will result in a polar molecule. 
+4. Polar bonds arranged symetrically around a central atom will result in a nonpolar molecule.
+
+For more information on [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.09%3A_Polarity_of_Molecules"), protect_underbar("the polarity of molecules, click here"), "TARGET='_blank'" ); @]*
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+
