@@ -141,13 +141,14 @@ TEXT(beginproblem());
 
 BEGIN_PGML
 
-##Mole Conversions
+##Mole Conversions - grams to moles
 
-How many moles of [$atom] atoms are in [$given]? 
+The given value has been placed into the problem below. Fill in the conversion factor(s) and the final answer. 
+* Don't forget to include units and calculate the answer to the proper number of sig figs. 
+* Use *[@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* *to find the molar mass needed.  Use molar masses rounded to the nearest hundredth.
+* Be sure to use *moles [$atomSym] *in the units of your final answer.
 
-Use [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]*  to find the molar mass needed.  Use molar masses rounded to the nearest hundredth.
-
-Be sure to use moles [$atomSym] in the units of your answer.
+####How many moles of [$atom] atoms are in [$given]? 
 
 [@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
 
@@ -177,15 +178,11 @@ END_TEXT
 
 BEGIN_PGML_HINT
 
-The general steps in performing dimensional analysis
+Use the molar mass in a conversion factor to convert from mol [`\mathrm{[$atomSym]}`] to grams [`\mathrm{[$atomSym]}`].
 
-1.  Identify the "given" information in the problem. Look for a number with units to start this problem with.
-2.  What is the problem asking you to "find"? In other words, what unit will your answer have?
-3.  Use ratios and conversion factors to cancel out the units that aren't part of your answer, and leave you with units that are part of your answer.
-4.  When your units cancel out correctly, you are ready to do the math. You are multiplying fractions, so you multiply the top numbers and divide by the bottom numbers in the fractions.
+Use *[@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* *to find the molar mass needed.
 
-
-For more information on unit conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemistry_I_(Southeast)/2%3A_Measurement_and_Problem_Solving/2.5%3A_Problem_Solving_and_Unit_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+For more information on mole conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/08%3A_Counting_Atoms_Ions_and_Molecules/8.01%3A_Counting_Atoms_by_the_Gram"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
 
 
