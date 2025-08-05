@@ -83,18 +83,31 @@ A metal that can form more than one possible cation is called a [_]{$dropdown3} 
 Classify each of the following metals as a variable or fixed charge metal by checking the box next to the metal in column in which they belong.
 
 ----
+END_PGML
+if ($displayMode eq 'TeX') {
+BEGIN_PGML
+Fixed Charge Metals:[_]{$checkboxes{'Fixed Charge Metal'}}
+
+Variable Charge Metals:[_]{$checkboxes{'Variable Charge Metal'}}
+
+END_PGML
+
+} else {
+    BEGIN_PGML
 [#
     [.*Fixed Charge Metal*.]
     [.*Variable Charge Metal*.]*{rowbottom => 1}
     [.[_]{$checkboxes{'Fixed Charge Metal'}}.]
     [.[_]{$checkboxes{'Variable Charge Metal'}}.]
 #]*{
-    align => 'p{2.8cm}p{2.8cm}',
+    align => 'p{4.8cm}p{4.8cm}',
     padding => [0.1,0.5],
     valign =>'bottom'
 }
-
 END_PGML
+}
+
+
 ############################################################
 BEGIN_PGML_HINT
 
