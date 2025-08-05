@@ -75,6 +75,10 @@ for (0..3) {
 }
 BEGIN_PGML
 
+##Polarity
+
+From the dropdown menu choose the correct answer for each structure.
+
 1. [@ image( $image[0], width=>300, height=>300,  
  extra_html_tags=>"alt=$alt[0]" )@]* is a [_]{$checks[0]} molecule.
 
