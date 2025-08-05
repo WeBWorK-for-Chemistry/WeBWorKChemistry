@@ -25,60 +25,58 @@ loadMacros(
 
 
 $dropdown1 = DropDown([ 
-    [ "fixed charge", "variable charge" ] ],
+    [ "ionic", "covalent" ] ],
     0,
     placeholder => 'Choose One');
 
 $dropdown2 = DropDown([ 
-    [ "require", "do not require" ] ],
+    [ "ionic", "covalent" ] ],
     1,
     placeholder => 'Choose One');
-
 $dropdown3 = DropDown([ 
-    [ "fixed charge", "variable charge" ] ],
-    1,
+    [ "are", "are not" ] ],
+    0,
     placeholder => 'Choose One');
 
 $dropdown4 = DropDown([ 
-    [ "require", "do not require" ] ],
-    0,
+    [ "are", "are not" ] ],
+    1,
     placeholder => 'Choose One');
-# It seemed like a good idea to logically group the elements
-# with meaningful names
-@type_1_metals = qw(Li Na K Rb Cs Fr Be Mg Ca Sr Ba Al Zn Ag Cd);
-@type_2_metals = qw(Ti V Cr Mn Fe Co Cu Au Zr Mo Pt Pd Sb Sn Pb);
+
+@ionic = qw(\(\mathrm{TiCl_4}\) \(\mathrm{SnO_2}\) \(\mathrm{MnF_4}\) \(\mathrm{FeO}\) \(\mathrm{AlF_3}\) \(\mathrm{VCl_2}\) \(\mathrm{V_2O_3}\) \(\mathrm{MnO_2}\) \(\mathrm{BaCl_2}\));
+@covalent = qw(\(\mathrm{CCl_4}\) \(\mathrm{NO_2}\) \(\mathrm{SeF_4}\) \(\mathrm{CO}\) \(\mathrm{CO_2}\) \(\mathrm{SO_3}\) \(\mathrm{NF_3}\) \(\mathrm{S_2O_3}\) \(\mathrm{PCl_5}\));
 
 
 %metalClasses = (
-    (map {$_ => 'Fixed Charge Metal'} @type_1_metals),
-    (map {$_ => 'Variable Charge Metal'} @type_2_metals)
+    (map {$_ => 'Ionic'} @ionic),
+    (map {$_ => 'Covalent'} @covalent)
 );
 
 # randomly pick two of each type
-@type_one_elements = random_subset(3, @type_1_metals);
-@type_two_elements = random_subset(3, @type_2_metals);
+@ionic_formulas = random_subset(3, @ionic);
+@covalent_formulas = random_subset(3, @covalent);
 
 # merge them and randomize order:
-@elements = random_subset(6,
-    @type_one_elements,
-    @type_two_elements
+@formulas = random_subset(6,
+    @ionic_formulas,
+    @covalent_formulas
 );
 
 @options = (
-    'Fixed Charge Metal',
-    'Variable Charge Metal'
+    'Ionic',
+    'Covalent'
 );
 
 
-$checkboxes{'Fixed Charge Metal'} = CheckboxList(~~@elements, ~~@type_one_elements);
-$checkboxes{'Variable Charge Metal'} = CheckboxList(~~@elements, ~~@type_two_elements);
+$checkboxes{'Ionic'} = CheckboxList(~~@formulas, ~~@ionic_formulas);
+$checkboxes{'Covalent'} = CheckboxList(~~@formulas, ~~@covalent_formulas);
 
 BEGIN_PGML
-##Variable or Fixed Charge Metal
+##Ionic or Covalent
 
-A metal that can only form one possible cation is called a [__]{$dropdown1} metal. These metals [_]{$dropdown2} a Roman Numeral in their name to designate their charge.
+Compounds that contain a metal and a nonmetal are [__]{$dropdown1} compounds. When writing the names of these compounds, prefixes like di, tri, tetra, [__]{$dropdown4} used. 
 
-A metal that can form more than one possible cation is called a [_]{$dropdown3} metal. These metals [_]{$dropdown4} a Roman Numeral in their name to designate their charge.
+Compounds that contain two nonmetals are [__]{$dropdown2} compounds. When writing the names of these compounds, prefixes like di, tri, tetra, [__]{$dropdown3} used. 
 
 Classify each of the following metals as a variable or fixed charge metal by checking the box next to the metal in column in which they belong.
 
@@ -86,32 +84,33 @@ Classify each of the following metals as a variable or fixed charge metal by che
 END_PGML
 if ($displayMode eq 'TeX') {
 BEGIN_PGML
-Fixed Charge Metals:[_]{$checkboxes{'Fixed Charge Metal'}}
+Ionic:[_]{$checkboxes{'Ionic'}}
 
-Variable Charge Metals:[_]{$checkboxes{'Variable Charge Metal'}}
+Covalent:[_]{$checkboxes{'Covalent'}}
 
 END_PGML
 
 } else {
     BEGIN_PGML
 [#
-    [.*Fixed Charge Metal*.]
-    [.*Variable Charge Metal*.]*{rowbottom => 1}
-    [.[_]{$checkboxes{'Fixed Charge Metal'}}.]
-    [.[_]{$checkboxes{'Variable Charge Metal'}}.]
+    [.*Ionic*.]
+    [.*Covalent*.]*{rowbottom => 1}
+    [.[_]{$checkboxes{'Ionic'}}.]
+    [.[_]{$checkboxes{'Covalent'}}.]
 #]*{
-    align => 'p{4.8cm}p{4.8cm}',
+    align => 'p{3.2cm}p{3.2cm}',
     padding => [0.1,0.5],
     valign =>'bottom'
 }
 END_PGML
 }
 
-
 ############################################################
 BEGIN_PGML_HINT
 
-For more information on ion charges, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.02%3A_Ions_With_Variable_Charges"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+For more information on [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.05%3A_Naming_Ionic_Compounds"), protect_underbar("ionic naming, click here"), "TARGET='_blank'" ); @]*
+
+For more information on [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.04%3A_Binary_Covalent_Compounds-_Formulas_and_Names"), protect_underbar("covalent naming, click here"), "TARGET='_blank'" ); @]*
 
 
 
@@ -119,4 +118,5 @@ For more information on ion charges, click [@ htmlLink( protect_underbar("https:
 END_PGML_HINT
 
 ENDDOCUMENT();
+
 
