@@ -1,0 +1,150 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+
+Context("ArbitraryString");
+
+
+@reaction_choices = (
+    {
+        equation  => "Zn (s) + Cu^{2+}(aq) \rightarrow Zn^{2+}(aq)+ Cu(s)",
+        isOxidized  => 'Zn',
+        isReduced     => 'Cu^(2+)'
+    },
+    {
+        equation  => "2Na(s) + Cl_2(g) \rightarrow 2NaCl(s)",
+        isOxidized  => 'Na',
+        isReduced     => 'Cl_2'
+    },
+    {
+        equation  => "Fe_2O_3(s) + 3CO(g) \rightarrow 2Fe(s)+ 3CO_2(g)",
+        isOxidized  => 'CO',
+        isReduced     => 'Fe_2O_3'
+    },
+    {
+        equation  => "Cl_2(g) + 2KBr(s) \rightarrow 2KCl(s)+ Br_2(l)",
+        isOxidized  => 'KBr',
+        isReduced     => 'Cl_2'
+    },
+    {
+        equation  => "CuO(s) + H_2(g) \rightarrow Cu(s)+ H_2O(g)",
+        isOxidized  => 'H_2',
+        isReduced     => 'CuO'
+    },
+    {
+        equation  => "2Al(s) + 3Br_2(g) \rightarrow 2AlBr_3(s)",
+        isOxidized  => 'Al',
+        isReduced     => 'Br_2'
+    },
+    {
+        equation  => "H_2(g) + F_2(g) \rightarrow 2HF(g)",
+        isOxidized  => 'H_2',
+        isReduced     => 'F_2'
+    },
+);
+@reactions = random_subset(2, @reaction_choices);
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Redox Reactions
+
+For each reaction below, indicate what reactant is oxidized, what reactant is reduced, the oxidizing agent, and the reducing agent. You do not need to put the state of matter into the answer blank. 
+
+1. [``\mathrm{[$reactions[0]->{equation}]}``]
+
+    [_]{$reactions[0]->{isOxidized}} is the reactant that is oxidized in the above reaction.
+    
+    [_]{$reactions[0]->{isReduced}} is the reactant that is reduced in the above reaction.
+
+    Therefore, the oxidizing agent is [_]{$reactions[0]->{isReduced}} and the reducing agent is [_]{$reactions[0]->{isOxidized}}.
+
+1. [``\mathrm{[$reactions[1]->{equation}]}``]
+
+    [_]{$reactions[1]->{isOxidized}} is the reactant that is oxidized in the above reaction.
+    
+    [_]{$reactions[1]->{isReduced}} is the reactant that is reduced in the above reaction.
+
+    Therefore, the oxidizing agent is [_]{$reactions[1]->{isReduced}} and the reducing agent is [_]{$reactions[1]->{isOxidized}}.
+
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+1. Identify Oxidation Numbers:
+Assign oxidation numbers to all atoms in the reactants and products using established rules. 
+2. Track Changes:
+Compare the oxidation numbers of each element in the reactants and products. 
+3. Oxidation:
+If an element's oxidation number increases, it has been oxidized (lost electrons). 
+4. Reduction:
+If an element's oxidation number decreases, it has been reduced (gained electrons). 
+5. Redox Agents:
+The substance that causes oxidation (and is itself reduced) is the oxidizing agent. The substance that causes reduction (and is itself oxidized) is the reducing agent. 
+
+To review redox reactions, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/09%3A_An_Introduction_to_Chemical_Reactions/9.10%3A_A_Very_Brief_Introduction_to_Redox_Reactions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
