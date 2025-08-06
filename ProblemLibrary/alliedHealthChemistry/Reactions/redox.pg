@@ -83,6 +83,59 @@ Context("ArbitraryString");
     },
 );
 @reactions = random_subset(2, @reaction_choices);
+
+#custom answer checker to make sure capitals are used and the state of matter is not included
+for (0..1) {
+    $Oxidized[$_]= Compute($reactions[$_]->{isOxidized})->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                # check that space is not between roman numeral and cation name
+                if ($student =~ m/~~(s|l|g|aq~~)/) { 
+                    $ans->{ans_message} = "Do not include the state of matter in the answer";}
+                if ($student eq lc($correct) || $student eq uc($correct)) {
+                    $ans->{ans_message} = "Make sure the capitalization in your formula is correct.";}
+            return $correct eq $student;
+            });
+     $Oxidized1[$_]= Compute($reactions[$_]->{isOxidized})->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                # check that space is not between roman numeral and cation name
+                if ($student =~ m/~~(s|l|g|aq~~)/) { 
+                    $ans->{ans_message} = "Do not include the state of matter in the answer";}
+                if ($student eq lc($correct) || $student eq uc($correct)) {
+                    $ans->{ans_message} = "Make sure the capitalization in your formula is correct.";}
+            return $correct eq $student;
+            });
+    $Reduced[$_]= Compute($reactions[$_]->{isReduced})->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                # check that space is not between roman numeral and cation name
+                if ($student =~ m/~~(s|l|g|aq~~)/) { 
+                    $ans->{ans_message} = "Do not include the state of matter in the answer";}
+                 if ($student eq lc($correct) || $student eq uc($correct)) {
+                    $ans->{ans_message} = "Make sure the capitalization in your formula is correct.";}
+            return $correct eq $student;
+            });
+     $Reduced1[$_]= Compute($reactions[$_]->{isReduced})->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                #remove leading and trailing whitespace
+                $student =~ s/^~~s+|~~s+$//g;  # ~~ is backslash in PGML
+                # check that space is not between roman numeral and cation name
+                if ($student =~ m/~~(s|l|g|aq~~)/) { 
+                    $ans->{ans_message} = "Do not include the state of matter in the answer";}
+                 if ($student eq lc($correct) || $student eq uc($correct)) {
+                    $ans->{ans_message} = "Make sure the capitalization in your formula is correct.";}
+            return $correct eq $student;
+            });
+    }
+
 ############################################################
 # Body
 ############################################################
@@ -94,19 +147,19 @@ For each reaction below, indicate what reactant is oxidized, what reactant is re
 
 1. [``\mathrm{[$reactions[0]->{equation}]}``]
 
-    [_]{$reactions[0]->{isOxidized}} is the reactant that is oxidized in the above reaction.
+    [_]{$Oxidized[0]} is the reactant that is oxidized in the above reaction.
     
-    [_]{$reactions[0]->{isReduced}} is the reactant that is reduced in the above reaction.
+    [_]{$Reduced[0]} is the reactant that is reduced in the above reaction.
 
-    Therefore, the oxidizing agent is [_]{$reactions[0]->{isReduced}} and the reducing agent is [_]{$reactions[0]->{isOxidized}}.
+    Therefore, the oxidizing agent is [_]{$Reduced1[0]} and the reducing agent is [_]{$Oxidized1[0]}.
 
 1. [``\mathrm{[$reactions[1]->{equation}]}``]
 
-    [_]{$reactions[1]->{isOxidized}} is the reactant that is oxidized in the above reaction.
+    [_]{$Oxidized[1]} is the reactant that is oxidized in the above reaction.
     
-    [_]{$reactions[1]->{isReduced}} is the reactant that is reduced in the above reaction.
+    [_]{$Reduced[1]} is the reactant that is reduced in the above reaction.
 
-    Therefore, the oxidizing agent is [_]{$reactions[1]->{isReduced}} and the reducing agent is [_]{$reactions[1]->{isOxidized}}.
+    Therefore, the oxidizing agent is [_]{$Reduced1[1]} and the reducing agent is [_]{$Oxidized1[1]}.
 
 
 
@@ -126,9 +179,7 @@ If an element's oxidation number decreases, it has been reduced (gained electron
 5. Redox Agents:
 The substance that causes oxidation (and is itself reduced) is the oxidizing agent. The substance that causes reduction (and is itself oxidized) is the reducing agent. 
 
-To review redox reactions, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/09%3A_An_Introduction_to_Chemical_Reactions/9.10%3A_A_Very_Brief_Introduction_to_Redox_Reactions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
-
-
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/09%3A_An_Introduction_to_Chemical_Reactions/9.10%3A_A_Very_Brief_Introduction_to_Redox_Reactions', 'Read here if you need information on redox reactions.'); @]*
 END_PGML_HINT
 
 ############################################################
