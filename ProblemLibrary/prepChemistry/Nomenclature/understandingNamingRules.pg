@@ -68,8 +68,9 @@ $dropdown4 = DropDown([
 );
 
 
-$checkboxes{'Ionic'} = CheckboxList(~~@formulas, ~~@ionic_formulas);
-$checkboxes{'Covalent'} = CheckboxList(~~@formulas, ~~@covalent_formulas);
+$separator = ($displayMode eq 'TeX') ? '' : $BR;
+$checkboxes{'Ionic'} = CheckboxList(~~@formulas, ~~@ionic_formulas, separator => $separator);
+$checkboxes{'Covalent'} = CheckboxList(~~@formulas, ~~@covalent_formulas, separator => $separator);
 
 BEGIN_PGML
 ##Ionic or Covalent
@@ -81,17 +82,7 @@ Compounds that contain two nonmetals are [__]{$dropdown2} compounds. When writin
 Classify each of the following metals as a variable or fixed charge metal by checking the box next to the metal in column in which they belong.
 
 ----
-END_PGML
-if ($displayMode eq 'TeX') {
-BEGIN_PGML
-Ionic:[_]{$checkboxes{'Ionic'}}
 
-Covalent:[_]{$checkboxes{'Covalent'}}
-
-END_PGML
-
-} else {
-    BEGIN_PGML
 [#
     [.*Ionic*.]
     [.*Covalent*.]*{rowbottom => 1}
@@ -103,7 +94,7 @@ END_PGML
     valign =>'bottom'
 }
 END_PGML
-}
+
 
 ############################################################
 BEGIN_PGML_HINT
