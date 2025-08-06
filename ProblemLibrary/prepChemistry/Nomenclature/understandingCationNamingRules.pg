@@ -70,8 +70,10 @@ $dropdown4 = DropDown([
 );
 
 
-$checkboxes{'Fixed Charge Metal'} = CheckboxList(~~@elements, ~~@type_one_elements);
-$checkboxes{'Variable Charge Metal'} = CheckboxList(~~@elements, ~~@type_two_elements);
+$separator = ($displayMode eq 'TeX') ? '' : $BR;
+$checkboxes{'Fixed Charge Metal'} = CheckboxList(~~@elements, ~~@type_one_elements, separator => $separator);
+$checkboxes{'Variable Charge Metal'} = CheckboxList(~~@elements, ~~@type_two_elements, separator => $separator);
+
 
 BEGIN_PGML
 ##Variable or Fixed Charge Metal
@@ -80,20 +82,11 @@ A metal that can only form one possible cation is called a [__]{$dropdown1} meta
 
 A metal that can form more than one possible cation is called a [_]{$dropdown3} metal. These metals [_]{$dropdown4} a Roman Numeral in their name to designate their charge.
 
+----
+
 Classify each of the following metals as a variable or fixed charge metal by checking the box next to the metal in column in which they belong.
 
-----
-END_PGML
-if ($displayMode eq 'TeX') {
-BEGIN_PGML
-Fixed Charge Metals:[_]{$checkboxes{'Fixed Charge Metal'}}
 
-Variable Charge Metals:[_]{$checkboxes{'Variable Charge Metal'}}
-
-END_PGML
-
-} else {
-    BEGIN_PGML
 [#
     [.*Fixed Charge Metal*.]
     [.*Variable Charge Metal*.]*{rowbottom => 1}
@@ -105,7 +98,6 @@ END_PGML
     valign =>'bottom'
 }
 END_PGML
-}
 
 
 ############################################################
