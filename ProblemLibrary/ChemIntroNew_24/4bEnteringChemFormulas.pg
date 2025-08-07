@@ -1,0 +1,59 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"contextReaction.pl",
+"contextLimitedRadical.pl",
+"contextArbitraryString.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+Context("Reaction");
+$u = Formula("H_2O");
+
+Context("ArbitraryString");
+$v = "kilogram";
+
+
+
+
+
+######################################
+
+
+BEGIN_PGML
+## Answer Entry and MathQuill  ##
+
+The math system in WeBWorK is also very helpful when entering chemical formulas with subscripts.  It helps you to see the subscript appear when you hit the underscore key.  Try entering H_2O in the box below. You should see the 2 as a subscript. *You will need to push the arrow up button to move the arrow back up to the main line after entering a subscript.* If you see the underscore in the answer box, this is fine.  It just means the MathQuill system is turned off for your problem set and you can ignore the direction about the up arrow. 
+
+[_____]{$u}
+
+Sometimes you will want to enter text in the answer box. You saw this in the previous problem. The box will try and recognize this as math. For example try entering the word "kilogram" in the box below.
+
+[_______]{$v}
+
+The answer box was likely trying to recognize the letter string "log" as the log function in math. If the MathQuill system was not turned on in your homework set then you had no problem entering the word "kilogram" and you can move on. To turn off this math recognition and enter the word kilogram, press the Tt button on the MathQuill system before you start typing kilogram. This will allow you to enter text. For help finding the Tt button see the image below. (Note: if you want to see the image larger and having a zooming function, click on the image.) 
+
+[@ image( "text.png", width=>108, height=>132,  
+ extra_html_tags=>"alt=image of text button in MathQuill"  )@]*
+
+The system then should stop recognizing "log" as a log function and allow you to enter "kilogram" as the answer above. Go ahead and try this in the blank above if you have not already. Check your answers.  
+
+Use this button whenever you need to turn off this math recognition feature.  
+
+You are now ready to go onto the next problem.
+
+END_PGML
+
+
+######################################
+
+
+
+ENDDOCUMENT();
+
