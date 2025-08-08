@@ -1,0 +1,119 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "contextChemical.pl",  # added for chemical parsing in units
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+##############################################
+
+
+install_weighted_grader();
+
+Context("Numeric");
+
+$grams = random(1.01 ,9.99, 0.01);
+
+Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);  # flag needed to recognize chemical names as units
+    
+    $given = InexactValueWithUnits( [$grams , 3], 'grams CH_4');  
+    $n1 = InexactValueWithUnits(['1', 9**9**9], 'mol'); 
+    $d1 = InexactValueWithUnits(['16.05', 4], 'grams'); 
+    $n2 = InexactValueWithUnits(['890', 3], 'kJ'); 
+    $d2 = InexactValueWithUnits(['1', 9**9**9], 'mol');
+$answer = $given * $n1 / $d1 * $n2 / $d2;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$n2,$d2,$answer)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2],$answer);
+##############################################
+#Calculate the mass in grams of [`[$given]`] of [`[@'~~mathrm{' . $compound . '} '@]`].  
+
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Stoichiometry Involving Heat
+
+Consider the thermochemical equation below:
+
+[``` \ce{CH_4(g) + 2O_2(g) \rightarrow CO_2(g) + 2H_2O(g)} ```]
+    The change in enthalpy for this reaction is given as, [``\mathrm{\Delta H=−890. \frac{kJ}{mol}}``]
+    
+How much heat (in kJ) is released when [`[$given]`] is completely combusted?
+
+Helpful Hints:
+* Because this reaction is exothermic the enthalpy change is negative. Use the positive of this number when calculating the amount of heat released because although the reaction is losing heat, the amount released is a positive quantity.
+* Note that the change in enthalpy has a decimal point after the zero indicating that it contains 3 sig figs. 
+
+[@ DimensionalAnalysis::generateProblem($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)) @]*
+
+END_PGML
+
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+
+
+
+BEGIN_PGML_HINT
+
+1. In the first conversion factor, convert the number of grams [`\mathrm{CH_4}`] to moles [`\mathrm{CH_4}`] using the molar mass as a conversion factor. 
+2. Then use the enthalpy change as a conversion factor to convert from moles to kJ. 
+
+
+For more information on heat energy from reactions, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/11%3A_Energy_and_Chemical_Reactions/11.04%3A_Endothermic_and_Exothermic_Reactions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
