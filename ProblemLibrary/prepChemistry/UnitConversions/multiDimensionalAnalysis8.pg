@@ -102,8 +102,8 @@ $n1 = InexactValueWithUnits([1, 9**9**9], 'm');
 $d1 = InexactValueWithUnits([100, 9**9**9], 'cm'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
 
 
-$n2 = InexactValueWithUnits([1000000, 9**9**9], 'Mm'); 
-$d2 = InexactValueWithUnits([1, 9**9**9], 'm'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+$n2 = InexactValueWithUnits([1, 9**9**9], 'Mm'); 
+$d2 = InexactValueWithUnits([1e6, 9**9**9], 'm'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
 
 
 $answer = $given * $n1 / $d1 * $n2 / $d2;
