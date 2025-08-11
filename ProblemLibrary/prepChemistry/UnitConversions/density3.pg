@@ -134,7 +134,8 @@ $n1 = InexactValueWithUnits(['1000', 9**9**9], 'g'); # make this exact (infinite
 $d1 = InexactValueWithUnits(['1', 9**9**9], 'kg');
 
 $answer = $given * $n1 / $d1;
-$answer_units = InexactValueWithUnits([$answer, 3], 'g/mL');
+$density = $mass/$volume;
+$answer_units = InexactValueWithUnits([$density, 3], 'g/mL');
 
 ANS($n1->cmp);
 ANS($d1->cmp);
