@@ -1,0 +1,44 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+Context("LimitedNumeric");
+
+
+$number = 854366;
+######################################
+
+
+BEGIN_PGML
+## Images in Problems ##
+
+Some problems will have embedded images. If these images are too small to view inside the problem, you can left click on the image to see a full size view of that image.
+
+Try this below. The image after this sentence contains a number that you need to put into the box below. Left click on the image to view the number large enough to read. 
+[@ image( 'number.png', width=>34, height=>17,  
+ extra_html_tags=>"alt='This number cannot be read unless the image is clicked on. The number is 854366.'"  )@]*
+
+
+    [_______]{$number} 
+
+
+If you are ready, move on to the next problem in this orientation. You my either use the _Next_ button above, or directly click on the next problem number to the left.
+
+
+END_PGML
+
+
+######################################
+
+
+
+ENDDOCUMENT();
+
