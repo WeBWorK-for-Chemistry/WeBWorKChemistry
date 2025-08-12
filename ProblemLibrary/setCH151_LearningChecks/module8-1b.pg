@@ -123,9 +123,9 @@ BEGIN_PGML
 
 ##Conversions Using A Dozen
 
-####How many donuts are in a 42 donuts? 
+####42 donuts are equivalent to how many dozens? 
 
-How many donuts are in a dozen cookies? Use this as a conversion factor in the problem below to convert 42 donuts to dozens.
+How many donuts are in a dozen? Use this as a conversion factor in the problem below to convert 42 donuts to dozens.
 
 [@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
 
