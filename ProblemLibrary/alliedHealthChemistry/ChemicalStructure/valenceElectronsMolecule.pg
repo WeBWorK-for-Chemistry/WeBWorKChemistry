@@ -1,0 +1,142 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+
+Context("ArbitraryString");
+
+
+@formula_choices = (
+    {
+        formula  => "N_2",
+        electrons  => 10
+    },
+    {
+        formula  => "O_2",
+        electrons  => 12
+    },
+    {
+        formula  => "CO",
+        electrons  => 10
+    },
+    {
+        formula  => "SO_3",
+        electrons  => 24
+    },
+    {
+        formula  => "CO_3^{2-}",
+        electrons  => 24
+    },
+    {
+        formula  => "H_2O",
+        electrons  => 8
+    },
+    {
+        formula  => "NO_2^{-}",
+        electrons  => 18
+    },
+    {
+        formula  => "NO_3^{-}",
+        electrons  => 24
+    },
+    {
+        formula  => "ClO_2^{-}",
+        electrons  => 20
+    },
+    {
+        formula  => "SO_3^{2-}",
+        electrons  => 26
+    },
+    {
+        formula  => "H_3O{+}",
+        electrons  => 8
+    },
+);
+@formulas = random_subset(4, @formula_choices);
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Total Number of Valence Electrons
+
+Before writing a Lewis Structure for a molecule, you need to count the total number of valence electrons in the structure. Indicate the total number of valence electrons in each of the molecules below.
+
+1. The number of valence electrons in [`\mathrm{[$formulas[0]->{formula}]}`]  is [_]{$formulas[0]->{electrons}}.
+
+1. The number of valence electrons in [`\mathrm{[$formulas[1]->{formula}]}`] is [_]{$formulas[1]->{electrons}}.
+
+1. The number of valence electrons in [`\mathrm{[$formulas[2]->{formula}]}`] is [_]{$formulas[2]->{electrons}}.
+
+1. The number of valence electrons in [`\mathrm{[$formulas[3]->{formula}]}`] is [_]{$formulas[3]->{electrons}}.
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Determine the total number of valence (outer shell) electrons in the molecule or ion. For a molecule, we add the number of valence electrons (use the main group number) on each atom in the molecule. If the structure is an ion, adjust the total based on the charge of the ion. Positive charges mean there are less electrons and negative charges mean there are more electrons. 
+
+This is the total number of electrons that must be used in the Lewis structure.
+
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.05%3A_Drawing_Lewis_Structures', 'Read here if you need information on redox reactions.'); @]*
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
