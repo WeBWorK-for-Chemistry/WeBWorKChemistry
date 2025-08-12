@@ -1,0 +1,180 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+
+
+Context("ArbitraryString");
+
+
+@formula_choices = (
+    {
+        formula  => "N_2O_3",
+        element  => 'N',
+        oxNumber => '3'
+    },
+    {
+        formula  => "H_2SO_4",
+        element  => 'S',
+        oxNumber => '6'
+    },
+    {
+        formula  => "CO",
+        element  => 'C',
+        oxNumber => '2'
+    },
+    {
+        formula  => "NaCl",
+        element  => 'Na',
+        oxNumber => '1'
+    },
+    {
+        formula  => "H_2SO_4",
+        element  => 'S',
+        oxNumber => '6'
+    },
+    {
+        formula => "BaCl_2",
+        element  => 'Ba',
+        oxNumber => '2'
+    },
+    {
+        formula  => "H_2O",
+        element  => 'H',
+        oxNumber => '1'
+    },
+    {
+        formula  => "NO_2^{-}",
+        element  => 'N',
+        oxNumber => '3'
+    },
+    {
+        formula  => "Al_2S_3",
+        element  => 'S',
+        oxNumber => '-2'
+    },
+    {
+        formula  => "Al(ClO_2)_3",
+        element  => 'Cl',
+        oxNumber => '3'
+    },
+    {
+        formula  => "NO_3^{-}",
+        element  => 'N',
+        oxNumber => '5'
+    },
+    {
+        formula  => "SO_3^{2-}",
+        element  => 'S',
+        oxNumber => '4'
+    },
+    {
+        formula  => "MnO_2",
+        element  => 'Mn',
+        oxNumber => '4'
+    },
+);
+@formulas = random_subset(4, @formula_choices);
+
+#custom answer checker to make sure capitals are used and the state of matter is not included
+for (0..3) {
+    $Oxidation[$_]= Compute($formulas[$_]->{oxNumber})->cmp(
+            checker => sub {
+                my ($correct,$student,$ans) = @_;
+                #remove whitespace
+                $student =~ s/~~s+//g;  # ~~ is backslash in PGML
+                #remove plus sign if present
+                $student =~ s/~~+//g;
+            return $correct eq $student;
+            });
+    }
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Oxidation Number
+
+For each formula below indicate the oxidation number of the element indicated.  
+
+1. The oxidation number of [`\mathrm{[$formulas[0]->{element}]}`] in [`\mathrm{[$formulas[0]->{formula}]}`] is [_]{$Oxidation[0]}.
+
+1. The oxidation number of [`\mathrm{[$formulas[1]->{element}]}`] in [`\mathrm{[$formulas[1]->{formula}]}`] is [_]{$Oxidation[1]}.
+
+1. The oxidation number of [`\mathrm{[$formulas[2]->{element}]}`] in [`\mathrm{[$formulas[2]->{formula}]}`] is [_]{$Oxidation[2]}.
+
+1. The oxidation number of [`\mathrm{[$formulas[3]->{element}]}`] in [`\mathrm{[$formulas[3]->{formula}]}`] is [_]{$Oxidation[3]}.
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+*Rules For Assigning Oxidation Numbers*
+1. For free elements (uncombined state), each atom has an oxidation number of zero.  [`H_2`], [`Br_2`], [`Na`], [`Be`], [`K`], [`O_2`], [`P_4`], all have an oxidation number of 0.
+2. Monatomic ions have oxidation numbers equal to their charge.  [`Li^{+}=+1`], [`Ba^{2+}=+2`], [`Fe^{3+}=+3`], etc.
+3. The oxidation number of fluorine = -1 in all compounds.
+4. The oxidation number of oxygen = -2 in nearly all compounds. One exception is in peroxides, like hydrogen peroxide [`H_2O_2`], where O has an oxidation number of -1. 
+5. The oxidation number of hydrogen is +1 in nearly all compounds. The exception to this rule is H in metal hydrides like NaH where its oxidation number is -1.
+6. The oxidation numbers of the atoms in a neutral compound add to zero.
+7. The oxidation numbers of the atoms in a polyatomic ion add to the charge on the ion.
+
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/09%3A_An_Introduction_to_Chemical_Reactions/9.10%3A_A_Very_Brief_Introduction_to_Redox_Reactions', 'Read here if you need information on redox reactions.'); @]*
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
