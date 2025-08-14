@@ -128,11 +128,14 @@ END_PGML
 ############################################################
 BEGIN_PGML_HINT
 
-Determine the total number of valence (outer shell) electrons in the molecule or ion. For a molecule, we add the number of valence electrons (use the main group number) on each atom in the molecule. If the structure is an ion, adjust the total based on the charge of the ion. Positive charges mean there are less electrons and negative charges mean there are more electrons. 
+*Steps for Drawing Lewis Structures*
+1. Determine the total number of valence (outer shell) electrons among all the atoms. For cations, subtract one electron for each positive charge. For anions, add one electron for each negative charge.
+2. Draw a skeleton structure of the molecule or ion, arranging the atoms around a central atom. (Generally, the least electronegative element should be placed in the center.) Connect each atom to the central atom with a single bond (one electron pair).
+3. Distribute the remaining electrons as lone pairs on the terminal atoms (except hydrogen), completing an octet around each atom.
+4. Place all remaining electrons on the central atom.
+5. Rearrange the electrons of the outer atoms to make multiple bonds with the central atom in order to obtain octets wherever possible.
 
-This is the total number of electrons that must be used in the Lewis structure.
-
-[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.05%3A_Drawing_Lewis_Structures', 'Read here if you need information on redox reactions.'); @]*
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.05%3A_Drawing_Lewis_Structures', 'Read here if you need information on drawing Lewis Structures.'); @]*
 END_PGML_HINT
 
 ############################################################
