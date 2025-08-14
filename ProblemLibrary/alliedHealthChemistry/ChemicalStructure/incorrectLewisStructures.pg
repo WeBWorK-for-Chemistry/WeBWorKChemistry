@@ -1,0 +1,154 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl",
+  "parserRadioMultiAnswer.pl",
+    "contextString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("ArbitraryString");
+
+@formula_choices = (
+    {
+        formula  => "N_2",
+        fileName => 'NSingleBond',
+        blank  => "10",
+        answer => 0,
+        alt => "Two nitrogen atoms connected by a single bond. Each has three lone pairs."
+    },
+    {
+       formula  => "Cl_2",
+        fileName => 'ClDoubleBond',
+        blank  => "14",
+        answer => 0,
+        alt => "Two chlorine atoms connected by a double bond. Each has two lone pairs."
+    },
+    {
+        formula  => "F_2",
+        fileName => 'F2OK',
+        blank  => "14",
+        answer => 3,
+        alt => "Two fluorine atoms connected by a single bond. Each has three lone pairs."
+    },
+    {
+        formula  => "COH_2",
+        fileName => 'COH2Incomplete',
+        blank => "O",
+        answer => 1,
+        alt => "A carbon in the center single bonded to an O and 2 H's There are two lone pairs on the O and one lone pair on the C."
+    },
+    {
+        formula  => "COH_2",
+        fileName => 'COH2TooMany',
+        blank  => "12",
+        answer => 0,
+        alt => "A carbon in the center single bonded to an O and 2 H's There are three lone pairs on the O and one lone pair on the C."
+    },
+    {
+        formula  => "COH_2",
+        fileName => 'COH2TripleBond',
+        blank => "C",
+        answer => 2,
+        alt => "A carbon in the center triple bonded to an O and single bonded to 2 H's There in one lone pairs on the O."
+    },
+    {
+        formula  => "OBr_2",
+        fileName => 'OBr2DoubleBonds',
+        blank  => "20",
+        answer => 0,
+        alt => "A carbon in the is double bonded to two Br's. Each of these bromine atoms have two lone pairs."
+    },
+);
+
+
+@formulas = random_subset(1, @formula_choices);
+$ans = "$formulas[0]->{blank}";
+
+$rma = RadioMultiAnswer([
+           ['The total number of valence electrons in this structure is incorrect. '],
+           ['An atom in this structure does not have a full octet. <br> The element symbol for this atom is %s ', $ans ],
+           ['An atom in this structure has more electrons than it should. <br> The element symbol for this atom is %s ',  $ans],
+           ['This is the correct Lewis structure for this molecule.']
+       ], $formulas[0]->{answer}
+    );
+
+$formula = $formulas[0]->{formula};
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Is This Lewis Structure Correct?
+
+Below is a proposed Lewis Structure for the molecules with the formula, [`\mathrm{[$formula]}`] . Click on the radio button next to the best answer. If that choice contains a blank, fill in the correct answer in that blank. Only the answer blanks in the choice selected need to be completed.
+
+[@ image( "$formulas[0]->{fileName}.png", width=>200, 
+ extra_html_tags=>"alt='$formulas[0]->{alt}'"  )@]*
+
+[__________]{$rma}
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Determine the total number of valence (outer shell) electrons in the molecule or ion. For a molecule, we add the number of valence electrons (use the main group number) on each atom in the molecule. If the structure is an ion, adjust the total based on the charge of the ion. Positive charges mean there are less electrons and negative charges mean there are more electrons. 
+
+This is the total number of electrons that must be used in the Lewis structure.
+
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.05%3A_Drawing_Lewis_Structures', 'Read here if you need information on redox reactions.'); @]*
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
