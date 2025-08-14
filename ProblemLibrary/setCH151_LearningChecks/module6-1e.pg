@@ -40,6 +40,7 @@ TEXT(beginproblem());
 #
 #  Create a matching list and use popups
 #
+
 $ml = new_match_list();
 $ml->rf_print_q(~~&pop_up_list_print_q);
 $ml->ra_pop_up_list([
@@ -50,13 +51,17 @@ $ml->ra_pop_up_list([
 "J" => "J", "K" => "K", "L" => "L",
 ]);
 
+
+
 #
 #  Add correct questions and answers
 #
 $ml->qa(
-"oxide ion", "`O^{2-}`",
-"chloride ion", "`Cl^-`","copper(II) ion","`Cu^{2+}`",
-"tin(IV) ion", "`Sn^{4+}`","sodium ion","`Na^+`"
+  "oxide ion", '\(O^{2-}\)',
+  "chloride ion", '\(Cl^-\)',
+  "copper(II) ion", '\(Cu^{2+}\)',
+  "tin(IV) ion", '\(Sn^{4+}\)',
+  "sodium ion", '\(Na^+\)'
 );
 $ml->choose(5);
 
@@ -64,7 +69,7 @@ $ml->choose(5);
 #  Add extra incorrect answers
 #
 $ml->extra(
-"`O^{-}`","`C^-`","`Cl^+`","`Co^{2+}`","`Cu^{+}`","`Tn^{4+}`","`S^{+}`"
+  '\(O^{-}\)','\(C^-\)','\(Cl^+\)','\(Co^{2+}\)','\(Cu^{+}\)','\(Tn^{4+}\)','\(S^{+}\)'
 );
 $ml->choose_extra(7);
   
@@ -170,4 +175,5 @@ END_PGML_HINT
 
 
 ENDDOCUMENT();
+
 
