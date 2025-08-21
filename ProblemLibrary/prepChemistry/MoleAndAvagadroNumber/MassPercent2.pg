@@ -213,19 +213,14 @@ molar mass of H = [$IvMassH] [``\frac{g}{mol}``]
 molar mass of O = [$IvMassO] [``\frac{g}{mol}``]
 
 
-[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
-[@ ('mass percent of H =') @]*
-[@ conversionFactor('mass of H in 1 mole of compound', 'molar mass of compound') @]*
-[@ MODES(HTML=>'  x 100  ', TeX=>'\times 100') @]*
-[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
-[@ MODES(HTML=>'</div>', TeX=>'') @]*
+[```\mathrm{mass\:percent\:of\:H} = \frac{\mathrm{mass\:of\:H\:in\:1\:mole\:of\:the\:compound}}{\mathrm{molar\:mass\:of\:compound}} \times 100```]
 
 
 [@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
 [@ ('mass percent of H =') @]*
 [@ conversionFactor(ans_rule(6), ans_rule(6)) @]*
-[@ MODES(HTML=>'  x 100  =  ', TeX=>'\times 100 =') @]*
 [@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ MODES(HTML=>'  x 100  =  ', TeX=>'\(\times 100 =\)') @]*
 [@ ans_rule(6) @]*%
 
 [@ MODES(HTML=>'</div>', TeX=>'') @]*
