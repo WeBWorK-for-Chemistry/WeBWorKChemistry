@@ -218,22 +218,14 @@ molar mass of Si = [$IvMassSi] [``\frac{g}{mol}``]
 
 molar mass of O = [$IvMassO] [``\frac{g}{mol}``]
 
+[```\mathrm{mass\:percent\:of\:Al} = \frac{\mathrm{mass\:of\:Al\:in\:1\:mole\:of\:the\:compound}}{\mathrm{molar\:mass\:of\:compound}} \times 100```]
 
 [@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
-[@ ('mass percent of Al =') @]*
-[@ conversionFactor('mass of Al in 1 mole of the compound', 'molar mass of compound') @]*
-[@ MODES(HTML=>'  x 100  ', TeX=>'\times 100') @]*
-[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
-[@ MODES(HTML=>'</div>', TeX=>'') @]*
-
-
-[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
-[@ ('mass percent of Al =') @]*
+mass percent of Al = 
 [@ conversionFactor(ans_rule(6), ans_rule(6)) @]*
-[@ MODES(HTML=>'  x 100  =  ', TeX=>'\times 100 =') @]*
 [@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm}}{\hspace{2cm}}``]') @]**
+[@ MODES(HTML=>'  x 100  =  ', TeX=>'\(\times 100 =\)') @]*
 [@ ans_rule(6) @]*%
-
 [@ MODES(HTML=>'</div>', TeX=>'') @]*
 
 
