@@ -278,14 +278,15 @@ sub cmp {
         # 	$cmp->{rh_ans}{checker} = sub { return 0.6;};
         # }
         my $result = $main::PG->decode_base64( $inputs->{"${ans_name}"} );
-        my $json   = JSON->new->allow_nonref;
+        #JSON module no longer used 
+        #my $json   = JSON->new->allow_nonref;
 
         # if ($result == 0 || $result == ""){
         # 	return $cmp;
         # }
         my $kekuleJS;
 
-        eval { $kekuleJS = $json->decode($result); };    #->{simpleKekule};
+        eval { $kekuleJS = Mojo::JSON::decode_json($result); };    #->{simpleKekule};
 
         if ( !defined $kekuleJS ) {
 
@@ -320,7 +321,7 @@ sub cmp {
               : 0.25;
 
             my $simpleKekule;
-            eval { $simpleKekule = $json->decode( $kekuleJS->{simpleKekule} ); };
+            eval { $simpleKekule = Mojo::JSON::decode_json( $kekuleJS->{simpleKekule} ); };
 
             my $correctMoleculeHash =
               Chemical::LewisStructure::generateHashFromLaTeXFormula(
