@@ -79,7 +79,7 @@ Complete the following table.
 
 [@ 
 DataTable([
-[['Isotope Symbol ',headerrow=>1],'Atomic Number, Z','Mass Number, A', 'number of protons','number of neutrons', 'number of elctrons'],
+[['Isotope Symbol ',headerrow=>1],'Atomic Number, Z','Mass Number, A', 'number of protons','number of neutrons', 'number of electrons'],
 [PGML('[`[$row1[$x1]]`]'), PGML('[___]{$Zrow1}'), PGML('[___]{$Arow1}'), PGML('[___]{$Zrow1}'), PGML('[___]{$Nrow1}'),PGML('[___]{$Zrow1}') ],
 [PGML('[`[$row2[$x2]]`]'),PGML('[___]{$Zrow2}'),PGML('[___]{$Arow2}'), PGML('[___]{$Zrow2}'), PGML('[___]{$Nrow2}'), PGML('[___]{$Erow2}')],
 [PGML('[`[$row3x[$x3]]`]') ,PGML('[___]{$Zrow3}'),PGML('[___]{$Arow3}'), PGML('[___]{$Zrow3}'), PGML('[___]{$Nrow3}'), PGML('[___]{$Erow3}')]],
