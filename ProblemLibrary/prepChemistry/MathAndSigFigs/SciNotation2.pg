@@ -94,7 +94,7 @@ BEGIN_PGML
 
 ##Scientific Notation
 
-_Write each of the following numbers in scientific notation. For this problem, scientific notation is entered as "x10^" so that, for example, if the problem asks you to put 0.0097 in scientific notation, you would enter 9.7x10^-2 into the answer blank. _
+_Write each of the following numbers in scientific notation. For this problem, scientific notation is entered as "x10^" so that, for example, if the problem asks you to put 0.0097 in scientific notation, you would enter 9.7x10^-3 into the answer blank. _
 
 a.   [``[$answer1]``]   [____]{$prob1}
 
