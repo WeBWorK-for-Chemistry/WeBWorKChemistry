@@ -46,7 +46,7 @@ Context()->flags->set(
 
 @options = ( "choose an answer", "pure substance", "mixture" );
 
-@pure = ( "Copper", "Nitrogen", "Oxygen", "Aluminum", "Helium", "Carbon", "Hydrogen","Water", "Carbon dioxide", "Mercury Oxide", "Ice", "Table salt (NaCl)", "Bleach (NaClO)", "Hydrocloric acid (HCl)");
+@pure = ( "Copper", "Nitrogen", "Oxygen", "Aluminum", "Helium", "Carbon", "Hydrogen","Water", "Carbon dioxide", "Mercury oxide", "Ice", "Table salt (NaCl)", "Bleach (NaClO)", "Hydrogen chloride (HCl)");
 @mixture = ( "Air", "Gasoline", "Pancake syrup", "Iced tea", "Milk", "Shampoo", "Soil", "Brass", "Concrete", "Mud", "Sea water", "Carbonated water", "Blood", "Bread");
 
 my @numbers;
