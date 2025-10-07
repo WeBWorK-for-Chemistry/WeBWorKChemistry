@@ -31,11 +31,13 @@ loadMacros(
 
 Context("ScientificNotation");
 
-@check = (1,2,3,4,5,6,7,8,9);
+@check = (1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0);
 $base1 = random(1.0, 9.9, 0.01);
-for (@check) {
-    if ($base1 == $check[$_]) {
-    $base1 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+
+foreach my $val (@check) {
+    if (abs($base1 - $val) < 0.0001) {  # Use tolerance for float comparison
+        $base1 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+        last;
     }
 }
 $exponent1 = random(-4, 6, 1);
@@ -43,9 +45,11 @@ $prob1 = Compute("$base1 x 10^$exponent1");
 $answer1 = $base1*10**($exponent1);
     
 $base2 = random(1.0, 9.9, 0.01);
-for (@check) {
-    if ($base2 == $check[$_]) {
-    $base2 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+
+foreach my $val (@check) {
+    if (abs($base2 - $val) < 0.0001) {  # Use tolerance for float comparison
+        $base2 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+        last;
     }
 }
 $exponent2 = random(-4, 6, 1);
@@ -53,9 +57,11 @@ $prob2 = Compute("$base2 x 10^$exponent2");
 $answer2 = $base2*10**($exponent2);
 
 $base3 = random(1.0, 9.9, 0.01);
-for (@check) {
-    if ($base3 == $check[$_]) {
-    $base3 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+
+foreach my $val (@check) {
+    if (abs($base3 - $val) < 0.0001) {  # Use tolerance for float comparison
+        $base3 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+        last;
     }
 }
 $exponent3 = random(-4, 6, 1);
@@ -63,19 +69,24 @@ $prob3 = Compute("$base3 x 10^$exponent3");
 $answer3 = $base3*10**($exponent3);
 
 $base4 = random(1.0, 9.9, 0.01);
-for (@check) {
-    if ($base4 == $check[$_]) {
-    $base4 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+
+foreach my $val (@check) {
+    if (abs($base4 - $val) < 0.0001) {  # Use tolerance for float comparison
+        $base4 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+        last;
     }
 }
+
 $exponent4 = random(-4, 6, 1);
 $prob4 = Compute("$base4 x 10^$exponent4");    
 $answer4 = $base4*10**($exponent4);
 
 $base5 = random(1.0, 9.9, 0.01);
-for (@check) {
-    if ($base5 == $check[$_]) {
-    $base5 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+
+foreach my $val (@check) {
+    if (abs($base5 - $val) < 0.0001) {  # Use tolerance for float comparison
+        $base5 = list_random(2.75, 4.909, 3.22, 1.001, 9.007, 7.6, 2.00, 2.040);
+        last;
     }
 }
 $exponent5 = random(-4, 6, 1);
