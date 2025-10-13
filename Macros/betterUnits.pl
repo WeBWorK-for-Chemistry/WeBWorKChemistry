@@ -206,6 +206,10 @@ our %known_units = (
         'factor' => 3600,
         's'      => 1
     },
+    'hrs' => {
+        'factor' => 3600,
+        's'      => 1
+    },
     'hour' => {
         'factor' => 3600,
         's'      => 1
