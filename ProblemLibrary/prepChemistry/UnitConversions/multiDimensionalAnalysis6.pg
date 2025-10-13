@@ -133,7 +133,7 @@ BEGIN_PGML
 
 The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. Remember to look at the units to know which conversion factor to use.
 
-#### Convert [``\mathrm{[$m]\frac{m}{hr}}``] to [``\mathrm{\frac{mi}{min}}``].  Use the fact that 0.6214 mi = 1 km.    
+#### Convert [``\mathrm{[$value]\frac{m}{hr}}``] to [``\mathrm{\frac{mi}{min}}``].  Use the fact that 0.6214 mi = 1 km.    
 
 [@conversionEQ($display,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
  
