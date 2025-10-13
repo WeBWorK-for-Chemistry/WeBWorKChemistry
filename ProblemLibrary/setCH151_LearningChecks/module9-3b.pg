@@ -233,9 +233,9 @@ $mp6 = MultiAnswer($prod5, $prod6)->with(
 ############################################################
 
 BEGIN_PGML
-##Precipitation Reactions - Writing Balanced Molecular Reactions
+##Precipitation Reactions - Writing Balanced Molecular Equations
 
-Write the complete balanced molecular reaction for each double displacement reaction. You are given the reactants that are combined in each instance.
+Write the complete balanced molecular equation for each double displacement reaction. You are given the reactants that are combined in each instance.
 
 Place the balanced coeffcient in the answer box with the formula for each reactant and product.  Do not forget to include the state of each reactant and product, (s) or (aq).  The order in which the reactants and products are written does not matter.
 
