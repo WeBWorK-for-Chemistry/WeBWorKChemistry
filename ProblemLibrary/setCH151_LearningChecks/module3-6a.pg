@@ -31,6 +31,7 @@ Context("Numeric");
 #$m = random(70.1,99.9,0.1);
 
 Context("InexactValue");
+Context()->flags->set(creditSigFigs=>0.25);
 
 $degK = InexactValue(90.2, 3);
 
@@ -81,7 +82,7 @@ BEGIN_PGML_SOLUTION
 
 To convert to from Celcuis to Kelvin, remember that the constants in this equation are exact. 
 
-[$degK] + 273.15 = [$degC] [``^\circ C``]
+[$degK] - 273.15 = [$degC] [``^\circ C``]
 
 Then to convert from Celsius to Fahrenheit.  Again remember that the constants in this equation are all exact.
 
