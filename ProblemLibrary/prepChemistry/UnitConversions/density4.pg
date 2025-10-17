@@ -116,7 +116,7 @@ TEXT(beginproblem());
 BEGIN_PGML
 ## Unit Conversion - Density as a Conversion Factor
 
-The given value has been placed into the single line of dimensional analysis for you.  Place the correct conversion factor into the problem. When using density as a conversion factor it can be helpful to think about density as an equality. For example, for mercury, which has a density of [`\mathrm{13.6\frac{g}{mL}}`], the following equality is true, 11.3 g = 1 mL. 
+The given value has been placed into the single line of dimensional analysis for you.  Place the correct conversion factor into the problem. When using density as a conversion factor it can be helpful to think about density as an equality. For example, for mercury, which has a density of [`\mathrm{13.6\frac{g}{mL}}`], the following equality is true, 13.6 g = 1 mL. 
 
 #### What mass of acetone would have a volume of [$given]? The density of acetone is 0.784 g/mL.  
 
