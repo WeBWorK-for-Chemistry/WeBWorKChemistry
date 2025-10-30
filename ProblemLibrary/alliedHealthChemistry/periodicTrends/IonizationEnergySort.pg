@@ -24,7 +24,7 @@ loadMacros(
 );
 
 Context("ArbitraryString");
-@sets = ([qw(Be Li Na K)], [qw(Mg Ca Sr Rb)], [qw(N C B Al)], [qw(Sb As P N)], [qw(Al Mg Na K)], [qw(P Si Al Ga)], [qw(F Cl Br I)], [qw(Cl S Se Te)]);
+@sets = ([qw(Be Li Na K)], [qw(Mg Ca Sr Rb)], [qw(N C B Al)], [qw(N P As Sb)], [qw(Al Mg Na K)], [qw(P Si Al Ga)], [qw(F Cl Br I)], [qw(Cl S Se Te)]);
 
 
 # randomly pick one isotope set
