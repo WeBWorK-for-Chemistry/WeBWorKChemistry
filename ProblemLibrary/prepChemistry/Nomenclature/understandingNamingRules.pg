@@ -1,0 +1,111 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+# Try to only load the macro files that are needed.
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+);
+
+
+$dropdown1 = DropDown([ 
+    [ "ionic", "covalent" ] ],
+    0,
+    placeholder => 'Choose One');
+
+$dropdown2 = DropDown([ 
+    [ "ionic", "covalent" ] ],
+    1,
+    placeholder => 'Choose One');
+$dropdown3 = DropDown([ 
+    [ "are", "are not" ] ],
+    0,
+    placeholder => 'Choose One');
+
+$dropdown4 = DropDown([ 
+    [ "are", "are not" ] ],
+    1,
+    placeholder => 'Choose One');
+
+@ionic = qw(\(\mathrm{TiCl_4}\) \(\mathrm{SnO_2}\) \(\mathrm{MnF_4}\) \(\mathrm{FeO}\) \(\mathrm{AlF_3}\) \(\mathrm{VCl_2}\) \(\mathrm{V_2O_3}\) \(\mathrm{MnO_2}\) \(\mathrm{BaCl_2}\));
+@covalent = qw(\(\mathrm{CCl_4}\) \(\mathrm{NO_2}\) \(\mathrm{SeF_4}\) \(\mathrm{CO}\) \(\mathrm{CO_2}\) \(\mathrm{SO_3}\) \(\mathrm{NF_3}\) \(\mathrm{S_2O_3}\) \(\mathrm{PCl_5}\));
+
+
+%metalClasses = (
+    (map {$_ => 'Ionic'} @ionic),
+    (map {$_ => 'Covalent'} @covalent)
+);
+
+# randomly pick two of each type
+@ionic_formulas = random_subset(3, @ionic);
+@covalent_formulas = random_subset(3, @covalent);
+
+# merge them and randomize order:
+@formulas = random_subset(6,
+    @ionic_formulas,
+    @covalent_formulas
+);
+
+@options = (
+    'Ionic',
+    'Covalent'
+);
+
+$separator = ($displayMode eq 'TeX') ? '' : $BR;
+$checkboxes{'Ionic'} = CheckboxList(~~@formulas, ~~@ionic_formulas, separator => $separator);
+$checkboxes{'Covalent'} = CheckboxList(~~@formulas, ~~@covalent_formulas, separator => $separator);
+
+BEGIN_PGML
+##Ionic or Covalent
+
+Compounds that contain a metal and a nonmetal are [__]{$dropdown1} compounds. When writing the names of these compounds, prefixes like di, tri, tetra, [__]{$dropdown4} used. 
+
+Compounds that contain two nonmetals are [__]{$dropdown2} compounds. When writing the names of these compounds, prefixes like di, tri, tetra, [__]{$dropdown3} used. 
+
+Classify each of the following metals as a variable or fixed charge metal by checking the box next to the metal in column in which they belong.
+
+----
+
+[#
+    [.*Ionic*.]
+    [.*Covalent*.]*{rowbottom => 1}
+    [.[_]{$checkboxes{'Ionic'}}.]
+    [.[_]{$checkboxes{'Covalent'}}.]
+#]*{
+    align => 'p{3.2cm}p{3.2cm}',
+    padding => [0.1,0.5],
+    valign =>'bottom'
+}
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+For more information on [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.05%3A_Naming_Ionic_Compounds"), protect_underbar("ionic naming, click here"), "TARGET='_blank'" ); @]*
+
+For more information on [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.04%3A_Binary_Covalent_Compounds-_Formulas_and_Names"), protect_underbar("covalent naming, click here"), "TARGET='_blank'" ); @]*
+
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+

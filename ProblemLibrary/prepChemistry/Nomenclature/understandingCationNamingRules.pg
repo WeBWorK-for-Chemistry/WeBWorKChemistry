@@ -1,0 +1,112 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+# Try to only load the macro files that are needed.
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+  "draggableSubsets.pl"
+);
+
+
+$dropdown1 = DropDown([ 
+    [ "fixed charge", "variable charge" ] ],
+    0,
+    placeholder => 'Choose One');
+
+$dropdown2 = DropDown([ 
+    [ "require", "do not require" ] ],
+    1,
+    placeholder => 'Choose One');
+
+$dropdown3 = DropDown([ 
+    [ "fixed charge", "variable charge" ] ],
+    1,
+    placeholder => 'Choose One');
+
+$dropdown4 = DropDown([ 
+    [ "require", "do not require" ] ],
+    0,
+    placeholder => 'Choose One');
+# Define metal types
+@type_1_metals = qw(Li Na K Rb Cs Fr Be Mg Ca Sr Ba Al Zn Ag Cd);
+@type_2_metals = qw(Ti V Cr Mn Fe Co Cu Au Zr Mo Pt Pd Sb Sn Pb);
+
+# Classify metals
+%metalClasses = (
+  (map { $_ => 'Fixed Charge Metal' } @type_1_metals),
+  (map { $_ => 'Variable Charge Metal' } @type_2_metals)
+);
+
+# Randomly select 3 of each type
+@type_one_elements = random_subset(3, @type_1_metals);
+@type_two_elements = random_subset(3, @type_2_metals);
+
+# Combine and shuffle
+@elements = random_subset(6, @type_one_elements, @type_two_elements);
+
+# Index lookup hashes
+my %is_type_one = map { $_ => 1 } @type_one_elements;
+my %is_type_two = map { $_ => 1 } @type_two_elements;
+
+# Get indices of each type in @elements
+my @type_one_indices = grep { $is_type_one{$elements[$_]} } 0..$#elements;
+my @type_two_indices = grep { $is_type_two{$elements[$_]} } 0..$#elements;
+
+# Create draggable classification activity
+$draggable = DraggableSubsets(
+  ~~@elements,
+  [ [], ~~@type_one_indices, ~~@type_two_indices ],
+  DefaultSubsets => [
+    { label => 'Elements', indices => [ 0 .. $#elements ] },
+    { label => 'Fixed Charge Metals', indices => [] },
+    { label => 'Variable Charge Metals', indices => [] },
+  ],
+  AllowNewBuckets => 0
+);
+
+
+BEGIN_PGML
+##Variable or Fixed Charge Metal
+
+A metal that can only form one possible cation is called a [__]{$dropdown1} metal. These metals [_]{$dropdown2} a Roman Numeral in their name to designate their charge.
+
+A metal that can form more than one possible cation is called a [_]{$dropdown3} metal. These metals [_]{$dropdown4} a Roman Numeral in their name to designate their charge.
+
+----
+
+Drag each element from the elements box to into the appropriate box.
+
+[_]{$draggable}
+
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+For more information on ion charges, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/06%3A_Ions_Ionic_Bonding_and_the_Nomenclature_of_Ionic_Compounds/6.02%3A_Ions_With_Variable_Charges"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+
