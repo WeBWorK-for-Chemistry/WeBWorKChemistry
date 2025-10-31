@@ -59,9 +59,9 @@ $draggable = DraggableSubsets(
 BEGIN_PGML
 ##Ionic or Covalent
 
-Compounds that contain a metal and a nonmetal are [__]{$dropdown1} compounds. When writing the names of these compounds, prefixes like di, tri, tetra [__]{$dropdown4} used.
+Compounds that contain a metal and a nonmetal are [__]{$dropdown1} compounds. When writing the names of these compounds, prefixes like di, tri, tetra [__]{$dropdown3} used.
 
-Compounds that contain two nonmetals are [__]{$dropdown2} compounds. When writing the names of these compounds, prefixes like di, tri, tetra [__]{$dropdown3} used.
+Compounds that contain two nonmetals are [__]{$dropdown2} compounds. When writing the names of these compounds, prefixes like di, tri, tetra [__]{$dropdown4} used.
 
 ----
 
