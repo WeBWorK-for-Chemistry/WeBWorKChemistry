@@ -45,41 +45,38 @@ EOF
 ##############################################
 
 sub conversionEQ {
-  my $start = shift;
-  my $colsref = shift;
-  my $n = scalar @{$colsref};
-  my $end = shift;
+  my ($start, $colsref, $end) = @_;
+  my $n = scalar @$colsref;
+
   my $html;
+  my $ptx;
+
+  # HTML output
   $html .= '<div class="conversionEQ">';
-    $html .= '<div>';
-      $html .= $start;
+  $html .= "<div>$start</div>";
+  for (my $i = 0; $i < $n; $i += 2) {
+    $html .= '<div class="conversionEQmath">' . math_ev3('\times') . '</div>';
+    $html .= '<div class="conversionEQcol">';
+    $html .= "<div>$colsref->[$i]</div>";
+    $html .= '<div class="conversionFractionBar"><svg height="1" width="40"><desc>per</desc></svg></div>';
+    $html .= "<div>$colsref->[$i+1]</div>";
     $html .= '</div>';
-    for ($i=0; $i < $n; $i+=2) {
-      $html .= '<div class="conversionEQmath">';
-         $html .= math_ev3('\times');
-      $html .= '</div>';
-      $html .= '<div class="conversionEQcol">';
-         $html .= '<div>';
-             $html .= $colsref->[$i];
-         $html .= '</div>';       
-         $html .= '<div class="conversionFractionBar">';
-             $html .= '<svg height="1" width="40">';
-                 $html .= '<desc>per</desc>';
-             $html .= '</svg>';
-         $html .= '</div>';       
-         $html .= '<div>';
-             $html .= $colsref->[$i+1];
-         $html .= '</div>';       
-      $html .= '</div>';
   }
-  $html .= '<div  class="conversionEQmath">';
-      $html .= math_ev3('{}={}');
+  $html .= '<div class="conversionEQmath">' . math_ev3('{}={}') . '</div>';
+  $html .= "<div>$end</div>";
   $html .= '</div>';
-  $html .= '<div>';
-      $html .= $end;
-  $html .= '</div>';
-  $html .= '</div>';
-  MODES(HTML=>$html);
+
+  # PTX output
+  $ptx .= "<p>\n<m>\n<mrow>\n";
+  $ptx .= "<me>$start</me>\n";
+  for (my $i = 0; $i < $n; $i += 2) {
+    $ptx .= "<times/>\n";
+    $ptx .= "<mfrac>\n<numerator><me>$colsref->[$i]</me></numerator>\n";
+    $ptx .= "<denominator><me>$colsref->[$i+1]</me></denominator>\n</mfrac>\n";
+  }
+  $ptx .= "<equals/>\n<me>$end</me>\n</mrow>\n</m>\n</p>\n";
+
+  MODES(HTML => $html, PTX => $ptx);
 }
 
 install_weighted_grader();
