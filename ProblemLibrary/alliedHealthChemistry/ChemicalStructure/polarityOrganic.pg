@@ -71,7 +71,7 @@ loadMacros(
 
 for (0..3) {
     $image[$_] = "$molecules[$_].png";
-    $alt[$_] = $alt_text{$molecules[0]};
+    $alt[$_] = $alt_text{$molecules[$_]};
 }
 BEGIN_PGML
 
