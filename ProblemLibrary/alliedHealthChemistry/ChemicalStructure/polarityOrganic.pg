@@ -71,7 +71,11 @@ loadMacros(
 
 for (0..3) {
     $image[$_] = "$molecules[$_].png";
-    $alt[$_] = $alt_text{$molecules[$_]};
+#   if (exists $alt_text{molecules[$_]}){
+#       $alt[$_] = $alt_text{$molecules[$_]};
+#   } else {
+        $alt[$_] = "Structure of $molecules[$_]";
+#   }
 }
 BEGIN_PGML
 
