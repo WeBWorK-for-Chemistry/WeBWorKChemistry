@@ -188,7 +188,6 @@ BEGIN_PGML
 ##The Periodic Table and the Elements
 
 Write the *chemical symbol* for each element below based on their group number and period.
-[$elements[15]{name}]
 
 [#
     [.
