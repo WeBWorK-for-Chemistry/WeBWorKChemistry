@@ -25,7 +25,7 @@ $m = random(1.25,9.99, 0.01);
 #    $m = 153;
 #}
 
-Context("InexactValueWithUnits");
+Context("InexactValue");
 Context()->flags->set(
     'newUnit' => [
         [ 'Joule',     'Joules',     'J' ],
@@ -53,7 +53,7 @@ TEXT(beginproblem());
 BEGIN_PGML
 ##Calculating Heat Energy
 
-What quantity of heat (in Joules) is transferred when [$mass] grams of copper is heated from  [``\mathrm{25^\circ C}  ``] to  [``\mathrm{153^\circ C}  ``] C? The heat capacity of copper is [``\mathrm{0.385 \frac{J}{g^\circ C}}``] 
+What quantity of heat (in Joules) is transferred when [$mass] grams of copper is heated from  [``\mathrm{25^\circ C}  ``] to  [``\mathrm{153^\circ C}  ``]? The heat capacity of copper is [``\mathrm{0.385 \frac{J}{g^\circ C}}``] 
 
 
 heat (q) = [____]{$heat} J
