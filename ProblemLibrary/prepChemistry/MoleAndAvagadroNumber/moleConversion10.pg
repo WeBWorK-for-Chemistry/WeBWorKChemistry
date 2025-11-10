@@ -97,6 +97,8 @@ $x = random(0,7);
 
 @mass = ('46.01', '44.01', '153.81', '331.61', '18.02', '80.06', '120.36', '253.71');
 
+@sigfig = qw(4 4 5 5 4 4 5 5);
+
 @elements = ('O', 'O', 'Cl', 'Br', 'O', 'O', 'Cl', 'Br');
 
 @numbers = (2,2,4,4,1,3,3,3);
@@ -105,6 +107,7 @@ $x = random(0,7);
 
 $compound = $formulas[$x];
 $formMass = $mass[$x];
+$sigfigs = $sigfig[$x];
 $element = $elements[$x];
 $number = $numbers[$x];
 $numMass = $numMasses[$x];
@@ -118,7 +121,7 @@ $n = InexactValue ( $m, 3);
 $given = InexactValueWithUnits( [$num , 3], "g $compound");
 
 $n1 = InexactValueWithUnits(['1', 9**9**9], 'mol');
-$d1 = InexactValueWithUnits([$formMass, 4], 'g'); 
+$d1 = InexactValueWithUnits([$formMass, $sigfigs], 'g'); 
 
 $n2 = InexactValueWithUnits([$number, 9**9**9], "mol $element");
 $d2 = InexactValueWithUnits(['1', 9**9**9], "mol $compound");
@@ -198,4 +201,6 @@ BEGIN_PGML_SOLUTION
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
+
+
 
