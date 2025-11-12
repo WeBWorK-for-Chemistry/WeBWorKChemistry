@@ -154,6 +154,13 @@ foreach $i (0..4) {
     }
 }
 
+foreach $i (0..4) {
+    foreach $j (0..2) {
+        if ($xy[$j][$i] eq Formula("H_2HPO_4")) {
+            $xy[$j][$i] = Formula("H_3PO_4");
+        }
+    }
+}
 
 
 
