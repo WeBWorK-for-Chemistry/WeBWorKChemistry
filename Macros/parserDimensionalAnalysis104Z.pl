@@ -1,7 +1,7 @@
 # This is a dimensional analysis macro being tested for CH 104Z at PCC. This class doesn't require sig figs in calculations but wants to reinforce that students utilize all digits in conversion factors.
 =head1 NAME
 
-parserDimensionalAnalysis.pl 
+parserDimensionalAnalysis104Z.pl 
 
 =head1 DESCRIPTION
 
