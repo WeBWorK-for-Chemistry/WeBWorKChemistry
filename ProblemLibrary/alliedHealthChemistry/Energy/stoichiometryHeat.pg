@@ -33,7 +33,7 @@ $grams = random(1.01 ,9.99, 0.01);
 
 Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);  # flag needed to recognize chemical names as units
     
-    $given = InexactValueWithUnits( [$grams , 3], 'grams CH_4');  
+    $given = InexactValueWithUnits( [$grams , 3], 'grams');  
     $n1 = InexactValueWithUnits(['1', 9**9**9], 'mol'); 
     $d1 = InexactValueWithUnits(['16.05', 4], 'grams'); 
     $n2 = InexactValueWithUnits(['890', 3], 'kJ'); 
@@ -71,6 +71,7 @@ How much heat (in kJ) is released when [`[$given]`] is completely combusted?
 Helpful Hints:
 * Because this reaction is exothermic the enthalpy change is negative. Use the positive of this number when calculating the amount of heat released because although the reaction is losing heat, the amount released is a positive quantity.
 * Note that the change in enthalpy has a decimal point after the zero indicating that it contains 3 sig figs. 
+* You may use the chemical formulas in your conversion factors but only if it is present in the numerator and denominator. If it is not, please do not use it. This is not actually incorrect but is a consequence of the grading algorithm in WeBWorK. For example, [``\mathrm{\frac{1 mol CH_4}{16.05 g CH_4}}``] is fine but [``\mathrm{\frac{890. kJ}{1 mol CH_4}}``] will be marked incorrect even when correct. 
 
 [@ DimensionalAnalysis::generateProblem($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10)) @]*
 
