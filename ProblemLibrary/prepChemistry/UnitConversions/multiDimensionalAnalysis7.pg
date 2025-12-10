@@ -18,7 +18,7 @@ loadMacros(
   "weightedGrader.pl"
 );
 
-\
+
 install_weighted_grader();
 
 Context("Numeric");
