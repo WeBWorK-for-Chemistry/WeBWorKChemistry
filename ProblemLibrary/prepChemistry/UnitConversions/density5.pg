@@ -58,6 +58,7 @@ Note: mL has a capital L. Also check the format of your final answer. It should 
             [.[`\mathrm{volume}`] .]*
         #]*
     .]
+    [.[`=`].]
     [.
         [#
             [.[_]{$mass} .]*{bottom => 1}
