@@ -8,12 +8,9 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
-  "parserPopUp.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
   "parserDimensionalAnalysis.pl",
@@ -21,67 +18,7 @@ loadMacros(
   "weightedGrader.pl"
 );
 
-HEADER_TEXT(<<EOF);
-  <style>
-  .conversionEQ {
-    display: flex;
-    align-items: center;
-  }
-  .conversionEQ > div {
-    text-align: center;
-  }
-  .conversionFractionBar {
-  line-height: 1px;
-  width: 100%;
-  border-bottom: 1px solid black;
-  margin-bottom: 4px;
-  }
-  .conversionEQmath {
-    padding: 1em;
-  }
-  </style>  
-EOF
-
-##############################################
-
-sub conversionEQ {
-  my $start = shift;
-  my $colsref = shift;
-  my $n = scalar @{$colsref};
-  my $end = shift;
-  my $html;
-  $html .= '<div class="conversionEQ">';
-    $html .= '<div>';
-      $html .= $start;
-    $html .= '</div>';
-    for ($i=0; $i < $n; $i+=2) {
-      $html .= '<div class="conversionEQmath">';
-         $html .= math_ev3('\times');
-      $html .= '</div>';
-      $html .= '<div class="conversionEQcol">';
-         $html .= '<div>';
-             $html .= $colsref->[$i];
-         $html .= '</div>';       
-         $html .= '<div class="conversionFractionBar">';
-             $html .= '<svg height="1" width="40">';
-                 $html .= '<desc>per</desc>';
-             $html .= '</svg>';
-         $html .= '</div>';       
-         $html .= '<div>';
-             $html .= $colsref->[$i+1];
-         $html .= '</div>';       
-      $html .= '</div>';
-  }
-  $html .= '<div  class="conversionEQmath">';
-      $html .= math_ev3('{}={}');
-  $html .= '</div>';
-  $html .= '<div>';
-      $html .= $end;
-  $html .= '</div>';
-  $html .= '</div>';
-  MODES(HTML=>$html);
-}
-
+\
 install_weighted_grader();
 
 Context("Numeric");
@@ -89,7 +26,7 @@ Context("Numeric");
 $m = random(11,99,1);
 
 while ( $m % 10 == 0 ) {
-    $m = random(11, 99, 1);
+    $m++;
     }
 
 Context("InexactValueWithUnits");
@@ -125,18 +62,47 @@ $ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$answer)->asDimensionalAnalysis($given
 $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2,$n3,$d3],$answer);
 ##############################################
 
-TEXT(beginproblem());
-
 BEGIN_PGML
 ## Unit Conversion - Units Raised to a Power
 
-The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. Remember to look at the units to know which conversion factor to use. For units raised to a power, you will need to use the conversion factor the number of times in that power.
+*Convert [``[$m]\ cm^{3}``] to [``m^{3}``].  *
 
-#### Convert [``[$m]\ cm^{3}``] to [``m^{3}``].  
+The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. Remember to look at the units to know which conversion factor to use. For units raised to a power, you will need to use the conversion factor the number of times in that power.
 
 Use the fact that 100 cm = 1 m.  You may need to use this conversion factor more than once in this problem.  Make sure that you understand how the units are cancelling.
 
-[@conversionEQ($display,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
  
 END_PGML
 

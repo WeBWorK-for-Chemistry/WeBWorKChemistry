@@ -8,12 +8,9 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
-  "parserPopUp.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
   "parserDimensionalAnalysis.pl",
@@ -21,76 +18,13 @@ loadMacros(
   "weightedGrader.pl"
 );
 
-HEADER_TEXT(<<EOF);
-  <style>
-  .conversionEQ {
-    display: flex;
-    align-items: center;
-  }
-  .conversionEQ > div {
-    text-align: center;
-  }
-  .conversionFractionBar {
-  line-height: 1px;
-  width: 100%;
-  border-bottom: 1px solid black;
-  margin-bottom: 4px;
-  }
-  .conversionEQmath {
-    padding: 1em;
-  }
-  </style>  
-EOF
 
-##############################################
-
-sub conversionEQ {
-  my $start = shift;
-  my $colsref = shift;
-  my $n = scalar @{$colsref};
-  my $end = shift;
-  my $html;
-  $html .= '<div class="conversionEQ">';
-    $html .= '<div>';
-      $html .= $start;
-    $html .= '</div>';
-    for ($i=0; $i < $n; $i+=2) {
-      $html .= '<div class="conversionEQmath">';
-         $html .= math_ev3('\times');
-      $html .= '</div>';
-      $html .= '<div class="conversionEQcol">';
-         $html .= '<div>';
-             $html .= $colsref->[$i];
-         $html .= '</div>';       
-         $html .= '<div class="conversionFractionBar">';
-             $html .= '<svg height="1" width="40">';
-                 $html .= '<desc>per</desc>';
-             $html .= '</svg>';
-         $html .= '</div>';       
-         $html .= '<div>';
-             $html .= $colsref->[$i+1];
-         $html .= '</div>';       
-      $html .= '</div>';
-  }
-  $html .= '<div  class="conversionEQmath">';
-      $html .= math_ev3('{}={}');
-  $html .= '</div>';
-  $html .= '<div>';
-      $html .= $end;
-  $html .= '</div>';
-  $html .= '</div>';
-  MODES(HTML=>$html);
-}
 
 install_weighted_grader();
 
 Context("Numeric");
 
 $m = random(0.0100, 0.0999, 0.0001);
-
-#while ( $m % 10 == 0 ) {
-#    $m = random(11, 99, 1);
-#    }
 
 Context("InexactValueWithUnits");
 
@@ -126,17 +60,47 @@ $ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$answer)->asDimensionalAnalysis($given
 $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2,$n3,$d3],$answer);
 ##############################################
 
-TEXT(beginproblem());
 
 BEGIN_PGML
 ## Unit Conversion - Multiple Step, Compound Units
 
+*Convert [``\mathrm{[$value]\frac{m}{hr}}``] to [``\mathrm{\frac{mi}{min}}``].  Use the fact that 0.6214 mi = 1 km. *
+
 The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. Remember to look at the units to know which conversion factor to use.
 
-#### Convert [``\mathrm{[$value]\frac{m}{hr}}``] to [``\mathrm{\frac{mi}{min}}``].  Use the fact that 0.6214 mi = 1 km.    
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
 
-[@conversionEQ($display,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
- 
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
 END_PGML
 
 # This weights the final answer with X percentage and splits the rest among the conversion factors.

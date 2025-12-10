@@ -8,17 +8,11 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
-  "parserPopUp.pl",
   "contextInexactValue.pl",
-  "contextInexactValueWithUnits.pl",
-  "parserDimensionalAnalysis.pl",
   "parserMultiAnswer.pl",
-  "weightedGrader.pl"
 );
 
 
@@ -26,11 +20,9 @@ loadMacros(
 ##############################################
 
 
-Context("Numeric");
+Context("InexactValue");
 
 $m = random(30.0,69.9,0.1);
-
-Context("InexactValue");
 
 $given = InexactValue($m, 3);
 
@@ -48,9 +40,9 @@ TEXT(beginproblem());
 BEGIN_PGML
 ##Unit Conversion - Temperature - Celcius to Fahrenheit
 
-Convert the following temperature. Remember that temperature conversions use both multiplication/division and addition/subtraction so you will need to use the correct sig fig rules when doing these calculations.
+*The temperature of a substance is [$given] [``^\circ C``], convert this into degrees Fahrenheit.*
 
-####The temperature of a substance is [$given] [``^\circ C``], convert this into degrees Fahrenheit.
+Convert the following temperature. Remember that temperature conversions use both multiplication/division and addition/subtraction so you will need to use the correct sig fig rules when doing these calculations.
  
 
 [$given] [``^\circ C``] = [_________]{$degF} [``^\circ F``]

@@ -9,114 +9,16 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
 #  "parserDimensionalAnalysis.pl",
    "parserMultiAnswer.pl",
 );
 ############################################################
-# Header
-############################################################
-HEADER_TEXT(<<EOF);
-  <style>
-  .conversionEQ {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: -30px;
-    justify-content: space-evenly;
-  }
-  .conversionEQ > div {
-    text-align: center;
-    margin-top: 30px;
-    padding: 1em;
-  }
-  .conversionFractionBar {
-  line-height: 1px;
-  width: 100%;
-  border-bottom: 1px solid black;
-  margin-bottom: 4px;
-  }
-  .conversionEQmath {
-    padding: 1em;
-  }
-  .conversionFactorGrouping{
-      display:flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1em;
-  }
-  </style>  
-EOF
 
-TEXT(beginproblem());
-
-sub conversionEQ {
-    my $start = shift;
-    my $colsref = shift;
-    my $n = scalar @{$colsref};
-    my $end = shift;
-    my $html;
-    my $tex;
-    $html .= '<div class="conversionEQ">';
-    $html .= '<div>';
-    $html .= $start;
-    $html .= '</div>';
-    for ($i=0; $i < $n; $i+=2) {
-        $html .= '<div class="conversionEQmath">';
-        $html .= math_ev3('\times');
-        $html .= '</div>';
-        $html .= '<div class="conversionEQcol">';
-        $html .= '<div>';
-        $html .= $colsref->[$i];
-        $html .= '</div>';       
-        $html .= '<div class="conversionFractionBar">';
-        $html .= '<svg height="1" width="40">';
-        $html .= '<desc>per</desc>';
-        $html .= '</svg>';
-        $html .= '</div>';       
-        $html .= '<div>';
-        $html .= $colsref->[$i+1];
-        $html .= '</div>';       
-        $html .= '</div>';
-    }
-    $html .= '<div  class="conversionEQmath">';
-    $html .= math_ev3('{}={}');
-    $html .= '</div>';
-    $html .= '<div>';
-    $html .= $end;
-    $html .= '</div>';
-    $html .= '</div>';
-    MODES(HTML=>$html, TeX=>'');
-}
-
-sub conversionFactor {
-    my $numerator = shift;
-    my $denominator = shift;
-    my $html;
-    $html .= '<div class="conversionEQ">';
-        $html .= '<div class="conversionEQcol">';
-            $html .= '<div>';
-                $html .= $numerator;
-            $html .= '</div>';       
-            $html .= '<div class="conversionFractionBar">';
-                $html .= '<svg height="1" width="40">';
-                $html .= '<desc>per</desc>';
-                $html .= '</svg>';
-            $html .= '</div>';       
-            $html .= '<div>';
-                $html .= $denominator;
-            $html .= '</div>';       
-        $html .= '</div>';
-    $html .= '</div>';
-
-    MODES(HTML=>$html, TeX=>'');
-}
 
 Context("InexactValueWithUnits");
 
@@ -128,38 +30,44 @@ $mass1 = InexactValueWithUnits([$m1,5], g);
 $mass2 = InexactValueWithUnits([$m2,5], g);
 $mass = $mass2 - $mass1;
 $answer = $mass/$volume;
-ANS($mass->cmp);
-ANS($mass->cmp);
-ANS($volume->cmp);
-ANS($answer->cmp);
-
 
 ##############################################
 
 BEGIN_PGML
 ## Density
 
-The following problem has two steps. First find the mass by taking the difference and then use this result to find the density.
+*An empty beaker has a mass of [$mass1]. You add [$volume] of solution, and the beaker now has a mass of [$mass2]. What is the density of your solution in [`\mathrm{\frac{g}{mL}}`]?*
 
-#### An empty beaker has a mass of [$mass1]. You add [$volume] of solution, and the beaker now has a mass of [$mass2]. What is the density of your solution in [`\mathrm{\frac{g}{mL}}`]?
+The following problem has two steps. First find the mass by taking the difference and then use this result to find the density.
 
 First find the mass in grams of the solution by subtracting the mass of the beaker.
 
->> [``\mathrm{mass\:of\:the\:solution} = [$mass2] - [$mass1] = ``][@ ans_rule(6) @]* <<
+>> [``\mathrm{mass\:of\:the\:solution} = [$mass2] - [$mass1] = ``][_]{$mass} <<
 
 Second, place the answer above with units into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. 
 
 Note: mL has a capital L. Also check the format of your final answer. It should be formatted like this [`\mathrm{number\frac{g}{mL}}`], not [`\mathrm{\frac{number\:g}{mL}}`]. 
 
 
-[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
-[@ MODES(HTML=>'  `\text{density  =  }``\frac{\text{mass}}{\text{volume}} = `') @]*
-[@ conversionFactor(ans_rule(6), ans_rule(6)) @]*
-[@ MODES(HTML=>'`\text{= }`') @]*
-[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm} grams}{\hspace{2cm} mL}``]') @]**
-[@ ans_rule(6) @]*
+[#
+    [.[`\mathrm{density}`] .]
+    [.[`=`].]
+    [.
+        [#
+            [.[`\mathrm{mass}`] .]*{bottom => 1}
+            [.[`\mathrm{volume}`] .]*
+        #]*
+    .]
+    [.
+        [#
+            [.[_]{$mass} .]*{bottom => 1}
+            [.[_]{$volume} .]*
+        #]*
+    .]
 
-[@ MODES(HTML=>'</div>', TeX=>'') @]*
+    [.[`=`].]
+    [.[_]{$answer}.]
+#]*{valign => 'middle'}
 
 END_PGML
 ##############################################
@@ -179,11 +87,25 @@ END_PGML_HINT
 
 BEGIN_PGML_SOLUTION
 
-[@ MODES(HTML=>'<div class="conversionFactorGrouping">', TeX=>'') @]*
-[@ MODES(HTML=>'  `\text{density  =  }``\frac{\text{mass}}{\text{volume}} = `') @]*
-[@ conversionFactor($mass, $volume) @]*
-[@ MODES(HTML=>'`\text{= }`') @]*
-[@ MODES(HTML=>'', TeX=>'[``\frac{\hspace{2cm} grams}{\hspace{2cm} mL}``]') @]** [``[$answer]``] 
+[#
+    [.[`\mathrm{density}`] .]
+    [.[`=`].]
+    [.
+        [#
+            [.[`\mathrm{mass}`] .]*{bottom => 1}
+            [.[`\mathrm{volume}`] .]*
+        #]*
+    .]
+    [.
+        [#
+            [.[`[$mass]`] .]*{bottom => 1}
+            [.[`[$volume]`] .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[`[$answer]`].]
+#]*{valign => 'middle'}
 
 
 END_PGML_SOLUTION

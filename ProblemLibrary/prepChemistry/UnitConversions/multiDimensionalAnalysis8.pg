@@ -8,12 +8,9 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
-  "parserPopUp.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
   "parserDimensionalAnalysis.pl",
@@ -21,81 +18,14 @@ loadMacros(
   "weightedGrader.pl"
 );
 
-HEADER_TEXT(<<EOF);
-  <style>
-  .conversionEQ {
-    display: flex;
-    align-items: center;
-  }
-  .conversionEQ > div {
-    text-align: center;
-  }
-  .conversionFractionBar {
-  line-height: 1px;
-  width: 100%;
-  border-bottom: 1px solid black;
-  margin-bottom: 4px;
-  }
-  .conversionEQmath {
-    padding: 1em;
-  }
-  </style>  
-EOF
-
-##############################################
-
-sub conversionEQ {
-  my $start = shift;
-  my $colsref = shift;
-  my $n = scalar @{$colsref};
-  my $end = shift;
-  my $html;
-  $html .= '<div class="conversionEQ">';
-    $html .= '<div>';
-      $html .= $start;
-    $html .= '</div>';
-    for ($i=0; $i < $n; $i+=2) {
-      $html .= '<div class="conversionEQmath">';
-         $html .= math_ev3('\times');
-      $html .= '</div>';
-      $html .= '<div class="conversionEQcol">';
-         $html .= '<div>';
-             $html .= $colsref->[$i];
-         $html .= '</div>';       
-         $html .= '<div class="conversionFractionBar">';
-             $html .= '<svg height="1" width="40">';
-                 $html .= '<desc>per</desc>';
-             $html .= '</svg>';
-         $html .= '</div>';       
-         $html .= '<div>';
-             $html .= $colsref->[$i+1];
-         $html .= '</div>';       
-      $html .= '</div>';
-  }
-  $html .= '<div  class="conversionEQmath">';
-      $html .= math_ev3('{}={}');
-  $html .= '</div>';
-  $html .= '<div>';
-      $html .= $end;
-  $html .= '</div>';
-  $html .= '</div>';
-  MODES(HTML=>$html);
-}
 
 install_weighted_grader();
 
-Context("Numeric");
-
-$m = random(100, 900, 100);
-#while ( $m % 1000 == 0 ) {
-#    $m = random(1100, 9900, 100);
-#    }
-
 Context("InexactValueWithUnits");
 
+$m = random(100, 900, 100);
 
 $given = InexactValueWithUnits( [$m, 1], 'cm');
-
 
 
 $n1 = InexactValueWithUnits([1, 9**9**9], 'm'); 
@@ -121,17 +51,38 @@ $ma = MultiAnswer($n1,$d1,$n2,$d2,$answer)->asDimensionalAnalysis($given);
 $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2],$answer);
 ##############################################
 
-TEXT(beginproblem());
 
 BEGIN_PGML
 ##Unit Conversion - Two Step
 
+*Convert [$given] to Mm. Go through the base unit.*
+
 The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. Remember to look at the units to know which conversion factor to use. For two step metric conversions convert the given unit to the base unit (meters, liters, grams, etc) and then convert the base unit to the desired unit. 
 
-####Convert [$given] to Mm. Go through the base unit.
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
 
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
 
-[@conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+     [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
  
 END_PGML
 
@@ -181,3 +132,5 @@ BEGIN_PGML_SOLUTION
 END_PGML_SOLUTION
 
 ENDDOCUMENT();
+
+

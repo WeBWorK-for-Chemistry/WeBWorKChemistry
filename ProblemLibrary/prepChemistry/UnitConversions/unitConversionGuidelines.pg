@@ -8,12 +8,9 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
-  "parserPopUp.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
   "parserDimensionalAnalysis.pl",
@@ -21,74 +18,13 @@ loadMacros(
   "weightedGrader.pl"
 );
 
-HEADER_TEXT(<<EOF);
-  <style>
-  .conversionEQ {
-    display: flex;
-    align-items: center;
-  }
-  .conversionEQ > div {
-    text-align: center;
-  }
-  .conversionFractionBar {
-  line-height: 1px;
-  width: 100%;
-  border-bottom: 1px solid black;
-  margin-bottom: 4px;
-  }
-  .conversionEQmath {
-    padding: 1em;
-  }
-  </style>  
-EOF
 
-##############################################
-
-sub conversionEQ {
-  my $start = shift;
-  my $colsref = shift;
-  my $n = scalar @{$colsref};
-  my $end = shift;
-  my $html;
-  $html .= '<div class="conversionEQ">';
-    $html .= '<div>';
-      $html .= $start;
-    $html .= '</div>';
-    for ($i=0; $i < $n; $i+=2) {
-      $html .= '<div class="conversionEQmath">';
-         $html .= math_ev3('\times');
-      $html .= '</div>';
-      $html .= '<div class="conversionEQcol">';
-         $html .= '<div>';
-             $html .= $colsref->[$i];
-         $html .= '</div>';       
-         $html .= '<div class="conversionFractionBar">';
-             $html .= '<svg height="1" width="40">';
-                 $html .= '<desc>per</desc>';
-             $html .= '</svg>';
-         $html .= '</div>';       
-         $html .= '<div>';
-             $html .= $colsref->[$i+1];
-         $html .= '</div>';       
-      $html .= '</div>';
-  }
-  $html .= '<div  class="conversionEQmath">';
-      $html .= math_ev3('{}={}');
-  $html .= '</div>';
-  $html .= '<div>';
-      $html .= $end;
-  $html .= '</div>';
-  $html .= '</div>';
-  MODES(HTML=>$html);
-}
 
 install_weighted_grader();
 
-Context("Numeric");
+Context("InexactValueWithUnits");
 
 $m = random(30.0, 70.0, 0.1);
-
-Context("InexactValueWithUnits");
 
 $given = InexactValueWithUnits( sprintf('%.1f',$m), 'g');
 $correct = sprintf('%.1f',$m)/1000;
@@ -113,7 +49,6 @@ $ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given);
 $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
 ##############################################
 
-TEXT(beginproblem());
 
 BEGIN_PGML
 ##Unit Conversion - What to Check When Your Answer is Incorrect
@@ -122,7 +57,21 @@ Here is a sample conversion problem. Please read all of the text. This will help
 
 Convert [$given] of carbon tetrachloride to kilograms of carbon tetrachloride.  
 
-[@conversionEQ($given,[ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
 
 You may know how to solve this problem already but some time in your work, you will likely get feedback that something you entered is incorrect. How can you interpret this to help you?
 

@@ -8,17 +8,10 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
-  "parserPopUp.pl",
   "contextInexactValue.pl",
-  "contextInexactValueWithUnits.pl",
-  "parserDimensionalAnalysis.pl",
-  "parserMultiAnswer.pl",
-  "weightedGrader.pl"
 );
 
 
@@ -26,11 +19,9 @@ loadMacros(
 ##############################################
 
 
-Context("Numeric");
+Context("InexactValue");
 
 $m = random(-201,-70,1);
-
-Context("InexactValue");
 
 $given = InexactValue($m, 3);
 
@@ -41,14 +32,12 @@ $degK = InexactValue($given + $kelvin);
 
 ##############################################
 
-TEXT(beginproblem());
-
 BEGIN_PGML
 ##Unit Conversion - Temperature - Celcius to Kelvin
 
-Convert the following temperature. Remember that temperature conversions use both multiplication/division and addition/subtraction so you will need to use the correct sig fig rules when doing these calculations.
+*What is the temperature in Kelvin of a substance at [$given] [``^\circ C``]?*
 
-####What is the temperature in Kelvin of a substance at [$given] [``^\circ C``].
+Convert the following temperature. Remember that temperature conversions use both multiplication/division and addition/subtraction so you will need to use the correct sig fig rules when doing these calculations.
 
 [$given] [``^\circ C``] = [_________]{$degK} K
 

@@ -8,11 +8,9 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
   "parserPopUp.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
@@ -21,66 +19,7 @@ loadMacros(
   "weightedGrader.pl"
 );
 
-HEADER_TEXT(<<EOF);
-  <style>
-  .conversionEQ {
-    display: flex;
-    align-items: center;
-  }
-  .conversionEQ > div {
-    text-align: center;
-  }
-  .conversionFractionBar {
-  line-height: 1px;
-  width: 100%;
-  border-bottom: 1px solid black;
-  margin-bottom: 4px;
-  }
-  .conversionEQmath {
-    padding: 1em;
-  }
-  </style>  
-EOF
 
-##############################################
-
-sub conversionEQ {
-  my $start = shift;
-  my $colsref = shift;
-  my $n = scalar @{$colsref};
-  my $end = shift;
-  my $html;
-  $html .= '<div class="conversionEQ">';
-    $html .= '<div>';
-      $html .= $start;
-    $html .= '</div>';
-    for ($i=0; $i < $n; $i+=2) {
-      $html .= '<div class="conversionEQmath">';
-         $html .= math_ev3('\times');
-      $html .= '</div>';
-      $html .= '<div class="conversionEQcol">';
-         $html .= '<div>';
-             $html .= $colsref->[$i];
-         $html .= '</div>';       
-         $html .= '<div class="conversionFractionBar">';
-             $html .= '<svg height="1" width="40">';
-                 $html .= '<desc>per</desc>';
-             $html .= '</svg>';
-         $html .= '</div>';       
-         $html .= '<div>';
-             $html .= $colsref->[$i+1];
-         $html .= '</div>';       
-      $html .= '</div>';
-  }
-  $html .= '<div  class="conversionEQmath">';
-      $html .= math_ev3('{}={}');
-  $html .= '</div>';
-  $html .= '<div>';
-      $html .= $end;
-  $html .= '</div>';
-  $html .= '</div>';
-  MODES(HTML=>$html);
-}
 
 install_weighted_grader();
 
@@ -89,7 +28,7 @@ Context("Numeric");
 $m = random(11, 99, 1);
 #the following throws out the numbers with only one sig fig
 while ( $m % 10 == 0 ) {
-    $m = random(11, 99, 1);
+    $m = $m++;
     }
 
 Context("InexactValueWithUnits");
@@ -130,18 +69,55 @@ $ma = MultiAnswer($n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4,$answer)->asDimensionalAnalysi
 $dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1,$n2,$d2,$n3,$d3,$n4,$d4],$answer);
 ##############################################
 
-TEXT(beginproblem());
-
 BEGIN_PGML
 ## Unit Conversion - Multiple Steps
 
-The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. A path for doing this is included in this problem. Remeber you will have one conversion factor for every arrow in the plan.
+*Convert [$given] to mm.*
 
-#### Convert [$given] to mm.
+The given value has been placed into the single line of dimensional analysis for you. Place the correct conversion factors into the problem. A path for doing this is included in this problem. Remeber you will have one conversion factor for every arrow in the plan.
 
 Use the following path to complete this conversion: ft [`\rightarrow`] in [`\rightarrow`] cm [`\rightarrow`] m [`\rightarrow`] mm
 
-[@conversionEQ($given,[ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10),ans_rule(10)],ans_rule(10));@]*
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
  
 END_PGML
 

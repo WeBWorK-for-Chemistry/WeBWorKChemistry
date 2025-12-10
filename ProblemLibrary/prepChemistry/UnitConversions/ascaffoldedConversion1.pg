@@ -160,13 +160,13 @@ BEGIN_PGML
 
 ## Scaffolded Conversion Problem
 
+*The volume of soda remaining in a can after a spill is [$givenForText] liters.  Convert this volume to milliliters.*
+
 This problem has 3 steps. Once you get a step correct the next step will open.
 
 1. In the first step you are going to write the equality that you are going to need to make a conversion factor to solve the problem.  An example of an equality is 1000mL = 1L
 2. In the second step you will write the two possible conversion factors from the equaity.
 3. In the third step you will solve the problem using one line of dimensional analysis.  Start with the given from the problem, multiply by the conversion factor that will cancel the units given and give you the correct units.  
-
-#### The volume of soda remaining in a can after a spill is [$givenForText] liters.  Convert this volume to milliliters.
 
 In this problem if you use the abbreviation for liters, note that liters is always a capital L, not lowercase.  So milliliters is mL.
 

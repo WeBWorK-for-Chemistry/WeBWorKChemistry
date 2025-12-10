@@ -8,12 +8,9 @@ DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
-  "MathObjects.pl",
   "PGML.pl",
   "PGcourse.pl",
   "answerHints.pl",
-  "niceTables.pl",
-  "parserPopUp.pl",
   "contextInexactValue.pl",
   "contextInexactValueWithUnits.pl",
   "parserDimensionalAnalysis.pl",
@@ -26,11 +23,9 @@ loadMacros(
 ##############################################
 
 
-Context("Numeric");
+Context("InexactValue");
 
 $m = random(70.1,99.9,0.1);
-
-Context("InexactValue");
 
 $given = InexactValue($m, 3);
 
@@ -47,14 +42,13 @@ $degK = InexactValue($degC + $kelvin);
 
 ##############################################
 
-TEXT(beginproblem());
 
 BEGIN_PGML
 ##Unit Conversion - Temperature
 
-Convert the following temperature. Remember that temperature conversions use both multiplication/division and addition/subtraction so you will need to use the correct sig fig rules when doing these calculations.
+*If a temperature measured on a thermometer was [$given] [``^\circ F``], what is the temperature in Kelvin?*
 
-####If a temperature measured on a thermometer was [$given] [``^\circ F``], what is the temperature in Kelvin?
+Convert the following temperature. Remember that temperature conversions use both multiplication/division and addition/subtraction so you will need to use the correct sig fig rules when doing these calculations.
 
 _Step One: Convert to [``^\circ C``]._  
 
