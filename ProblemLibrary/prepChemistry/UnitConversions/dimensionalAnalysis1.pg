@@ -25,13 +25,10 @@ install_weighted_grader();
 
 Context("InexactValueWithUnits");
 
-#$m = 101;
-$m = random(101, 999, 1);
-while ( $m % 10 == 0 ) {
-    $m++;
-}
 
-$given = InexactValueWithUnits( $m, 'pt');
+$m = random(101, 999, 1);
+
+$given = InexactValueWithUnits( [$m, 3], 'pt');
 #Context()->flags->set('newUnit'=>[['pt','pint', 'pints'],['mL','milliliter','milliliters']]);
 
 # using 473.176 mL = 1 pt
