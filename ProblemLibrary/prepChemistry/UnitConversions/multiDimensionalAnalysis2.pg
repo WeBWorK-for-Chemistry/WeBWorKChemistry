@@ -23,17 +23,9 @@ loadMacros(
 
 install_weighted_grader();
 
-Context("Numeric");
+Context("InexactValueWithUnits");
 
 $m = random(11, 99, 1);
-#the following throws out the numbers with only one sig fig
-while ( $m % 10 == 0 ) {
-    $m = $m++;
-    }
-
-Context("InexactValueWithUnits");
-#Context()->flags->set('newUnit'=>[['ft','foot', 'feet'],['in','inch','inches'], ['cm','centimeter','centimeters'], ['mm','millimeter','millimeters'], ['m','meter','meters']]);
-
 
 $given = InexactValueWithUnits( [$m, 2], 'ft');
 
