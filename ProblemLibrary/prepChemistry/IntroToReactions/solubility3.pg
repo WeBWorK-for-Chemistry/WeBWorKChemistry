@@ -1,0 +1,592 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+loadMacros('PGstandard.pl', 'PGML.pl', 'PGcourse.pl', 'contextReaction.pl', 'contextArbitraryString.pl');
+
+Context('ArbitraryString');
+
+$none = String("none");
+@soluble = (
+    {
+        formula => "LiCl(aq)",
+        name    => "lithium chloride",
+        ion1    => "Li^+",
+        ion2    => "Cl^-",
+    },
+    {
+        formula => "Li_2S(aq)",
+        name    => "lithium sulfide",
+        ion1    => "Li^+",
+        ion2    => "S^2-",
+    },
+    {
+        formula => "KCl(aq)",
+        name    => "potassium chloride",
+        ion1    => "K^+",
+        ion2    => "Cl^-",
+    },
+    {
+        formula => "KBr(aq)",
+        name    => "potassium bromide",
+        ion1    => "K^+",
+        ion2    => "Br^-",
+    },
+    {
+        formula => "KI(aq)",
+        name    => "potassium iodide",
+        ion1    => "K^+",
+        ion2    => "I^-",
+    },
+    {
+        formula => "K_2S(aq)",
+        name    => "potassium sulfide",
+        ion1    => "K^+",
+        ion2    => "S^2-",
+    },
+    {
+        formula => "NaBr(aq)",
+        name    => "sodium bromide",
+        ion1    => "Na^+",
+        ion2    => "Br^-",
+    },
+    {
+        formula => "Na_2S(aq)",
+        name    => "sodium sulfide",
+        ion1    => "Na^+",
+        ion2    => "S^2-",
+    },
+    {
+        formula => "Na_2O(aq)",
+        name    => "sodium oxide",
+        ion1    => "Na^+",
+        ion2    => "O^2-",
+    },
+    {
+        formula => "MgBr_2(aq)",
+        name    => "magnesium bromide",
+        ion1    => "Mg^2+",
+        ion2    => "Br^-",
+    },
+    {
+        formula => "CaCl_2(aq)",
+        name    => "calcium chloride",
+        ion1    => "Ca^2+",
+        ion2    => "Cl^-",
+    },
+    {
+        formula => "CaBr_2(aq)",
+        name    => "calcium bromide",
+        ion1    => "Ca^2+",
+        ion2    => "Br^-",
+    },
+);
+
+@solublePolyatomic = (
+    {
+        formula => "Na_2SO_4(aq)",
+        name    => "sodium sulfate",
+        ion1    => "Na^+",
+        ion2    => "SO_4^2-",
+    },
+    {
+        formula => "K_2SO_4(aq)",
+        name    => "potassium sulfate",
+        ion1    => "K^+",
+        ion2    => "SO_4^2-",
+    },
+    {
+        formula => "Mg(NO_3)_2(aq)",
+        name    => "magnesium nitrate",
+        ion1    => "Mg^2+",
+        ion2    => "NO_3^-",
+    },
+    {
+        formula => "Ca(NO_3)_2(aq)",
+        name    => "calcium nitrate",
+        ion1    => "Ca^2+",
+        ion2    => "NO_3^-",
+    },
+    {
+        formula => "Mg(ClO_4)_2(aq)",
+        name    => "magnesium chlorate",
+        ion1    => "Mg^2+",
+        ion2    => "ClO_4^-",
+    },
+    {
+        formula => "Ca(ClO_4)_2(aq)",
+        name    => "calcium chlorate",
+        ion1    => "Ca^2+",
+        ion2    => "ClO_4^-",
+    },
+    {
+        formula => "Na_2CO_3(aq)",
+        name    => "sodium carbonate",
+        ion1    => "Na^+",
+        ion2    => "CO_3^2-",
+    },
+    {
+        formula => "K_2CO_3(aq)",
+        name    => "potassium carbonate",
+        ion1    => "K^+",
+        ion2    => "CO_3^2-",
+    },
+    {
+        formula => "Na_3PO_4(aq)",
+        name    => "sodium phosphate",
+        ion1    => "Na^+",
+        ion2    => "PO_4^3-",
+    },
+    {
+        formula => "K_3PO_4(aq)",
+        name    => "potassium phosphate",
+        ion1    => "K^+",
+        ion2    => "PO_4^3-",
+    },
+);
+
+@insoluble = (
+    {
+        formula => "MgF_2(s)",
+        name    => "magnesium fluoride",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "CaF_2(s)",
+        name    => "calcium fluoride",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "BaF_2(s)",
+        name    => "barium fluoride",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "AgCl(s)",
+        name    => "silver chloride",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "CaCO_3(s)",
+        name    => "calcium carbonate",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "MgCO_3(s)",
+        name    => "magnesium carbonate",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "Al_2O_3(s)",
+        name    => "aluminum oxide",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "Al_2S_3(s)",
+        name    => "aluminum sulfide",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "PbF_2(s)",
+        name    => "lead(II) fluoride",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "Pb(OH)_2(s)",
+        name    => "lead(II) hydroxide",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "TiO_2(s)",
+        name    => "titanium(IV) oxide",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "FeO(s)",
+        name    => "iron(II) oxide",
+        ion1    => $none,
+        ion2    => $none,
+    },
+    {
+        formula => "Fe_2O_3(s)",
+        name    => "iron(III) oxide",
+        ion1    => $none,
+        ion2    => $none,
+    },
+);
+
+# randomly pick one of each type
+@soluble_choice    = random_subset(1, @soluble);
+@polyatomic_choice = random_subset(1, @solublePolyatomic);
+@insoluble_choice  = random_subset(1, @insoluble);
+
+# merge the three chosen compounds and randomize
+@compounds = random_subset(3, @soluble_choice, @polyatomic_choice, @insoluble_choice );
+
+sub normalize_ion {
+  my $s = shift;
+
+  # Remove whitespace and parentheses
+  $s =~ s/~~s+//g;     
+  $s =~ s/[()]//g;
+
+  # Remove aqueous phase labels if students include them (aq, aq., aqueous)
+  # (We remove these after parentheses are gone, so we just look for the text.)
+  $s =~ s/(?:aq~~.?|aqueous)//gi;
+
+  # Remove braces in ^{...}
+  $s =~ s/~~^~~{([^}]*)~~}/^$1/g;
+
+  # Process only if a caret charge exists
+  if ($s =~ /^(.*)~~^(.*)$/) {
+    my ($base, $chg) = ($1, $2);
+
+    # Clean charge
+    $chg =~ s/~~s+//g;
+
+    my ($mag, $sign);
+
+    # Case: digits then sign (2+, 10-, 1+)
+    if ($chg =~ /^(~~d+)([+-])$/) {
+      ($mag, $sign) = ($1, $2);
+    }
+    # Case: sign then digits (+2, -1)
+    elsif ($chg =~ /^([+-])(~~d+)$/) {
+      ($sign, $mag) = ($1, $2);
+    }
+    # Case: sign only (+ or -)
+    elsif ($chg =~ /^([+-])$/) {
+      ($sign, $mag) = ($1, 1);
+    }
+    else {
+      # Unexpected form → just return cleaned string
+      return $s;
+    }
+
+    # • If magnitude = 1 → Omit "1"
+    # • Otherwise → magnitude then sign
+    if ($mag == 1) {
+      return $base . '^' . $sign;
+    } else {
+      return $base . '^' . $mag . $sign;
+    }
+  }
+
+  return $s;
+}
+
+sub split_ion_for_feedback {
+  my $s = shift;              # expects something like "SO_4^2-" or "Mg^2+"
+  my $n = normalize_ion($s);  # standardizes sign/order and removes (aq), spaces, etc.
+
+  # If normalize_ion couldn't/shouldn't parse a caret, bail
+  return (undef, undef, $n) unless $n =~ /^(.*)~~^(.*)$/;
+
+  my ($base, $chg) = ($1, $2);   # base like "SO_4", charge like "2-" or "+" etc.
+  return ($base, $chg, $n);
+}
+
+
+sub ion_checker {
+  my ($correct, $student, $ansHash) = @_;
+
+  my $c_raw = "$correct";
+  my $s_raw = "$student";
+
+  # clear any previous message
+  $ansHash->{ans_message} = "";
+
+  # --- Handle "none" case-insensitively, but don't lowercase ions ---
+  if ($c_raw =~ /^none$/i) {
+    return 1 if $s_raw =~ /^none$/i;
+
+    $ansHash->{ans_message} = "This compound is insoluble.";
+    return 0;
+  }
+
+  # If student entered none but ions are expected
+  if ($s_raw =~ /^none$/i) {
+    $ansHash->{ans_message} = "This compound is soluble. Enter the ions present in solution (not <b>none</b>).";
+    return 0;
+  }
+
+  # Encourage charge notation if student omitted caret
+  if ($s_raw !~ /~~^/) {
+    $ansHash->{ans_message} = "Check your ion format. Use proper subscripts with <code>_</code> and charges with <code>^</code>.";
+    return 0;
+  }
+
+  # Compare normalized forms
+  my $c_norm = normalize_ion($c_raw);
+  my $s_norm = normalize_ion($s_raw);
+
+  return 1 if $c_norm eq $s_norm;
+
+  # If still wrong, try to give targeted feedback:
+  my ($c_base, $c_chg, $c_can) = split_ion_for_feedback($c_raw);
+  my ($s_base, $s_chg, $s_can) = split_ion_for_feedback($s_raw);
+
+  # If we couldn't parse something cleanly, fall back
+  if (!defined($c_base) || !defined($s_base)) {
+    $ansHash->{ans_message} = "Check your ion format. Use proper subscripts with <code>_</code> and charges with <code>^</code>.";
+    return 0;
+  }
+
+  # ---------------------------------------------------------
+  # NEW: Wrong sign for this blank (cation vs anion mismatch)
+  # ---------------------------------------------------------
+  # Extract just the final sign from the charge pieces
+  my ($c_sign) = $c_chg =~ /([+-])$/;
+  my ($s_sign) = $s_chg =~ /([+-])$/;
+
+  if (defined $c_sign && defined $s_sign && $c_sign ne $s_sign) {
+    if ($c_sign eq '+') {
+      $ansHash->{ans_message} = "This blank is for the <b>cation</b> (positive ion). You entered a negative ion—check the sign.";
+    } else {
+      $ansHash->{ans_message} = "This blank is for the <b>anion</b> (negative ion). You entered a positive ion—check the sign.";
+    }
+    return 0;
+  }
+
+  # Wrong ion identity (base differs)
+  if ($c_base ne $s_base) {
+    $ansHash->{ans_message} = "Relook at the formula. You entered <code>$s_base</code> but the correct ion contains <code>$c_base</code>.";
+    return 0;
+  }
+
+  # Right ion, wrong charge
+  if ($c_chg ne $s_chg) {
+    $ansHash->{ans_message} = "You have the correct ion (<code>$c_base</code>), but the charge is incorrect. Check the superscript charge.";
+    return 0;
+  }
+
+  # Generic fallback (should be rare)
+  $ansHash->{ans_message} = "Check your ion formatting (subscripts and charge).";
+  return 0;
+}
+
+
+sub normalize_formula_for_comparison {
+    my $f = shift;
+
+    # Remove whitespace
+    $f =~ s/~~s+//g;
+
+    # Phase labels: allow (aq), (s), optional trailing period
+    $f =~ s/~~((aq|s)~~.? ~~)//i;
+
+    return $f;
+}
+
+
+sub formula_checker {
+    my ($correct, $student, $ansHash) = @_;
+
+    my $c_raw = "$correct";
+    my $s_raw = "$student";
+
+    # -------------------------------------------------
+    # Phase-label feedback (must be BEFORE normalization)
+    # -------------------------------------------------
+
+    # Require a phase label on the student's answer: (aq) or (s)
+    if ($s_raw !~ /~~(~~s*(aq|s)~~s*~~)$/i) {
+        $ansHash->{ans_message} =
+            "Your formula is missing the phase label. Include <code>(aq)</code> for soluble or <code>(s)</code> for insoluble.";
+        return 0;
+    }
+
+    # Require the phase label to match the correct one (aq vs s)
+    my ($c_phase) = ($c_raw =~ /~~(~~s*(aq|s)~~s*~~)$/i);
+    my ($s_phase) = ($s_raw =~ /~~(~~s*(aq|s)~~s*~~)$/i);
+
+    if (defined $c_phase && defined $s_phase && lc($c_phase) ne lc($s_phase)) {
+        $ansHash->{ans_message} =
+            "Your phase label is incorrect. Check whether the compound is soluble (aq) or insoluble (s).";
+        return 0;
+    }
+
+    # ----------------------------------------
+    # Normalize for comparison (phase removed)
+    # ----------------------------------------
+    my $c = normalize_formula_for_comparison($c_raw);
+    my $s = normalize_formula_for_comparison($s_raw);
+
+    # Accept exact match first
+    return 1 if $c eq $s;
+
+    # ---------------------------
+    # Structural validation block
+    # ---------------------------
+
+   # 1) Must use underscores for subscripts (including after parentheses)
+#    e.g. Pb(OH)2  -> should be Pb(OH)_2
+#    e.g. SO4      -> should be SO_4
+if ($s =~ /(?<!_)~~d+/) {
+    $ansHash->{ans_message} =
+        "Use an underscore for subscripts. Example: <code>Pb(OH)_2</code> not <code>Pb(OH)2</code>, and <code>SO_4</code> not <code>SO4</code>.";
+    return 0;
+}
+
+
+    # 2) Must use parentheses for polyatomics with coefficient > 1
+    # Look for: NO_3_2 or SO_4_2 etc.
+    if ($s =~ /(NO_3|SO_4|CO_3|PO_4|ClO_4)_([2-9])/) {
+        $ansHash->{ans_message} =
+            "When a polyatomic ion has a subscript greater than 1, place it in parentheses. ";
+        return 0;
+    }
+
+    # 3) Detect missing parentheses for polyanions that multiply (based on the correct formula)
+    my $correct_needs_parens = ($c =~ /~~(([^)]+)~~)_([2-9])/);
+    my $student_has_parens   = ($s =~ /~~(([^)]+)~~)_([2-9])/);
+
+    if ($correct_needs_parens && !$student_has_parens) {
+        $ansHash->{ans_message} =
+        "This formula needs parentheses around the polyatomic ion when it has a subscript greater than 1.";
+  return 0;
+}
+
+
+    # 4) Check matched parentheses
+    my $open  = () = $s =~ /~~(/g;
+    my $close = () = $s =~ /~~)/g;
+    if ($open != $close) {
+        $ansHash->{ans_message} =
+            "Your parentheses are not balanced. Check for a missing <code>(</code> or <code>)</code>.";
+        return 0;
+    }
+
+    # 5) Allow only valid characters
+    if ($s =~ /[^A-Za-z0-9_^()]/) {
+        $ansHash->{ans_message} =
+            "Formula contains invalid characters.";
+        return 0;
+    }
+
+    # Last-resort mismatch
+    $ansHash->{ans_message} =
+        "Check subscripts, parentheses, and the formula structure carefully.";
+    return 0;
+}
+
+
+@formula_ans = ();
+@ion1 = ();
+@ion2 = ();
+
+for my $i (0..$#compounds) {
+  my $p = $compounds[$i];
+
+  $formula_ans[$i] = String($p->{formula})->cmp(checker => ~~&formula_checker);
+  $ion1[$i]        = String($p->{ion1})->cmp(checker => ~~&ion_checker);
+  $ion2[$i]        = String($p->{ion2})->cmp(checker => ~~&ion_checker);
+}
+
+sub wrap_charge_for_solution {
+  my $s = shift;   # e.g., "SO_4^2-", "Mg^2+", "Cl^-"
+
+  # If exponent is already braced, leave it alone
+  return $s if $s =~ /~~^~~{/;
+
+  # If there's a caret, wrap everything after it in { ... }
+  # SO_4^2- -> SO_4^{2-}
+  # Mg^2+   -> Mg^{2+}
+  # Cl^-    -> Cl^{-}
+  $s =~ s/~~^(.*)$ /^{~~1}/x if $s =~ /~~^/;
+
+  return $s;
+}
+
+for my $i (0..$#compounds) {
+  # formula: no charge wrapping needed, but store a solution display version
+  $compounds[$i]{formula_soln} = "\mathrm{$compounds[$i]{formula}}";
+
+  # ions: wrap charge as ^{...} so multi-char exponents render correctly
+  my $cat = wrap_charge_for_solution($compounds[$i]{ion1});
+  my $an  = wrap_charge_for_solution($compounds[$i]{ion2});
+
+  $compounds[$i]{ion1_soln} = "\mathrm{$cat}";
+  $compounds[$i]{ion2_soln} = "\mathrm{$an}";
+}
+
+
+
+BEGIN_PGML
+
+##Ions in Aqueous Solutions
+
+Use *[@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_%282nd_Edition%29/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("the solubility table in your text"), "TARGET='_blank'" ); @]* *to determine whether the following compounds are soluble or insoluble when mixed with water. Then fill in the in the following table. 
+
+- The **chemical formula** should include the phase label (aq) or (s) to indicate whether the compound is soluble or insoluble  in water.
+
+- Be sure to use proper subscripts and superscripts. An underscore _ creates a subscript. Use the mathQuill helper on the side or ^ for superscripts.
+
+- If the compound is **insoluble**, enter **none** for both the cation and anion because no ions will be present in solution.
+
+- Ions do not need phase labels.
+
+- The first row has been completed for you. Use this as a guide.
+
+[#
+[.[`\mathbf{Compound\:Name}`].]
+[.[`\mathbf{Formula}`] [`\mathbf{with}`] [`\mathbf{phase\:labels}`].]
+[.[`\mathbf{Cation}`] [`\mathbf{in\:solution}`].]
+[.[`\mathbf{Anion}`] [`\mathbf{in\:solution}`].]*
+
+[.magnesium chloride.]
+[.[`\mathrm{MgCl_2(aq)}`].]
+[.[`\mathrm{Mg^{2+}}`].]
+[.[`\mathrm{Cl^-}`].]*
+
+[.[$compounds[0]{name}].][.[___]{$formula_ans[0]}.][.[___]{$ion1[0]}.][.[___]{$ion2[0]}.]*
+[.[$compounds[1]{name}].][.[___]{$formula_ans[1]}.][.[___]{$ion1[1]}.][.[___]{$ion2[1]}.]*
+[.[$compounds[2]{name}].][.[___]{$formula_ans[2]}.][.[___]{$ion1[2]}.][.[___]{$ion2[2]}.]*
+#]{align => '|c|c|c|c|', horizontalrules => 1}
+
+END_PGML
+
+BEGIN_PGML_HINT
+
+1. Check that formulas are written with proper super and subscripts. If the formula contains a polyatomic, check that you have properly used parentheses for multiple polyatomic ions in the formula but not used parentheses for only one.
+
+2. Compounds that are soluble form aqueous soultions (aq). Compounds that are insoluble, stay as a solid (s).
+
+3. Check the charges on ions. Cations are positive and anions are negative.
+
+For more information on solubility, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+BEGIN_PGML_SOLUTION
+
+[#
+[.[`\mathbf{Compound\:Name}`].]
+[.[`\mathbf{Formula}`] [`\mathbf{with}`] [`\mathbf{phase\:labels}`].]
+[.[`\mathbf{Cation}`] [`\mathbf{in\:solution}`].]
+[.[`\mathbf{Anion}`] [`\mathbf{in\:solution}`].]*
+
+[.[$compounds[0]{name}].][.[`[$compounds[0]{formula_soln}]`].][.[`[$compounds[0]{ion1_soln}]`].][.[`[$compounds[0]{ion2_soln}]`].]*
+[.[$compounds[1]{name}].][.[`[$compounds[1]{formula_soln}]`].][.[`[$compounds[1]{ion1_soln}]`].][.[`[$compounds[1]{ion2_soln}]`].]*
+[.[$compounds[2]{name}].][.[`[$compounds[2]{formula_soln}]`].][.[`[$compounds[2]{ion1_soln}]`].][.[`[$compounds[2]{ion2_soln}]`].]*
+
+#]{align => '|c|c|c|c|', horizontalrules => 1}
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
