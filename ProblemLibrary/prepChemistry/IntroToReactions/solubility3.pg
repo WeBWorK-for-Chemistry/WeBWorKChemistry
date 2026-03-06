@@ -562,11 +562,11 @@ END_PGML
 
 BEGIN_PGML_HINT
 
-1. Check that formulas are written with proper super and subscripts. If the formula contains a polyatomic, check that you have properly used parentheses for multiple polyatomic ions in the formula but not used parentheses for only one.
+1. Check that formulas are written with proper superscripts and subscripts. If the formula contains a polyatomic ion, check that you have properly used parentheses for multiple polyatomic ions in the formula but not used parentheses for only one.
 
-2. Compounds that are soluble form aqueous soultions (aq). Compounds that are insoluble, stay as a solid (s).
+2. Compounds that are soluble form aqueous solutions (aq). Compounds that are insoluble stay as a solid (s).
 
-3. Check the charges on ions. Cations are positive and anions are negative.
+3. Check the charges on ions. Cations are positive and anions are negative. Since you are just identifying ions present, do not show the ion ratio with coefficients, e.g. [`\mathrm{Na^{+}}`] and not [`\mathrm{2\:Na^{+}}`]
 
 For more information on solubility, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("here"), "TARGET='_blank'" ); @]*
 
