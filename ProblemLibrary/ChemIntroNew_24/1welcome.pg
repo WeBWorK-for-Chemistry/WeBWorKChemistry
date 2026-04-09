@@ -28,9 +28,9 @@ Let's start off simple. What is the value of [`2+2`] ? Type your answer in the b
 
     [_______]{Real(4)} 
 
-Below, you have two buttons available: _Preview Answers_ and _Check Answers_. 
-1.  Push the _Check Answers_ button, and see that you have the right answer.
-2.  Try typing in a number that is wrong and pushing the _Check Answers_ button.
+Below, you have two buttons available: _Preview My Answers_ and _Submit Answers_. 
+1.  Push the _Submit Answers_ button, and see that you have the right answer.
+2.  Try typing in a number that is wrong and pushing the _Submit Answers_ button.
 3.  Sometimes you might completely misunderstand a question and your answer is way off base. WeBWorK will try to make you see this. Try typing in the expression [`x`] as the answer and pushing the _Check Answers_ button. In the box above, _read the feedback message_ that arises. Do you understand what that feedback message is saying and how it applies to your answer?
 
 As you use WeBWorK and inevitably get some questions wrong on your first attempt, make sure that you read the feedback messages. 
