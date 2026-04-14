@@ -72,7 +72,10 @@ The given value has been placed into the single line of dimensional analysis for
 
     [.
         [#
-            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[_]{$ma} .]*
         #]*
     .]
@@ -81,7 +84,10 @@ The given value has been placed into the single line of dimensional analysis for
 
     [.
         [#
-            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[_]{$ma} .]*
         #]*
     .]
