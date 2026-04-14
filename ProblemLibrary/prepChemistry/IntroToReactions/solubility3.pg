@@ -543,10 +543,10 @@ Use *[@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland
 - The first row has been completed for you. Use this as a guide.
 
 [#
-[.[`\mathbf{Compound\:Name}`].]
-[.[`\mathbf{Formula}`] [`\mathbf{with}`] [`\mathbf{phase\:labels}`].]
-[.[`\mathbf{Cation}`] [`\mathbf{in\:solution}`].]
-[.[`\mathbf{Anion}`] [`\mathbf{in\:solution}`].]*
+[.Compound Name.]
+[.Formula with phase labels.]
+[.Cation in solution.]
+[.Anion in solution.]*{ headerrow => 1 }
 
 [.magnesium chloride.]
 [.[`\mathrm{MgCl_2(aq)}`].]
