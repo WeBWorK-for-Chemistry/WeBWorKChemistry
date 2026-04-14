@@ -80,14 +80,20 @@ Note: mL has a capital L. Also check the format of your final answer. It should 
     [.[`=`].]
     [.
         [#
-            [.[`\mathrm{mass}`] .]*{bottom => 1}
+            [.[`\mathrm{mass}`][<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[`\mathrm{volume}`] .]*
         #]*
     .]
     [.[`=`].]
     [.
         [#
-            [.[_]{$mass} .]*{bottom => 1}
+            [.[_]{$mass}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[_]{$volume} .]*
         #]*
     .]
@@ -121,7 +127,10 @@ BEGIN_PGML_SOLUTION
 
     [.
         [#
-            [.[`[$n1]`] .]*{bottom => 1}
+            [.[`[$n1]`][<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[`[$d1]`] .]*
         #]*
     .]
@@ -136,7 +145,10 @@ BEGIN_PGML_SOLUTION
     
     [.
         [#
-            [.[`[$mass]`] .]*{bottom => 1}
+            [.[`[$mass]`][<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[`[$volume]`].]*
         #]*
     .]
