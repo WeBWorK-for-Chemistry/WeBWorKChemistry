@@ -575,10 +575,10 @@ END_PGML_HINT
 BEGIN_PGML_SOLUTION
 
 [#
-[.[`\mathbf{Compound\:Name}`].]
-[.[`\mathbf{Formula}`] [`\mathbf{with}`] [`\mathbf{phase\:labels}`].]
-[.[`\mathbf{Cation}`] [`\mathbf{in\:solution}`].]
-[.[`\mathbf{Anion}`] [`\mathbf{in\:solution}`].]*
+[.Compound Name.]
+[.Formula with phase labels.]
+[.Cation in solution.]
+[.Anion in solution.]*{ headerrow => 1 }
 
 [.[$compounds[0]{name}].][.[`[$compounds[0]{formula_soln}]`].][.[`[$compounds[0]{ion1_soln}]`].][.[`[$compounds[0]{ion2_soln}]`].]*
 [.[$compounds[1]{name}].][.[`[$compounds[1]{formula_soln}]`].][.[`[$compounds[1]{ion1_soln}]`].][.[`[$compounds[1]{ion2_soln}]`].]*
