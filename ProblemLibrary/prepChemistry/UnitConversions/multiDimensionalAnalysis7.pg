@@ -77,7 +77,10 @@ Use the fact that 100 cm = 1 m.  You may need to use this conversion factor more
 
     [.
         [#
-            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[_]{$ma} .]*
         #]*
     .]
@@ -86,7 +89,10 @@ Use the fact that 100 cm = 1 m.  You may need to use this conversion factor more
 
     [.
         [#
-            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[_]{$ma} .]*
         #]*
     .]
@@ -95,7 +101,10 @@ Use the fact that 100 cm = 1 m.  You may need to use this conversion factor more
 
     [.
         [#
-            [.[_]{$ma} .]*{bottom => 1}
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
             [.[_]{$ma} .]*
         #]*
     .]
