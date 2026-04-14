@@ -530,7 +530,7 @@ BEGIN_PGML
 
 ##Ions in Aqueous Solutions
 
-Use *[@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_%282nd_Edition%29/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("the solubility table in your text"), "TARGET='_blank'" ); @]* *to determine whether the following compounds are soluble or insoluble when mixed with water. Then fill in the in the following table. 
+Use *[@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_%282nd_Edition%29/09%3A_An_Introduction_to_Chemical_Reactions/9.06%3A_Solubility_Rules"), protect_underbar("the solubility table in your text"), "TARGET='_blank'" ); @]* *to determine whether the following compounds are soluble or insoluble when mixed with water. Then fill in the following table. 
 
 - The **chemical formula** should include the phase label (aq) or (s) to indicate whether the compound is soluble or insoluble  in water.
 
