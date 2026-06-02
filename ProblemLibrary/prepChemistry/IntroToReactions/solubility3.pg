@@ -112,13 +112,13 @@ $none = String("none");
     },
     {
         formula => "Mg(ClO_4)_2(aq)",
-        name    => "magnesium chlorate",
+        name    => "magnesium perchlorate",
         ion1    => "Mg^2+",
         ion2    => "ClO_4^-",
     },
     {
         formula => "Ca(ClO_4)_2(aq)",
-        name    => "calcium chlorate",
+        name    => "calcium perchlorate",
         ion1    => "Ca^2+",
         ion2    => "ClO_4^-",
     },
