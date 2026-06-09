@@ -1,0 +1,141 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+
+
+@homogenMix = ( "Gasoline, a mixture of organic molecules used to power some cars", "Iced tea, a cold mixture of dissolved molecules from tea leaves in water", "Brass, a solid mixture of zinc and copper", "Salt water, a mixture of salt completely dissolved in water", "Air, a gaseous mixture of oxygen and nitrogen");
+
+@heteroMix = ("Concrete, a mixture of cement, water, sand and gravel", "Mud, a mixture of dirt suspended in water","Carbonated water, water with bubbles of carbon dioxide", "Blood, a substance composed of several types of cells suspended in a salty solution called plasma", "A loaf of bread", "Dirt, a combination of rocks and decaying plant matter", "Pasta being cooked in boiling water");
+
+%mixtureClasses = (
+    (map {$_ => 'homogeneous mixture'} @homogenMix),
+    (map {$_ => 'heterogeneous mixture'} @heteroMix),
+);
+
+@homogenMix_pick = random_subset(2, @homogenMix);
+@heteroMix_pick = random_subset(3, @heteroMix);
+
+@mixtures = random_subset(5,
+    @homogenMix_pick,
+    @heteroMix_pick
+);
+
+@options = ( 'heterogeneous mixture', 'homogeneous mixture' );
+
+@dropdown = map {
+    DropDown(
+        ~~@options,
+        $mixtureClasses{$_},
+        placeholder => 'Choose One'
+    )
+} @mixtures;
+
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Heterogeneous Mixture or Homogeneous Mixture?
+
+_Choose the answer from the dropdown menu_ 
+
+[#
+            [.Description of the Mixture.] [.Classification.]*{headerrow => 1}
+            [.[$mixtures[0]].] [.[_]{$dropdown[0]}.]*
+            [.[$mixtures[1]].] [.[_]{$dropdown[1]}.]*
+            [.[$mixtures[2]].] [.[_]{$dropdown[2]}.]*
+            [.[$mixtures[3]].] [.[_]{$dropdown[3]}.]*
+            [.[$mixtures[4]].] [.[_]{$dropdown[4]}.]
+
+#]{
+   align           => '|l|c|',
+    valign          => 'middle',
+    padding         => [ 0.5, 0.5 ],
+    horizontalrules => 1
+}
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+A homogeneous mixture is a mixture in which the composition is uniform throughout the mixture. The salt water described above is homogeneous because the dissolved salt is evenly distributed throughout the entire salt water sample. Often it is easy to confuse a homogeneous mixture with a pure substance because they are both uniform. The difference is that the composition of the substance is always the same. The amount of salt in the salt water can vary from one sample to another. All solutions are considered homogeneous because the dissolved material is present in the same amount throughout the solution.
+
+A heterogeneous mixture is a mixture in which the composition is not uniform throughout the mixture. Vegetable soup is a heterogeneous mixture. Any given spoonful of soup will contain varying amounts of the different vegetables and other components of the soup.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+[#
+            [.[$mixtures[0]].] [.[$dropdown[0]].]*
+            [.[$mixtures[1]].] [.[$dropdown[1]].]*
+            [.[$mixtures[2]].] [.[$dropdown[2]].]*
+            [.[$mixtures[3]].] [.[$dropdown[3]].]*
+            [.[$mixtures[4]].] [.[$dropdown[4]].]
+
+#]{
+   align           => '|l|c|',
+    valign          => 'middle',
+    padding         => [ 0.5, 0.5 ],
+    horizontalrules => 1
+}
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
