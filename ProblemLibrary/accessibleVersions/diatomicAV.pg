@@ -1,0 +1,83 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+# Try to only load the macro files that are needed.
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+);
+
+
+
+# Define diatomic
+@diatomic = qw(hydrogen nitrogen fluorine oxygen iodine chlorine bromine);
+@monatomic = qw(sodium manganese iron cobalt copper gold boron argon neon carbon silicon tin lead);
+
+# Classify
+%atomClasses = (
+  (map { $_ => 'Diatomic' } @diatomic),
+  (map { $_ => 'Monatomic' } @monatomic)
+);
+
+# Randomly select 3 of each type
+@diatomic_elements = random_subset(3, @diatomic);
+@monatomic_elements = random_subset(4, @monatomic);
+
+# Combine and shuffle
+@elements = random_subset(7, @diatomic_elements, @monatomic_elements);
+
+
+
+@options = (
+    'Diatomic'
+);
+
+
+$separator = ($displayMode eq 'TeX') ? '' : $BR;
+$checkboxes{'Diatomic'} = CheckboxList(~~@elements, ~~@diatomic_elements, separator => $separator);
+
+
+BEGIN_PGML
+##Diatomic?
+
+
+Click the check box for each choice that is a diatomic element.
+
+
+[#
+    [.*Diatomic Elements*.]*{rowbottom => 1}
+    [.[_]{$checkboxes{'Diatomic'}}.]
+#]*{
+    align => 'p{4.8cm}',
+    valign =>'bottom'
+}
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+Some elements exist naturally as diatomic molecules. For example, hydrogen and oxygen exist as two-atom molecules. The molecular formula for elemental hydrogen is [`H_2`], with H being the symbol for hydrogen and the subscript 2 implying that there are two atoms of this element in the molecule. Other diatomic elements have similar formulas: [`O_2`], [`N_2`], [`F_2`], [`Cl_2`], [`Br_2`], [`I_2`].
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+
