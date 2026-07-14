@@ -1,4 +1,4 @@
-
+#This contains new grading options for dimensional analysis
 =head1 NAME
 
 parserDimensionalAnalysis.pl 
@@ -28,7 +28,62 @@ sub asDimensionalAnalysis {
 	if (exists $options->{gradeGiven}){
 		$gradeGiven = $options->{gradeGiven};
 	}
-	
+	#grading option settings
+	#the options for conversion factors have been separated from the final answer to give more control over how the answers are graded.
+	#Some instructors may want to be able to selectively grade sig figs in the conversion factor differently than the final answer. 
+	#This is an issue for a class that doesn't cover sig fig calculations but students should know to use all the digits given in the problem in the conversion factor. 
+	#Or an instructor may just want to show correct sig figs in the solutions but not worry about sig figs anywhere in the problem. 
+	#The default settings grades sig figs everywhere for 1/4 of the whole value and gives messages that mention sig figs. 
+
+	#settings for the feedback message when sig figs are incorrect (i.e. the exact digits entered are not the same but the value is within tolerance)
+        #messageDigitsDiff is for the sig fig message on the conversion factors and given values and messageDigitsDiffAns is the sig fig message on the answer calculation.
+    my $messageDigitsDiff = "Make sure that you are using all the digits given to you in the problem.";
+    if (exists $options->{messageDigitsDiff}){
+		$messageDigitsDiff = $options->{messageDigitsDiff};
+	} 
+     my $messageDigitsDiffAns = "Most likely you have an incorrect number of significant figures.";
+    if (exists $options->{messageDigitsDiffAns}){
+		$messageDigitsDiffAns = $options->{messageDigitsDiffAns};
+	} 
+
+	#settings for the point values for grading sig figs in the conversion factors and the given (exact conversions are never graded for sig figs)
+	#$creditSigFigGiven and $creditValueGiven must add to 1. 
+
+    my $creditSigFigsGiven = 0.5;
+    if (exists $options ->{creditSigFigsGiven}){
+            $creditSigFigsGiven = $options->{creditSigFigsGiven};
+    }
+
+	my $creditValueGiven = 0.5;
+		if (exists $options ->{creditValueGiven}){
+			$creditValueGiven = $options->{creditValueGiven};
+	}
+
+	$creditGiven = $creditSigFigsGiven + $creditValueGiven;
+	if ($creditGiven != 1) {
+			warn("Credit for given values does not total 100%");
+	}
+
+	#settings for grading the final answer
+	my $creditSigFigsFinal = 0.25;
+	if (exists $options->{creditSigFigsFinal}){
+		$creditSigFigsFinal = $options->{creditSigFigsFinal};
+	} 
+
+	my $creditValueFinal = 0.5;
+	if (exists $options->{creditValueFinal}){
+		$creditValueFinal = $options->{creditValueFinal};
+	} 
+
+	my $creditUnitsFinal = 0.25;
+	if (exists $options->{creditUnitsFinal}){
+		$creditUnitsFinal = $options->{creditUnitsFinal};
+	} 
+
+	$creditFinal = $creditSigFigsFinal + $creditValueFinal + $creditUnitsFinal;
+	if ($creditFinal != 1) {
+			warn("Credit for final answer does not total 100%");
+	}
 
 	return $self->with(
 		singleResult => 0,
@@ -50,11 +105,13 @@ sub asDimensionalAnalysis {
 			}
 
 			for ($i = 0; $i < scalar @studentArray - 1; $i++){
+                                $blankMessage[$i] = 0;
 				if ($studentArray[$i]->isExactZero){
 					# handle if zeros in blanks (assume exact 1 for dimensional analysis)
 					# If we don't do this, we get division by zero errors.  
 					# Plus, intent of blanks in student dimensional analysis is usually 1 mathmatically.
 					# Final answer doesn't matter.
+                                        $blankMessage[$i] = 1;       
 					$units = $studentArray[$i]->{units};
 					$newValue = Value->Package("InexactValueWithUnits")->new(['1',9**9**9], $units);
 					$studentArray[$i] = $newValue;
@@ -131,7 +188,7 @@ sub asDimensionalAnalysis {
 			}
 			
 
-			$ansHash->setMessage(scalar @studentArray,"Your dimensional analysis returns this value: $studentCalc");
+			#$ansHash->setMessage(scalar @studentArray,"Your dimensional analysis returns this value: $studentCalc");
 
 			# Time to grade dimensional analysis!
 			# Grading assumes that the answer provided includes the REQURIED pathway for dimensional analysis.  While order will not matter,
@@ -147,16 +204,16 @@ sub asDimensionalAnalysis {
 				# check for matching units on student given and actual given,
 				# then check for matching value (with tolerance)
 				$givenScore=0;
-				$message='';
-				$valueGrade = $given->{inexactValue}->compareValue($studentGiven->{inexactValue},{"creditSigFigs"=>0.5, "creditValue"=>0.5, "failOnValueWrong"=>1});
+				$message="";
+				$valueGrade = $given->{inexactValue}->compareValue($studentGiven->{inexactValue},{"creditSigFigs"=>$creditSigFigsGiven, "creditValue"=>$creditValueGiven, "failOnValueWrong"=>1});
 				$givenScore = $valueGrade;
 				if ($givenScore != 0 && $givenScore != 1){
-					$message .= "Most likely you have a significant figures problem.";
+					$message .= $messageDigitsDiff;
 				}
 				if (InexactValueWithUnits::InexactValueWithUnits::compareUnitHash($given->{units_ref}, $studentGiven->{units_ref}) == 0) {
 				#if ($given->{units} ne $studentGiven->{units}) {
 					$givenScore*=0.5;  # half-credit b/c missing units.
-					$message .= "Your units are incorrect.";	
+					$message .= "Your units are incorrect or missing.";	
 				}				
 				push @scores, $givenScore;
 				$ansHash->setMessage($count, $message);
@@ -187,13 +244,18 @@ sub asDimensionalAnalysis {
 
 					# for comparing simplified units
 					$answerDiv = $correctArray[$j] / $correctArray[$j+1];
+                                        if ($blankMessage[$j] == 1|| $blankMessage[$j+1] == 1 ){
+                                               #ansHash is looping over an index that is not consistent with $j
+                                               #To get the feedback meassage to be located on the correct blank the index must be adjusted to match the count.
+                                               $ansHash->setMessage($j+1, "Both the numerator and denominator must be entered before the conversion factor can be graded correctly.");
+                                               $ansHash->setMessage($j+2, "Both the numerator and denominator must be entered before the conversion factor can be graded correctly.");}
 					# check for matching units on both parts, then check for matching value (with tolerance)
 					#if (BetterUnits::compareUnitRefs($correctArray[$j]->{units_ref},$numerator->{units_ref}) && BetterUnits::compareUnitRefs($correctArray[$j+1]->{units_ref},$denominator->{units_ref})){
 					if (BetterUnits::compareUnitRefs($answerDiv->{units_ref},$studentDiv->{units_ref})) {
 						# if answer is an exact number (like 12 inches in 1 ft), student's input of 12 will automatically be inexact, so just tolerate sig fig "errors" if answer is exact
 						
-						$numeratorCreditSigFigs = 0.5;
-						$numeratorCreditValue = 0.5;
+						$numeratorCreditSigFigs = $creditSigFigsGiven;
+						$numeratorCreditValue = $creditValueGiven;
 						if ($correctArray[$j]->{inexactValue}->sigFigs() == Inf){
 							$numeratorCreditSigFigs = 0;
 							$numeratorCreditValue = 1.0;
@@ -205,10 +267,10 @@ sub asDimensionalAnalysis {
 						$valueGradeNumerator = $correctArray[$j]->{inexactValue}->compareValue($numerator->{inexactValue},{"creditSigFigs"=>$numeratorCreditSigFigs, "creditValue"=>$numeratorCreditValue, "failOnValueWrong"=>1});
 						$numeratorScore = $valueGradeNumerator;
 						if ($numeratorScore != 0 && $numeratorScore != 1){
-							$ansHash->setMessage($count,"Most likely you have a significant figures problem.");
+							$ansHash->setMessage($count,$messageDigitsDiff);
 						}
-						$denominatorCreditSigFigs = 0.5;
-						$denominatorCreditValue = 0.5;
+						$denominatorCreditSigFigs = $creditSigFigsGiven;
+						$denominatorCreditValue = $creditValueGiven;
 						if ($correctArray[$j+1]->{inexactValue}->sigFigs() == Inf){
 							$denominatorCreditSigFigs = 0;
 							$denominatorCreditValue = 1.0;
@@ -216,7 +278,7 @@ sub asDimensionalAnalysis {
 						$valueGradeDenominator = $correctArray[$j+1]->{inexactValue}->compareValue($denominator->{inexactValue},{"creditSigFigs"=>$denominatorCreditSigFigs, "creditValue"=>$denominatorCreditValue, "failOnValueWrong"=>1});
 						$denominatorScore = $valueGradeDenominator;
 						if ($denominatorScore != 0 && $denominatorScore != 1){
-							$ansHash->setMessage($count+1,"Most likely you have a significant figures problem.");
+							$ansHash->setMessage($count+1,$messageDigitsDiff);
 						}
 						if ($numeratorScore == 0 && $denominatorScore == 0) {
 							# check the ratio to see if those match.  Maybe student used a different equality like 1L/1000mL instead of 0.001L/1mL
@@ -288,26 +350,41 @@ sub asDimensionalAnalysis {
 
 
 			# now grade final answer
-			#$finalStudentAnswer = shift @studentArray;
-			$correctAnswer = pop @correctArray;
-			my $result = $correctAnswer->compareValuesWithUnits(
-				$studentAnswer,
-				{
-					"roundingErrorPossibles"=> \@possibleRoundingErrorAnswers,
-					"penaltyRoundingError"=>0.25,
-					"creditSigFigs"=>0.25, 
-					"creditValue"=>0.5, 
-					"creditUnits"=>0.25, 
-					"failOnValueWrong"=>1
-				});
-			my @resultArr = @$result;
-	
-			push @scores, shift @resultArr;
-			my $message = shift @resultArr;
-			if ($message ne ''){
-				$ansHash->setMessage($count,$message);
-			}
+$correctAnswer = pop @correctArray;
 
+my $result = $correctAnswer->compareValuesWithUnits(
+    $studentAnswer,
+    {
+        "roundingErrorPossibles" => \@possibleRoundingErrorAnswers,
+        "penaltyRoundingError"   => 0.25,
+        "creditSigFigs"          => $creditSigFigsFinal,
+        "creditValue"            => $creditValueFinal,
+        "creditUnits"            => $creditUnitsFinal,
+        "failOnValueWrong"       => 1
+    }
+);
+
+my $finalScore;
+my $message = '';
+
+if (ref($result) eq 'ARRAY') {
+    $finalScore = $result->[0];
+    $message    = $result->[1] // '';
+} else {
+    $finalScore = $result;
+}
+
+$finalScore = 0 unless defined $finalScore;
+
+push @scores, $finalScore;
+
+my $sigFigOnlyScore = $creditValueFinal + $creditUnitsFinal;
+
+if (abs($finalScore - $sigFigOnlyScore) < 0.000001) {
+    $ansHash->setMessage($count, $messageDigitsDiffAns);
+} elsif ($message ne '') {
+    $ansHash->setMessage($count, $message);
+}
 			return \@scores;
 		}
 	);
@@ -1222,3 +1299,4 @@ sub generateProblem {
 
 
 1;
+
