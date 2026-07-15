@@ -1,0 +1,87 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+# Try to only load the macro files that are needed.
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+  "draggableSubsets.pl"
+);
+
+
+# Define diatomic
+@diatomic = qw(hydrogen nitrogen fluorine oxygen iodine chlorine bromine);
+@monatomic = qw(sodium manganese iron cobalt copper gold boron argon neon carbon silicon tin lead);
+
+# Classify
+%atomClasses = (
+  (map { $_ => 'Diatomic' } @diatomic),
+  (map { $_ => 'Monatomic' } @monatomic)
+);
+
+# Randomly select 3 of each type
+@diatomic_elements = random_subset(3, @diatomic);
+@monatomic_elements = random_subset(4, @monatomic);
+
+# Combine and shuffle
+@elements = random_subset(7, @diatomic_elements, @monatomic_elements);
+
+# Index lookup hashes
+my %is_diatomic = map { $_ => 1 } @diatomic;
+my %is_monatomic = map { $_ => 1 } @monatomic;
+
+# Get indices of each type in @elements
+my @diatomic_indices = grep { $is_diatomic{$elements[$_]} } 0..$#elements;
+my @monatomic_indices = grep { $is_monatomic{$elements[$_]} } 0..$#elements;
+
+# Create draggable classification activity
+$draggable = DraggableSubsets(
+  ~~@elements,
+  [ ~~@monatomic_indices, ~~@diatomic_indices ],
+  DefaultSubsets => [
+    { label => 'Elements', indices => [ 0 .. $#elements ] },
+    { label => 'Diatomic', indices => [] },
+  ],
+  AllowNewBuckets => 0
+);
+
+
+BEGIN_PGML
+##Diatomic?
+
+
+Drag the diatomic elements into the box labeled diatomic.
+
+[_]{$draggable}
+
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+Some elements exist naturally as diatomic molecules. For example, hydrogen and oxygen exist as two-atom molecules. The molecular formula for elemental hydrogen is [`H_2`], with H being the symbol for hydrogen and the subscript 2 implying that there are two atoms of this element in the molecule. Other diatomic elements have similar formulas: [`O_2`], [`N_2`], [`F_2`], [`Cl_2`], [`Br_2`], [`I_2`].
+
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+
