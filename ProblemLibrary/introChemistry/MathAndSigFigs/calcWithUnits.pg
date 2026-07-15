@@ -1,0 +1,126 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+
+##############################################
+
+install_weighted_grader();
+
+Context("InexactValueWithUnits");
+
+$m = random(10.00, 90.00, 0.01);
+$sigfigs = random(2,4,1);
+$given_value = InexactValue($m, $sigfigs);
+$given = InexactValueWithUnits( InexactValue($given_value), 'g');
+
+if ($sigfigs < 3) {
+    $sigfig_ans = $sigfigs;
+} else {
+    $sigfig_ans = 3;
+}
+
+# using density as a conversion factor
+$n1 = InexactValueWithUnits(['1', 9**9**9], 'mL'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+$d1 = InexactValueWithUnits(['1.60', 3], 'g');
+
+$answer = $given * $n1 / $d1;
+
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given);
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+##Calculations with Units
+
+_Use the following calculation to find the volume in mL that [$given] of carbon tetrachloride will occupy if the density is 1.60 g/mL. Report your answer to [$sigfig_ans] sig figs. Do not forget to put units in your answer._
+
+
+
+Note: mL has a capital L.
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[`[$n1]`][<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[`[$d1]`].]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$answer}.]
+#]*{valign => 'middle'}
+ 
+END_PGML
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+BEGIN_TEXT
+
+END_TEXT
+
+BEGIN_PGML_HINT
+
+Follow the significant figure rounding rules for the numerical portion of your answer. 
+
+For the units in your answer, remember that units in both the numerator and denominator cancel.
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
