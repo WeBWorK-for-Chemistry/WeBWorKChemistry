@@ -1,0 +1,211 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+
+);
+
+##############################################
+
+
+
+Context("Numeric");
+
+$periodicTable = MODES(
+HTML=> 
+"<div style='min-width:740px;overflow:auto;'><periodic-table casGroupNames='false' showNames='false' hideTransitionMetals='false' maxPrecision='3' colorMode='light'></periodic-table></div>", 
+TeX =>
+"An embedded periodic table. View directly by following - https://spot.pcc.edu/chemistry/periodic-table/"
+);
+
+my @neutral_atoms = (
+    { symbol => 'H',  charge => '', protons => 1,   electrons => 1   },
+    { symbol => 'He', charge => '', protons => 2,   electrons => 2   },
+    { symbol => 'Li', charge => '', protons => 3,   electrons => 3   },
+    { symbol => 'Be', charge => '', protons => 4,   electrons => 4   },
+    { symbol => 'B',  charge => '', protons => 5,   electrons => 5   },
+    { symbol => 'C',  charge => '', protons => 6,   electrons => 6   },
+    { symbol => 'N',  charge => '', protons => 7,   electrons => 7   },
+    { symbol => 'O',  charge => '', protons => 8,   electrons => 8   },
+    { symbol => 'F',  charge => '', protons => 9,   electrons => 9   },
+    { symbol => 'Ne', charge => '', protons => 10,  electrons => 10  },
+    { symbol => 'Na', charge => '', protons => 11,  electrons => 11  },
+    { symbol => 'Mg', charge => '', protons => 12,  electrons => 12  },
+    { symbol => 'Al', charge => '', protons => 13,  electrons => 13  },
+    { symbol => 'Si', charge => '', protons => 14,  electrons => 14  },
+    { symbol => 'P',  charge => '', protons => 15,  electrons => 15  },
+    { symbol => 'S',  charge => '', protons => 16,  electrons => 16  },
+    { symbol => 'Cl', charge => '', protons => 17,  electrons => 17  },
+    { symbol => 'Ar', charge => '', protons => 18,  electrons => 18  },
+    { symbol => 'K',  charge => '', protons => 19,  electrons => 19  },
+    { symbol => 'Ca', charge => '', protons => 20,  electrons => 20  },
+    { symbol => 'Sc', charge => '', protons => 21,  electrons => 21  },
+    { symbol => 'Ti', charge => '', protons => 22,  electrons => 22  },
+    { symbol => 'V',  charge => '', protons => 23,  electrons => 23  },
+    { symbol => 'Cr', charge => '', protons => 24,  electrons => 24  },
+    { symbol => 'Mn', charge => '', protons => 25,  electrons => 25  },
+    { symbol => 'Fe', charge => '', protons => 26,  electrons => 26  },
+    { symbol => 'Co', charge => '', protons => 27,  electrons => 27  },
+    { symbol => 'Ni', charge => '', protons => 28,  electrons => 28  },
+    { symbol => 'Cu', charge => '', protons => 29,  electrons => 29  },
+    { symbol => 'Zn', charge => '', protons => 30,  electrons => 30  },
+    { symbol => 'Ga', charge => '', protons => 31,  electrons => 31  },
+    { symbol => 'Ge', charge => '', protons => 32,  electrons => 32  },
+    { symbol => 'As', charge => '', protons => 33,  electrons => 33  },
+    { symbol => 'Se', charge => '', protons => 34,  electrons => 34  },
+    { symbol => 'Br', charge => '', protons => 35,  electrons => 35  },
+    { symbol => 'Kr', charge => '', protons => 36,  electrons => 36  },
+    { symbol => 'Rb', charge => '', protons => 37,  electrons => 37  },
+    { symbol => 'Sr', charge => '', protons => 38,  electrons => 38  },
+    { symbol => 'Y',  charge => '', protons => 39,  electrons => 39  },
+    { symbol => 'Zr', charge => '', protons => 40,  electrons => 40  },
+    { symbol => 'Nb', charge => '', protons => 41,  electrons => 41  },
+    { symbol => 'Mo', charge => '', protons => 42,  electrons => 42  },
+    { symbol => 'Tc', charge => '', protons => 43,  electrons => 43  },
+    { symbol => 'Ru', charge => '', protons => 44,  electrons => 44  },
+    { symbol => 'Rh', charge => '', protons => 45,  electrons => 45  },
+    { symbol => 'Pd', charge => '', protons => 46,  electrons => 46  },
+    { symbol => 'Ag', charge => '', protons => 47,  electrons => 47  },
+    { symbol => 'Cd', charge => '', protons => 48,  electrons => 48  },
+    { symbol => 'In', charge => '', protons => 49,  electrons => 49  },
+    { symbol => 'Sn', charge => '', protons => 50,  electrons => 50  },
+    { symbol => 'Sb', charge => '', protons => 51,  electrons => 51  },
+    { symbol => 'Te', charge => '', protons => 52,  electrons => 52  },
+    { symbol => 'I',  charge => '', protons => 53,  electrons => 53  },
+    { symbol => 'Xe', charge => '', protons => 54,  electrons => 54  },
+    { symbol => 'Cs', charge => '', protons => 55,  electrons => 55  },
+    { symbol => 'Ba', charge => '', protons => 56,  electrons => 56  },
+    { symbol => 'La', charge => '', protons => 57,  electrons => 57  },
+    { symbol => 'Ce', charge => '', protons => 58,  electrons => 58  },
+    { symbol => 'Pr', charge => '', protons => 59,  electrons => 59  },
+    { symbol => 'Nd', charge => '', protons => 60,  electrons => 60  },
+    { symbol => 'Pm', charge => '', protons => 61,  electrons => 61  },
+    { symbol => 'Sm', charge => '', protons => 62,  electrons => 62  },
+    { symbol => 'Eu', charge => '', protons => 63,  electrons => 63  },
+    { symbol => 'Gd', charge => '', protons => 64,  electrons => 64  },
+    { symbol => 'Tb', charge => '', protons => 65,  electrons => 65  },
+    { symbol => 'Dy', charge => '', protons => 66,  electrons => 66  },
+    { symbol => 'Ho', charge => '', protons => 67,  electrons => 67  },
+    { symbol => 'Er', charge => '', protons => 68,  electrons => 68  },
+    { symbol => 'Tm', charge => '', protons => 69,  electrons => 69  },
+    { symbol => 'Yb', charge => '', protons => 70,  electrons => 70  },
+    { symbol => 'Lu', charge => '', protons => 71,  electrons => 71  },
+    { symbol => 'Hf', charge => '', protons => 72,  electrons => 72  },
+    { symbol => 'Ta', charge => '', protons => 73,  electrons => 73  },
+    { symbol => 'W',  charge => '', protons => 74,  electrons => 74  },
+    { symbol => 'Re', charge => '', protons => 75,  electrons => 75  },
+    { symbol => 'Os', charge => '', protons => 76,  electrons => 76  },
+    { symbol => 'Ir', charge => '', protons => 77,  electrons => 77  },
+    { symbol => 'Pt', charge => '', protons => 78,  electrons => 78  },
+    { symbol => 'Au', charge => '', protons => 79,  electrons => 79  },
+    { symbol => 'Hg', charge => '', protons => 80,  electrons => 80  },
+    { symbol => 'Tl', charge => '', protons => 81,  electrons => 81  },
+    { symbol => 'Pb', charge => '', protons => 82,  electrons => 82  },
+    { symbol => 'Bi', charge => '', protons => 83,  electrons => 83  },
+    { symbol => 'Po', charge => '', protons => 84,  electrons => 84  },
+    { symbol => 'At', charge => '', protons => 85,  electrons => 85  },
+    { symbol => 'Rn', charge => '', protons => 86,  electrons => 86  },
+    { symbol => 'Fr', charge => '', protons => 87,  electrons => 87  },
+    { symbol => 'Ra', charge => '', protons => 88,  electrons => 88  },
+    { symbol => 'Ac', charge => '', protons => 89,  electrons => 89  },
+    { symbol => 'Th', charge => '', protons => 90,  electrons => 90  },
+    { symbol => 'Pa', charge => '', protons => 91,  electrons => 91  },
+    { symbol => 'U',  charge => '', protons => 92,  electrons => 92  },
+    { symbol => 'Np', charge => '', protons => 93,  electrons => 93  },
+    { symbol => 'Pu', charge => '', protons => 94,  electrons => 94  },
+);
+
+my @ions = (
+    { symbol => 'H',  charge => '+',  protons => 1,  electrons => 0  }, 
+    { symbol => 'Li', charge => '+',  protons => 3,  electrons => 2  },
+    { symbol => 'Be', charge => '2+', protons => 4,  electrons => 2  },
+    { symbol => 'B',  charge => '3+', protons => 5,  electrons => 2  },
+    { symbol => 'N',  charge => '3-', protons => 7,  electrons => 10 },
+    { symbol => 'O',  charge => '2-', protons => 8,  electrons => 10 },
+    { symbol => 'F',  charge => '-',  protons => 9,  electrons => 10 },
+    { symbol => 'Na', charge => '+',  protons => 11, electrons => 10 },
+    { symbol => 'Mg', charge => '2+', protons => 12, electrons => 10 },
+    { symbol => 'Al', charge => '3+', protons => 13, electrons => 10 },
+    { symbol => 'P',  charge => '3-', protons => 15, electrons => 18 },
+    { symbol => 'S',  charge => '2-', protons => 16, electrons => 18 },
+    { symbol => 'Cl', charge => '-',  protons => 17, electrons => 18 },
+    { symbol => 'K',  charge => '+',  protons => 19, electrons => 18 },
+    { symbol => 'Ca', charge => '2+', protons => 20, electrons => 18 },
+);
+
+
+@elements = random_subset(6,
+   @neutral_atoms,
+);
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Protons
+
+Complete the following table by entering the number of protons for each element.
+
+You may find this [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* helpful.
+
+
+[#
+    [.Symbol.] [.Number of Protons.]*{ headerrow => 1 }
+     [.[`[$elements[0]{symbol}]^{[$elements[0]{charge}]}`].] [.[_]{$elements[0]{protons}}.]*
+    [.[`[$elements[1]{symbol}]^{[$elements[1]{charge}]}`].] [.[_]{$elements[1]{protons}}.]*
+    [.[`[$elements[2]{symbol}]^{[$elements[2]{charge}]}`].] [.[_]{$elements[2]{protons}}.]*
+    [.[`[$elements[3]{symbol}]^{[$elements[3]{charge}]}`].] [.[_]{$elements[3]{protons}}.]*
+    [.[`[$elements[4]{symbol}]^{[$elements[4]{charge}]}`].] [.[_]{$elements[4]{protons}}.]*
+    [.[`[$elements[5]{symbol}]^{[$elements[5]{charge}]}`].] [.[_]{$elements[5]{protons}}.]*
+           
+#]{
+    align           => '|c|c|',
+    valign          => 'middle',
+    padding         => [ 0.5, 0.5 ],
+    horizontalrules => 1
+}
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+The number of protons is equivalent to the atomic number on the periodic table. This is usually located at the top of the box for the element on a periodic table but can vary depending on graphic design considerations.
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
