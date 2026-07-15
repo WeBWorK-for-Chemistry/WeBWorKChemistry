@@ -1,0 +1,155 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+
+);
+
+##############################################
+
+
+
+Context("ArbitraryString");
+
+
+my @ions = (
+    { name => 'Hydrogen',  symbol => 'H',  charge => '+',  protons => 1,  electrons => 0  }, 
+    { name => 'Lithium',   symbol => 'Li', charge => '+',  protons => 3,  electrons => 2  },
+    { name => 'Beryllium', symbol => 'Be', charge => '2+', protons => 4,  electrons => 2  },
+    { name => 'Boron',     symbol => 'B',  charge => '3+', protons => 5,  electrons => 2  },
+    { name => 'Nitride',   symbol => 'N',  charge => '3-', protons => 7,  electrons => 10 },
+    { name => 'Oxide',     symbol => 'O',  charge => '2-', protons => 8,  electrons => 10 },
+    { name => 'Fluoride',  symbol => 'F',  charge => '-',  protons => 9,  electrons => 10 },
+    { name => 'Sodium',    symbol => 'Na', charge => '+',  protons => 11, electrons => 10 },
+    { name => 'Magnesium', symbol => 'Mg', charge => '2+', protons => 12, electrons => 10 },
+    { name => 'Aluminum',  symbol => 'Al', charge => '3+', protons => 13, electrons => 10 },
+    { name => 'Phosphide', symbol => 'P',  charge => '3-', protons => 15, electrons => 18 },
+    { name => 'Sulfide',   symbol => 'S',  charge => '2-', protons => 16, electrons => 18 },
+    { name => 'Chloride',  symbol => 'Cl', charge => '-',  protons => 17, electrons => 18 },
+    { name => 'Potassium', symbol => 'K',  charge => '+',  protons => 19, electrons => 18 },
+    { name => 'Calcium',   symbol => 'Ca', charge => '2+', protons => 20, electrons => 18 },
+);
+
+@elements = random_subset(6, @ions);
+
+sub edit_distance {
+    my ($a, $b) = @_;
+    my @a = split('', $a);
+    my @b = split('', $b);
+    my @d;
+
+    $d[$_][0] = $_ for 0 .. @a;
+    $d[0][$_] = $_ for 0 .. @b;
+
+    for my $i (1 .. @a) {
+        for my $j (1 .. @b) {
+            my $cost = ($a[$i - 1] eq $b[$j - 1]) ? 0 : 1;
+
+            my $delete  = $d[$i - 1][$j] + 1;
+            my $insert  = $d[$i][$j - 1] + 1;
+            my $replace = $d[$i - 1][$j - 1] + $cost;
+
+            $d[$i][$j] = $delete < $insert ? $delete : $insert;
+            $d[$i][$j] = $replace
+                if $replace < $d[$i][$j];
+        }
+    }
+
+    return $d[@a][@b];
+}
+
+sub ion_name_cmp {
+    my ($correct_name, $charge) = @_;
+
+    return String($correct_name)->cmp(
+        checker => sub {
+            my ($correct, $student, $ans) = @_;
+
+            $correct =~ s/~~s+//g;
+            $student =~ s/~~s+//g;
+
+            $correct = lc($correct);
+            $student = lc($student);
+
+            $student = "sulfide" if $student eq "sulphide";
+
+            return 1 if $correct eq $student;
+
+            if ($charge =~ /-$/ && $student !~ /ide$/) {
+                $ans->{ans_message} =
+                    "Remember that the name of anions end in -ide.";
+            }
+            elsif (edit_distance($correct, $student) <= 2) {
+                $ans->{ans_message} =
+                    "Your answer is close. Check your spelling.";
+            }
+
+            return 0;
+        }
+    );
+}
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Charge on an Ion
+
+Write the name of each ion in the box next to the symbol.
+
+[#
+    [.Ion.] [.Ion Name.] *{ headerrow => 1 }
+   [.[`[$elements[0]{symbol}]^{[$elements[0]{charge}]}`].] [.[_] ion.]*
+[.[`[$elements[1]{symbol}]^{[$elements[1]{charge}]}`].] [.[_] ion.]*
+[.[`[$elements[2]{symbol}]^{[$elements[2]{charge}]}`].] [.[_] ion.]*
+[.[`[$elements[3]{symbol}]^{[$elements[3]{charge}]}`].] [.[_] ion.]*
+[.[`[$elements[4]{symbol}]^{[$elements[4]{charge}]}`].] [.[_] ion.]*
+[.[`[$elements[5]{symbol}]^{[$elements[5]{charge}]}`].] [.[_] ion.]*
+#]
+
+END_PGML
+
+ANS(
+    map {
+        ion_name_cmp($_->{name}, $_->{charge})
+    } @elements
+);
+
+##############################################
+BEGIN_PGML_HINT
+
+For positive ions, which are called cations, the naming process is straightforward because the name of the element remains completely unchanged. Metals, which are found on the left and center of the periodic table, lose electrons to form these positive ions. When naming them, you simply use the regular element name and follow it with the word "ion" to clarify that it has a charge. For example, a sodium atom that loses an electron becomes the sodium ion, and a magnesium atom that loses two electrons becomes the magnesium ion. This rule applies to all main-group metals, such as lithium, calcium, and aluminum.
+
+For negative ions, which are called anions, the naming process requires changing the ending of the element's name. Nonmetals, located on the right side of the periodic table, gain electrons to form these negative ions. To name an anion, you take the root name of the element, drop its original suffix (like "-ogen," "-ine," or "-ur"), and replace it with the suffix "-ide." For instance, nitrogen drops its ending to become nitride, oxygen becomes oxide, and fluorine becomes fluoride. Similarly, phosphorus becomes phosphide, sulfur becomes sulfide, and chlorine becomes chloride. Just like with cations, you can add the word "ion" after the modified name, such as the chloride ion, to specify its charged state.
+
+END_PGML_HINT
+##############################################
+
+
+
+ENDDOCUMENT();
