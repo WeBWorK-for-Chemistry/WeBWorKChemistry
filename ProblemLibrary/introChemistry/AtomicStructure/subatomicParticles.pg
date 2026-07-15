@@ -1,0 +1,91 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl",
+  "parserRadioButtons.pl",
+  "PGchoicemacros.pl"
+);
+
+##############################################
+
+
+
+Context("Numeric");
+
+
+$dropdown_electron_charge =
+    DropDown([ '+1', '0', '-1' ], '-1', placeholder => 'Select One');
+
+$dropdown_proton_charge =
+    DropDown([ '+1', '0', '-1' ], '+1', placeholder => 'Select One');
+
+$dropdown_neutron_charge =
+    DropDown([ '+1', '0', '-1' ], 1, placeholder => 'Select One');
+
+$dropdown_electron_location =
+    DropDown([ 'in the nucleus', 'outside the nucleus', 'both'], 'outside the nucleus', placeholder => 'Select One');
+
+$dropdown_proton_location =
+    DropDown([ 'in the nucleus', 'outside the nucleus', 'both'], 'in the nucleus', placeholder => 'Select One');
+
+$dropdown_neutron_location =
+    DropDown([ 'in the nucleus', 'outside the nucleus', 'both'], 'in the nucleus', placeholder => 'Select One');
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Subatomic Particles
+
+Choose the correct answer from the dropdown menu for the charge and location of each subatomic particle.
+
+[#
+            [.Subatomic Particle.] [.Charge.] [.Location.]*{headerrow => 1}
+            [.electron.] [.[_]{$dropdown_electron_charge}.] [.[_]{$dropdown_electron_location}.]*
+            [.proton.] [.[_]{$dropdown_proton_charge}.] [.[_]{$dropdown_proton_location}.]*
+            [.neutron.] [.[_]{$dropdown_neutron_charge}.] [.[_]{$dropdown_neutron_location}.]
+            
+#]
+
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+At the very center of every atom lies the nucleus, which acts as the dense core holding two specific types of particles. Inside this nucleus, you will find protons, which carry a distinct positive charge, nestled tightly alongside neutrons, which are completely neutral and carry no charge at all. Meanwhile, the third type of particle lives in a completely different area. The electrons, which carry a negative charge, do not sit inside the core at all; instead, they are found constantly moving in the vast space outside the nucleus, forming an outer cloud around the atom's center.
+
+END_PGML_HINT
+##############################################
+
+
+
+ENDDOCUMENT();

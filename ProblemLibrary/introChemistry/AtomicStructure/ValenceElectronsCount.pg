@@ -1,0 +1,169 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1(not reported)
+## Problem1(8.1.12)
+## Author()
+## Institution()
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "AnswerFormatHelp.pl",
+  "parserPopUp.pl",
+  "PGcourse.pl",
+  "niceTables.pl",
+  "contextInexactValue.pl",
+  "answerHints.pl"
+);
+
+############################################################
+# Header
+############################################################
+
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+
+my @main_group_elements = [
+    # Group 1 (Alkali Metals) - 1 Valence Electron
+    { name => 'Hydrogen',  symbol => 'H',  valence_electrons => 1 },
+    { name => 'Lithium',   symbol => 'Li', valence_electrons => 1 },
+    { name => 'Sodium',    symbol => 'Na', valence_electrons => 1 },
+    { name => 'Potassium', symbol => 'K',  valence_electrons => 1 },
+    { name => 'Rubidium',  symbol => 'Rb', valence_electrons => 1 },
+    { name => 'Cesium',    symbol => 'Cs', valence_electrons => 1 },
+    { name => 'Francium',  symbol => 'Fr', valence_electrons => 1 },
+
+    # Group 2 (Alkaline Earth Metals) - 2 Valence Electrons
+    { name => 'Beryllium', symbol => 'Be', valence_electrons => 2 },
+    { name => 'Magnesium', symbol => 'Mg', valence_electrons => 2 },
+    { name => 'Calcium',   symbol => 'Ca', valence_electrons => 2 },
+    { name => 'Strontium', symbol => 'Sr', valence_electrons => 2 },
+    { name => 'Barium',    symbol => 'Ba', valence_electrons => 2 },
+    { name => 'Radium',    symbol => 'Ra', valence_electrons => 2 },
+
+    # Group 13 (Boron Group) - 3 Valence Electrons
+    { name => 'Boron',     symbol => 'B',  valence_electrons => 3 },
+    { name => 'Aluminum',  symbol => 'Al', valence_electrons => 3 },
+    { name => 'Gallium',   symbol => 'Ga', valence_electrons => 3 },
+    { name => 'Indium',    symbol => 'In', valence_electrons => 3 },
+    { name => 'Thallium',  symbol => 'Tl', valence_electrons => 3 },
+
+    # Group 14 (Carbon Group) - 4 Valence Electrons
+    { name => 'Carbon',    symbol => 'C',  valence_electrons => 4 },
+    { name => 'Silicon',   symbol => 'Si', valence_electrons => 4 },
+    { name => 'Germanium', symbol => 'Ge', valence_electrons => 4 },
+    { name => 'Tin',       symbol => 'Sn', valence_electrons => 4 },
+    { name => 'Lead',      symbol => 'Pb', valence_electrons => 4 },
+
+    # Group 15 (Pnictogens) - 5 Valence Electrons
+    { name => 'Nitrogen',  symbol => 'N',  valence_electrons => 5 },
+    { name => 'Phosphorus',symbol => 'P',  valence_electrons => 5 },
+    { name => 'Arsenic',   symbol => 'As', valence_electrons => 5 },
+    { name => 'Antimony',  symbol => 'Sb', valence_electrons => 5 },
+    { name => 'Bismuth',   symbol => 'Bi', valence_electrons => 5 },
+
+    # Group 16 (Chalcogens) - 6 Valence Electrons
+    { name => 'Oxygen',    symbol => 'O',  valence_electrons => 6 },
+    { name => 'Sulfur',    symbol => 'S',  valence_electrons => 6 },
+    { name => 'Selenium',  symbol => 'Se', valence_electrons => 6 },
+    { name => 'Tellurium', symbol => 'Te', valence_electrons => 6 },
+    { name => 'Polonium',  symbol => 'Po', valence_electrons => 6 },
+
+    # Group 17 (Halogens) - 7 Valence Electrons
+    { name => 'Fluorine',  symbol => 'F',  valence_electrons => 7 },
+    { name => 'Chlorine',  symbol => 'Cl', valence_electrons => 7 },
+    { name => 'Bromine',   symbol => 'Br', valence_electrons => 7 },
+    { name => 'Iodine',    symbol => 'I',  valence_electrons => 7 },
+    { name => 'Astatine',  symbol => 'At', valence_electrons => 7 },
+
+    # Group 18 (Noble Gases) - 8 Valence Electrons (Except Helium, which has 2)
+    { name => 'Helium',    symbol => 'He', valence_electrons => 2 },
+    { name => 'Neon',      symbol => 'Ne', valence_electrons => 8 },
+    { name => 'Argon',     symbol => 'Ar', valence_electrons => 8 },
+    { name => 'Krypton',   symbol => 'Kr', valence_electrons => 8 },
+    { name => 'Xenon',     symbol => 'Xe', valence_electrons => 8 },
+    { name => 'Radon',     symbol => 'Rn', valence_electrons => 8 },
+];
+
+@elements = random_subset(8, @main_group_elements);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Number of Valence Electrons
+
+Use [@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* to determine the number of valence electrons for each element below.
+[#
+    [.
+        [#
+            [.Element Name.] [.Number of Valence Electrons.]*{headerrow => 1}
+            [.[$elements[0]->{name}].] [.[_]{$elements[0]->{valence_electrons}}.]*
+            [.[$elements[1]->{name}].] [.[_]{$elements[1]->{valence_electrons}}.]*
+            [.[$elements[2]->{name}].] [.[_]{$elements[2]->{valence_electrons}}.]*
+            [.[$elements[3]->{name}].] [.[_]{$elements[3]->{valence_electrons}}.]
+
+#]
+    .]
+    [.
+        [#
+            [.Element Symbol.] [.Number of Valence Electrons.]*{headerrow => 1}
+            [.[$elements[4]->{symbol}].] [.[_]{$elements[4]->{valence_electrons}}.]*
+            [.[$elements[5]->{symbol}].] [.[_]{$elements[5]->{valence_electrons}}.]*
+            [.[$elements[6]->{symbol}].] [.[_]{$elements[6]->{valence_electrons}}.]*
+            [.[$elements[7]->{symbol}].] [.[_]{$elements[7]->{valence_electrons}}.]
+        #]
+    .]
+
+#]*
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+The valence shell is the outermost shell of an atom in its uncombined state, which contains the electrons most likely to account for the nature of any reactions involving the atom and of the bonding interactions it has with other atoms. Valence electrons are the outer-shell electrons of an atom. These are electrons that can participate in the formation of a chemical bond. The presence of valence electrons can determine the element's chemical properties and whether it may bond with other elements.
+
+The number of valence electrons of an element can be determined by the periodic table group (vertical column) in which the element is categorized. With the exception of groups 3–12 (the transition metals), *the ones digit of the group number identifies how many valence electrons are associated with a neutral atom of an element* listed under that particular column.
+
+END_PGML_HINT
+
+############################################################
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+ENDDOCUMENT();
