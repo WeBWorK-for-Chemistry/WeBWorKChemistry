@@ -1,0 +1,141 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+
+);
+
+##############################################
+
+
+
+Context("Numeric");
+
+my @neutral_atoms = (
+    { symbol => 'H',  charge => '', protons => 1,  electrons => 1  },
+    { symbol => 'He', charge => '', protons => 2,  electrons => 2  },
+    { symbol => 'Li', charge => '', protons => 3,  electrons => 3  },
+    { symbol => 'Be', charge => '', protons => 4,  electrons => 4  },
+    { symbol => 'B',  charge => '', protons => 5,  electrons => 5  },
+    { symbol => 'C',  charge => '', protons => 6,  electrons => 6  },
+    { symbol => 'N',  charge => '', protons => 7,  electrons => 7  },
+    { symbol => 'O',  charge => '', protons => 8,  electrons => 8  },
+    { symbol => 'F',  charge => '', protons => 9,  electrons => 9  },
+    { symbol => 'Ne', charge => '', protons => 10, electrons => 10 },
+    { symbol => 'Na', charge => '', protons => 11, electrons => 11 },
+    { symbol => 'Mg', charge => '', protons => 12, electrons => 12 },
+    { symbol => 'Al', charge => '', protons => 13, electrons => 13 },
+    { symbol => 'Si', charge => '', protons => 14, electrons => 14 },
+    { symbol => 'P',  charge => '', protons => 15, electrons => 15 },
+    { symbol => 'S',  charge => '', protons => 16, electrons => 16 },
+    { symbol => 'Cl', charge => '', protons => 17, electrons => 17 },
+    { symbol => 'Ar', charge => '', protons => 18, electrons => 18 },
+    { symbol => 'K',  charge => '', protons => 19, electrons => 19 },
+    { symbol => 'Ca', charge => '', protons => 20, electrons => 20 },
+);
+
+my @ions = (
+    { symbol => 'H',  charge => '+',  protons => 1,  electrons => 0  }, 
+    { symbol => 'Li', charge => '+',  protons => 3,  electrons => 2  },
+    { symbol => 'Be', charge => '2+', protons => 4,  electrons => 2  },
+    { symbol => 'B',  charge => '3+', protons => 5,  electrons => 2  },
+    { symbol => 'N',  charge => '3-', protons => 7,  electrons => 10 },
+    { symbol => 'O',  charge => '2-', protons => 8,  electrons => 10 },
+    { symbol => 'F',  charge => '-',  protons => 9,  electrons => 10 },
+    { symbol => 'Na', charge => '+',  protons => 11, electrons => 10 },
+    { symbol => 'Mg', charge => '2+', protons => 12, electrons => 10 },
+    { symbol => 'Al', charge => '3+', protons => 13, electrons => 10 },
+    { symbol => 'P',  charge => '3-', protons => 15, electrons => 18 },
+    { symbol => 'S',  charge => '2-', protons => 16, electrons => 18 },
+    { symbol => 'Cl', charge => '-',  protons => 17, electrons => 18 },
+    { symbol => 'K',  charge => '+',  protons => 19, electrons => 18 },
+    { symbol => 'Ca', charge => '2+', protons => 20, electrons => 18 },
+);
+
+# randomly pick 4 of each type
+@neutral = random_subset(4, @neutral_atoms);
+@ionic = random_subset(4, @ions);
+
+# merge them and randomize order:
+@elements = random_subset(8,
+   @neutral,
+    @ionic,
+);
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Electrons and Protons
+
+Complete the following table. If no charge is given, the atom is neutral.
+
+
+[#
+    [.Symbol.] [.Number of Protons.] [.Number of Electrons.]*{ headerrow => 1 }
+     [.[`[$elements[0]{symbol}]^{[$elements[0]{charge}]}`].] [.[_]{$elements[0]{protons}}.] [.[_]{$elements[0]{electrons}}.]*
+    [.[`[$elements[1]{symbol}]^{[$elements[1]{charge}]}`].] [.[_]{$elements[1]{protons}}.] [.[_]{$elements[1]{electrons}}.]*
+    [.[`[$elements[2]{symbol}]^{[$elements[2]{charge}]}`].] [.[_]{$elements[2]{protons}}.] [.[_]{$elements[2]{electrons}}.]*
+    [.[`[$elements[3]{symbol}]^{[$elements[3]{charge}]}`].] [.[_]{$elements[3]{protons}}.] [.[_]{$elements[3]{electrons}}.]*
+    [.[`[$elements[4]{symbol}]^{[$elements[4]{charge}]}`].] [.[_]{$elements[4]{protons}}.] [.[_]{$elements[4]{electrons}}.]*
+    [.[`[$elements[5]{symbol}]^{[$elements[5]{charge}]}`].] [.[_]{$elements[5]{protons}}.] [.[_]{$elements[5]{electrons}}.]*
+    [.[`[$elements[6]{symbol}]^{[$elements[6]{charge}]}`].] [.[_]{$elements[6]{protons}}.] [.[_]{$elements[6]{electrons}}.]*
+    [.[`[$elements[7]{symbol}]^{[$elements[7]{charge}]}`].] [.[_]{$elements[7]{protons}}.] [.[_]{$elements[7]{electrons}}.]*
+           
+#]{
+    align           => '|c|c|c|',
+    valign          => 'middle',
+    padding         => [ 0.5, 0.5 ],
+    horizontalrules => 1
+}
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+The number of protons is equivalent to the atomic number on the periodic table. The number of electrons can then be found using 
+
+[``\mathrm{charge = protons - electrons}``]
+
+Rearranging this gives,
+
+[``\mathrm{electrons = protons - charge}``]
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

@@ -1,0 +1,196 @@
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## KEYWORDS('')
+## DBCCSS('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextScientificNotation.pl",
+  "contextReaction.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl"
+
+);
+
+##############################################
+
+
+
+Context("ArbitraryString");
+
+
+my @ions = (
+    { symbol => 'H',  charge => '+',  protons => 1,  electrons => 0  }, 
+    { symbol => 'Li', charge => '+',  protons => 3,  electrons => 2  },
+    { symbol => 'Be', charge => '2+', protons => 4,  electrons => 2  },
+    { symbol => 'B',  charge => '3+', protons => 5,  electrons => 2  },
+    { symbol => 'N',  charge => '3-', protons => 7,  electrons => 10 },
+    { symbol => 'O',  charge => '2-', protons => 8,  electrons => 10 },
+    { symbol => 'F',  charge => '-',  protons => 9,  electrons => 10 },
+    { symbol => 'Na', charge => '+',  protons => 11, electrons => 10 },
+    { symbol => 'Mg', charge => '2+', protons => 12, electrons => 10 },
+    { symbol => 'Al', charge => '3+', protons => 13, electrons => 10 },
+    { symbol => 'P',  charge => '3-', protons => 15, electrons => 18 },
+    { symbol => 'S',  charge => '2-', protons => 16, electrons => 18 },
+    { symbol => 'Cl', charge => '-',  protons => 17, electrons => 18 },
+    { symbol => 'K',  charge => '+',  protons => 19, electrons => 18 },
+    { symbol => 'Ca', charge => '2+', protons => 20, electrons => 18 },
+);
+
+@elements = random_subset(4, @ions);
+
+$ans_rule1 = ans_rule(4);
+$ans_rule2 = ans_rule(4);
+$ans_rule3 = ans_rule(4);
+$ans_rule4 = ans_rule(4);
+
+ANS(String($elements[0]{charge})->cmp(
+    checker => sub {
+        my ($correct, $student, $ans) = @_;
+
+        # Remove all whitespace.
+        $student =~ s/~~s+//g;
+
+        if ($student =~ /^(?:[+-]1|1[+-])$/) {
+            $ans->{ans_message} =
+            "Do not include the number 1. Enter 1+ as + and 1- as -.";
+        }
+        elsif ($student =~ /^[+-]~~d+$/) {
+            $ans->{ans_message} =
+            "Enter the charge with the number before the sign. "
+          . "2+ or 3- are examples of the correct format.";
+        }
+        return $correct eq $student;
+    }
+));
+ANS(String($elements[1]{charge})->cmp(
+    checker => sub {
+        my ($correct, $student, $ans) = @_;
+
+        # Remove all whitespace.
+        $student =~ s/~~s+//g;
+
+        if ($student =~ /^(?:[+-]1|1[+-])$/) {
+            $ans->{ans_message} =
+            "Do not include the number 1. Enter 1+ as + and 1- as -.";
+        }
+        elsif ($student =~ /^[+-]~~d+$/) {
+            $ans->{ans_message} =
+            "Enter the charge with the number before the sign. "
+          . "2+ or 3- are examples of the correct format.";
+        }
+        return $correct eq $student;
+    }
+));
+ANS(String($elements[2]{charge})->cmp(
+    checker => sub {
+        my ($correct, $student, $ans) = @_;
+
+        # Remove all whitespace.
+        $student =~ s/~~s+//g;
+
+        if ($student =~ /^(?:[+-]1|1[+-])$/) {
+            $ans->{ans_message} =
+            "Do not include the number 1. Enter 1+ as + and 1- as -.";
+        }
+        elsif ($student =~ /^[+-]~~d+$/) {
+            $ans->{ans_message} =
+            "Enter the charge with the number before the sign. "
+          . "2+ or 3- are examples of the correct format.";
+        }
+        return $correct eq $student;
+    }
+));
+ANS(String($elements[3]{charge})->cmp(
+    checker => sub {
+        my ($correct, $student, $ans) = @_;
+
+        # Remove all whitespace.
+        $student =~ s/~~s+//g;
+
+        if ($student =~ /^(?:[+-]1|1[+-])$/) {
+            $ans->{ans_message} =
+            "Do not include the number 1. Enter 1+ as + and 1- as -.";
+        }
+        elsif ($student =~ /^[+-]~~d+$/) {
+            $ans->{ans_message} =
+            "Enter the charge with the number before the sign. "
+          . "2+ or 3- are examples of the correct format.";
+        }
+        return $correct eq $student;
+    }
+));
+
+
+
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Charge on an Ion
+
+The charge of an ion is written as a superscript next to the symbol. Fill in the charges for the following ions. 
+
+Remember that the charge is written with the number first and the + or -. Aluminum has a charge of 3+ for example. If the charge is 1+ or 1-, then only a + or - is used and the 1 is left off. 
+
+a. [@ MODES(
+    TeX => "\\( \\displaystyle $elements[0]{symbol}^{$ans_rule1} \\)",
+    HTML =>"<div><span>`$elements[0]{symbol}`"
+        . "<span style='vertical-align: 1.4em'> $ans_rule1 </span></div>"
+)@]*
+
+b. [@ MODES(
+    TeX => "\\( \\displaystyle $elements[1]{symbol}^{$ans_rule2} \\)",
+    HTML =>"<div><span>`$elements[1]{symbol}`"
+        . "<span style='vertical-align: 1.4em'> $ans_rule2 </span></div>"
+)@]*
+
+c. [@ MODES(
+    TeX => "\\( \\displaystyle $elements[2]{symbol}^{$ans_rule3} \\)",
+    HTML =>"<div><span>`$elements[2]{symbol}`"
+        . "<span style='vertical-align: 1.4em'> $ans_rule3 </span></div>"
+)@]*
+
+d. [@ MODES(
+    TeX => "\\( \\displaystyle $elements[3]{symbol}^{$ans_rule4} \\)",
+    HTML =>"<div><span>`$elements[3]{symbol}`"
+        . "<span style='vertical-align: 1.4em'> $ans_rule4 </span></div>"
+)@]*
+
+END_PGML
+
+##############################################
+BEGIN_PGML_HINT
+
+To determine the charge of a main-group ion, you must look at its column on the periodic table to find its valence electrons and apply the Octet Rule. This rule states that atoms are most stable when their outermost electron shell is completely full, which generally requires eight electrons. Because atoms react in a way that requires the minimal amount of energy to achieve this stability, they will either shed their outer electrons or steal extra ones depending on which process is energetically favorable.
+
+Main-group metals found on the left side of the periodic table in Groups 1, 2, and 13 have only one, two, or three valence electrons, respectively. It takes far less energy for these atoms to completely shed these few outer electrons to reveal a full, stable shell underneath than it would to grab enough electrons to fill the current shell. Because electrons carry a negative charge, losing them leaves the atom with more positive protons than negative electrons, creating a positively charged ion called a cation. For example, a Group 1 metal like Sodium loses one electron to form a +1 charge, while a Group 2 metal like Magnesium loses two electrons to form a +2 charge.
+
+Conversely, main-group nonmetals found on the right side of the table in Groups 15, 16, and 17 are already very close to having a full outer shell, possessing five, six, or seven valence electrons. Instead of expending the massive amount of energy required to lose all of those electrons, these atoms pull in extra electrons from their environment to round their total up to eight. Because the atom is gaining extra negative charges, it becomes a negatively charged ion called an anion. You can easily calculate this negative charge by subtracting eight from the atom's number of valence electrons. For instance, an oxygen atom in Group 16 has six valence electrons, so it gains two more to reach an octet, resulting in a -2 ionic charge. Elements in Group 18, the noble gases, already possess a naturally full outer shell of eight electrons, meaning they are perfectly stable and do not form ions at all.
+
+END_PGML_HINT
+##############################################
+
+
+
+ENDDOCUMENT();
