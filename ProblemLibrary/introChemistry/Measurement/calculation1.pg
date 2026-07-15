@@ -1,0 +1,165 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+   "parserMultiAnswer.pl",
+);
+
+
+
+Context("InexactValueWithUnits");
+
+$v = random(100.0, 800.0, 0.1);
+$volume = InexactValueWithUnits([$v,4], mL);
+$m1 = random(1.00, 9.99, 0.01);
+$masskg = InexactValueWithUnits([$m1,3],kg);
+$given = $masskg;
+#$mass = InexactValueWithUnits([$m1*1000,3], g);
+
+
+
+# convert to g from kg
+$n1 = InexactValueWithUnits(['1000', 9**9**9], 'g'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+$d1 = InexactValueWithUnits(['1', 9**9**9], 'kg');
+
+$mass = $given * $n1 / $d1;
+$density = $mass/$volume;
+$answer_units = InexactValueWithUnits([$density, 3], 'g/mL');
+
+$ma = MultiAnswer($n1,$d1,$mass)->asDimensionalAnalysis($given);
+
+##############################################
+
+BEGIN_PGML
+## Density
+
+*Find the density in[`\mathrm{\frac{g}{mL}}`] of an object that has a mass of [$masskg] and a volume of [$volume]?*
+
+This problem has two steps. First complete the conversion from kg to g and then use this result to find the density.
+
+First find the mass in grams of the solution. 
+
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
+
+Second, place the answer from above into the numerator below. Then place the volume in mL in the denominator with units and find the density. Don't forget to include units in all your answers. 
+
+Note: mL has a capital L. Also check the format of your final answer. It should be formatted like this [`\mathrm{number\frac{g}{mL}}`], not [`\mathrm{\frac{number\:g}{mL}}`]. 
+
+[#
+    [.[`\mathrm{density}`] .]
+    [.[`=`].]
+    [.
+        [#
+            [.[`\mathrm{mass}`][<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[`\mathrm{volume}`] .]*
+        #]*
+    .]
+    [.[`=`].]
+    [.
+        [#
+            [.[_]{$mass}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$volume} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$answer_units}.]
+#]*{valign => 'middle'}
+
+
+
+END_PGML
+##############################################
+
+BEGIN_PGML_HINT
+
+1. Check that your solution displays all the numbers with the correct sig figs. For example if you need to display 2700 g as a number with 3 sig figs, it must be written as [``2.70 \times 10^3``].
+
+2. Don't forget to put units in your answer.
+
+For more information on calculating density, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Introductory_Chemistry_(LibreTexts)/02%3A_Measurement_and_Problem_Solving/2.09%3A_Density"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[`[$n1]`][<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[`[$d1]`] .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[`[$mass]`].]
+#]*{valign => 'middle'}
+
+[#
+    [.[`\mathrm{density}`] .]
+    [.[`=`].]
+    
+    [.
+        [#
+            [.[`[$mass]`][<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[`[$volume]`].]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[`[$answer_units]`].]
+#]*{valign => 'middle'}
+
+
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

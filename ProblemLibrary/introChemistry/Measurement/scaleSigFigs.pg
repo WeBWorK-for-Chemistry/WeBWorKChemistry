@@ -1,0 +1,208 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("InexactValue");
+#Context()->flags->set(
+#  tolerance => 0.01,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+%scales = (
+  scale0 => {
+    image       => "scale0.png",
+    alt         => "scale with a display that reads 0.73 g",
+    measurement => 0.73,
+    sigfigs     => 2,
+  },
+  scale1 => {
+    image       => "scale1.png",
+    alt         => "scale with a display that reads 18.40 g",
+    measurement => 18.40,
+    sigfigs     => 4,
+  },
+  scale2 => {
+    image       => "scale2.png",
+    alt         => "scale with a display that reads 20.60 g",
+    measurement => 20.60,
+    sigfigs     => 4,
+  },
+  scale3 => {
+    image       => "scale3.png",
+    alt         => "scale with a display that reads 200.20 g",
+    measurement => 200.20,
+    sigfigs     => 5,
+  },
+  scale4 => {
+    image       => "scale4.png",
+    alt         => "scale with a display that reads 3.20 g",
+    measurement => 3.20,
+    sigfigs     => 3,
+  },
+  scale5 => {
+    image       => "scale5.png",
+    alt         => "scale with a display that reads 0.60 g",
+    measurement => 0.60,
+    sigfigs     => 2,
+  },
+  scale6 => {
+    image       => "scale6.png",
+    alt         => "scale with a display that reads 0.99 g",
+    measurement => 0.99,
+    sigfigs     => 2,
+  },
+  scale7 => {
+    image       => "scale7.png",
+    alt         => "scale with a display that reads 9.09 g",
+    measurement => 9.09,
+    sigfigs     => 3,
+  },
+  scale8 => {
+    image       => "scale8.png",
+    alt         => "scale with a display that reads 89.11 g",
+    measurement => 89.11,
+    sigfigs     => 4,
+  },
+  scale9 => {
+    image       => "scale9.png",
+    alt         => "scale with a display that reads 100.01 g",
+    measurement => 100.01,
+    sigfigs     => 5,
+  },
+);
+
+@scale_keys = (
+  "scale0",
+  "scale1",
+  "scale2",
+  "scale3",
+  "scale4",
+  "scale5",
+  "scale6",
+  "scale7",
+  "scale8",
+  "scale9",
+);
+
+for (0..1) {
+    my $order = random(0,9);
+    redo if $unique{$order}++;
+    push @order, $order;
+}
+
+foreach (0..1) {
+    my $key = $scale_keys[$order[$_]];
+    $image[$_] = $scales{$key}{image};
+    $alt[$_]   = $scales{$key}{alt};
+    $ans[$_]   = $scales{$key}{measurement};
+    $sf[$_]    = $scales{$key}{sigfigs};
+}
+
+$m0 = InexactValue($ans[0], $sf[0], { tolerance => 0.00});
+$m0uncert = InexactValue(0.01,1);
+$tick0 = $m0uncert*10;
+$m1 = InexactValue($ans[1], $sf[1], { tolerance => 0.00});
+$m1uncert = InexactValue(0.01,1);
+$tick1 = $m1uncert*10;
+$image0 = $image[0];
+$alt0 = $alt[0];
+$image1 = $image[1];
+$alt1 = $alt[1];
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Measuring with an Electronic Balance
+
+_An amount of solid has been placed on the electronic balance.  Read the measurement on the balance and record it with the correct number of signigficant digits and uncertainty.  Place the measurement and uncertainty *in separate boxes* in the answer field._
+
+
+a)  [@ image( $image0, width=>516, height=>225,  
+ extra_html_tags=>"alt='$alt0'"  )@]*
+
+    The solid placed on this scale has a mass of [____]{$m0} +/- [___]{$m0uncert} grams.
+
+
+b)  [@ image( $image1, width=>516, height=>225,  
+ extra_html_tags=>"alt='$alt1'"  )@]*
+
+    The solid placed on this scale has a mass of [____]{$m1} +/- [___]{$m1uncert} grams.
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+A digital device like a scale measures the guess digit for you. The last digit of the measurement is the guess digit and is a measure of the uncertainty in the measurement. 
+
+1. What is the place value of the last digit of the measurement for the scale? Look at the last column measured for both measurements.
+
+    a. [$m0]
+
+    b. [$m1]
+
+2. Put a one in that column to get a measure of the uncertainty in this device. 
+
+To review measurement and uncertainty, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("on this link to find a discussion about the number of digits in a measurement"), "TARGET='_blank'" ); @]*. Note that the number of digits reported in a measurement are often called the significant digits.
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+a) The solid placed on this scale has a mass of [$m0] +/- [$m0uncert] grams.
+b) The solid placed on this scale has a mass of [$m1] +/- [$m1uncert] grams.
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

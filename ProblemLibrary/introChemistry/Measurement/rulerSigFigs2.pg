@@ -1,0 +1,216 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("InexactValue");
+#Context()->flags->set(
+#  tolerance => 0.02,      #default is 0.001
+#  tolType => 'absolute',  #default is 'relative'
+#);
+
+
+
+%rulers_cm_mm = (
+  ruler0 => {
+    image       => "ruler0.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends exactly on the 6 cm mark",
+    measurement => 6.00,
+    sigfigs     => 3,
+  },
+  ruler1 => {
+    image       => "ruler1.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends between the 3rd and 4th small marks after the 3 cm marks",
+    measurement => 3.35,
+    sigfigs     => 3,
+  },
+  ruler2 => {
+    image       => "ruler2.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends after the 9th small mark after the 2 cm marks",
+    measurement => 2.95,
+    sigfigs     => 3,
+  },
+  ruler3 => {
+    image       => "ruler3.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends exactly on the 9th small mark after the 1 cm mark",
+    measurement => 0.90,
+    sigfigs     => 2,
+  },
+  ruler4 => {
+    image       => "ruler4.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends halfway before the first small mark after the 4 cm mark",
+    measurement => 4.05,
+    sigfigs     => 3,
+  },
+  ruler5 => {
+    image       => "ruler5.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends halfway between the 2nd and 3rd small mark after the 1 cm mark",
+    measurement => 1.25,
+    sigfigs     => 3,
+  },
+  ruler6 => {
+    image       => "ruler6.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends exactly on the 5th small mark after the 1 cm mark",
+    measurement => 1.50,
+    sigfigs     => 3,
+  },
+  ruler7 => {
+    image       => "ruler7.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends halfway between the 7th and 8th small mark after the 2 cm mark",
+    measurement => 2.75,
+    sigfigs     => 3,
+  },
+  ruler8 => {
+    image       => "ruler8.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends halfway between the 1st and 2nd small mark after the 5 cm mark",
+    measurement => 5.15,
+    sigfigs     => 3,
+  },
+  ruler9 => {
+    image       => "ruler9.png",
+    alt         => "A ruler sits below a gray retangle representing a strip of magnesium. The ruler has labeled tick marks every centimeter and 10 marks between them.  The gray rectangle starts at 0 cm and ends exactly on the 5th small mark after the 5 cm mark",
+    measurement => 5.50,
+    sigfigs     => 3,
+  },
+);
+
+# Keep this explicit list instead of using sort, since sort can be unreliable/problematic in WeBWorK PG.
+# ruler9 is reserved for the worked example, so it is intentionally omitted from randomized choices.
+@ruler_keys = (
+  "ruler0",
+  "ruler1",
+  "ruler2",
+  "ruler3",
+  "ruler4",
+  "ruler5",
+  "ruler6",
+  "ruler7",
+  "ruler8",
+);
+
+for (0..1) {
+    my $order = random(0, scalar(@ruler_keys) - 1);
+    redo if $unique{$order}++;
+    push @order, $order;
+}
+
+foreach (0..1) {
+    my $key = $ruler_keys[$order[$_]];
+    $image[$_] = $rulers_cm_mm{$key}{image};
+    $alt[$_]   = $rulers_cm_mm{$key}{alt};
+    $ans[$_]   = $rulers_cm_mm{$key}{measurement};
+    $sf[$_]    = $rulers_cm_mm{$key}{sigfigs};
+}
+
+$m0 = InexactValue($ans[0], $sf[0], { tolerance => 0.03});
+$m0uncert = InexactValue(0.01,1);
+$tick0 = $m0uncert*10;
+$m1 = InexactValue($ans[1], $sf[1], { tolerance => 0.03});
+$m1uncert = InexactValue(0.01,1);
+$tick1 = $m1uncert*10;
+$image0 = $image[0];
+$alt0 = $alt[0];
+$image1 = $image[1];
+$alt1 = $alt[1];
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Measuring with a Ruler
+
+_Measure the strip of magnesium above each ruler.  Include the measurement with the correct number of signigficant digits and uncertainty for the units shown (centimeters).  Place the measurement and uncertainty *in separate boxes* in the answer field.  Notice that the smallest markings on these rulers are in millimeters (0.1 centimeter).  The first example has been done for you. You can click on the image to see a larger version._
+
+Example: [@ image( "ruler9.png", width=>516, height=>225,extra_html_tags=>"alt='gray rectangle starts at 0 cm and ends exactly on the 5th small mark after the 5 cm mark'"  )@]*
+
+    The magnesium strip above measures *5.50* +/- *0.01* cm.
+    
+    
+
+a)  [@ image( $image0, width=>516, height=>225,  
+ extra_html_tags=>"alt='$alt0'"  )@]*
+
+    The magnesium strip above measures [____]{$m0} +/- [___]{$m0uncert} cm.
+
+
+b)  [@ image( $image1, width=>516, height=>225,  
+ extra_html_tags=>"alt='$alt1'"  )@]*
+ 
+    The magnesium strip above measures [____]{$m1} +/- [___]{$m1uncert} cm.
+
+
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+What is the quantity measured by the smallest lines on the ruler in these examples? In other words, how far apart are these markings?
+
+        a. [$tick0] cm
+    
+        b. [$tick1] cm
+
+This means that the measurement for these devices should be *one digit more precise* than this. This is called the guess digit and this will define the uncertainty for that measurement. 
+
+To review measurement and uncertainty, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.03%3A_Significant_Figures_-_Writing_Numbers_to_Reflect_Precision"), protect_underbar("on this link to find a discussion about the number of digits in a measurement"), "TARGET='_blank'" ); @]*. Note that the number of digits reported in a measurement are often called the significant digits.
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+a) The magnesium strip above measures [$m0] +/- [$m0uncert] cm.
+
+b) The magnesium strip above measures [$m1] +/- [$m1uncert] cm.
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
