@@ -1,0 +1,184 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+@options = ( "choose an answer", "pure sample of an element", "pure sample of a compound", "mixture of elements", "mixture of compounds", "mixture of an element and a compound" );
+
+@alt = ( "a box of theoretical particles made of two black cirles touching each other","a box of theoretical particles made single black circles randomly placed","a box of theoretical particles made of three gray circles","a box of theoretical particles made of gray circles stacked neatly and orderly at the bottom of the box","a box of theoretical particles made of small black circles","a box of theoretical particles made of a black circle and a white circle stuck together","a box of theoretical particles made of a larger gray circle and two small black circles all stuck together","a box of theoretical particles made of a larger gray circle and three small black circles all stuck togehter","a box of theoretical particles made of a black circle surrounded by two white circles","a box of theoretical particles made of a white circle surrounded by three small black circles","a box of 2 types of theoretical particles. One is made of 2 larger gray adjoining circles and the other made of two smaller black adjoining circles.","a box of 2 types of theoretical particles. One is made of gray circles stacked neatly and orderly at the bottom of the box and the other is made of two smaller black adjoining circles.",
+"a box of 2 types of theoretical particles. One is made of single black circles and the other made of 2 adjoining gray circles.","a box of 2 types of theoretical particles. One is made of single gray cirlcles and the other smaller black circles.","a box of 3 types of theoretical particles. One is made of single gray cirlcles, another made of single white circles, and the third is made of 2 small adjoining black circles.","a box of 2 types of theoretical particles. One is made of a larger gray circles with 2 small black circles attched and the other made of a larger white circle with 3 small black circles attached.","a box of 2 types of theoretical particles. One made of a white circle attached to a black circle and the other made of a black circle surrounded by 2 white circles.","a box of 3 types of theoretical particles. One made of a white circle attached to a black circle, another is made of a larger white circle with 3 small black circles attached, and the third is a larger gray circle with 2 small black circles attached","a box of 2 types of theoretical particles. One made of a larger gray circle with 2 small black circles attached and the other is made of a larger gray circle with 3 small black circles attached.","a box of 2 types of theoretical particles. One made of a larger gray circle with 2 small black circles attached and the other is made of larger white circle with 2 small black circles attached","a box of 2 types of theoretical particles.  One made of a larger gray circle with 2 small black circles attached and the other is single black circles.","a box of 2 types of theoretical particles.  One made of a larger gray circle with 2 small black circles attached and the other is single black circles.","a box of 2 types of theoretical particles. One is made of gray circles stacked neatly and orderly at the bottom of the box and the other is made of a larger gray circle with 2 small black circles attached.","a box of 2 types of theoretical particles. One is made of a larger gray circle with 2 small black circles attached and the other is single small blck circles.","a box of 2 types of theoretical particles. One is made of a black circle surrounded by 2 white circles and the otheris 2 adjoining black circles.");
+
+@pic = ("matter1.png", "matter2.png", "matter3.png", "matter4.png", "matter5.png", "matter6.png", "matter7.png", "matter8.png", "matter9.png", "matter10.png", "matter11.png", "matter12.png", "matter13.png", "matter14.png", "matter15.png", "matter16.png", "matter17.png", "matter18.png", "matter19.png", "matter20.png", "matter21.png", "matter22.png", "matter23.png", "matter24.png", "matter25.png");
+
+@ans = (1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5);
+
+my @numbers;
+my %unique;
+
+for (0..7) {
+    my $number = random(0,24);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+ 
+$number1 = $numbers[0];
+$pic1 = $pic[$number1];
+$alt1 = $alt[$number1];
+$ans1 = $ans[$number1];
+
+$popa = PopUp( [ @options ], $options[$ans1] );
+
+ANS( $popa->cmp() );
+
+$number2 = $numbers[1];
+$pic2 = $pic[$number2];
+$alt2 = $alt[$number2];
+$ans2 = $ans[$number2];
+
+$popb = PopUp( [ @options ], $options[$ans2] );
+
+ANS( $popb->cmp() );
+
+$number3 = $numbers[2];
+$pic3 = $pic[$number3];
+$alt3 = $alt[$number3];
+$ans3 = $ans[$number3];
+
+$popc = PopUp( [ @options ], $options[$ans3] );
+
+ANS( $popc->cmp() );
+
+$number4 = $numbers[3];
+$pic4 = $pic[$number4];
+$alt4 = $alt[$number4];
+$ans4 = $ans[$number4];
+
+$popc = PopUp( [ @options ], $options[$ans4] );
+
+ANS( $popc->cmp() );
+
+$number5 = $numbers[4];
+$pic5 = $pic[$number5];
+$alt5 = $alt[$number5];
+$ans5 = $ans[$number5];
+
+$popc = PopUp( [ @options ], $options[$ans5] );
+
+ANS( $popc->cmp() );
+
+$number6 = $numbers[5];
+$pic6 = $pic[$number6];
+$alt6 = $alt[$number6];
+$ans6 = $ans[$number6];
+
+$popc = PopUp( [ @options ], $options[$ans6] );
+
+ANS( $popc->cmp() );
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Classify Matter
+
+_Classify the following particle level diagrams below._  
+
+[@ image( $pic1, width=>250, height=>250,  
+ extra_html_tags=>"alt='$alt1'"  )@]*is a
+[@ $popa->menu() @]*
+
+[@ image( $pic2, width=>250, height=>250,  
+ extra_html_tags=>"alt='$alt2'"  )@]*is a
+[@ $popb->menu() @]*
+
+[@ image( $pic3, width=>250, height=>250,  
+ extra_html_tags=>"alt='$alt3'"  )@]*is a
+[@ $popc->menu() @]*
+
+[@ image( $pic4, width=>250, height=>250,  
+ extra_html_tags=>"alt='$alt4'"  )@]*is a
+[@ $popc->menu() @]*
+
+[@ image( $pic5, width=>250, height=>250,  
+ extra_html_tags=>"alt='$alt5'"  )@]*is a
+[@ $popc->menu() @]*
+
+[@ image( $pic6, width=>250, height=>250,  
+ extra_html_tags=>"alt='$alt6'"  )@]*is a
+[@ $popc->menu() @]*
+
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+A material composed of two or more substances is a *mixture*. Elements and compounds are both examples of pure substances. A substance that cannot be broken down into chemically simpler components is an *element*. Aluminum, which is used in soda cans, is an element. A substance that can be broken down into chemically simpler components (because it has more than one element) is a *compound*. For example, water is a compound composed of the elements hydrogen and oxygen.
+
+To review classifying matter, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/03%3A_Matter_and_Energy/3.04%3A_Classifying_Matter_According_to_Its_Composition"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
