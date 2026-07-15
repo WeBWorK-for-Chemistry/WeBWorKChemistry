@@ -1,0 +1,106 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+# Try to only load the macro files that are needed.
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "parserCheckboxList.pl",
+  "PGcourse.pl",
+);
+
+
+
+# Define element types
+@alkali = qw(Li Na K Rb Cs Fr);
+@alkaline = qw(Be Mg Ca Sr Ba);
+@halogen = qw(F Cl Br I);
+@noble_gas = qw(He Ne Ar Kr Xe);
+@none = qw(Sc Ti C Si Pb Hg Cd Pt Au Ag Ni Fe Dy Bi Sn Al B Ga In Rh );
+
+# Classify metals
+%elementClasses = (
+  (map { $_ => 'Alkali Metals' } @alkali),
+  (map { $_ => 'Alkaline Earth Metals' } @alkaline),
+  (map { $_ => 'Halogens' } @halogen),
+  (map { $_ => 'Noble Gases' } @noble_gas),
+  (map { $_ => 'Elements' } @none),
+    
+);
+
+# Randomly select 3 of each type
+@alkali_elements = random_subset(2, @alkali);
+@alkaline_elements = random_subset(2, @alkaline);
+@halogen_elements = random_subset(2, @halogen);
+@noble_elements = random_subset(2, @noble_gas);
+@none_elements = random_subset(2, @none);
+
+# Combine and shuffle
+@elements = random_subset(10, @alkali_elements, @alkaline_elements, @halogen_elements, @noble_elements, @none_elements);
+
+
+@options = (
+    'Alkali Metal',
+  'Alkaline Earth Metal',
+   'Halogen', 'Noble Gas'
+);
+
+
+$separator = ($displayMode eq 'TeX') ? '' : $BR;
+$checkboxes{'Alkali Metal'} = CheckboxList(~~@elements, ~~@alkali_elements, separator => $separator);
+$checkboxes{'Alkaline Earth Metal'} = CheckboxList(~~@elements, ~~@alkaline_elements, separator => $separator);
+$checkboxes{'Halogen'} = CheckboxList(~~@elements, ~~@halogen_elements, separator => $separator);
+$checkboxes{'Noble Gas'} = CheckboxList(~~@elements, ~~@noble_elements, separator => $separator);
+
+
+BEGIN_PGML
+##Classifying Elements by Group Name
+
+
+
+Classify each of the following elements by their group name by checking the check box in the correct column. If none of the names apply, do not check any of the boxes for that name.
+
+
+[#
+    [.*Alkali Metal*.]
+    [.*Alkaline Earth Metal*.]
+    [.*Halogen*.]
+    [.*Noble Gas*.]*{rowbottom => 1}
+    [.[_]{$checkboxes{'Alkali Metal'}}.]
+    [.[_]{$checkboxes{'Alkaline Earth Metal'}}.]
+    [.[_]{$checkboxes{'Halogen'}}.]
+    [.[_]{$checkboxes{'Noble Gas'}}.]
+#]*{
+    align => 'p{4.8cm}p{4.8cm}p{4.8cm}p{4.8cm}',
+    padding => [0.1,0.5],
+    valign =>'bottom'
+}
+END_PGML
+
+
+############################################################
+BEGIN_PGML_HINT
+
+You can find information on the names of various groups [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/05%3A_The_Nuclei_of_Atoms/5.01%3A_The_Periodic_Table"), protect_underbar("on this page"), "TARGET='_blank'" ); @]* under the section labeled Descriptive Names.  
+
+
+
+
+END_PGML_HINT
+
+ENDDOCUMENT();
+
