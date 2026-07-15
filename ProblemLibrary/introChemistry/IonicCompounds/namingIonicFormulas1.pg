@@ -1,0 +1,414 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  'PGstandard.pl',
+  'PGML.pl',
+  'PGcourse.pl',
+  'contextArbitraryString.pl'
+);
+
+TEXT(beginproblem());
+
+Context('ArbitraryString');
+
+############################################################
+# Compound pools
+# Fixed-charge metals only
+############################################################
+
+@monatomic = (
+    {
+        formula => "LiCl",
+        name    => "lithium chloride",
+    },
+    {
+        formula => "Li_2S",
+        name    => "lithium sulfide",
+    },
+    {
+        formula => "NaBr",
+        name    => "sodium bromide",
+    },
+    {
+        formula => "Na_2O",
+        name    => "sodium oxide",
+    },
+    {
+        formula => "KCl",
+        name    => "potassium chloride",
+    },
+    {
+        formula => "K_2S",
+        name    => "potassium sulfide",
+    },
+    {
+        formula => "MgCl_2",
+        name    => "magnesium chloride",
+    },
+    {
+        formula => "MgBr_2",
+        name    => "magnesium bromide",
+    },
+    {
+        formula => "CaCl_2",
+        name    => "calcium chloride",
+    },
+    {
+        formula => "CaBr_2",
+        name    => "calcium bromide",
+    },
+    {
+        formula => "BaF_2",
+        name    => "barium fluoride",
+    },
+    {
+        formula => "Al_2O_3",
+        name    => "aluminum oxide",
+    },
+    {
+        formula => "Al_2S_3",
+        name    => "aluminum sulfide",
+    },
+    {
+        formula => "AgCl",
+        name    => "silver chloride",
+    },
+    {
+        formula => "ZnO",
+        name    => "zinc oxide",
+    },
+    {
+        formula => "ZnCl_2",
+        name    => "zinc chloride",
+    },
+);
+
+@polyatomic = (
+    {
+        formula => "Na_2SO_4",
+        name    => "sodium sulfate",
+    },
+    {
+        formula => "K_2SO_4",
+        name    => "potassium sulfate",
+    },
+    {
+        formula => "MgSO_4",
+        name    => "magnesium sulfate",
+    },
+    {
+        formula => "CaSO_4",
+        name    => "calcium sulfate",
+    },
+    {
+        formula => "Al_2(SO_4)_3",
+        name    => "aluminum sulfate",
+    },
+    {
+        formula => "NaNO_3",
+        name    => "sodium nitrate",
+    },
+    {
+        formula => "KNO_3",
+        name    => "potassium nitrate",
+    },
+    {
+        formula => "Mg(NO_3)_2",
+        name    => "magnesium nitrate",
+    },
+    {
+        formula => "Ca(NO_3)_2",
+        name    => "calcium nitrate",
+    },
+    {
+        formula => "Al(NO_3)_3",
+        name    => "aluminum nitrate",
+    },
+    {
+        formula => "Na_2CO_3",
+        name    => "sodium carbonate",
+    },
+    {
+        formula => "K_2CO_3",
+        name    => "potassium carbonate",
+    },
+    {
+        formula => "MgCO_3",
+        name    => "magnesium carbonate",
+    },
+    {
+        formula => "CaCO_3",
+        name    => "calcium carbonate",
+    },
+    {
+        formula => "Na_3PO_4",
+        name    => "sodium phosphate",
+    },
+    {
+        formula => "K_3PO_4",
+        name    => "potassium phosphate",
+    },
+    {
+        formula => "Mg_3(PO_4)_2",
+        name    => "magnesium phosphate",
+    },
+    {
+        formula => "Ca_3(PO_4)_2",
+        name    => "calcium phosphate",
+    },
+    {
+        formula => "AlPO_4",
+        name    => "aluminum phosphate",
+    },
+    {
+        formula => "NaOH",
+        name    => "sodium hydroxide",
+    },
+    {
+        formula => "KOH",
+        name    => "potassium hydroxide",
+    },
+    {
+        formula => "Ca(OH)_2",
+        name    => "calcium hydroxide",
+    },
+    {
+        formula => "Mg(OH)_2",
+        name    => "magnesium hydroxide",
+    },
+    {
+        formula => "Al(OH)_3",
+        name    => "aluminum hydroxide",
+    },
+);
+
+############################################################
+# Randomization
+############################################################
+
+# Choose three monatomic compounds and three polyatomic compounds.
+@monatomic_choice  = random_subset(3, @monatomic);
+@polyatomic_choice = random_subset(3, @polyatomic);
+
+# Merge and randomize the order.
+@compounds = random_subset(6, @monatomic_choice, @polyatomic_choice);
+
+
+
+############################################################
+# Name checker
+############################################################
+
+sub normalize_name {
+    my $s = shift;
+
+    # lowercase
+    $s = lc($s);
+
+    # trim leading/trailing whitespace
+    $s =~ s/~~A~~s+//;
+    $s =~ s/~~s+~~z//;
+
+    # collapse repeated spaces
+    $s =~ s/~~s+/ /g;
+
+    return $s;
+}
+
+sub name_checker {
+    my ($correct, $student, $ansHash) = @_;
+
+    my $c = normalize_name("$correct");
+    my $s = normalize_name("$student");
+
+    $ansHash->{ans_message} = "";
+
+    return 1 if $c eq $s;
+
+    # Roman numerals should not be used for fixed-charge metals.
+    if ($s =~ /~~([ivxlcdm]+~~)/i) {
+        $ansHash->{ans_message} =
+            "Do not use Roman numerals for these fixed-charge metals.";
+        return 0;
+    }
+
+    # If they typed something formula-like in the name blank.
+    if ($s =~ /[_~~d]/ || $s =~ /[A-Z][a-z]?/) {
+        $ansHash->{ans_message} =
+            "This blank asks for the compound name, not the formula.";
+        return 0;
+    }
+
+    $ansHash->{ans_message} =
+        "Check the compound name. Name the metal first, then the nonmetal or polyatomic ion.";
+    return 0;
+}
+
+############################################################
+# Formula checker
+############################################################
+
+sub normalize_formula {
+    my $f = shift;
+
+    # Remove whitespace
+    $f =~ s/~~s+//g;
+
+    return $f;
+}
+
+sub formula_checker {
+    my ($correct, $student, $ansHash) = @_;
+
+    my $c = normalize_formula("$correct");
+    my $s = normalize_formula("$student");
+
+    $ansHash->{ans_message} = "";
+
+    return 1 if $c eq $s;
+
+    # Do not include phase labels.
+    if ($s =~ /~~((aq|s|l|g)~~)$/i) {
+        $ansHash->{ans_message} =
+            "Do not include a phase label. Enter only the chemical formula.";
+        return 0;
+    }
+
+    # Student entered something name-like.
+    if ($s =~ /~~s/ || $s =~ /^[a-z]/) {
+        $ansHash->{ans_message} =
+            "This blank asks for the formula, not the compound name.";
+        return 0;
+    }
+
+    # Must use underscores for subscripts.
+    # Examples: MgCl2 should be MgCl_2; SO4 should be SO_4.
+    if ($s =~ /(?<!_)~~d+/) {
+        $ansHash->{ans_message} =
+            "Use an underscore for subscripts. For example, write MgCl_2, not MgCl2, and SO_4, not SO4.";
+        return 0;
+    }
+
+    # Must use parentheses around polyatomic ions when more than one is present.
+    # Examples: Mg(NO_3)_2, not MgNO_3_2.
+    if ($s =~ /(NO_3|SO_4|CO_3|PO_4|OH)_([2-9])/) {
+        $ansHash->{ans_message} =
+            "Use parentheses when there is more than one of a polyatomic ion. For example, write Mg(NO_3)_2.";
+        return 0;
+    }
+
+    # Check matched parentheses.
+    my $open  = () = $s =~ /~~(/g;
+    my $close = () = $s =~ /~~)/g;
+
+    if ($open != $close) {
+        $ansHash->{ans_message} =
+            "Your parentheses are not balanced. Check for a missing opening or closing parenthesis.";
+        return 0;
+    }
+
+    # Invalid characters.
+    if ($s =~ /[^A-Za-z0-9_()]/) {
+        $ansHash->{ans_message} =
+            "The formula contains invalid characters. Use element symbols, underscores for subscripts, and parentheses when needed.";
+        return 0;
+    }
+
+    $ansHash->{ans_message} =
+        "Check the ion charges and make sure the formula is neutral.";
+    return 0;
+}
+
+@formula_ans = ();
+@name_ans    = ();
+
+for my $i (0..$#compounds) {
+    my $p = $compounds[$i];
+
+    $formula_ans[$i] = String($p->{formula})->cmp(checker => ~~&formula_checker);
+    $name_ans[$i]    = String($p->{name})->cmp(checker => ~~&name_checker);
+}
+
+############################################################
+# PGML
+############################################################
+
+BEGIN_PGML
+
+## Formulas and Names of Ionic Compounds
+
+Complete the table by filling in the missing **formula** or **name** for each ionic compound.
+
+- Use an underscore [`\_`]  for subscripts and the up arrow to move out of the subscript. For example, type [`\mathrm{MgCl_2}`], not [`\mathrm{MgCl2}`].
+- Use parentheses when there is more than one of a polyatomic ion. For example, type [`\mathrm{Ca(NO_3)_2}`].
+
+[#
+[.Formula.]
+[.Name.]*{ headerrow => 1 }
+
+[.[`\mathrm{Mg(OH)_2}`].]
+[.magnesium hydroxide.]*
+
+[.[___]{$formula_ans[0]}.]
+[.[$compounds[0]{name}].]*
+
+[.[`\mathrm{[$compounds[1]{formula}]}`].]
+[.[___]{$name_ans[1]}.]*
+
+[.[___]{$formula_ans[2]}.]
+[.[$compounds[2]{name}].]*
+
+[.[`\mathrm{[$compounds[3]{formula}]}`].]
+[.[___]{$name_ans[3]}.]*
+
+[.[___]{$formula_ans[4]}.]
+[.[$compounds[4]{name}].]*
+
+[.[`\mathrm{[$compounds[5]{formula}]}`].]
+[.[___]{$name_ans[5]}.]*
+
+#]{align => '|l|l|', horizontalrules => 1}
+
+END_PGML
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+1. Use the metal name first, followed by the nonmetal or polyatomic ion name. Remember that the anion(nonmetal) name ends in -ide
+
+2. Check that the total positive charge balances the total negative charge in the formula.
+
+3. Use parentheses only when there is more than one of a polyatomic ion.  For example, [`\mathrm{Ca(NO_3)_2}`] has two nitrate ions, so nitrate needs parentheses.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+[#
+[.Formula.]
+[.Name.]*{ headerrow => 1 }
+
+[.[`\mathrm{[$compounds[0]{formula}]}`].][.[$compounds[0]{name}].]*
+[.[`\mathrm{[$compounds[1]{formula}]}`].][.[$compounds[1]{name}].]*
+[.[`\mathrm{[$compounds[2]{formula}]}`].][.[$compounds[2]{name}].]*
+[.[`\mathrm{[$compounds[3]{formula}]}`].][.[$compounds[3]{name}].]*
+[.[`\mathrm{[$compounds[4]{formula}]}`].][.[$compounds[4]{name}].]*
+[.[`\mathrm{[$compounds[5]{formula}]}`].][.[$compounds[5]{name}].]*
+
+#]{align => '|c|c|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
