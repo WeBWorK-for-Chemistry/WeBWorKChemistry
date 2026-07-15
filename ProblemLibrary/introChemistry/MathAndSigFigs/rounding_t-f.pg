@@ -1,0 +1,110 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "MathObjects.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+@options = ( "?", "true", "false");
+
+$pop1 = PopUp( [@options], 2);
+$pop2 = PopUp( [@options], 2);
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Rounding Answers
+
+_Answer the True/False Questions._
+
+
+1. Chemists are generous people, so we always round up when reporting the answers to math problems. [__]{$pop1}
+
+
+2. When reporting the answers to calculations performed on a calculator, chemists simply report whatever value their calculators reads out without considering significant figures. [__]{$pop2}
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Rounding Off Numbers
+
+To round a number, first decide how many significant figures the number should have. Once you know that, round to that many digits, starting from the left. *If the number immediately to the right of the last significant digit is less than 5, it is dropped and the value of the last significant digit remains the same. If the number immediately to the right of the last significant digit is greater than or equal to 5, the last significant digit is increased by 1.*
+
+To review this material, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/02%3A_Measurement_and_Significant_Figures/2.03%3A_Significant_Figures"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+
+############################################################
+#Answers
+
+############################################################
+
+BEGIN_PGML_SOLUTION
+1. This is false.  Chemists follow normal rounding rules. When the first number dropped is less than 5, the preceding number remains unchanged. But when the first number dropped is 5 or more, 1 is added to the preceding number.
+
+2. This is false. Chemists must follow the appropriate significant figures rules for calculations so that they can round their answers to calculations include the correct number of significant figures. Common scientific calculators do not account for the correct number of significant figures in the answer that they report.
+
+
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
+
+
+
+
