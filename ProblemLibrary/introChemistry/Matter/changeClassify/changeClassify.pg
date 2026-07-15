@@ -1,0 +1,146 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+@options = ( "choose an answer", "physical change", "chemical change" );
+
+@changes = ("change1.png", "change2.png", "change3.png", "change4.png", "change5.png", "change6.png", "change7.png", "change8.png", "change9.png", "change10.png", "change11.png", "change12.png");
+
+@alt_changes  = ("atoms packed together at the bottom of a box spreading out throughtout the whole box", "an element and a compound evenly disbursed becoming concentrated in different parts of the container", "a compound randomly distributed around atoms concentrated at the bottom of the container.  2 of the atoms have floated away from group of atoms concentrated at the bottom of the container.", "Atoms evenly distributed in a box are being concentrated in the botton of the box.", "Two different elements seperated into distinct parts of a container mixing together so they are evenly distributed.", "A compound spread out throughout a container gathering together in an ordered way at the bottom of the container.", "Two elements forming a compound with some extra of one element left over.", "A compound represented by a white circle connected to 3 black circles forming a compound represented by two white circles connected to 4 black circles and the extra black cicles pairing up by themselves.", "A compound made of a white circle and a black circle and an element of two white circles forming a compound represented by a black circle surrounded by two white circles.","A compound breaking apart into individual elements.", "Two diatomic elements forming a compound.", "A compound formed of two elements breaking apart into its individual atoms." );
+
+my @numbers;
+my %unique;
+
+for (0..3) {
+    my $number = random(0,11);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+
+
+foreach (0..3) {
+    $x = $numbers[$_];
+    if ($x < 6) {
+    $d = 1;
+    $solution[$_] ="because no bonds are broken in this process."
+    } else {
+    $d = 2;
+    $solution[$_] ="because chemical bonds are broken in this process."
+    } 
+    $pop[$_] = PopUp( [ @options ], $options[$d] );
+    $i[$_] = $changes[$x];
+    $alt[$_] = $alt_changes[$x];
+    }
+
+
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+##Physical or Chemical Changes?
+
+_Classify each of the following as either a physical or chemical change by selecting the correct answer from the dropdown menu after the image._
+
+a. [@ image( $i[0], width=>600, height=>250,  
+ extra_html_tags=>"alt='$alt[0]'"  )@]*
+
+    The image above shows a [_________________]{$pop[0]}.
+
+
+b. [@ image( $i[1], width=>600, height=>250,  
+ extra_html_tags=>"alt='$alt[1]'"  )@]*
+
+    The image above shows a [_________________]{$pop[1]}.
+
+c. [@ image( $i[2], width=>600, height=>250,  
+ extra_html_tags=>"alt='$alt[2]'"  )@]*
+
+    The image above shows a [_________________]{$pop[2]}.
+
+d. [@ image( $i[3], width=>600, height=>250,  
+ extra_html_tags=>"alt='$alt[3]'"  )@]*
+
+    The image above shows a [_________________]{$pop[3]}.
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+Physical changes are changes in which no bonds are broken or formed. This means that the same types of compounds or elements that were there at the beginning of the change are there at the end of the change. Because the ending materials are the same as the beginning materials, the properties (such as color, boiling point, etc) will also be the same. Physical changes involve moving molecules around, but not changing them.
+
+Chemical changes occur when bonds are broken and/or formed between molecules or atoms. This means that one substance with a certain set of properties (such as melting point, color, taste, etc) is turned into a different substance with different properties. Chemical changes are frequently harder to reverse than physical changes.
+
+To review physical and chemical changes, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/03%3A_Matter_and_Energy/3.06%3A_Changes_in_Matter_-_Physical_and_Chemical_Changes"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+a. The image above shows a [$pop[0]] [$solution[0]].
+a. The image above shows a [$pop[1]] [$solution[1]].
+a. The image above shows a [$pop[2]] [$solution[2]].
+a. The image above shows a [$pop[3]] [$solution[3]].
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
