@@ -1,0 +1,283 @@
+## DBsubject(Chemistry)
+## DBchapter(Solutions)
+## DBsection(Dilution)
+## Level()
+## KEYWORDS('dilution', 'molarity', 'solution concentration')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load macros
+############################################################
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "contextInexactValue.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Context
+############################################################
+
+Context("InexactValue");
+
+############################################################
+# Solutes
+############################################################
+
+@solutes = (
+    {
+        name => "hydrochloric acid",
+    },
+    {
+        name => "sodium chloride",
+    },
+    {
+        name => "potassium chloride",
+    },
+    {
+        name => "sodium hydroxide",
+    },
+    {
+        name => "potassium hydroxide",
+    },
+    {
+        name => "potassium nitrate",
+    },
+    {
+        name => "sodium nitrate",
+    },
+    {
+        name => "calcium chloride",
+    },
+    {
+        name => "magnesium chloride",
+    },
+    {
+        name => "glucose",
+    },
+);
+
+$solute = $solutes[random(0, scalar(@solutes) - 1, 1)];
+$soluteName = $solute->{name};
+
+############################################################
+# Generate one internally consistent dilution
+#
+# M1 V1 = M2 V2
+#
+# The dilution factor is used to generate values that give
+# clean results regardless of which variable is requested.
+############################################################
+
+$dilutionFactor = random(2, 6, 1);
+
+$finalMolarityValue = random(2, 20, 1) / 40;
+$initialMolarityValue =
+    $finalMolarityValue * $dilutionFactor;
+
+$initialVolumeValue =
+    random(4, 20, 1) * 2.5;
+
+$finalVolumeValue =
+    $initialVolumeValue * $dilutionFactor;
+
+############################################################
+# Values displayed with 3 significant figures
+############################################################
+
+$M1 = InexactValue($initialMolarityValue, 3);
+$V1 = InexactValue($initialVolumeValue, 3);
+
+$M2 = InexactValue($finalMolarityValue, 3);
+$V2 = InexactValue($finalVolumeValue, 3);
+
+############################################################
+# Randomly select the unknown
+############################################################
+
+@problemTypes = (
+    {
+        type => "M2",
+
+        question =>
+            "A $V1 mL sample of a $M1 M $soluteName solution "
+            . "is diluted to a total volume of $V2 mL. "
+            . "What is the molarity of the diluted solution?",
+
+        answer => $M2,
+
+        expectedUnit =>
+            "M",
+
+        hint =>
+            "Solve the dilution equation for the final molarity: "
+            . "multiply the initial molarity by the initial volume, "
+            . "then divide by the final volume.",
+
+        calculation =>
+            "($M1 * $V1) / $V2 = $M2 M",
+    },
+
+    {
+        type => "V1",
+
+        question =>
+            "What volume of a $M1 M $soluteName stock solution "
+            . "is needed to prepare $V2 mL of a $M2 M solution?",
+
+        answer => $V1,
+
+        expectedUnit =>
+            "mL",
+
+        hint =>
+            "Solve the dilution equation for the initial volume: "
+            . "multiply the final molarity by the final volume, "
+            . "then divide by the initial molarity.",
+
+        calculation =>
+            "($M2 * $V2) / $M1 = $V1 mL",
+    },
+
+    {
+        type => "V2",
+
+        question =>
+            "A $V1 mL sample of a $M1 M $soluteName solution "
+            . "is diluted until its concentration is $M2 M. "
+            . "What is the total volume of the diluted solution?",
+
+        answer => $V2,
+
+        expectedUnit =>
+            "mL",
+
+        hint =>
+            "Solve the dilution equation for the final volume: "
+            . "multiply the initial molarity by the initial volume, "
+            . "then divide by the final molarity.",
+
+        calculation =>
+            "($M1 * $V1) / $M2 = $V2 mL",
+    },
+
+    {
+        type => "M1",
+
+        question =>
+            "A $V1 mL sample of a $soluteName stock solution "
+            . "is diluted to a total volume of $V2 mL. "
+            . "The diluted solution has a concentration of $M2 M. "
+            . "What was the molarity of the stock solution?",
+
+        answer => $M1,
+
+        expectedUnit =>
+            "M",
+
+        hint =>
+            "Solve the dilution equation for the initial molarity: "
+            . "multiply the final molarity by the final volume, "
+            . "then divide by the initial volume.",
+
+        calculation =>
+            "($M2 * $V2) / $V1 = $M1 M",
+    },
+);
+
+$problem =
+    $problemTypes[random(0, scalar(@problemTypes) - 1, 1)];
+
+$questionText = $problem->{question};
+$answer       = $problem->{answer};
+$expectedUnit = $problem->{expectedUnit};
+$hintText     = $problem->{hint};
+$calculation  = $problem->{calculation};
+
+############################################################
+# Problem
+############################################################
+
+BEGIN_PGML
+
+## Dilution Calculations
+
+[$questionText]
+
+Use the dilution relationship:
+
+[```
+M_1V_1 = M_2V_2
+```]
+
+where:
+
+- [`M_1`] is the concentration before dilution.
+- [`V_1`] is the volume before dilution.
+- [`M_2`] is the concentration after dilution.
+- [`V_2`] is the total volume after dilution.
+
+Both volumes are given in mL, so the volume units do not need to be converted.
+
+Enter the answer with **3 significant figures**.
+
+Enter only the numerical value. Do not include units in the answer blank.
+
+**Answer:** [____]{$answer} [$expectedUnit]
+
+END_PGML
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+Begin with:
+
+[```
+M_1V_1 = M_2V_2
+```]
+
+Identify each value as belonging to the solution either before or after dilution.
+
+[$hintText]
+
+Because both volumes are expressed in mL, they can be used directly in the dilution equation.
+
+Enter the result with **3 significant figures**, but do not enter the unit in the answer blank.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+Use the dilution relationship:
+
+[```
+M_1V_1 = M_2V_2
+```]
+
+Substituting the values and solving for the requested variable gives:
+
+[```
+[$calculation]
+```]
+
+Therefore, the numerical value entered in the answer blank is [$answer].
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
