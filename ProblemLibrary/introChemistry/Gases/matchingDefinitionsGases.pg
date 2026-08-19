@@ -1,0 +1,68 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl",
+"unionTables.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+
+Context("Numeric");
+$showPartialCorrectAnswers = 1;
+
+#
+#  Create a matching list and use popups
+#
+$ml = new_match_list();
+$ml->rf_print_q(~~&pop_up_list_print_q);
+$ml->ra_pop_up_list([
+"No answer" => "?",
+"A" => "A", "B" => "B", "C" => "C", 
+"D" => "D", "E" => "E", "F" => "F",
+"G" => "G", "H" => "H", "I" => "I",
+]);
+
+#
+#  Add correct questions and answers
+#
+$ml->qa(
+"A measure of the average kinetic energy (motion) of the gas particles. Higher values mean particles are moving faster.", "Temperature","The collective force of rapid, random particle impacts pushing against the interior walls of a container.", "Pressure",
+"The physical space occupied by the gas particles. In an ideal gas, this is assumed to be mostly empty space because the particles themselves have negligible size.", "Volume",
+"The gradual spreading out and mixing of gas particles through a space or another gas, moving from areas of high concentration to low concentration.", "Diffusion",
+"Attractive or repulsive forces between molecules. For an ideal gas, it is assumed these are completely non-existent.", "Intermolecular Forces",
+"Explicitly counts the quantity of gas particles present in the system, which directly dictates how many total collisions can occur.", 
+  "Number of moles (n)"
+);
+$ml->choose(6);
+
+
+$ml->makeLast("None of the above");
+
+
+######################################
+
+
+BEGIN_PGML
+## Gases Concept Matching
+
+Match the phrase on the left with the best concept that it describes on the right.
+
+[@ ColumnMatchTable($ml,valign => TOP) @]* 
+
+
+
+END_PGML
+
+
+######################################
+
+ANS( str_cmp( $ml->ra_correct_ans ) );
+
+
+ENDDOCUMENT();

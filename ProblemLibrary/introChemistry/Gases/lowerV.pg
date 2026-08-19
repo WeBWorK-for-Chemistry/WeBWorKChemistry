@@ -1,0 +1,128 @@
+## DBsubject(Chemistry)
+## DBchapter(Gases)
+## DBsection(Kinetic Molecular Theory)
+## Level(2)
+## KEYWORDS('gases', 'pressure', 'volume', 'particle behavior')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",
+    "PGML.pl",
+    "parserPopUp.pl",
+    "PGcourse.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Images
+############################################################
+
+$sampleAImage = image(
+    "SampleA.png",
+    width    => 300,
+    height   => 300,
+    tex_size => 500,
+    extra_html_tags =>
+        'alt="Sample A: eight gas particles moving inside a container."'
+);
+
+$comparisonImage = image(
+    "LowerV.png",
+    width    => 300,
+    height   => 300,
+    tex_size => 500,
+    extra_html_tags =>
+        'alt="Eight gas particles moving inside a smaller container."'
+);
+
+############################################################
+# Answers
+############################################################
+
+@pressureChoices = (
+    "Choose...",
+    "increases",
+    "decreases",
+    "stays the same"
+);
+
+$pressureAnswer = PopUp(
+    ~~@pressureChoices,
+    "increases"
+);
+
+@reasonChoices = (
+    "Choose...",
+    "The particles travel a shorter distance between wall collisions, so they collide with the walls more frequently.",
+    "The particles move faster and exert more force during each collision.",
+    "There are more particles available to collide with the walls.",
+    "The particles collide with the walls less frequently because the walls are closer together."
+);
+
+$reasonAnswer = PopUp(
+    ~~@reasonChoices,
+    "The particles travel a shorter distance between wall collisions, so they collide with the walls more frequently."
+);
+
+############################################################
+# Problem
+############################################################
+
+BEGIN_PGML
+
+## Changing the volume of a gas
+
+Gas pressure results from collisions between gas particles and the
+walls of their container.
+
+In each particle diagram:
+
+* each circle represents one gas particle;
+* each arrow shows the direction and relative speed of a particle; and
+* a longer arrow represents a greater particle speed.
+
+### Initial state:
+
+[@ $sampleAImage @]*
+
+### New state:
+
+[@ $comparisonImage @]*
+
+In the new state, the gas occupies a smaller container. The number of
+particles and the average particle speed are unchanged.
+
+Compared with the initial state, the pressure in the new state [@ $pressureAnswer->menu() @]*.
+
+Which statement best explains this pressure change?
+
+[@ $reasonAnswer->menu() @]*
+
+END_PGML
+
+ANS($pressureAnswer->cmp());
+ANS($reasonAnswer->cmp());
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The pressure **increases**.
+
+In the smaller container, the particles travel a shorter distance
+before reaching a wall. They therefore collide with the walls more
+frequently.
+
+The average particle speed has not changed, so the effect of each
+individual collision is unchanged.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

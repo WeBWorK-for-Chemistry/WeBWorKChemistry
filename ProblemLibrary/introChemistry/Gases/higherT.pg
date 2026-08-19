@@ -1,0 +1,144 @@
+## DBsubject(Chemistry)
+## DBchapter(Gases)
+## DBsection(Kinetic Molecular Theory)
+## Level(2)
+## KEYWORDS('gases', 'pressure', 'temperature', 'particle behavior')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",
+    "PGML.pl",
+    "parserPopUp.pl",
+    "PGcourse.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Images
+############################################################
+
+$sampleAImage = image(
+    "SampleA.png",
+    width    => 300,
+    height   => 300,
+    tex_size => 500,
+    extra_html_tags =>
+        'alt="Sample A: eight gas particles moving inside a container."'
+);
+
+$comparisonImage = image(
+    "HigherT.png",
+    width    => 300,
+    height   => 300,
+    tex_size => 500,
+    extra_html_tags =>
+        'alt="Eight gas particles moving faster inside a container of the same size as Sample A."'
+);
+
+############################################################
+# Answers
+############################################################
+
+@temperatureEvidenceChoices = (
+    "Choose...",
+    "The arrows are longer, showing that the particles have a greater average speed.",
+    "There are more particles in the container.",
+    "The particles are closer together.",
+    "The container is larger."
+);
+
+$temperatureEvidenceAnswer = PopUp(
+    ~~@temperatureEvidenceChoices,
+    "The arrows are longer, showing that the particles have a greater average speed."
+);
+
+@pressureChoices = (
+    "Choose...",
+    "increases",
+    "decreases",
+    "stays the same"
+);
+
+$pressureAnswer = PopUp(
+    ~~@pressureChoices,
+    "increases"
+);
+
+@reasonChoices = (
+    "Choose...",
+    "The particles collide with the walls more frequently and exert more force during each collision.",
+    "The particles collide with the walls less frequently and exert less force during each collision.",
+    "There are fewer particles available to collide with the walls.",
+    "The frequency and force of the particle-wall collisions do not change."
+);
+
+$reasonAnswer = PopUp(
+    ~~@reasonChoices,
+    "The particles collide with the walls more frequently and exert more force during each collision."
+);
+
+############################################################
+# Problem
+############################################################
+
+BEGIN_PGML
+
+##Changing the temperature of a gas
+
+Gas pressure results from collisions between gas particles and the
+walls of their container.
+
+In each particle diagram:
+
+* each circle represents one gas particle;
+* each arrow shows the direction and relative speed of a particle; and
+* a longer arrow represents a greater particle speed.
+
+### Initial state:
+
+[@ $sampleAImage @]*
+
+### New state:
+
+[@ $comparisonImage @]*
+
+How do you know that the temperature is higher in the new state?
+
+[@ $temperatureEvidenceAnswer->menu() @]*
+
+Compared with the initial state, the pressure in the new state [@ $pressureAnswer->menu() @]*.
+
+Which statement best explains this pressure change?
+
+[@ $reasonAnswer->menu() @]*
+
+END_PGML
+
+ANS($temperatureEvidenceAnswer->cmp());
+ANS($pressureAnswer->cmp());
+ANS($reasonAnswer->cmp());
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The temperature is higher because the arrows are longer, showing that
+the particles have a greater average speed. Temperature is related to
+the average kinetic energy of the gas particles.
+
+The pressure **increases**.
+
+The faster particles reach and collide with the container walls more
+frequently. Each collision also produces a greater change in momentum,
+so the particles exert a greater force on the walls.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
