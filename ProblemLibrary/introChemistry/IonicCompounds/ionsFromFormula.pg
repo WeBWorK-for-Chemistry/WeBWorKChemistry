@@ -118,30 +118,6 @@ Context('ArbitraryString');
         ion1    => "Al^3+",
         ion2    => "S^2-",
     },
-    {
-        formula => "PbF_2(s)",
-        name    => "lead(II) fluoride",
-        ion1    => "Pb^2+",
-        ion2    => "F^-",
-    },
-    {
-        formula => "TiO_2(s)",
-        name    => "titanium(IV) oxide",
-        ion1    => "Ti^4+",
-        ion2    => "O^2-",
-    },
-    {
-        formula => "FeO(s)",
-        name    => "iron(II) oxide",
-        ion1    => "Fe^2+",
-        ion2    => "O^2-",
-    },
-    {
-        formula => "Fe_2O_3(s)",
-        name    => "iron(III) oxide",
-        ion1    => "Fe^3+",
-        ion2    => "O^2-",
-    },
 );
 
 @polyatomic = (
@@ -216,12 +192,6 @@ Context('ArbitraryString');
         name    => "magnesium carbonate",
         ion1    => "Mg^2+",
         ion2    => "CO_3^2-",
-    },
-    {
-        formula => "Pb(OH)_2(s)",
-        name    => "lead(II) hydroxide",
-        ion1    => "Pb^2+",
-        ion2    => "OH^-",
     },
 );
 
