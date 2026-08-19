@@ -1,0 +1,506 @@
+## DBsubject(Chemistry)
+## DBchapter(Gases)
+## DBsection(Gas Laws)
+## Level(2)
+## KEYWORDS('gases', 'gas laws', 'pressure', 'volume',
+##          'temperature', 'number of particles',
+##          'kinetic molecular theory', 'conceptual')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",
+    "PGML.pl",
+    "parserPopUp.pl",
+    "PGcourse.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# True/false choices
+############################################################
+
+@tfChoices = (
+    "Choose...",
+    "True",
+    "False"
+);
+
+############################################################
+# Question pool
+############################################################
+
+@questionPool = (
+
+    ########################################################
+    # Pressure and volume
+    ########################################################
+
+    {
+        statement =>
+            "If the volume of a gas decreases while its temperature "
+          . "and number of particles remain constant, the pressure "
+          . "increases.",
+
+        answer => "True",
+
+        explanation =>
+            "When the gas occupies a smaller volume, the particles "
+          . "travel a shorter distance before reaching a wall. They "
+          . "therefore collide with the walls more frequently, causing "
+          . "the pressure to increase."
+    },
+
+    {
+        statement =>
+            "If a gas expands while its temperature and number of "
+          . "particles remain constant, its pressure increases.",
+
+        answer => "False",
+
+        explanation =>
+            "When the gas occupies a larger volume, the particles "
+          . "collide with the container walls less frequently. The "
+          . "pressure therefore decreases."
+    },
+
+    {
+        statement =>
+            "Compressing a gas at constant temperature causes its "
+          . "particles to move faster.",
+
+        answer => "False",
+
+        explanation =>
+            "Average particle speed depends on temperature. If the "
+          . "temperature remains constant, the average speed does not "
+          . "change. Compression increases the frequency of collisions "
+          . "with the walls."
+    },
+
+    {
+        statement =>
+            "A gas can be compressed without changing its temperature.",
+
+        answer => "True",
+
+        explanation =>
+            "This is possible if energy is transferred out of the gas "
+          . "during compression so that its average kinetic energy and "
+          . "temperature remain constant."
+    },
+
+    ########################################################
+    # Temperature and pressure
+    ########################################################
+
+    {
+        statement =>
+            "Heating a gas in a rigid container causes its pressure "
+          . "to increase.",
+
+        answer => "True",
+
+        explanation =>
+            "The volume of a rigid container cannot change. Heating "
+          . "increases the average particle speed, so particles collide "
+          . "with the walls more frequently and with greater force."
+    },
+
+    {
+        statement =>
+            "Cooling a gas in a rigid container causes its pressure "
+          . "to increase.",
+
+        answer => "False",
+
+        explanation =>
+            "Cooling decreases the average particle speed. The particles "
+          . "collide with the walls less frequently and exert less force "
+          . "during each collision, so the pressure decreases."
+    },
+
+    {
+        statement =>
+            "If the pressure of a gas increases, its temperature must "
+          . "also have increased.",
+
+        answer => "False",
+
+        explanation =>
+            "Pressure can also increase if the volume decreases or if "
+          . "more gas particles are added to the container."
+    },
+
+    {
+        statement =>
+            "A gas sample can have a higher pressure and a higher "
+          . "temperature than before while still having the same volume.",
+
+        answer => "True",
+
+        explanation =>
+            "This can occur in a rigid container. Heating increases the "
+          . "average particle speed and pressure, while the rigid walls "
+          . "prevent the volume from changing."
+    },
+
+    ########################################################
+    # Temperature and volume
+    ########################################################
+
+    {
+        statement =>
+            "Heating a gas always causes its volume to increase.",
+
+        answer => "False",
+
+        explanation =>
+            "The volume can increase only if the container is able to "
+          . "expand. In a rigid container, heating increases the pressure "
+          . "instead of the volume."
+    },
+
+    {
+        statement =>
+            "A gas sample can have a higher temperature and a larger "
+          . "volume than before while having the same pressure.",
+
+        answer => "True",
+
+        explanation =>
+            "This can occur in a flexible container. As the gas is "
+          . "heated, it can expand until its pressure again matches the "
+          . "external pressure."
+    },
+
+    {
+        statement =>
+            "If the volume of a gas increases, the gas must have been "
+          . "heated.",
+
+        answer => "False",
+
+        explanation =>
+            "The volume could also increase because the external pressure "
+          . "decreased or because more gas particles were added."
+    },
+
+    {
+        statement =>
+            "Cooling a gas in a flexible container at constant external "
+          . "pressure can cause its volume to decrease.",
+
+        answer => "True",
+
+        explanation =>
+            "Cooling decreases the average particle speed. The external "
+          . "pressure can then compress the gas until the internal and "
+          . "external pressures are balanced again."
+    },
+
+    ########################################################
+    # Number of particles
+    ########################################################
+
+    {
+        statement =>
+            "Adding gas particles to a rigid container at constant "
+          . "temperature causes the pressure to increase.",
+
+        answer => "True",
+
+        explanation =>
+            "More particles are available to collide with the walls. "
+          . "This increases the number of particle-wall collisions during "
+          . "a given amount of time."
+    },
+
+    {
+        statement =>
+            "Removing gas particles from a rigid container at constant "
+          . "temperature causes the remaining particles to move more "
+          . "slowly.",
+
+        answer => "False",
+
+        explanation =>
+            "The average particle speed depends on temperature. Removing "
+          . "particles reduces the collision frequency, but it does not "
+          . "change the average speed when the temperature is constant."
+    },
+
+    {
+        statement =>
+            "A flexible container can become larger when more gas "
+          . "particles are added while temperature and external pressure "
+          . "remain constant.",
+
+        answer => "True",
+
+        explanation =>
+            "Adding particles initially increases the internal pressure. "
+          . "The flexible container can expand until its internal pressure "
+          . "again balances the external pressure."
+    },
+
+    {
+        statement =>
+            "Adding gas particles to a container always causes its "
+          . "temperature to increase.",
+
+        answer => "False",
+
+        explanation =>
+            "The number of particles and temperature are separate "
+          . "variables. Particles can be added without changing the "
+          . "average kinetic energy of the gas."
+    },
+
+    ########################################################
+    # Particle-level behavior
+    ########################################################
+
+    {
+        statement =>
+            "Gas pressure is caused by gas particles colliding with the "
+          . "walls of their container.",
+
+        answer => "True",
+
+        explanation =>
+            "Each collision exerts a force on a container wall. The "
+          . "combined effect of many particle-wall collisions produces "
+          . "gas pressure."
+    },
+
+    {
+        statement =>
+            "At the same temperature, heavier gas particles have greater "
+          . "average kinetic energy than lighter gas particles.",
+
+        answer => "False",
+
+        explanation =>
+            "Gas particles at the same temperature have the same average "
+          . "kinetic energy. Heavier particles have a lower average speed "
+          . "than lighter particles at that temperature."
+    },
+
+    {
+        statement =>
+            "A gas can exert pressure even when its container is not "
+          . "moving or changing size.",
+
+        answer => "True",
+
+        explanation =>
+            "Gas particles remain in constant motion and continue to "
+          . "collide with the walls even when the container is stationary."
+    },
+
+    {
+        statement =>
+            "Two gas samples can have the same pressure even if they "
+          . "have different temperatures.",
+
+        answer => "True",
+
+        explanation =>
+            "Differences in volume or number of particles can compensate "
+          . "for the temperature difference, allowing the samples to "
+          . "have the same pressure."
+    }
+
+);
+
+############################################################
+# Select five questions without replacement
+############################################################
+
+@availableQuestions = @questionPool;
+@selectedQuestions = ();
+
+for ($i = 0; $i < 5; $i++) {
+
+    $selectedIndex = random(
+        0,
+        scalar(@availableQuestions) - 1,
+        1
+    );
+
+    $selectedQuestions[$i] = splice(
+        @availableQuestions,
+        $selectedIndex,
+        1
+    );
+}
+
+############################################################
+# Extract selected statements, answers, and explanations
+############################################################
+
+$statement1 = $selectedQuestions[0]{statement};
+$statement2 = $selectedQuestions[1]{statement};
+$statement3 = $selectedQuestions[2]{statement};
+$statement4 = $selectedQuestions[3]{statement};
+$statement5 = $selectedQuestions[4]{statement};
+
+$correct1 = $selectedQuestions[0]{answer};
+$correct2 = $selectedQuestions[1]{answer};
+$correct3 = $selectedQuestions[2]{answer};
+$correct4 = $selectedQuestions[3]{answer};
+$correct5 = $selectedQuestions[4]{answer};
+
+$explanation1 = $selectedQuestions[0]{explanation};
+$explanation2 = $selectedQuestions[1]{explanation};
+$explanation3 = $selectedQuestions[2]{explanation};
+$explanation4 = $selectedQuestions[3]{explanation};
+$explanation5 = $selectedQuestions[4]{explanation};
+
+############################################################
+# Create answer menus
+############################################################
+
+$answer1 = PopUp(
+    ~~@tfChoices,
+    $correct1
+);
+
+$answer2 = PopUp(
+    ~~@tfChoices,
+    $correct2
+);
+
+$answer3 = PopUp(
+    ~~@tfChoices,
+    $correct3
+);
+
+$answer4 = PopUp(
+    ~~@tfChoices,
+    $correct4
+);
+
+$answer5 = PopUp(
+    ~~@tfChoices,
+    $correct5
+);
+
+############################################################
+# Problem statement
+############################################################
+
+BEGIN_PGML
+
+##True or False?
+
+For each statement, select True or False.
+
+Assume that each gas behaves ideally. Carefully note which variables
+or conditions are held constant in each statement.
+
+1. [@ $answer1->menu() @]*  
+   [@ $statement1 @]*
+
+2. [@ $answer2->menu() @]*  
+   [@ $statement2 @]*
+
+3. [@ $answer3->menu() @]*  
+   [@ $statement3 @]*
+
+4. [@ $answer4->menu() @]*  
+   [@ $statement4 @]*
+
+5. [@ $answer5->menu() @]*  
+   [@ $statement5 @]*
+
+END_PGML
+
+############################################################
+# Answer evaluators
+############################################################
+
+ANS($answer1->cmp());
+ANS($answer2->cmp());
+ANS($answer3->cmp());
+ANS($answer4->cmp());
+ANS($answer5->cmp());
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+Think about gas pressure at the particle level. Pressure depends on
+particles colliding with the walls of the container.
+
+For each statement, ask yourself:
+
+1. Which variable or condition is changing?
+
+2. Which variables or conditions are being held constant?
+
+3. Would the change affect:
+
+           * the speed of the particles,
+   
+           * the number of particles striking the walls,
+   
+           * the distance particles travel before reaching a wall, or
+   
+           * whether the container is able to expand?
+
+Remember these distinctions:
+
+* Temperature is related to the average kinetic energy and average
+  speed of the particles.
+
+* Changing the number of particles does not automatically change the
+  speed of each particle.
+
+* A rigid container cannot change volume.
+
+* A flexible container can expand or contract until its internal
+  pressure balances the external pressure.
+
+* Words such as "always" and "must" mean that the statement has to be
+  correct under every condition described. Consider whether another
+  variable could explain the same observed change.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+1. [@ $correct1 @]
+
+   [@ $explanation1 @]*
+
+2. [@ $correct2 @]
+
+   [@ $explanation2 @]*
+
+3. [@ $correct3 @]
+
+   [@ $explanation3 @]*
+
+4. [@ $correct4 @]
+
+   [@ $explanation4 @]*
+
+5. [@ $correct5 @]
+
+   [@ $explanation5 @]*
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
