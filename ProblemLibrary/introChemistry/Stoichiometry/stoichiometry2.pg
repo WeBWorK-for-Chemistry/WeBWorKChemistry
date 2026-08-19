@@ -1,0 +1,151 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "contextChemical.pl",  # added for chemical parsing in units
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+##############################################
+
+
+install_weighted_grader();
+
+Context("Numeric");
+
+$moles = random(1.01 ,9.99, 0.01);
+@React = ('Fe','O_2');
+$x = random(0,1);
+$sigFigAns = 3;
+
+Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);  # flag needed to recognize chemical names as units
+    $givenReact = $React[0];
+    $otherReact = $React[1];
+    $given = InexactValueWithUnits( [$moles , 3], 'moles Fe');  # 'hydrogen' would also     work
+    $n1 = InexactValueWithUnits(['2', 9**9**9], 'mol Fe_2O_3'); 
+    $d1 = InexactValueWithUnits(['4', 9**9**9], 'mol Fe'); 
+
+$answer = $given * $n1 / $d1;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given, {creditSigFigsGiven => 0.25,
+creditValueGiven   => 0.75,
+
+creditSigFigsFinal => 0.30,
+creditValueFinal   => 0.50,
+creditUnitsFinal   => 0.20,
+
+messageDigitsDiff => "Your numerical value is close. Check that you are using the correct coefficent from the balanced equation.",
+messageDigitsDiffAns => "This problem specifies that the answer should be rounded to $sigFigAns significant figures."});
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+##############################################
+#Calculate the mass in grams of [`[$given]`] of [`[@'~~mathrm{' . $compound . '} '@]`].  
+
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Stoichiometry: Moles to Moles
+
+Calculate the number of moles of [``\mathrm{Fe_2O_3}``] created when [$moles] moles of [``\mathrm{[$givenReact]}``] is reacted with excess [``\mathrm{[$otherReact]}``] according to the chemical equation given.  
+    
+You will need to first balance the equation.
+
+Report your final answer to 3 sig figs and don't forget to include units. 
+
+[``` \ce{Fe + O_2 \rightarrow Fe_2O_3} ```]
+
+
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
+END_PGML
+
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+
+#BEGIN_TEXT
+
+#END_TEXT
+
+BEGIN_PGML_HINT
+
+Solving a Mole-to-Mole Problem
+1. Identify the “given” information in the problem: Look for the starting number of moles and the specific chemical identity provided (e.g., "3.5 moles of A"). This is the number you will start your calculation with.
+
+2. What is the problem asking you to “find”? Identify the new chemical you are being asked to calculate. For this problem, the final answer will have the unit moles [``\mathrm{Fe_2O_3}``].
+
+3. Use the mole ratio from your balanced equation to cancel units: Look at the coefficients (the big numbers in front) of the balanced chemical equation. Create a conversion factor fraction: place the moles of your given chemical on the bottom (so it cancels out) and the moles of your target chemical on top.
+
+4. When your units cancel out correctly, you are ready to do the math: Multiply your starting number of moles by the coefficient on the top of your fraction, and divide by the coefficient on the bottom.
+
+
+For more information on mole to mole conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/10%3A_Mass_Relations_in_Chemical_Reactions/10.02%3A_Mole-to-Mole_Conversions"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
