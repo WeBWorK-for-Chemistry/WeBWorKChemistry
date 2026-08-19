@@ -1,0 +1,70 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl",
+"unionTables.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+
+Context("Numeric");
+$showPartialCorrectAnswers = 1;
+
+#
+#  Create a matching list and use popups
+#
+$ml = new_match_list();
+$ml->rf_print_q(~~&pop_up_list_print_q);
+$ml->ra_pop_up_list([
+"No answer" => "?",
+"A" => "A", "B" => "B", "C" => "C", 
+"D" => "D", "E" => "E", "F" => "F",
+"G" => "G", "H" => "H", "I" => "I",
+]);
+
+#
+#  Add correct questions and answers
+#
+$ml->qa(
+"Attractive forces that exist between neighboring molecules.", "Intermolecular forces","Chemical bonds (like covalent bonds) that hold atoms together within a single molecule.", "Intramolecular forces",
+"A molecule with an uneven distribution of charge, resulting in a permanent positive end and a negative end.", "Polar molecule",
+"A molecule with an even distribution of charge and no permanent positive or negative ends.", "Nonpolar molecule",
+"The weakest type of IMF, caused by temporary electron movements, and the only force present in nonpolar molecules.", "London dispersion forces",
+"The IMF that exists between the permanent positive and negative ends of polar molecules like HCl", 
+  "Dipole-dipole forces",
+"An exceptionally strong type of dipole-dipole force that happens between molecules when the molecules contain a hydrogen bonded directly to N, O, or F.", 
+  "Hydrogen bonding", "The temperature at which a liquid changes into a gas; this temperature goes up when a substance has stronger IMFs.", "Boiling point"
+);
+$ml->choose(8);
+
+
+$ml->makeLast("None of the above");
+
+
+######################################
+
+
+BEGIN_PGML
+## IMF Definitions Matching
+
+Match the phrase on the left with the best concept that it describes on the right.
+
+[@ ColumnMatchTable($ml,valign => TOP) @]* 
+
+
+
+END_PGML
+
+
+######################################
+
+ANS( str_cmp( $ml->ra_correct_ans ) );
+
+
+ENDDOCUMENT();
