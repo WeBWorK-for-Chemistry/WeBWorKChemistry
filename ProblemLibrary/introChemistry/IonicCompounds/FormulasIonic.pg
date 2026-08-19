@@ -181,7 +181,7 @@ TEXT(beginproblem());
 
 BEGIN_PGML
 
-##Writing Formulas with Polyatomic Ions
+##Writing Formulas with Monatomic Ions
 
 Fill in the following table with the neutral compound formed from the ions.
 
