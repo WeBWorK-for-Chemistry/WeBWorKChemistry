@@ -1,0 +1,229 @@
+## DBsubject(Chemistry)
+## DBchapter(Acids and Bases)
+## DBsection(pH)
+## Level(2)
+## KEYWORDS('pH', 'hydronium concentration', 'acids and bases', 'exponents')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",
+    "MathObjects.pl",
+    "PGML.pl",
+    "PGcourse.pl",
+    "contextInexactValue.pl",
+    "parserPopUp.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Setup
+############################################################
+
+Context("InexactValue");
+
+############################################################
+# Generate a basic solution
+############################################################
+
+# Generate a basic pH to the hundredths place.
+$pH_integer1 = random(701, 1300, 1);
+$pH1 = $pH_integer1 / 100;
+$pH_display1 = sprintf("%.2f", $pH1);
+
+# Calculate the hydronium-ion concentration.
+$h3o_concentration1 = 10**(-$pH1);
+
+# The pH has two digits after the decimal, so the calculated
+# concentration should have two significant figures.
+$answer1 = InexactValue(
+    $h3o_concentration1,
+    2
+);
+
+############################################################
+# Generate an acidic solution
+############################################################
+
+# Generate an acidic pH to the hundredths place.
+$pH_integer2 = random(100, 699, 1);
+$pH2 = $pH_integer2 / 100;
+$pH_display2 = sprintf("%.2f", $pH2);
+
+# Calculate the hydronium-ion concentration.
+$h3o_concentration2 = 10**(-$pH2);
+
+$answer2 = InexactValue(
+    $h3o_concentration2,
+    2
+);
+
+############################################################
+# Store both solutions
+############################################################
+
+@problems = (
+    {
+        pH     => $pH_display1,
+        answer => $answer1,
+        class  => "base",
+    },
+    {
+        pH     => $pH_display2,
+        answer => $answer2,
+        class  => "acid",
+    },
+);
+
+############################################################
+# Randomize the order
+############################################################
+
+if (random(0, 1, 1)) {
+    ($problems[0], $problems[1]) =
+        ($problems[1], $problems[0]);
+}
+
+############################################################
+# Pull out the randomized values
+############################################################
+
+$pHA     = $problems[0]->{pH};
+$answerA = $problems[0]->{answer};
+$classA  = $problems[0]->{class};
+
+$pHB     = $problems[1]->{pH};
+$answerB = $problems[1]->{answer};
+$classB  = $problems[1]->{class};
+
+############################################################
+# Classification menus
+############################################################
+
+$classMenuA = PopUp(
+    [
+        "Select a classification",
+        "acid",
+        "base",
+        "neutral"
+    ],
+    $classA
+);
+
+$classMenuB = PopUp(
+    [
+        "Select a classification",
+        "acid",
+        "base",
+        "neutral"
+    ],
+    $classB
+);
+
+############################################################
+# Problem
+############################################################
+
+BEGIN_PGML
+
+## Calculating hydronium-ion concentration
+
+For each solution:
+
+1. Calculate the hydronium-ion concentration from the pH.
+2. Report the concentration with **two significant figures**.
+3. Classify the solution as an **acid**, **base**, or **neutral** solution.
+
+[#
+    [.*pH*.]
+    [.*[``\left[\mathrm{H_3O^+}\right]``]*.]
+    [.*Classification*.]*
+
+    [.[$pHA].]
+    [.[__________]{$answerA} [``\mathrm{M}``].]
+    [.[__________]{$classMenuA}.]*
+
+    [.[$pHB].]
+    [.[__________]{$answerB} [``\mathrm{M}``].]
+    [.[__________]{$classMenuB}.]*
+#]{align => '|c|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+The relationship between pH and hydronium-ion concentration is
+
+[``\mathrm{pH}
+=
+-\log\left(\left[\mathrm{H_3O^+}\right]\right).``]
+
+To solve for the hydronium-ion concentration, use the inverse of the base-10 logarithm:
+
+[``\left[\mathrm{H_3O^+}\right]
+=
+10^{-\mathrm{pH}}.``]
+
+For example, if the pH is \(x\), the calculator entry should be equivalent to
+
+[``10^{-x}.``]
+
+Report each concentration with **two significant figures**.
+
+Classify each solution by comparing its pH with 7:
+
+* pH less than 7: acid
+* pH equal to 7: neutral
+* pH greater than 7: base
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The hydronium-ion concentration is calculated using
+
+[``\left[\mathrm{H_3O^+}\right]
+=
+10^{-\mathrm{pH}}.``]
+
+Each concentration is reported with two significant figures.
+
+[#
+    [.*pH*.]
+    [.*Hydronium-ion concentration calculation*.]
+    [.*Classification*.]*
+
+    [.[$pHA].]
+    [.[``\begin{aligned}
+        \left[\mathrm{H_3O^+}\right]
+        &= 10^{-[$pHA]} \\
+        &= [$answerA]\ \mathrm{M}
+    \end{aligned}``].]
+    [.*[$classA]*.]*
+
+    [.[$pHB].]
+    [.[``\begin{aligned}
+        \left[\mathrm{H_3O^+}\right]
+        &= 10^{-[$pHB]} \\
+        &= [$answerB]\ \mathrm{M}
+    \end{aligned}``].]
+    [.*[$classB]*.]*
+#]{align => '|c|c|c|', horizontalrules => 1}
+
+A pH below 7 indicates an acid, a pH above 7 indicates a base, and a pH equal to 7 indicates a neutral solution.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

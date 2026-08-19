@@ -1,0 +1,749 @@
+## DBsubject(Chemistry)
+## DBchapter(Acids and Bases)
+## DBsection(Conjugate Acid-Base Pairs)
+## Institution(PCC)
+## Author(Stephanie Bryan)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "contextArbitraryString.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Context
+############################################################
+
+Context("ArbitraryString");
+
+############################################################
+# Normalize formula entries
+############################################################
+
+sub normalize_formula {
+    my $s = shift;
+
+    $s = "$s";
+
+    # Remove all whitespace.
+    $s =~ s/~~s+//g;
+
+    # Treat braces around charges as optional.
+    $s =~ s/[{}]//g;
+
+    # Normalize the charge if a caret is present.
+    if ($s =~ /^(.*)~~^(.*)$/) {
+        my ($base, $charge) = ($1, $2);
+
+        my ($magnitude, $sign);
+
+        # Examples: 2+, 3-, 1+
+        if ($charge =~ /^(~~d+)([+-])$/) {
+            ($magnitude, $sign) = ($1, $2);
+        }
+
+        # Examples: +2, -3, +1
+        elsif ($charge =~ /^([+-])(~~d+)$/) {
+            ($sign, $magnitude) = ($1, $2);
+        }
+
+        # Examples: + or -
+        elsif ($charge =~ /^([+-])$/) {
+            ($sign, $magnitude) = ($1, 1);
+        }
+
+        # Leave unrecognized charge notation unchanged.
+        else {
+            return $s;
+        }
+
+        # Do not require a displayed charge magnitude of 1.
+        if ($magnitude == 1) {
+            return $base . "^" . $sign;
+        }
+
+        return $base . "^" . $magnitude . $sign;
+    }
+
+    return $s;
+}
+
+############################################################
+# Separate the formula body from its charge
+############################################################
+
+sub split_formula_charge {
+    my $s = shift;
+
+    my $normalized = normalize_formula($s);
+
+    if ($normalized =~ /^(.*)~~^(.*)$/) {
+        return ($1, $2);
+    }
+
+    return ($normalized, "");
+}
+
+############################################################
+# Core formula checker
+############################################################
+
+sub formula_checker {
+    my (
+        $correct,
+        $student,
+        $ansHash,
+        $blankType,
+        $acid,
+        $conjugateBase,
+        $base,
+        $conjugateAcid
+    ) = @_;
+
+    my $cRaw = "$correct";
+    my $sRaw = "$student";
+
+    # Clear any previous feedback message.
+    $ansHash->{ans_message} = "";
+
+    ########################################################
+    # Blank response
+    ########################################################
+
+    if ($sRaw =~ /~~A~~s*~~z/) {
+        $ansHash->{ans_message} =
+            "Enter the formula of the species in this blank.";
+        return 0;
+    }
+
+    ########################################################
+    # Normalize the formulas
+    ########################################################
+
+    my $c = normalize_formula($cRaw);
+    my $s = normalize_formula($sRaw);
+
+    ########################################################
+    # Correct answer
+    ########################################################
+
+    return 1 if $c eq $s;
+
+    ########################################################
+    # Another species from the reaction was entered
+    ########################################################
+
+    if (
+        $blankType ne "acid"
+        && $s eq normalize_formula($acid)
+    ) {
+        $ansHash->{ans_message} =
+            "You entered the acid. The acid is the reactant that donates a proton.";
+        return 0;
+    }
+
+    if (
+        $blankType ne "conjugate base"
+        && $s eq normalize_formula($conjugateBase)
+    ) {
+        $ansHash->{ans_message} =
+            "You entered the conjugate base. The conjugate base is the product formed when the acid loses a proton.";
+        return 0;
+    }
+
+    if (
+        $blankType ne "base"
+        && $s eq normalize_formula($base)
+    ) {
+        $ansHash->{ans_message} =
+            "You entered the base. The base is the reactant that accepts a proton.";
+        return 0;
+    }
+
+    if (
+        $blankType ne "conjugate acid"
+        && $s eq normalize_formula($conjugateAcid)
+    ) {
+        $ansHash->{ans_message} =
+            "You entered the conjugate acid. The conjugate acid is the product formed when the base accepts a proton.";
+        return 0;
+    }
+
+    ########################################################
+    # Compare formula body and charge separately
+    ########################################################
+
+    my ($correctFormula, $correctCharge) =
+        split_formula_charge($cRaw);
+
+    my ($studentFormula, $studentCharge) =
+        split_formula_charge($sRaw);
+
+    if ($correctFormula eq $studentFormula) {
+
+        if (
+            $correctCharge ne ""
+            && $studentCharge eq ""
+        ) {
+            $ansHash->{ans_message} =
+                "The formula is correct, but the charge is missing.";
+            return 0;
+        }
+
+        if (
+            $correctCharge eq ""
+            && $studentCharge ne ""
+        ) {
+            $ansHash->{ans_message} =
+                "The formula is correct, but this species should not have a charge.";
+            return 0;
+        }
+
+        if (
+            $correctCharge ne ""
+            && $studentCharge ne ""
+        ) {
+            my ($correctSign) =
+                $correctCharge =~ /([+-])$/;
+
+            my ($studentSign) =
+                $studentCharge =~ /([+-])$/;
+
+            if (
+                defined($correctSign)
+                && defined($studentSign)
+                && $correctSign ne $studentSign
+            ) {
+                $ansHash->{ans_message} =
+                    "The formula is correct, but the charge sign is reversed.";
+                return 0;
+            }
+
+            $ansHash->{ans_message} =
+                "The formula is correct, but the magnitude of the charge is incorrect.";
+            return 0;
+        }
+    }
+
+    ########################################################
+    # Missing formula-entry markup
+    ########################################################
+
+    my $correctWithoutMarkup = $c;
+    my $studentWithoutMarkup = $s;
+
+    $correctWithoutMarkup =~ s/_//g;
+    $correctWithoutMarkup =~ s/~~^//g;
+
+    $studentWithoutMarkup =~ s/_//g;
+    $studentWithoutMarkup =~ s/~~^//g;
+
+    if ($correctWithoutMarkup eq $studentWithoutMarkup) {
+        $ansHash->{ans_message} =
+            "Check the formula formatting. Use an underscore for subscripts and a caret for charges.";
+        return 0;
+    }
+
+    ########################################################
+    # Incorrect capitalization
+    ########################################################
+
+    if (lc($c) eq lc($s)) {
+        $ansHash->{ans_message} =
+            "Check capitalization. Element symbols begin with an uppercase letter, and a second letter is lowercase.";
+        return 0;
+    }
+
+    ########################################################
+    # Generic role-specific feedback
+    ########################################################
+
+    if ($blankType eq "acid") {
+        $ansHash->{ans_message} =
+            "Enter the reactant that donates a proton.";
+        return 0;
+    }
+
+    if ($blankType eq "conjugate base") {
+        $ansHash->{ans_message} =
+            "Enter the product formed when the acid loses a proton.";
+        return 0;
+    }
+
+    if ($blankType eq "base") {
+        $ansHash->{ans_message} =
+            "Enter the reactant that accepts a proton.";
+        return 0;
+    }
+
+    $ansHash->{ans_message} =
+        "Enter the product formed when the base accepts a proton.";
+
+    return 0;
+}
+
+############################################################
+# Create a checker containing the information for one blank
+############################################################
+
+sub make_formula_checker {
+    my (
+        $blankType,
+        $acid,
+        $conjugateBase,
+        $base,
+        $conjugateAcid
+    ) = @_;
+
+    return sub {
+        my ($correct, $student, $ansHash) = @_;
+
+        return formula_checker(
+            $correct,
+            $student,
+            $ansHash,
+            $blankType,
+            $acid,
+            $conjugateBase,
+            $base,
+            $conjugateAcid
+        );
+    };
+}
+
+############################################################
+# Completed example
+############################################################
+
+%example = (
+    r1             => "HCl",
+    r2             => "H_2O",
+    p1             => "H_3O^+",
+    p2             => "Cl^-",
+    acid           => "HCl",
+    conjugate_base => "Cl^-",
+    base           => "H_2O",
+    conjugate_acid => "H_3O^+",
+);
+
+############################################################
+# Reactions in which water acts as a base
+############################################################
+
+@waterBaseReactions = (
+
+    {
+        r1             => "HF",
+        r2             => "H_2O",
+        p1             => "H_3O^+",
+        p2             => "F^-",
+        acid           => "HF",
+        conjugate_base => "F^-",
+        base           => "H_2O",
+        conjugate_acid => "H_3O^+",
+    },
+
+    {
+        r1             => "CH_3COOH",
+        r2             => "H_2O",
+        p1             => "H_3O^+",
+        p2             => "CH_3COO^-",
+        acid           => "CH_3COOH",
+        conjugate_base => "CH_3COO^-",
+        base           => "H_2O",
+        conjugate_acid => "H_3O^+",
+    },
+
+    {
+        r1             => "NH_4^+",
+        r2             => "H_2O",
+        p1             => "NH_3",
+        p2             => "H_3O^+",
+        acid           => "NH_4^+",
+        conjugate_base => "NH_3",
+        base           => "H_2O",
+        conjugate_acid => "H_3O^+",
+    },
+
+    {
+        r1             => "H_2PO_4^-",
+        r2             => "H_2O",
+        p1             => "HPO_4^{2-}",
+        p2             => "H_3O^+",
+        acid           => "H_2PO_4^-",
+        conjugate_base => "HPO_4^{2-}",
+        base           => "H_2O",
+        conjugate_acid => "H_3O^+",
+    },
+
+    {
+        r1             => "HSO_4^-",
+        r2             => "H_2O",
+        p1             => "SO_4^{2-}",
+        p2             => "H_3O^+",
+        acid           => "HSO_4^-",
+        conjugate_base => "SO_4^{2-}",
+        base           => "H_2O",
+        conjugate_acid => "H_3O^+",
+    },
+);
+
+############################################################
+# Reactions in which water acts as an acid
+############################################################
+
+@waterAcidReactions = (
+
+    {
+        r1             => "NH_3",
+        r2             => "H_2O",
+        p1             => "NH_4^+",
+        p2             => "OH^-",
+        acid           => "H_2O",
+        conjugate_base => "OH^-",
+        base           => "NH_3",
+        conjugate_acid => "NH_4^+",
+    },
+
+    {
+        r1             => "CH_3COO^-",
+        r2             => "H_2O",
+        p1             => "CH_3COOH",
+        p2             => "OH^-",
+        acid           => "H_2O",
+        conjugate_base => "OH^-",
+        base           => "CH_3COO^-",
+        conjugate_acid => "CH_3COOH",
+    },
+
+    {
+        r1             => "HCO_3^-",
+        r2             => "H_2O",
+        p1             => "H_2CO_3",
+        p2             => "OH^-",
+        acid           => "H_2O",
+        conjugate_base => "OH^-",
+        base           => "HCO_3^-",
+        conjugate_acid => "H_2CO_3",
+    },
+
+    {
+        r1             => "CO_3^{2-}",
+        r2             => "H_2O",
+        p1             => "HCO_3^-",
+        p2             => "OH^-",
+        acid           => "H_2O",
+        conjugate_base => "OH^-",
+        base           => "CO_3^{2-}",
+        conjugate_acid => "HCO_3^-",
+    },
+
+    {
+        r1             => "HS^-",
+        r2             => "H_2O",
+        p1             => "H_2S",
+        p2             => "OH^-",
+        acid           => "H_2O",
+        conjugate_base => "OH^-",
+        base           => "HS^-",
+        conjugate_acid => "H_2S",
+    },
+);
+
+############################################################
+# Select one reaction from each pool
+############################################################
+
+$waterBasePick = random(
+    0,
+    scalar(@waterBaseReactions) - 1,
+    1
+);
+
+$waterAcidPick = random(
+    0,
+    scalar(@waterAcidReactions) - 1,
+    1
+);
+
+@selected = (
+    $waterBaseReactions[$waterBasePick],
+    $waterAcidReactions[$waterAcidPick]
+);
+
+############################################################
+# Randomize the order of the two student rows
+############################################################
+
+if (random(0, 1, 1) == 1) {
+    $temporary   = $selected[0];
+    $selected[0] = $selected[1];
+    $selected[1] = $temporary;
+}
+
+############################################################
+# Construct student rows and evaluators
+#
+# The evaluators are used directly in the PGML answer blanks.
+# There is no separate ANS() section.
+############################################################
+
+for ($i = 0; $i < 2; $i++) {
+
+    $r1[$i] = $selected[$i]{r1};
+    $r2[$i] = $selected[$i]{r2};
+    $p1[$i] = $selected[$i]{p1};
+    $p2[$i] = $selected[$i]{p2};
+
+    $acid[$i] =
+        $selected[$i]{acid};
+
+    $conjugateBase[$i] =
+        $selected[$i]{conjugate_base};
+
+    $base[$i] =
+        $selected[$i]{base};
+
+    $conjugateAcid[$i] =
+        $selected[$i]{conjugate_acid};
+
+    $acidAns[$i] = String($acid[$i])->cmp(
+        checker => make_formula_checker(
+            "acid",
+            $acid[$i],
+            $conjugateBase[$i],
+            $base[$i],
+            $conjugateAcid[$i]
+        )
+    );
+
+    $conjugateBaseAns[$i] =
+        String($conjugateBase[$i])->cmp(
+            checker => make_formula_checker(
+                "conjugate base",
+                $acid[$i],
+                $conjugateBase[$i],
+                $base[$i],
+                $conjugateAcid[$i]
+            )
+        );
+
+    $baseAns[$i] = String($base[$i])->cmp(
+        checker => make_formula_checker(
+            "base",
+            $acid[$i],
+            $conjugateBase[$i],
+            $base[$i],
+            $conjugateAcid[$i]
+        )
+    );
+
+    $conjugateAcidAns[$i] =
+        String($conjugateAcid[$i])->cmp(
+            checker => make_formula_checker(
+                "conjugate acid",
+                $acid[$i],
+                $conjugateBase[$i],
+                $base[$i],
+                $conjugateAcid[$i]
+            )
+        );
+}
+
+############################################################
+# Example display variables
+############################################################
+
+$exampleR1 = $example{r1};
+$exampleR2 = $example{r2};
+$exampleP1 = $example{p1};
+$exampleP2 = $example{p2};
+
+$exampleAcid =
+    $example{acid};
+
+$exampleConjugateBase =
+    $example{conjugate_base};
+
+$exampleBase =
+    $example{base};
+
+$exampleConjugateAcid =
+    $example{conjugate_acid};
+
+############################################################
+# Student display variables
+############################################################
+
+$r1_1 = $r1[0];
+$r2_1 = $r2[0];
+$p1_1 = $p1[0];
+$p2_1 = $p2[0];
+
+$r1_2 = $r1[1];
+$r2_2 = $r2[1];
+$p1_2 = $p1[1];
+$p2_2 = $p2[1];
+
+$acidAns1 = $acidAns[0];
+$acidAns2 = $acidAns[1];
+
+$conjugateBaseAns1 =
+    $conjugateBaseAns[0];
+
+$conjugateBaseAns2 =
+    $conjugateBaseAns[1];
+
+$baseAns1 = $baseAns[0];
+$baseAns2 = $baseAns[1];
+
+$conjugateAcidAns1 =
+    $conjugateAcidAns[0];
+
+$conjugateAcidAns2 =
+    $conjugateAcidAns[1];
+
+############################################################
+# Display
+############################################################
+
+BEGIN_PGML
+
+## Conjugate Acid–Base Pairs
+
+A conjugate acid–base pair consists of two substances that differ by one proton, [`\mathrm{H^+}`].
+
+* An acid donates [`\mathrm{H^+}`] and becomes its conjugate base.
+* A base accepts [`\mathrm{H^+}`] and becomes its conjugate acid.
+
+The first row is completed as an example. Complete the remaining two rows by entering the formulas for the members of each conjugate acid–base pair.
+
+Use an underscore for a subscript and a caret for a charge. For example, enter hydronium as `H_3O^+`.
+
+[#
+[.Reaction.]
+[.Acid [`\longrightarrow`] conjugate base.]
+[.Base [`\longrightarrow`] conjugate acid.]*{ headerrow => 1 }
+
+[.[`\mathrm{[$exampleR1]}+\mathrm{[$exampleR2]}
+\longrightarrow
+\mathrm{[$exampleP1]}+\mathrm{[$exampleP2]}`].]
+[.[`\mathrm{[$exampleAcid]}
+\longrightarrow
+\mathrm{[$exampleConjugateBase]}`].]
+[.[`\mathrm{[$exampleBase]}
+\longrightarrow
+\mathrm{[$exampleConjugateAcid]}`].]*
+
+[.[`\mathrm{[$r1_1]}+\mathrm{[$r2_1]}
+\rightleftharpoons
+\mathrm{[$p1_1]}+\mathrm{[$p2_1]}`].]
+[.[________]{$acidAns1} [`\longrightarrow`] [________]{$conjugateBaseAns1}.]
+[.[________]{$baseAns1} [`\longrightarrow`] [________]{$conjugateAcidAns1}.]*
+
+[.[`\mathrm{[$r1_2]}+\mathrm{[$r2_2]}
+\rightleftharpoons
+\mathrm{[$p1_2]}+\mathrm{[$p2_2]}`].]
+[.[________]{$acidAns2} [`\longrightarrow`] [________]{$conjugateBaseAns2}.]
+[.[________]{$baseAns2} [`\longrightarrow`] [________]{$conjugateAcidAns2}.]*
+
+#]{align => '|l|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+Follow the proton from the reactant side to the product side.
+
+* The reactant that loses [`\mathrm{H^+}`] is the acid.
+* The product formed from the acid is its conjugate base.
+* The reactant that gains [`\mathrm{H^+}`] is the base.
+* The product formed from the base is its conjugate acid.
+
+The two members of a conjugate acid–base pair differ by one hydrogen. Their charges also differ by one.
+
+Use the completed first row as a model.
+
+END_PGML_HINT
+
+############################################################
+# Solution display variables
+############################################################
+
+$acid1 = $acid[0];
+$acid2 = $acid[1];
+
+$conjugateBase1 =
+    $conjugateBase[0];
+
+$conjugateBase2 =
+    $conjugateBase[1];
+
+$base1 = $base[0];
+$base2 = $base[1];
+
+$conjugateAcid1 =
+    $conjugateAcid[0];
+
+$conjugateAcid2 =
+    $conjugateAcid[1];
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The acid loses [`\mathrm{H^+}`] to form its conjugate base. The base gains [`\mathrm{H^+}`] to form its conjugate acid.
+
+[#
+[.Reaction.]
+[.Acid [`\longrightarrow`] conjugate base.]
+[.Base [`\longrightarrow`] conjugate acid.]*{ headerrow => 1 }
+
+[.[`\mathrm{[$exampleR1]}+\mathrm{[$exampleR2]}
+\longrightarrow
+\mathrm{[$exampleP1]}+\mathrm{[$exampleP2]}`].]
+[.[`\mathrm{[$exampleAcid]}
+\longrightarrow
+\mathrm{[$exampleConjugateBase]}`].]
+[.[`\mathrm{[$exampleBase]}
+\longrightarrow
+\mathrm{[$exampleConjugateAcid]}`].]*
+
+[.[`\mathrm{[$r1_1]}+\mathrm{[$r2_1]}
+\rightleftharpoons
+\mathrm{[$p1_1]}+\mathrm{[$p2_1]}`].]
+[.[`\mathrm{[$acid1]}
+\longrightarrow
+\mathrm{[$conjugateBase1]}`].]
+[.[`\mathrm{[$base1]}
+\longrightarrow
+\mathrm{[$conjugateAcid1]}`].]*
+
+[.[`\mathrm{[$r1_2]}+\mathrm{[$r2_2]}
+\rightleftharpoons
+\mathrm{[$p1_2]}+\mathrm{[$p2_2]}`].]
+[.[`\mathrm{[$acid2]}
+\longrightarrow
+\mathrm{[$conjugateBase2]}`].]
+[.[`\mathrm{[$base2]}
+\longrightarrow
+\mathrm{[$conjugateAcid2]}`].]*
+
+#]{align => '|l|c|c|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

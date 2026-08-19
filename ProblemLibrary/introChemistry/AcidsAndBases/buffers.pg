@@ -1,0 +1,285 @@
+## DBsubject(Chemistry)
+## DBchapter(Acids and Bases)
+## DBsection(Buffers)
+## Level(2)
+## KEYWORDS('buffers', 'conjugate acid-base pairs')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",
+    "MathObjects.pl",
+    "PGML.pl",
+    "PGcourse.pl",
+    "parserPopUp.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Possible buffer combinations
+############################################################
+
+@pairs = (
+    {
+        pair => q{\mathrm{HF}\text{ and }\mathrm{F^-}},
+        answer => "yes",
+        explanation =>
+            "These species are a weak acid and its conjugate base, "
+          . "so they can form a buffer.",
+    },
+    {
+        pair => q{\mathrm{CH_3COOH}\text{ and }\mathrm{CH_3COO^-}},
+        answer => "yes",
+        explanation =>
+            "These species are a weak acid and its conjugate base, "
+          . "so they can form a buffer.",
+    },
+    {
+        pair => q{\mathrm{NH_3}\text{ and }\mathrm{NH_4^+}},
+        answer => "yes",
+        explanation =>
+            "These species are a weak base and its conjugate acid, "
+          . "so they can form a buffer.",
+    },
+    {
+        pair => q{\mathrm{H_2CO_3}\text{ and }\mathrm{HCO_3^-}},
+        answer => "yes",
+        explanation =>
+            "These species are a weak acid and its conjugate base, "
+          . "so they can form a buffer.",
+    },
+    {
+        pair => q{\mathrm{HCOOH}\text{ and }\mathrm{HCOO^-}},
+        answer => "yes",
+        explanation =>
+            "These species are a weak acid and its conjugate base, "
+          . "so they can form a buffer.",
+    },
+    {
+        pair => q{\mathrm{HF}\text{ and }\mathrm{Cl^-}},
+        answer => "no",
+        explanation =>
+            "These species are not a conjugate acid-base pair. "
+          . "Conjugate pairs differ by exactly one proton.",
+    },
+    {
+        pair => q{\mathrm{CH_3COOH}\text{ and }\mathrm{NO_3^-}},
+        answer => "no",
+        explanation =>
+            "These species are not a conjugate acid-base pair. "
+          . "Conjugate pairs differ by exactly one proton.",
+    },
+    {
+        pair => q{\mathrm{NH_3}\text{ and }\mathrm{CH_3NH_3^+}},
+        answer => "no",
+        explanation =>
+            "These species are not a conjugate acid-base pair. "
+          . "Conjugate pairs differ by exactly one proton.",
+    },
+    {
+        pair => q{\mathrm{HCOOH}\text{ and }\mathrm{CH_3COO^-}},
+        answer => "no",
+        explanation =>
+            "These species are not a conjugate acid-base pair. "
+          . "Conjugate pairs differ by exactly one proton.",
+    },
+    {
+        pair => q{\mathrm{H_2CO_3}\text{ and }\mathrm{SO_4^{2-}}},
+        answer => "no",
+        explanation =>
+            "These species are not a conjugate acid-base pair. "
+          . "Conjugate pairs differ by exactly one proton.",
+    },
+);
+
+############################################################
+# Select three different combinations
+############################################################
+
+@available_pairs = @pairs;
+@selected_pairs = ();
+
+for ($i = 0; $i < 3; $i++) {
+    $index = random(0, $#available_pairs, 1);
+
+    push(
+        @selected_pairs,
+        splice(@available_pairs, $index, 1)
+    );
+}
+
+############################################################
+# Pull out the selected values
+############################################################
+
+$pairA        = $selected_pairs[0]->{pair};
+$correctA     = $selected_pairs[0]->{answer};
+$explanationA = $selected_pairs[0]->{explanation};
+
+$pairB        = $selected_pairs[1]->{pair};
+$correctB     = $selected_pairs[1]->{answer};
+$explanationB = $selected_pairs[1]->{explanation};
+
+$pairC        = $selected_pairs[2]->{pair};
+$correctC     = $selected_pairs[2]->{answer};
+$explanationC = $selected_pairs[2]->{explanation};
+
+############################################################
+# Answer menus
+############################################################
+
+$bufferMenuA = PopUp(
+    [
+        "Select an answer",
+        "yes",
+        "no"
+    ],
+    $correctA
+);
+
+$bufferMenuB = PopUp(
+    [
+        "Select an answer",
+        "yes",
+        "no"
+    ],
+    $correctB
+);
+
+$bufferMenuC = PopUp(
+    [
+        "Select an answer",
+        "yes",
+        "no"
+    ],
+    $correctC
+);
+
+############################################################
+# Feedback evaluators
+############################################################
+
+$bufferEvaluatorA = $bufferMenuA->cmp();
+
+$bufferEvaluatorA->install_post_filter(
+    sub {
+        my $ansHash = shift;
+
+        if ($ansHash->{score}) {
+            $ansHash->{ans_message} = $explanationA;
+        }
+
+        return $ansHash;
+    }
+);
+
+$bufferEvaluatorB = $bufferMenuB->cmp();
+
+$bufferEvaluatorB->install_post_filter(
+    sub {
+        my $ansHash = shift;
+
+        if ($ansHash->{score}) {
+            $ansHash->{ans_message} = $explanationB;
+        }
+
+        return $ansHash;
+    }
+);
+
+$bufferEvaluatorC = $bufferMenuC->cmp();
+
+$bufferEvaluatorC->install_post_filter(
+    sub {
+        my $ansHash = shift;
+
+        if ($ansHash->{score}) {
+            $ansHash->{ans_message} = $explanationC;
+        }
+
+        return $ansHash;
+    }
+);
+
+############################################################
+# Problem
+############################################################
+
+BEGIN_PGML
+
+## Identifying Buffer Systems
+
+For each combination, determine whether the two substances can form a buffer.
+
+A buffer must contain a weak acid and its conjugate base or a weak base and its conjugate acid.
+
+[#
+    [.*Combination*.]
+    [.*Can it form a buffer?*.]*
+
+    [.[``[$pairA]``].]
+    [.[__________]{$bufferMenuA}.]*
+
+    [.[``[$pairB]``].]
+    [.[__________]{$bufferMenuB}.]*
+
+    [.[``[$pairC]``].]
+    [.[__________]{$bufferMenuC}.]*
+#]{align => '|c|c|', horizontalrules => 1}
+
+END_PGML
+
+ANS($bufferEvaluatorA);
+ANS($bufferEvaluatorB);
+ANS($bufferEvaluatorC);
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+A conjugate acid-base pair differs by exactly one proton.
+
+Check whether each combination contains either:
+
+* a weak acid and its conjugate base, or
+* a weak base and its conjugate acid.
+
+Simply having an acid and a base present does not necessarily make the substances a conjugate pair.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+A combination can form a buffer when it contains a weak acid and its conjugate base or a weak base and its conjugate acid.
+
+[#
+    [.*Combination*.]
+    [.*Answer*.]
+    [.*Reason*.]*
+
+    [.[``[$pairA]``].]
+    [.*[$correctA]*.]
+    [.[$explanationA].]*
+
+    [.[``[$pairB]``].]
+    [.*[$correctB]*.]
+    [.[$explanationB].]*
+
+    [.[``[$pairC]``].]
+    [.*[$correctC]*.]
+    [.[$explanationC].]*
+#]{align => '|c|c|l|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

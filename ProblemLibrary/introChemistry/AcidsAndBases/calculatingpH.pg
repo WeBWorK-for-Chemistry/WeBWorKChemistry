@@ -1,0 +1,249 @@
+## DBsubject(Chemistry)
+## DBchapter(Acids and Bases)
+## DBsection(pH)
+## Level(2)
+## KEYWORDS('pH', 'hydronium concentration', 'acids and bases', 'logarithms')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",
+    "MathObjects.pl",
+    "PGML.pl",
+    "PGcourse.pl",
+    "contextInexactValue.pl",
+    "parserPopUp.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Setup
+############################################################
+
+Context("InexactValue");
+
+############################################################
+# Generate a basic solution
+############################################################
+
+# Generate a coefficient with two significant figures.
+$coefficient1 = random(10, 99, 1) / 10;
+
+# A hydronium concentration below 1 x 10^-7 M gives
+# a basic solution at 25 degrees Celsius.
+$exponent1 = random(8, 12, 1);
+
+$h3o_concentration1 = $coefficient1 * 10**(-$exponent1);
+
+$concentration1 = InexactValue(
+    $h3o_concentration1,
+    2
+);
+
+# Perl's log() is the natural logarithm.
+# Divide by log(10) to calculate log base 10.
+$pH1 = -log($h3o_concentration1) / log(10);
+
+# Report pH to the hundredths place.
+# InexactValue grades total significant figures, so a pH below
+# 10 requires 3 significant figures and a pH of 10 or greater
+# requires 4 significant figures.
+$pH_sigfigs1 = ($pH1 >= 10) ? 4 : 3;
+
+$answer1 = InexactValue($pH1, $pH_sigfigs1);
+
+############################################################
+# Generate an acidic solution
+############################################################
+
+# Generate a coefficient with two significant figures.
+$coefficient2 = random(10, 99, 1) / 10;
+
+# A hydronium concentration above 1 x 10^-7 M gives
+# an acidic solution at 25 degrees Celsius.
+$exponent2 = random(2, 6, 1);
+
+$h3o_concentration2 = $coefficient2 * 10**(-$exponent2);
+
+$concentration2 = InexactValue(
+    $h3o_concentration2,
+    2
+);
+
+$pH2 = -log($h3o_concentration2) / log(10);
+
+$pH_sigfigs2 = ($pH2 >= 10) ? 4 : 3;
+
+$answer2 = InexactValue($pH2, $pH_sigfigs2);
+
+############################################################
+# Store both solutions
+############################################################
+
+@problems = (
+    {
+        concentration => $concentration1,
+        answer        => $answer1,
+        class         => "base",
+    },
+    {
+        concentration => $concentration2,
+        answer        => $answer2,
+        class         => "acid",
+    },
+);
+
+############################################################
+# Randomize the order
+############################################################
+
+if (random(0, 1, 1)) {
+    ($problems[0], $problems[1]) =
+        ($problems[1], $problems[0]);
+}
+
+############################################################
+# Pull out the randomized values
+############################################################
+
+$concentrationA = $problems[0]->{concentration};
+$answerA        = $problems[0]->{answer};
+$classA         = $problems[0]->{class};
+
+$concentrationB = $problems[1]->{concentration};
+$answerB        = $problems[1]->{answer};
+$classB         = $problems[1]->{class};
+
+############################################################
+# Classification menus
+############################################################
+
+$classMenuA = PopUp(
+    [
+        "Select a classification",
+        "acid",
+        "base",
+        "neutral"
+    ],
+    $classA
+);
+
+$classMenuB = PopUp(
+    [
+        "Select a classification",
+        "acid",
+        "base",
+        "neutral"
+    ],
+    $classB
+);
+
+############################################################
+# Problem
+############################################################
+
+BEGIN_PGML
+
+## Calculating pH
+
+For each solution:
+
+1. Calculate the pH from the hydronium-ion concentration.
+2. Report the pH to the **hundredths place**.
+3. Classify the solution as an **acid**, **base**, or **neutral** solution.
+
+[#
+    [.*[``\left[\mathrm{H_3O^+}\right]``]*.]
+    [.*pH*.]
+    [.*Classification*.]*
+
+    [.[``[$concentrationA]\ \mathrm{M}``].]
+    [.[__________]{$answerA}.]
+    [.[__________]{$classMenuA}.]*
+
+    [.[``[$concentrationB]\ \mathrm{M}``].]
+    [.[__________]{$answerB}.]
+    [.[__________]{$classMenuB}.]*
+#]{align => '|c|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+Calculate the pH of each solution using
+
+[``\mathrm{pH}
+=
+-\log\left([\mathrm{H_3O^+}]\right).``]
+
+Use the **base-10 logarithm**, usually labeled `log` on a calculator.
+
+Enter the entire hydronium-ion concentration before taking the logarithm. For example, if
+
+[``[\mathrm{H_3O^+}]
+=
+a\times 10^{-n},``]
+
+the calculator entry should be equivalent to
+
+[``-\log\left(a\times 10^{-n}\right).``]
+
+Report each pH to the **hundredths place**.
+
+After calculating the pH, classify the solution:
+
+* pH less than 7: acid
+* pH equal to 7: neutral
+* pH greater than 7: base
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The pH is calculated using
+
+[``\mathrm{pH}
+=
+-\log\left([\mathrm{H_3O^+}]\right).``]
+
+Each pH is reported to the hundredths place.
+
+[#
+    [.*[``\left[\mathrm{H_3O^+}\right]``]*.]
+    [.*pH calculation*.]
+    [.*Classification*.]*
+
+    [.[``[$concentrationA]\ \mathrm{M}``].]
+    [.[``\begin{aligned}
+        \mathrm{pH}
+        &= -\log\left([$concentrationA]\right) \\
+        &= [$answerA]
+    \end{aligned}``].]
+    [.*[$classA]*.]*
+
+    [.[``[$concentrationB]\ \mathrm{M}``].]
+    [.[``\begin{aligned}
+        \mathrm{pH}
+        &= -\log\left([$concentrationB]\right) \\
+        &= [$answerB]
+    \end{aligned}``].]
+    [.*[$classB]*.]*
+#]{align => '|c|c|c|', horizontalrules => 1}
+
+A pH below 7 indicates an acid, a pH above 7 indicates a base, and a pH equal to 7 indicates a neutral solution.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
