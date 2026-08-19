@@ -1,0 +1,158 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "niceTables.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl",
+  "contextChemical.pl"
+);
+
+
+
+install_weighted_grader();
+
+Context("Numeric");
+
+$m = random(10.0 ,99.9, 0.1);
+
+$x = random(0,6);
+$sigFigAns = 3;
+
+
+
+#neon, sodium, and germanium have been left out for convenience because of sig fig issues in coding.
+@element = ("hydrogen","nitrogen", "oxygen","fluorine","chlorine","bromine","iodine");
+
+@symbol = ('H_2','N_2','O_2','F_2','Cl_2','Br_2','I_2');
+
+
+#Context("InexactValueWithUnits");
+Context("InexactValueWithUnits")->flags->set('hasChemicals' => 1);
+
+
+@mass = ('2.02', '28.02', '32.00', '38.00', '70.90', '159.80', '253.80');
+
+$atom = $element[$x];
+$atomSym = $symbol[$x];
+$atomMass = $mass[$x];
+
+$given = InexactValueWithUnits( [$m , 3], "g $atomSym");
+
+
+$n1 = InexactValueWithUnits(['1', 9**9**9], 'mol');
+$d1 = InexactValueWithUnits($atomMass, 'g'); 
+
+
+$answer = $given * $n1 / $d1;
+
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given, {creditSigFigsGiven => 0.25,
+creditValueGiven   => 0.75,
+
+creditSigFigsFinal => 0.30,
+creditValueFinal   => 0.50,
+creditUnitsFinal   => 0.20,
+
+messageDigitsDiff => "Your numerical value is close, but check that your molar mass is rounded to the hundredths.",
+messageDigitsDiffAns => "This problem specifies that the answer should be rounded to $sigFigAns significant figures."});
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+##############################################
+
+TEXT(beginproblem());
+
+BEGIN_PGML
+
+##Mole Conversions - grams to moles
+
+*How many moles of [$atom] molecules are in [$given]? *
+
+The given value has been placed into the problem below. Fill in the conversion factor(s) and the final answer. 
+* Don't forget to include units and calculate the answer to the proper number of sig figs. 
+* Use *[@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* *to find the molar mass needed.  Use molar masses rounded to the nearest hundredth.
+* Be sure to use units of *mol [`\mathbf{[$atomSym]}`] *in your final answer.
+* Round your answer to [$sigFigAns] significant digits.
+
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+END_PGML
+
+
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+
+
+
+BEGIN_PGML_HINT
+
+Use the molar mass in a conversion factor to convert from grams [`\mathrm{[$compound]}`] to mol [`\mathrm{[$compound]}`].
+
+Use *[@ htmlLink( protect_underbar("https://spot.pcc.edu/chemistry/periodic-table/?maxPrecision=2&minDecimals=2"), protect_underbar("this linked periodic table"), "TARGET='_blank'" ); @]* *to find the molar mass needed.
+
+For more information on mole conversion, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/08%3A_Counting_Atoms_Ions_and_Molecules/8.01%3A_Counting_Atoms_by_the_Gram"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+
