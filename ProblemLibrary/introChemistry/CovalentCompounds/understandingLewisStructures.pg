@@ -1,0 +1,109 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+  "unorderedAnswer.pl",
+  "contextArbitraryString.pl",
+  "parserMultiAnswer.pl",
+  "parserRadioMultiAnswer.pl",
+    "contextString.pl"
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+
+@options1 = ( "true or false", "true", "false");
+
+$pop1 = PopUp( [@options1], 1);
+$pop2 = PopUp( [@options1], 2);
+
+@options2 = ( "Choose One", "1", "2", "3", "4", "5", "6");
+$pop3 = PopUp( [@options2], 4);
+$pop5 = PopUp( [@options2], 2);
+
+@options3 = ( "Choose One", "1", "2", "4", "6", "8", "10");
+$pop4 = PopUp( [@options3], 5);
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Understanding Lewis Structures
+
+1. When drawing Lewis Structures of neutral molecules, the total number of electrons in the correct structure will equal the total number of valence electrons for all the atoms in the molecule. [_]{$pop1}
+
+2. When counting the numebr of electrons in a Lewis Structure for a polyatomic ion, a -2 charge means that the total number of electrons will be 2 less than the total number of valence electrons. [_]{$pop2}
+
+3. A double bond is written as two lines between atoms and contains how many electrons? [_]{$pop3}
+
+4. Every atom in a Lewis Structure should be surrounded by full octet of electrons. This is equal to how many electrons for all atoms except hydrogen? [_]{$pop4}
+
+5. A hydrogen atom will be surrounded by [_]{$pop5} electrons in a correct Lewis Structure. 
+
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+*Steps for Drawing Lewis Structures*
+1. Determine the total number of valence (outer shell) electrons among all the atoms. For cations, subtract one electron for each positive charge. For anions, add one electron for each negative charge.
+2. Draw a skeleton structure of the molecule or ion, arranging the atoms around a central atom. (Generally, the least electronegative element should be placed in the center.) Connect each atom to the central atom with a single bond (one electron pair).
+3. Distribute the remaining electrons as lone pairs on the terminal atoms (except hydrogen), completing an octet around each atom.
+4. Place all remaining electrons on the central atom.
+5. Rearrange the electrons of the outer atoms to make multiple bonds with the central atom in order to obtain octets wherever possible.
+
+[@ htmlLink('https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.05%3A_Drawing_Lewis_Structures', 'Read here if you need information on drawing Lewis Structures.'); @]*
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();

@@ -1,0 +1,172 @@
+## DBsubject(Chemistry)
+## DBchapter(Chemical Bonding)
+## DBsection(VSEPR)
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "PGcourse.pl",
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Molecule pools
+############################################################
+
+@tetrahedral = qw(CH_4 CF_4 SiH_4 SiF_4 CCl_4 CBr_4);
+@trigonal_pyramid = qw(PF_3 NH_3 NF_3 PH_3 NCl_3 PCl_3 NBr_3);
+@bent_104 = qw(H_2O H_2S H_2Se OCl_2 OF_2);
+@linear = qw(CO_2 CS_2);
+@trigonal_planar = qw(SO_3);
+@bent_120 = qw(SO_2 O_3);
+
+############################################################
+# Answer keys
+############################################################
+
+%EGclass = (
+  (map { $_ => 'tetrahedral' } @tetrahedral),
+  (map { $_ => 'tetrahedral' } @trigonal_pyramid),
+  (map { $_ => 'tetrahedral' } @bent_104),
+  (map { $_ => 'linear' } @linear),
+  (map { $_ => 'trigonal planar' } @trigonal_planar),
+  (map { $_ => 'trigonal planar' } @bent_120),
+);
+
+%MGclass = (
+  (map { $_ => 'tetrahedral' } @tetrahedral),
+  (map { $_ => 'trigonal pyramid' } @trigonal_pyramid),
+  (map { $_ => 'bent' } @bent_104),
+  (map { $_ => 'linear' } @linear),
+  (map { $_ => 'trigonal planar' } @trigonal_planar),
+  (map { $_ => 'bent' } @bent_120),
+);
+
+############################################################
+# Choose one molecule from each geometry group
+############################################################
+
+@formulas = (
+  random_subset(1, @tetrahedral),
+  random_subset(1, @trigonal_pyramid),
+  random_subset(1, @bent_104),
+  random_subset(1, @linear),
+  random_subset(1, @trigonal_planar),
+  random_subset(1, @bent_120),
+);
+
+@formulas = random_subset(6, @formulas);
+
+############################################################
+# Dropdown options
+############################################################
+
+@EGoptions = (
+  "tetrahedral",
+  "trigonal planar",
+  "linear",
+);
+
+@MGoptions = (
+  "tetrahedral",
+  "trigonal pyramid",
+  "trigonal planar",
+  "bent",
+  "linear",
+);
+
+@EGmenus = map {
+  PopUp(
+    ["", @EGoptions],
+    $EGclass{$_}
+  )
+} @formulas;
+
+@MGmenus = map {
+  PopUp(
+    ["", @MGoptions],
+    $MGclass{$_}
+  )
+} @formulas;
+
+############################################################
+# Problem text
+############################################################
+
+BEGIN_PGML
+
+## Electron Geometry and Molecular Geometry
+
+For each molecule, choose the correct electron geometry and molecular geometry.
+
+Use the Lewis structure to determine the number of electron groups around the central atom before choosing the geometries.
+
+[#
+[.Molecule.]
+[.Electron geometry.]
+[.Molecular geometry.]*{ headerrow => 1 }
+
+[.[``\mathrm{[$formulas[0]]}``].]
+[.[_]{$EGmenus[0]}.]
+[.[_]{$MGmenus[0]}.]*
+
+[.[``\mathrm{[$formulas[1]]}``].]
+[.[_]{$EGmenus[1]}.]
+[.[_]{$MGmenus[1]}.]*
+
+[.[``\mathrm{[$formulas[2]]}``].]
+[.[_]{$EGmenus[2]}.]
+[.[_]{$MGmenus[2]}.]*
+
+[.[``\mathrm{[$formulas[3]]}``].]
+[.[_]{$EGmenus[3]}.]
+[.[_]{$MGmenus[3]}.]*
+
+[.[``\mathrm{[$formulas[4]]}``].]
+[.[_]{$EGmenus[4]}.]
+[.[_]{$MGmenus[4]}.]*
+
+[.[``\mathrm{[$formulas[5]]}``].]
+[.[_]{$EGmenus[5]}.]
+[.[_]{$MGmenus[5]}.]*
+
+#]{align => '|c|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Answer checkers
+############################################################
+
+for my $i (0..5) {
+  ANS($EGmenus[$i]->cmp());
+  ANS($MGmenus[$i]->cmp());
+}
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+First draw the Lewis structure.
+
+Then count the number of electron groups around the central atom. Single bonds, double bonds, triple bonds, and lone pairs each count as one electron group.
+
+Electron geometry depends on all electron groups.
+
+Molecular geometry depends on the arrangement of atoms only.
+
+Be careful: trigonal planar and trigonal pyramid are different geometries.
+
+For more information on VSEPR geometries, see [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH104%3A_Allied_Health_Chemisty_I_(2nd_Edition)/07%3A_Molecules_Covalent_Bonding_and_the_Nomenclature_of_Binary_Covalent_Compounds/7.07%3A_Molecular_Geometry-_VSEPR"), protect_underbar("this textbook page"), "TARGET='_blank'" ); @]*.
+
+END_PGML_HINT
+ENDDOCUMENT();

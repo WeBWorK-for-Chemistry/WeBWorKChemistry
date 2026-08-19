@@ -1,0 +1,82 @@
+##DESCRIPTION
+##  Lewis Structures
+##ENDDESCRIPTION
+
+##KEYWORDS('lewis structures')
+
+## Date('2/13/2025')
+## Author('Lee McPherson', 'Stephanie Bryan')
+## Institution('Portland Community College')
+
+
+########################################################################
+
+DOCUMENT();
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGML.pl",
+   "parserLewisStructureTool.pl"
+);
+
+##############################################################
+#
+#  Setup
+#
+
+
+@moleculeFormulaLatex = ('Br_2');
+$rand_num_generator = new PGrandom();
+$size = @moleculeFormulaLatex;
+$index = random(0,$size-1);
+
+
+$formula = $moleculeFormulaLatex[$index];
+$lewisStructure = LewisStructureTool($formula)->with(cmpOptions => {'debug'=> 1,'showFormalCharges'=> 0, 'formalChargePenalty'=>0.4, 'requirePerspective'=>0});
+# With optional parameters for grading.
+# $lewisStructure = LewisStructureTool($formula)->with(cmpOptions => { "bondOrderPenalty" => 0.333 } );
+
+##############################################################
+#
+#  Problem
+#
+BEGIN_PGML
+
+##Lewis Structures - Tutorial
+
+The following problems will ask you to draw the Lewis Structures for various molecules. This tutorial will help you understand how to use the molecule sketcher in these problems. The molecule sketcher is at the bottom of this problem. If you cannot see it, you may need to scroll down the page.
+
+####Draw the Lewis Structure for [`\mathrm{[$formula]}`] in the box below. Don't forget to include all lone pairs.
+
+1. Since this problem is asking for the structure of [`\mathrm{Br_2}`], click on the button labeled "Element Select" and choose Br from the menu of elements that pops up. Click on the empty box and place 2 Br atoms in the box by clicking 2 times. If you accidentally place an atom you don't want, click on "Erase" and click on the atom you want to remove. You will need to click on "Draw" to go back to drawing after you are finished erasing.
+
+2. Now click on the single line button indicating a single bond, [@ image( 'single.png', width=>20, height=>20,  
+ extra_html_tags=>"alt= square button containing a single diagonal line"  )@]* Click on one Br atom and drag the single bond to the other Br atom creating a single bond between them. 
+
+3. Each Br atom needs a full octet of electrons so now you need to add the correct number of lone pairs. To add lone pairs click on the button with 2 dots, [@ image( 'lonePair.png', width=>20, height=>20,  
+ extra_html_tags=>"alt= square button containing two circular dots"  )@]* Add 3 lone pairs to each Br atom.
+
+4. Your final Lewis Structure should look like similar to this:
+[@ image( 'Br2.png', width=>100, height=>50,  
+ extra_html_tags=>"alt= two br atoms with a single line bewteen them"  )@]* 
+
+Adjust your structure if it does not. Remember that you can click on the "Erase" button if you need to redo anything. When you have a structure that you believe is correct, click on "Check Answers". 
+
+Hint: In the problems following this tutorial, you can also use the "Show Me Another" button to get new problems. To complete your homework you only have to complete the structures given but you may want to use the additional possiblities for each problem to help you study for exams.  
+
+[@ LABELED_ANS($lewisStructure->ANS_NAME, $lewisStructure->cmp); $lewisStructure->ans_rule @]*
+
+
+
+
+END_PGML
+#[____]{$lewisStructure}
+#
+BEGIN_PGML_SOLUTION
+
+[@ $lewisStructure->showSolutionGuide() @]*
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        

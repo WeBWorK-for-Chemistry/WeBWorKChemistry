@@ -1,0 +1,362 @@
+## DBsubject(Chemistry)
+## DBchapter(Chemical Bonding)
+## DBsection(Bond Polarity)
+## Institution(PCC)
+## Author(Stephanie Bryan)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Context
+############################################################
+
+Context("Numeric");
+
+Context()->flags->set(
+  tolerance => 0.05,
+  tolType   => "absolute"
+);
+
+############################################################
+# Electronegativity values are Pauling electronegativity
+# values.
+#
+# Classification cutoffs:
+#
+#   delta EN < 0.4          nonpolar covalent
+#   0.4 <= delta EN <= 1.7  polar covalent
+#   delta EN > 1.7          ionic
+############################################################
+
+@bonds = (
+  {
+    atom1 => "H",
+    atom2 => "H",
+    en1   => 2.20,
+    en2   => 2.20,
+  },
+  {
+    atom1 => "Cl",
+    atom2 => "Cl",
+    en1   => 3.16,
+    en2   => 3.16,
+  },
+  {
+    atom1 => "C",
+    atom2 => "H",
+    en1   => 2.55,
+    en2   => 2.20,
+  },
+  {
+    atom1 => "N",
+    atom2 => "H",
+    en1   => 3.04,
+    en2   => 2.20,
+  },
+  {
+    atom1 => "O",
+    atom2 => "H",
+    en1   => 3.44,
+    en2   => 2.20,
+  },
+  {
+    atom1 => "C",
+    atom2 => "O",
+    en1   => 2.55,
+    en2   => 3.44,
+  },
+  {
+    atom1 => "C",
+    atom2 => "Cl",
+    en1   => 2.55,
+    en2   => 3.16,
+  },
+  {
+    atom1 => "Na",
+    atom2 => "Cl",
+    en1   => 0.93,
+    en2   => 3.16,
+  },
+  {
+    atom1 => "Mg",
+    atom2 => "O",
+    en1   => 1.31,
+    en2   => 3.44,
+  },
+  {
+    atom1 => "K",
+    atom2 => "Br",
+    en1   => 0.82,
+    en2   => 2.96,
+  },
+  {
+    atom1 => "Li",
+    atom2 => "F",
+    en1   => 0.98,
+    en2   => 3.98,
+  },
+  {
+    atom1 => "Ca",
+    atom2 => "Cl",
+    en1   => 1.00,
+    en2   => 3.16,
+  },
+);
+
+############################################################
+# Bond pools
+#
+# Selecting one from each pool guarantees that students see
+# one nonpolar, one polar, and one ionic example.
+############################################################
+
+@nonpolarPool = (0, 1, 2);
+@polarPool    = (3, 4, 5, 6);
+@ionicPool    = (7, 8, 9, 10, 11);
+
+$nonpolarPick =
+  $nonpolarPool[random(0, scalar(@nonpolarPool) - 1, 1)];
+
+$polarPick =
+  $polarPool[random(0, scalar(@polarPool) - 1, 1)];
+
+$ionicPick =
+  $ionicPool[random(0, scalar(@ionicPool) - 1, 1)];
+
+@selected = (
+  $nonpolarPick,
+  $polarPick,
+  $ionicPick
+);
+
+############################################################
+# Randomize the order of the three rows
+############################################################
+
+for ($i = 2; $i > 0; $i--) {
+  $j = random(0, $i, 1);
+
+  $temporary    = $selected[$i];
+  $selected[$i] = $selected[$j];
+  $selected[$j] = $temporary;
+}
+
+############################################################
+# Construct the three questions
+############################################################
+
+for ($i = 0; $i < 3; $i++) {
+
+  $pick = $selected[$i];
+
+  $atom1[$i] = $bonds[$pick]{atom1};
+  $atom2[$i] = $bonds[$pick]{atom2};
+  $en1[$i]   = $bonds[$pick]{en1};
+  $en2[$i]   = $bonds[$pick]{en2};
+
+  $bondLabel[$i] = "$atom1[$i]-$atom2[$i]";
+
+  $deltaEN[$i] = abs($en1[$i] - $en2[$i]);
+
+  if ($deltaEN[$i] < 0.4) {
+    $bondType[$i] = "nonpolar covalent";
+  }
+  elsif ($deltaEN[$i] <= 1.7) {
+    $bondType[$i] = "polar covalent";
+  }
+  else {
+    $bondType[$i] = "ionic";
+  }
+
+  $deltaENans[$i] = Real($deltaEN[$i]);
+
+  $typePopUp[$i] = PopUp(
+    [
+      "?",
+      "ionic",
+      "polar covalent",
+      "nonpolar covalent"
+    ],
+    $bondType[$i]
+  );
+
+  $en1Display[$i]   = sprintf("%.2f", $en1[$i]);
+  $en2Display[$i]   = sprintf("%.2f", $en2[$i]);
+  $deltaDisplay[$i] = sprintf("%.2f", $deltaEN[$i]);
+}
+
+############################################################
+# Scalar display variables make the PGML table easier to read
+############################################################
+
+$bond1 = $bondLabel[0];
+$bond2 = $bondLabel[1];
+$bond3 = $bondLabel[2];
+
+$deltaENans1 = $deltaENans[0];
+$deltaENans2 = $deltaENans[1];
+$deltaENans3 = $deltaENans[2];
+
+$typePopUp1 = $typePopUp[0];
+$typePopUp2 = $typePopUp[1];
+$typePopUp3 = $typePopUp[2];
+
+############################################################
+# Display
+############################################################
+
+BEGIN_PGML
+
+## Bond Polarity
+
+For each bond, calculate the electronegativity difference and classify the bond.
+
+Use this [@ htmlLink(
+  protect_underbar(
+    "https://pubchem.ncbi.nlm.nih.gov/ptable/#view=table&property=Electronegativity"
+  ),
+  protect_underbar("table of electronegativity values"),
+  "TARGET='_blank'"
+); @]* to find the electronegativity values. The electronegativity value is shown below the name of each element.
+
+Use these cutoffs:
+
+* [`\Delta EN < 0.4`] = nonpolar covalent
+* [`0.4 \leq \Delta EN \leq 1.7`] = polar covalent
+* [`\Delta EN > 1.7`] = ionic
+
+[#
+[.Bond.]
+[.Electronegativity difference.]
+[.Bond classification.]*{headerrow => 1}
+
+[.[`\mathrm{[$bond1]}`].]
+[.[`\Delta EN =`] [__________]{$deltaENans1}.]
+[.[_]{$typePopUp1}.]*
+
+[.[`\mathrm{[$bond2]}`].]
+[.[`\Delta EN =`] [__________]{$deltaENans2}.]
+[.[_]{$typePopUp2}.]*
+
+[.[`\mathrm{[$bond3]}`].]
+[.[`\Delta EN =`] [__________]{$deltaENans3}.]
+[.[_]{$typePopUp3}.]*
+
+#]{align => '|l|c|l|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Answer checkers
+############################################################
+
+for ($i = 0; $i < 3; $i++) {
+
+  ANS(
+    $deltaENans[$i]->cmp(
+      correct_ans_latex_string => $deltaDisplay[$i],
+      correct_ans              => $deltaDisplay[$i],
+    )
+  );
+
+  ANS($typePopUp[$i]->cmp());
+}
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+For each bond:
+
+1. Look up the electronegativity value for each atom using the linked PubChem table.
+
+2. Subtract the smaller electronegativity from the larger electronegativity:
+
+    [``
+    \Delta EN = \left| EN_1 - EN_2 \right|
+    ``]
+
+3. Use the electronegativity difference to classify the bond:
+
+    [`\Delta EN < 0.4`] means nonpolar covalent.
+
+    [`0.4 \leq \Delta EN \leq 1.7`] means polar covalent.
+
+    [`\Delta EN > 1.7`] means ionic.
+
+END_PGML_HINT
+
+############################################################
+# Solution display variables
+############################################################
+
+$solutionBond1  = $bondLabel[0];
+$solutionAtom1A = $atom1[0];
+$solutionAtom1B = $atom2[0];
+$solutionEN1A   = $en1Display[0];
+$solutionEN1B   = $en2Display[0];
+$solutionDelta1 = $deltaDisplay[0];
+$solutionType1  = $bondType[0];
+
+$solutionBond2  = $bondLabel[1];
+$solutionAtom2A = $atom1[1];
+$solutionAtom2B = $atom2[1];
+$solutionEN2A   = $en1Display[1];
+$solutionEN2B   = $en2Display[1];
+$solutionDelta2 = $deltaDisplay[1];
+$solutionType2  = $bondType[1];
+
+$solutionBond3  = $bondLabel[2];
+$solutionAtom3A = $atom1[2];
+$solutionAtom3B = $atom2[2];
+$solutionEN3A   = $en1Display[2];
+$solutionEN3B   = $en2Display[2];
+$solutionDelta3 = $deltaDisplay[2];
+$solutionType3  = $bondType[2];
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The electronegativity difference is found using:
+
+[#
+[.Bond.]
+[.Electronegativity values.]
+[.Calculation.]
+[.Classification.]*{headerrow => 1}
+
+[.[`\mathrm{[$solutionBond1]}`].]
+[.[`EN(\mathrm{[$solutionAtom1A]}) = [$solutionEN1A]`], [`EN(\mathrm{[$solutionAtom1B]}) = [$solutionEN1B]`].]
+[.[`\left|[$solutionEN1A]-[$solutionEN1B]\right|=[$solutionDelta1]`].]
+[.[$solutionType1].]*
+
+[.[`\mathrm{[$solutionBond2]}`].]
+[.[`EN(\mathrm{[$solutionAtom2A]}) = [$solutionEN2A]`], [`EN(\mathrm{[$solutionAtom2B]}) = [$solutionEN2B]`].]
+[.[`\left|[$solutionEN2A]-[$solutionEN2B]\right|=[$solutionDelta2]`].]
+[.[$solutionType2].]*
+
+[.[`\mathrm{[$solutionBond3]}`].]
+[.[`EN(\mathrm{[$solutionAtom3A]}) = [$solutionEN3A]`], [`EN(\mathrm{[$solutionAtom3B]}) = [$solutionEN3B]`].]
+[.[`\left|[$solutionEN3A]-[$solutionEN3B]\right|=[$solutionDelta3]`].]
+[.[$solutionType3].]*
+
+#]{align => '|l|l|c|l|', horizontalrules => 1}
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
