@@ -1,0 +1,499 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  'PGstandard.pl',
+  'PGML.pl',
+  'PGcourse.pl',
+  'contextArbitraryString.pl',
+  'parserPopUp.pl'
+);
+
+Context('ArbitraryString');
+
+############################################################
+# Compound pools
+#
+# Every compound is shown as aqueous. Ionic compounds form
+# ions in solution; covalent compounds remain as molecules.
+############################################################
+
+@ionicMonatomic = (
+    {
+        formula => "LiCl(aq)",
+        type    => "ionic",
+        ion1    => "Li^+",
+        ion2    => "Cl^-",
+    },
+    {
+        formula => "Li_2S(aq)",
+        type    => "ionic",
+        ion1    => "Li^+",
+        ion2    => "S^2-",
+    },
+    {
+        formula => "KCl(aq)",
+        type    => "ionic",
+        ion1    => "K^+",
+        ion2    => "Cl^-",
+    },
+    {
+        formula => "KBr(aq)",
+        type    => "ionic",
+        ion1    => "K^+",
+        ion2    => "Br^-",
+    },
+    {
+        formula => "KI(aq)",
+        type    => "ionic",
+        ion1    => "K^+",
+        ion2    => "I^-",
+    },
+    {
+        formula => "K_2S(aq)",
+        type    => "ionic",
+        ion1    => "K^+",
+        ion2    => "S^2-",
+    },
+    {
+        formula => "NaBr(aq)",
+        type    => "ionic",
+        ion1    => "Na^+",
+        ion2    => "Br^-",
+    },
+    {
+        formula => "Na_2S(aq)",
+        type    => "ionic",
+        ion1    => "Na^+",
+        ion2    => "S^2-",
+    },
+    {
+        formula => "MgBr_2(aq)",
+        type    => "ionic",
+        ion1    => "Mg^2+",
+        ion2    => "Br^-",
+    },
+    {
+        formula => "MgCl_2(aq)",
+        type    => "ionic",
+        ion1    => "Mg^2+",
+        ion2    => "Cl^-",
+    },
+    {
+        formula => "CaCl_2(aq)",
+        type    => "ionic",
+        ion1    => "Ca^2+",
+        ion2    => "Cl^-",
+    },
+    {
+        formula => "CaBr_2(aq)",
+        type    => "ionic",
+        ion1    => "Ca^2+",
+        ion2    => "Br^-",
+    },
+);
+
+@ionicPolyatomic = (
+    {
+        formula => "Na_2SO_4(aq)",
+        type    => "ionic",
+        ion1    => "Na^+",
+        ion2    => "SO_4^2-",
+    },
+    {
+        formula => "K_2SO_4(aq)",
+        type    => "ionic",
+        ion1    => "K^+",
+        ion2    => "SO_4^2-",
+    },
+    {
+        formula => "Mg(NO_3)_2(aq)",
+        type    => "ionic",
+        ion1    => "Mg^2+",
+        ion2    => "NO_3^-",
+    },
+    {
+        formula => "Ca(NO_3)_2(aq)",
+        type    => "ionic",
+        ion1    => "Ca^2+",
+        ion2    => "NO_3^-",
+    },
+    {
+        formula => "Mg(ClO_4)_2(aq)",
+        type    => "ionic",
+        ion1    => "Mg^2+",
+        ion2    => "ClO_4^-",
+    },
+    {
+        formula => "Ca(ClO_4)_2(aq)",
+        type    => "ionic",
+        ion1    => "Ca^2+",
+        ion2    => "ClO_4^-",
+    },
+    {
+        formula => "Na_2CO_3(aq)",
+        type    => "ionic",
+        ion1    => "Na^+",
+        ion2    => "CO_3^2-",
+    },
+    {
+        formula => "K_2CO_3(aq)",
+        type    => "ionic",
+        ion1    => "K^+",
+        ion2    => "CO_3^2-",
+    },
+    {
+        formula => "Na_3PO_4(aq)",
+        type    => "ionic",
+        ion1    => "Na^+",
+        ion2    => "PO_4^3-",
+    },
+    {
+        formula => "K_3PO_4(aq)",
+        type    => "ionic",
+        ion1    => "K^+",
+        ion2    => "PO_4^3-",
+    },
+);
+
+@covalent = (
+    {
+        formula => "C_6H_12O_6(aq)",
+        type    => "covalent",
+        ion1    => "none",
+        ion2    => "none",
+    },
+    {
+        formula => "C_12H_22O_11(aq)",
+        type    => "covalent",
+        ion1    => "none",
+        ion2    => "none",
+    },
+    {
+        formula => "CH_3OH(aq)",
+        type    => "covalent",
+        ion1    => "none",
+        ion2    => "none",
+    },
+    {
+        formula => "C_2H_5OH(aq)",
+        type    => "covalent",
+        ion1    => "none",
+        ion2    => "none",
+    },
+    {
+        formula => "C_3H_8O_3(aq)",
+        type    => "covalent",
+        ion1    => "none",
+        ion2    => "none",
+    },
+    {
+        formula => "H_2O_2(aq)",
+        type    => "covalent",
+        ion1    => "none",
+        ion2    => "none",
+    },
+    {
+        formula => "CO(NH_2)_2(aq)",
+        type    => "covalent",
+        ion1    => "none",
+        ion2    => "none",
+    },
+);
+
+############################################################
+# Select one ionic compound with monatomic ions, one ionic
+# compound containing a polyatomic ion, and one covalent
+# compound. Then randomize the row order.
+############################################################
+
+@monatomic_choice = random_subset(1, @ionicMonatomic);
+@polyatomic_choice = random_subset(1, @ionicPolyatomic);
+@covalent_choice = random_subset(1, @covalent);
+
+@compounds = random_subset(
+    3,
+    @monatomic_choice,
+    @polyatomic_choice,
+    @covalent_choice
+);
+
+############################################################
+# Ion normalization and targeted feedback
+############################################################
+
+sub normalize_ion {
+  my $s = shift;
+
+  # Remove whitespace and parentheses
+  $s =~ s/~~s+//g;
+  $s =~ s/[()]//g;
+
+  # Remove an aqueous phase label if a student includes one
+  $s =~ s/(?:aq~~.?|aqueous)//gi;
+
+  # Remove braces in ^{...}
+  $s =~ s/~~^~~{([^}]*)~~}/^$1/g;
+
+  # Process only if a caret charge exists
+  if ($s =~ /^(.*)~~^(.*)$/) {
+    my ($base, $chg) = ($1, $2);
+
+    $chg =~ s/~~s+//g;
+
+    my ($mag, $sign);
+
+    # Digits followed by sign: 2+, 3-, 1+
+    if ($chg =~ /^(~~d+)([+-])$/) {
+      ($mag, $sign) = ($1, $2);
+    }
+    # Sign followed by digits: +2, -3, +1
+    elsif ($chg =~ /^([+-])(~~d+)$/) {
+      ($sign, $mag) = ($1, $2);
+    }
+    # Sign only: + or -
+    elsif ($chg =~ /^([+-])$/) {
+      ($sign, $mag) = ($1, 1);
+    }
+    else {
+      return $s;
+    }
+
+    # Omit a charge magnitude of 1
+    if ($mag == 1) {
+      return $base . '^' . $sign;
+    }
+
+    return $base . '^' . $mag . $sign;
+  }
+
+  return $s;
+}
+
+sub split_ion_for_feedback {
+  my $s = shift;
+  my $n = normalize_ion($s);
+
+  return (undef, undef, $n) unless $n =~ /^(.*)~~^(.*)$/;
+
+  my ($base, $chg) = ($1, $2);
+  return ($base, $chg, $n);
+}
+
+sub ion_checker {
+  my ($correct, $student, $ansHash) = @_;
+
+  my $c_raw = "$correct";
+  my $s_raw = "$student";
+
+  $ansHash->{ans_message} = "";
+
+  # Remove leading and trailing whitespace for checking none/blank
+  $s_raw =~ s/^~~s+|~~s+$//g;
+
+  if ($s_raw eq "") {
+    $ansHash->{ans_message} =
+      "Enter the ion present in solution, or enter <b>none</b> if the compound is covalent.";
+    return 0;
+  }
+
+  # Covalent compounds remain as molecules and do not produce ions
+  if ($c_raw =~ /^none$/i) {
+    return 1 if $s_raw =~ /^none$/i;
+
+    $ansHash->{ans_message} =
+      "This is a covalent compound. It remains as molecules in solution, so enter <b>none</b>.";
+    return 0;
+  }
+
+  # Ionic compounds require ion entries
+  if ($s_raw =~ /^none$/i) {
+    $ansHash->{ans_message} =
+      "This is an ionic compound. Enter the ion present in solution rather than <b>none</b>.";
+    return 0;
+  }
+
+  # Encourage proper charge notation
+  if ($s_raw !~ /~~^/) {
+    $ansHash->{ans_message} =
+      "Include the ion charge using <code>^</code>. Use <code>_</code> for subscripts.";
+    return 0;
+  }
+
+  my $c_norm = normalize_ion($c_raw);
+  my $s_norm = normalize_ion($s_raw);
+
+  return 1 if $c_norm eq $s_norm;
+
+  my ($c_base, $c_chg, $c_can) = split_ion_for_feedback($c_raw);
+  my ($s_base, $s_chg, $s_can) = split_ion_for_feedback($s_raw);
+
+  if (!defined($c_base) || !defined($s_base)) {
+    $ansHash->{ans_message} =
+      "Check the ion format. Use <code>_</code> for subscripts and <code>^</code> for the charge.";
+    return 0;
+  }
+
+  my ($c_sign) = $c_chg =~ /([+-])$/;
+  my ($s_sign) = $s_chg =~ /([+-])$/;
+
+  if (defined $c_sign && defined $s_sign && $c_sign ne $s_sign) {
+    if ($c_sign eq '+') {
+      $ansHash->{ans_message} =
+        "This blank is for the <b>cation</b>, so the ion must have a positive charge.";
+    } else {
+      $ansHash->{ans_message} =
+        "This blank is for the <b>anion</b>, so the ion must have a negative charge.";
+    }
+    return 0;
+  }
+
+  if ($c_base ne $s_base) {
+    $ansHash->{ans_message} =
+      "Look again at the formula. You entered <code>$s_base</code>, but this ion contains <code>$c_base</code>.";
+    return 0;
+  }
+
+  if ($c_chg ne $s_chg) {
+    $ansHash->{ans_message} =
+      "You identified the correct ion, but its charge is incorrect.";
+    return 0;
+  }
+
+  $ansHash->{ans_message} =
+    "Check the ion formatting, including subscripts and charge.";
+  return 0;
+}
+
+############################################################
+# Answer objects and solution formatting
+############################################################
+
+@type_options = (
+  "ionic",
+  "covalent"
+);
+
+@type_ans = ();
+@ion1_ans = ();
+@ion2_ans = ();
+
+sub wrap_charge_for_solution {
+  my $s = shift;
+
+  return $s if $s =~ /~~^~~{/;
+
+  $s =~ s/~~^(.*)$/^{$1}/ if $s =~ /~~^/;
+  return $s;
+}
+
+for my $i (0..$#compounds) {
+  my $p = $compounds[$i];
+
+  $type_ans[$i] = DropDown(
+    ~~@type_options,
+    $p->{type},
+    placeholder => "Select"
+  );
+
+  $ion1_ans[$i] = String($p->{ion1})->cmp(checker => ~~&ion_checker);
+  $ion2_ans[$i] = String($p->{ion2})->cmp(checker => ~~&ion_checker);
+
+  $compounds[$i]{formula_soln} = "\mathrm{$p->{formula}}";
+
+  if ($p->{ion1} eq "none") {
+    $compounds[$i]{ion1_soln} = "none";
+    $compounds[$i]{ion2_soln} = "none";
+  } else {
+    my $cat = wrap_charge_for_solution($p->{ion1});
+    my $an  = wrap_charge_for_solution($p->{ion2});
+
+    $compounds[$i]{ion1_soln} = "\mathrm{$cat}";
+    $compounds[$i]{ion2_soln} = "\mathrm{$an}";
+  }
+}
+
+############################################################
+# Problem display
+############################################################
+
+BEGIN_PGML
+
+## Ionic and Covalent Compounds in Aqueous Solution
+
+Each substance shown below is dissolved in water.
+
+For each formula:
+
+- Decide whether the compound is **ionic** or **covalent**.
+- Ionic compounds separate into cations and anions in solution. Enter the formula of each ion, including its charge.
+- Covalent compounds remain as neutral molecules in solution. Enter **none** in both ion columns.
+- Use an underscore _ for a subscript and a caret ^ for an ion charge.
+- Do not include coefficients or phase labels in the ion entries.
+
+The first row has been completed as an example.
+
+[#
+[.Formula.]
+[.Compound type.]
+[.Cation in solution.]
+[.Anion in solution.]*{ headerrow => 1 }
+
+[.[`\mathrm{NaCl(aq)}`].]
+[.ionic.]
+[.[`\mathrm{Na^{+}}`].]
+[.[`\mathrm{Cl^{-}}`].]*
+
+[.[`[$compounds[0]{formula_soln}]`].][.[_]{$type_ans[0]}.][.[___]{$ion1_ans[0]}.][.[___]{$ion2_ans[0]}.]*
+[.[`[$compounds[1]{formula_soln}]`].][.[_]{$type_ans[1]}.][.[___]{$ion1_ans[1]}.][.[___]{$ion2_ans[1]}.]*
+[.[`[$compounds[2]{formula_soln}]`].][.[_]{$type_ans[2]}.][.[___]{$ion1_ans[2]}.][.[___]{$ion2_ans[2]}.]*
+
+#]{align => '|c|c|c|c|', horizontalrules => 1}
+
+END_PGML
+
+BEGIN_PGML_HINT
+
+1. A compound made from a metal and a nonmetal, or containing a metal and a polyatomic ion, is usually ionic.
+
+2. A compound containing only nonmetals is usually covalent.
+
+3. Ionic compounds separate into charged particles when they dissolve. Covalent compounds remain as neutral molecules, so they do not have a cation or anion.
+
+4. The subscripts in an ionic formula show the ion ratio in the compound. Do not copy those subscripts as coefficients in front of the ions.
+
+END_PGML_HINT
+
+BEGIN_PGML_SOLUTION
+
+[#
+[.Formula.]
+[.Compound type.]
+[.Cation in solution.]
+[.Anion in solution.]*{ headerrow => 1 }
+
+[.[`[$compounds[0]{formula_soln}]`].]
+[.[$compounds[0]{type}].]
+[.[`[$compounds[0]{ion1_soln}]`].]
+[.[`[$compounds[0]{ion2_soln}]`].]*
+
+[.[`[$compounds[1]{formula_soln}]`].]
+[.[$compounds[1]{type}].]
+[.[`[$compounds[1]{ion1_soln}]`].]
+[.[`[$compounds[1]{ion2_soln}]`].]*
+
+[.[`[$compounds[2]{formula_soln}]`].]
+[.[$compounds[2]{type}].]
+[.[`[$compounds[2]{ion1_soln}]`].]
+[.[`[$compounds[2]{ion2_soln}]`].]*
+
+#]{align => '|c|c|c|c|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

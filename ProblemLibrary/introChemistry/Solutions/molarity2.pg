@@ -1,0 +1,361 @@
+## DBsubject(Chemistry)
+## DBchapter(Solutions)
+## DBsection(Molarity)
+## Level()
+## KEYWORDS('molarity', 'moles', 'molar mass', 'solution concentration')
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "AnswerFormatHelp.pl",
+  "PGcourse.pl",
+  "niceTables.pl",
+  "contextInexactValue.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Context
+############################################################
+
+Context("InexactValue");
+
+############################################################
+# Solute data
+#
+# All molar masses are displayed to the hundredths place.
+# The number of significant figures is stored separately so
+# trailing zeroes are displayed correctly.
+############################################################
+
+@solutes = (
+    {
+        name        => "hydrogen chloride",
+        formulaTeX  => '\mathrm{HCl}',
+        molarMass   => 36.46,
+        molarMassSF => 4,
+    },
+    {
+        name        => "sodium chloride",
+        formulaTeX  => '\mathrm{NaCl}',
+        molarMass   => 58.44,
+        molarMassSF => 4,
+    },
+    {
+        name        => "potassium chloride",
+        formulaTeX  => '\mathrm{KCl}',
+        molarMass   => 74.55,
+        molarMassSF => 4,
+    },
+    {
+        name        => "sodium hydroxide",
+        formulaTeX  => '\mathrm{NaOH}',
+        molarMass   => 40.00,
+        molarMassSF => 4,
+    },
+    {
+        name        => "potassium hydroxide",
+        formulaTeX  => '\mathrm{KOH}',
+        molarMass   => 56.11,
+        molarMassSF => 4,
+    },
+    {
+        name        => "potassium nitrate",
+        formulaTeX  => '\mathrm{KNO_3}',
+        molarMass   => 101.10,
+        molarMassSF => 5,
+    },
+    {
+        name        => "sodium nitrate",
+        formulaTeX  => '\mathrm{NaNO_3}',
+        molarMass   => 85.00,
+        molarMassSF => 4,
+    },
+    {
+        name        => "calcium chloride",
+        formulaTeX  => '\mathrm{CaCl_2}',
+        molarMass   => 110.98,
+        molarMassSF => 5,
+    },
+    {
+        name        => "magnesium chloride",
+        formulaTeX  => '\mathrm{MgCl_2}',
+        molarMass   => 95.21,
+        molarMassSF => 4,
+    },
+    {
+        name        => "sodium carbonate",
+        formulaTeX  => '\mathrm{Na_2CO_3}',
+        molarMass   => 105.99,
+        molarMassSF => 5,
+    },
+    {
+        name        => "potassium carbonate",
+        formulaTeX  => '\mathrm{K_2CO_3}',
+        molarMass   => 138.21,
+        molarMassSF => 5,
+    },
+    {
+        name        => "glucose",
+        formulaTeX  => '\mathrm{C_6H_{12}O_6}',
+        molarMass   => 180.16,
+        molarMassSF => 5,
+    },
+);
+
+############################################################
+# Select one solute
+############################################################
+
+$solute = $solutes[random(0, scalar(@solutes) - 1, 1)];
+
+$soluteName = $solute->{name};
+$formulaTeX = $solute->{formulaTeX};
+
+############################################################
+# Generate values
+#
+# The displayed mass and volume each contain 3 significant
+# figures. InexactValue preserves the intended formatting.
+############################################################
+
+$massValue = random(500, 25000, 1) / 1000;
+$mass      = InexactValue($massValue, 3);
+
+$volumeValue = random(100, 5000, 1) / 1000;
+$volume      = InexactValue($volumeValue, 3);
+
+$molarMass = InexactValue(
+    $solute->{molarMass},
+    $solute->{molarMassSF}
+);
+
+############################################################
+# Calculate moles and molarity
+############################################################
+
+$moles    = $mass / $molarMass;
+$molarity = $moles / $volume;
+
+############################################################
+# Feedback post-filter
+############################################################
+
+sub addIncorrectFeedback {
+    my ($evaluator, $message) = @_;
+
+    $evaluator->install_post_filter(
+        sub {
+            my $ansHash = shift;
+
+            my $studentAnswer  = $ansHash->{student_ans} // "";
+            my $score          = $ansHash->{score} // 0;
+            my $currentMessage = $ansHash->{ans_message} // "";
+
+            # Add the custom message only when the student entered
+            # something, received no credit, and no more specific
+            # feedback has already been generated.
+            if (
+                !$ansHash->{isPreview}
+                && $studentAnswer =~ /\S/
+                && $score == 0
+                && $currentMessage eq ""
+            ) {
+                $ansHash->{ans_message} = $message;
+            }
+
+            return $ansHash;
+        }
+    );
+
+    return $evaluator;
+}
+
+############################################################
+# Answer evaluators
+#
+# Each displayed blank receives its own evaluator. The two
+# moles blanks have the same correct value but must not reuse
+# the same evaluator.
+############################################################
+
+$massEvaluator = addIncorrectFeedback(
+    $mass->cmp(),
+    "Enter the given mass of the solute in the numerator."
+);
+
+$molarMassEvaluator = addIncorrectFeedback(
+    $molarMass->cmp(),
+    "Enter the given molar mass in the denominator. Molar mass has units of grams per mole."
+);
+
+$molesStep1Evaluator = addIncorrectFeedback(
+    $moles->cmp(),
+    "Divide the mass of the solute by its molar mass. Enter the calculated number of moles with 3 significant figures."
+);
+
+$molesStep2Evaluator = addIncorrectFeedback(
+    $moles->cmp(),
+    "Use the number of moles calculated in Step 1. Enter the value with 3 significant figures."
+);
+
+$volumeEvaluator = addIncorrectFeedback(
+    $volume->cmp(),
+    "Enter the given total solution volume in liters in the denominator."
+);
+
+$molarityEvaluator = addIncorrectFeedback(
+    $molarity->cmp(),
+    "Divide the calculated moles of solute by the total solution volume in liters. Enter the molarity with 3 significant figures."
+);
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+## Calculating Molarity from Mass
+
+A solution is prepared using [$mass] g of [$soluteName], [``[$formulaTeX]``]. The total volume of the solution is [$volume] L.
+
+The molar mass of [``[$formulaTeX]``] is [$molarMass] g/mol.
+
+First, convert the mass of the solute to moles. Then use the number of moles to calculate the molarity of the solution.
+
+Copy the given values into the setup blanks exactly as shown. Use all the displayed digits in your calculations.
+
+Enter the calculated number of moles and the final molarity with **3 significant figures**.
+
+### Step 1: Convert grams to moles
+
+[```
+\mathrm{moles\:of\:solute}
+=
+\frac{\mathrm{mass\:of\:solute\:(g)}}{\mathrm{molar\:mass\:(g/mol)}}
+```]
+
+[#
+    [.moles of solute.]
+    [.[`=`].]
+
+    [.
+        [#
+            [.[_]{$massEvaluator} g solute.]*{bottom => 1}
+            [.[_]{$molarMassEvaluator} g solute/mol solute.]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$molesStep1Evaluator} mol solute.]
+#]*{valign => 'middle'}
+
+### Step 2: Calculate molarity
+
+[```
+\mathrm{molarity}
+=
+\frac{\mathrm{moles\:of\:solute}}
+{\mathrm{volume\:of\:solution\:(L)}}
+```]
+
+[#
+    [.molarity.]
+    [.[`=`].]
+
+    [.
+        [#
+            [.[_]{$molesStep2Evaluator} mol solute.]*{bottom => 1}
+            [.[_]{$volumeEvaluator} L solution.]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$molarityEvaluator} M.]
+#]*{valign => 'middle'}
+
+END_PGML
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+This problem requires two calculations.
+
+First, convert the mass of the solute from grams to moles:
+
+[```
+\mathrm{moles\:of\:solute}
+=
+\frac{\mathrm{grams\:of\:solute}}
+{\mathrm{grams\:of\:solute\:/\:mole\:of\:solute}}
+```]
+
+Place the given mass in the numerator and the given molar mass in the denominator. The gram units cancel, leaving moles of solute.
+
+Next, divide the calculated number of moles by the total volume of the solution in liters:
+
+[```
+\mathrm{molarity}
+=
+\frac{\mathrm{moles\:of\:solute}}
+{\mathrm{liters\:of\:solution}}
+```]
+
+Use all the displayed digits while calculating. Enter the calculated moles and final molarity with **3 significant figures**.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+First, convert the given mass to moles using the molar mass of [``[$formulaTeX]``]:
+
+[```
+\mathrm{moles\:of\:solute}
+=
+\frac{[$mass]\ \mathrm{g}}
+{[$molarMass]\ \mathrm{g/mol}}
+=
+[$moles]\ \mathrm{mol}
+```]
+
+Next, divide the number of moles by the total solution volume:
+
+[```
+\mathrm{molarity}
+=
+\frac{[$moles]\ \mathrm{mol}}
+{[$volume]\ \mathrm{L}}
+=
+[$molarity]\ \mathrm{M}
+```]
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+ENDDOCUMENT();

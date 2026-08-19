@@ -1,0 +1,403 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+install_weighted_grader();
+
+Context("InexactValueWithUnits");
+
+############################################################
+# Solute data
+#
+# All molar masses are reported to the hundredths place.
+############################################################
+
+@solutes = (
+    {
+        name        => "hydrogen chloride",
+        formulaTeX  => '\mathrm{HCl}',
+        molarMass   => 36.46,
+        molarMassSF => 4,
+    },
+    {
+        name        => "sodium chloride",
+        formulaTeX  => '\mathrm{NaCl}',
+        molarMass   => 58.44,
+        molarMassSF => 4,
+    },
+    {
+        name        => "potassium chloride",
+        formulaTeX  => '\mathrm{KCl}',
+        molarMass   => 74.55,
+        molarMassSF => 4,
+    },
+    {
+        name        => "sodium hydroxide",
+        formulaTeX  => '\mathrm{NaOH}',
+        molarMass   => 40.00,
+        molarMassSF => 4,
+    },
+    {
+        name        => "potassium hydroxide",
+        formulaTeX  => '\mathrm{KOH}',
+        molarMass   => 56.11,
+        molarMassSF => 4,
+    },
+    {
+        name        => "potassium nitrate",
+        formulaTeX  => '\mathrm{KNO_3}',
+        molarMass   => 101.10,
+        molarMassSF => 5,
+    },
+    {
+        name        => "sodium nitrate",
+        formulaTeX  => '\mathrm{NaNO_3}',
+        molarMass   => 85.00,
+        molarMassSF => 4,
+    },
+    {
+        name        => "calcium chloride",
+        formulaTeX  => '\mathrm{CaCl_2}',
+        molarMass   => 110.98,
+        molarMassSF => 5,
+    },
+    {
+        name        => "magnesium chloride",
+        formulaTeX  => '\mathrm{MgCl_2}',
+        molarMass   => 95.21,
+        molarMassSF => 4,
+    },
+    {
+        name        => "sodium carbonate",
+        formulaTeX  => '\mathrm{Na_2CO_3}',
+        molarMass   => 105.99,
+        molarMassSF => 5,
+    },
+    {
+        name        => "potassium carbonate",
+        formulaTeX  => '\mathrm{K_2CO_3}',
+        molarMass   => 138.21,
+        molarMassSF => 5,
+    },
+    {
+        name        => "glucose",
+        formulaTeX  => '\mathrm{C_6H_{12}O_6}',
+        molarMass   => 180.16,
+        molarMassSF => 5,
+    },
+);
+
+############################################################
+# Select a solute
+############################################################
+
+$solute = $solutes[random(0, scalar(@solutes) - 1, 1)];
+
+$soluteName = $solute->{name};
+$formulaTeX = $solute->{formulaTeX};
+
+$molarMass = InexactValue(
+    $solute->{molarMass},
+    $solute->{molarMassSF}
+);
+
+############################################################
+# Generate given values
+############################################################
+
+$sigFigAns = 3;
+
+$randomVolume = random(1.10, 9.90, 0.01);
+$volumeValue  = InexactValue($randomVolume, $sigFigAns);
+
+$given = InexactValueWithUnits(
+    InexactValue($volumeValue),
+    'L'
+);
+
+$randomMolarity = random(0.10, 1.50, 0.01);
+$molarity = InexactValue($randomMolarity, 3);
+
+############################################################
+# First conversion factor: molarity
+#
+# molarity mol solute
+# -------------------
+# 1 L solution
+############################################################
+
+$n1 = InexactValueWithUnits(
+    InexactValue($molarity),
+    'mol'
+);
+
+$d1 = InexactValueWithUnits(
+    ['1', 9**9**9],
+    'L'
+);
+
+############################################################
+# Second conversion factor: molar mass
+#
+# molar mass g solute
+# -------------------
+# 1 mol solute
+############################################################
+
+$n2 = InexactValueWithUnits(
+    InexactValue($molarMass),
+    'g'
+);
+
+$d2 = InexactValueWithUnits(
+    ['1', 9**9**9],
+    'mol'
+);
+
+############################################################
+# Calculate final answer
+############################################################
+
+$answer = $given * $n1 / $d1 * $n2 / $d2;
+
+############################################################
+# Dimensional-analysis answer setup
+#
+# MultiAnswer blanks must be listed in this order:
+#
+# factor 1 numerator
+# factor 1 denominator
+# factor 2 numerator
+# factor 2 denominator
+# final answer
+############################################################
+
+$ma = MultiAnswer(
+    $n1,
+    $d1,
+    $n2,
+    $d2,
+    $answer
+)->asDimensionalAnalysis(
+    $given,
+    {
+        creditSigFigsGiven => 0.25,
+        creditValueGiven   => 0.75,
+
+        creditSigFigsFinal => 0.30,
+        creditValueFinal   => 0.50,
+        creditUnitsFinal   => 0.20,
+
+        messageDigitsDiff =>
+            "Your numerical value is close, but check that you are using all the digits given in the problem.",
+
+        messageDigitsDiffAns =>
+            "This problem specifies that the answer should be rounded to $sigFigAns significant figures."
+    }
+);
+
+############################################################
+# Generate solution explanation
+############################################################
+
+$dimensionalAnalysisSolution =
+    DimensionalAnalysis::generateExplanation(
+        [$given],
+        [$n1, $d1, $n2, $d2],
+        $answer
+    );
+
+##############################################
+# Problem body
+##############################################
+
+BEGIN_PGML
+
+## Using Molarity and Molar Mass as Conversion Factors
+
+*Given [`[$given]`] of a [$molarity] M solution of [$soluteName], [``[$formulaTeX]``], calculate the mass of [$soluteName] in grams.*
+
+The molar mass of [``[$formulaTeX]``] is [$molarMass] g/mol.
+
+The given volume has been placed into the dimensional-analysis setup for you.
+
+Use two conversion factors:
+
+1. Use molarity to convert from liters of solution to moles of solute.
+2. Use molar mass to convert from moles of solute to grams of solute.
+
+Arrange the conversion factors so that the units cancel in this order:
+
+[```
+\mathrm{L\:solution}
+\longrightarrow
+\mathrm{mol\:solute}
+\longrightarrow
+\mathrm{g\:solute}
+```]
+
+Use all the displayed digits in your calculation.
+
+Round the final answer to [$sigFigAns] significant figures.
+
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
+END_PGML
+
+############################################################
+# Answer weighting
+############################################################
+
+my $finalAnswerWeight = 50;
+my $remain = 100 - $finalAnswerWeight;
+
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+
+for ($i = 0; $i < scalar @ansArr; $i++) {
+    WEIGHTED_ANS(
+        $ansArr[$i],
+        $remain / scalar(@ansArr)
+    );
+}
+
+WEIGHTED_ANS(
+    $finalAns,
+    $finalAnswerWeight
+);
+
+# Without weighting, use:
+#
+# ANS($ma->cmp);
+#
+# Each answer blank would then have the same weight.
+
+##############################################
+# Hint
+##############################################
+
+BEGIN_PGML_HINT
+
+This problem requires two conversion factors.
+
+### First conversion: liters to moles
+
+Molarity relates moles of solute to liters of solution:
+
+[```
+\mathrm{molarity}
+=
+\frac{\mathrm{moles\:of\:solute}}
+{\mathrm{liters\:of\:solution}}
+```]
+
+A [$molarity] M solution contains [$molarity] mol of solute in 1 L of solution.
+
+Arrange this conversion factor so that **L** cancels:
+
+[```
+\mathrm{L\:solution}
+\times
+\frac{\mathrm{mol\:solute}}
+{\mathrm{L\:solution}}
+```]
+
+### Second conversion: moles to grams
+
+The molar mass of [``[$formulaTeX]``] is [$molarMass] g/mol. This means:
+
+[```
+1\ \mathrm{mol}\:[$formulaTeX]
+=
+[$molarMass]\ \mathrm{g}\:[$formulaTeX]
+```]
+
+Arrange the molar-mass conversion factor so that **mol** cancels:
+
+[```
+\mathrm{mol\:solute}
+\times
+\frac{\mathrm{g\:solute}}
+{\mathrm{mol\:solute}}
+```]
+
+The complete unit-cancellation pattern should be:
+
+[```
+\mathrm{L\:solution}
+\times
+\frac{\mathrm{mol\:solute}}
+{\mathrm{L\:solution}}
+\times
+\frac{\mathrm{g\:solute}}
+{\mathrm{mol\:solute}}
+=
+\mathrm{g\:solute}
+```]
+
+After both conversion factors are arranged correctly:
+
+1. Multiply all numbers in the numerators.
+2. Divide by all numbers in the denominators.
+3. Include the unit **g** in the final answer.
+4. Round the final answer to [$sigFigAns] significant figures.
+
+END_PGML_HINT
+
+##############################################
+# Solution
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+

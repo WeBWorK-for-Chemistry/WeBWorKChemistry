@@ -1,0 +1,227 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+install_weighted_grader();
+
+Context("InexactValueWithUnits");
+
+############################################################
+# Generate given values
+############################################################
+
+$m = random(1.10, 9.90, 0.01);
+$sigFigAns = 3;
+
+$random_molarity = random(0.01, 1.50, 0.01);
+$molarity = InexactValue($random_molarity, 3);
+
+$givenValue = InexactValue($m, $sigFigAns);
+$given = InexactValueWithUnits(
+    InexactValue($givenValue),
+    'mol'
+);
+
+############################################################
+# Conversion factor
+#
+# Molarity is mol/L:
+#
+#     molarity mol = 1 L
+#
+# To convert from mol to L, place 1 L in the numerator
+# and the molarity in mol in the denominator.
+############################################################
+
+$n1 = InexactValueWithUnits(
+    ['1', 9**9**9],
+    'L'
+);
+
+$d1 = InexactValueWithUnits(
+    InexactValue($molarity),
+    'mol'
+);
+
+############################################################
+# Calculate answer
+############################################################
+
+$answer = $given * $n1 / $d1;
+
+############################################################
+# Dimensional-analysis answer setup
+############################################################
+
+$ma = MultiAnswer(
+    $n1,
+    $d1,
+    $answer
+)->asDimensionalAnalysis(
+    $given,
+    {
+        creditSigFigsGiven => 0.25,
+        creditValueGiven   => 0.75,
+
+        creditSigFigsFinal => 0.30,
+        creditValueFinal   => 0.50,
+        creditUnitsFinal   => 0.20,
+
+        messageDigitsDiff =>
+            "Your numerical value is close, but check that you are using all the digits given in the problem.",
+
+        messageDigitsDiffAns =>
+            "This problem specifies that the answer should be rounded to $sigFigAns significant figures."
+    }
+);
+
+############################################################
+# Generate solution explanation
+############################################################
+
+$dimensionalAnalysisSolution =
+    DimensionalAnalysis::generateExplanation(
+        [$given],
+        [$n1, $d1],
+        $answer
+    );
+
+##############################################
+# Problem body
+##############################################
+
+BEGIN_PGML
+
+## Using Molarity as a Conversion Factor
+
+*Given [`[$given]`] of solute in a [$molarity] M solution, calculate the volume of the solution in liters.*
+
+The given value has been placed into the single line of dimensional analysis for you. Place the molarity into the problem as a conversion factor.
+
+Remember that molarity gives the number of moles of solute in 1 L of solution. For example, a 2.00 M solution means that 2.00 mol of solute is present in 1 L of solution.
+
+Arrange the conversion factor so that **mol** cancels and **L** remains.
+
+Round your answer to [$sigFigAns] significant figures.
+
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
+END_PGML
+
+############################################################
+# Answer weighting
+############################################################
+
+my $finalAnswerWeight = 50;
+my $remain = 100 - $finalAnswerWeight;
+
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+
+for ($i = 0; $i < scalar @ansArr; $i++) {
+    WEIGHTED_ANS(
+        $ansArr[$i],
+        $remain / scalar(@ansArr)
+    );
+}
+
+WEIGHTED_ANS(
+    $finalAns,
+    $finalAnswerWeight
+);
+
+# Without weighting, use:
+#
+# ANS($ma->cmp);
+#
+# Each answer blank would then have the same weight.
+
+##############################################
+# Hint
+##############################################
+
+BEGIN_PGML_HINT
+
+Molarity relates moles of solute to liters of solution:
+
+[```
+\mathrm{molarity}
+=
+\frac{\mathrm{moles\:of\:solute}}
+{\mathrm{liters\:of\:solution}}
+```]
+
+A solution with a molarity of [$molarity] M contains [$molarity] mol of solute in 1 L of solution:
+
+[```
+[$molarity]\ \mathrm{mol\:solute}
+=
+1\ \mathrm{L\:solution}
+```]
+
+The problem begins with moles and asks for liters. Write the relationship as a conversion factor with liters in the numerator and moles in the denominator:
+
+[```
+\mathrm{mol\:solute}
+\times
+\frac{\mathrm{L\:solution}}
+{\mathrm{mol\:solute}}
+```]
+
+The **mol** units should cancel, leaving **L** as the unit of the answer.
+
+To calculate the final value:
+
+1. Place 1 L in the numerator of the conversion factor.
+2. Place the molarity, with units of mol, in the denominator.
+3. Multiply the given number of moles by the conversion factor.
+4. Include the unit **L** in the final answer.
+5. Round the final answer to [$sigFigAns] significant figures.
+
+END_PGML_HINT
+
+##############################################
+# Solution
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
+````

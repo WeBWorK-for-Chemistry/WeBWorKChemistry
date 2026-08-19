@@ -1,0 +1,68 @@
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"MathObjects.pl",
+"PGML.pl",
+"PGchoicemacros.pl",
+"unionTables.pl",
+);
+
+TEXT(beginproblem());
+
+######################################
+
+
+Context("Numeric");
+$showPartialCorrectAnswers = 1;
+
+#
+#  Create a matching list and use popups
+#
+$ml = new_match_list();
+$ml->rf_print_q(~~&pop_up_list_print_q);
+$ml->ra_pop_up_list([
+"No answer" => "?",
+"A" => "A", "B" => "B", "C" => "C", 
+"D" => "D", "E" => "E", "F" => "F",
+"G" => "G", "H" => "H", "I" => "I",
+]);
+
+#
+#  Add correct questions and answers
+#
+$ml->qa(
+"The substance that is being dissolved (usually present in the smaller amount).", "Solute","The substance that does the dissolving (usually present in the larger amount).", "Solvent",
+"A homogeneous mixture of two or more substances uniformly dispersed at a molecular level.", "Solution",
+"The maximum amount of a solute that will dissolve in a given quantity of solvent at a specific temperature.", "Solubility",
+"A solution that contains the maximum amount of dissolved solute possible at a given temperature.", "Saturated",
+"A solution that contains less than the maximum amount of dissolved solute possible at a given temperature.", 
+  "Unsaturated", "A solution containing a relatively small amount of dissolved solute.", "Dilute", "A solution containing a relatively large amount of dissolved solute.", "Concentrated", "Liquids that are completely soluble in each other in any proportion (like ethanol and water).", "Miscible"
+);
+$ml->choose(9);
+
+
+$ml->makeLast("None of the above");
+
+
+######################################
+
+
+BEGIN_PGML
+## Solutions Concept Matching
+
+Match the phrase on the left with the best concept that it describes on the right.
+
+[@ ColumnMatchTable($ml,valign => TOP) @]* 
+
+
+
+END_PGML
+
+
+######################################
+
+ANS( str_cmp( $ml->ra_correct_ans ) );
+
+
+ENDDOCUMENT();

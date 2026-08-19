@@ -1,0 +1,181 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1(not reported)
+## Problem1(8.1.12)
+## Author()
+## Institution()
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "AnswerFormatHelp.pl",
+  "parserPopUp.pl",
+  "PGcourse.pl",
+  "niceTables.pl",
+  "contextInexactValue.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Setup
+############################################################
+
+Context("InexactValue");
+
+$mol   = random(0.001, 0.900, 0.001);
+$moles = InexactValue($mol, 3);
+
+$vol    = random(0.10, 10.0, 0.1);
+$volume = InexactValue($vol, 3);
+
+$molarity = $moles / $volume;
+
+############################################################
+# Feedback post-filter
+############################################################
+
+sub addIncorrectFeedback {
+    my ($evaluator, $message) = @_;
+
+    $evaluator->install_post_filter(
+        sub {
+            my $ansHash = shift;
+
+            my $studentAnswer = $ansHash->{student_ans} // "";
+            my $score         = $ansHash->{score} // 0;
+            my $currentMessage = $ansHash->{ans_message} // "";
+
+            if (
+                !$ansHash->{isPreview}
+                && $studentAnswer =~ /~~S/
+                && $score == 0
+                && $currentMessage eq ""
+            ) {
+                $ansHash->{ans_message} = $message;
+            }
+
+            return $ansHash;
+        }
+    );
+
+    return $evaluator;
+}
+
+############################################################
+# Answer evaluators
+############################################################
+
+$molesEvaluator = addIncorrectFeedback(
+    $moles->cmp(),
+    "Enter the given number of moles of HCl in the numerator."
+);
+
+$volumeEvaluator = addIncorrectFeedback(
+    $volume->cmp(),
+    "Enter the given total solution volume in liters in the denominator."
+);
+
+$molarityEvaluator = addIncorrectFeedback(
+    $molarity->cmp(),
+    "Divide the moles of HCl by the solution volume in liters. Enter the result with 3 significant figures."
+);
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+
+## Calculating Molarity
+
+Calculate the molarity of an HCl solution containing [$moles] moles HCl in [$volume] L total aqueous solution volume.
+
+Use all the digits given in the setup blanks and write the final answer with 3 significant figures. The units are shown and therefore should not be included in the answer blanks.
+
+[```
+\mathrm{molarity}
+=
+\frac{\mathrm{moles\:of\:solute}}
+{\mathrm{volume\:of\:solution\:(L)}}
+```]
+
+[#
+    [.molarity.]
+    [.[`=`].]
+
+    [.
+        [#
+            [.[_]{$molesEvaluator} moles HCl.]*{bottom => 1}
+            [.[_]{$volumeEvaluator} L solution.]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$molarityEvaluator} M HCl.]
+#]*{valign => 'middle'}
+
+END_PGML
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+Molarity describes the number of moles of solute in each liter of solution.
+
+Use the given values in
+
+[```
+\mathrm{molarity}
+=
+\frac{\mathrm{moles\:of\:HCl}}
+{\mathrm{liters\:of\:solution}}
+```]
+
+Place the amount of HCl in the numerator and the total solution volume in the denominator.
+
+Then divide the number of moles by the volume in liters. The units simplify to moles per liter, which is written as M.
+
+Use all the digits shown in the setup and enter the final molarity with **3 significant figures**.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+Substitute the given values into the molarity expression:
+
+[```
+\mathrm{molarity}
+=
+\frac{[$moles]\ \mathrm{mol\ HCl}}
+{[$volume]\ \mathrm{L\ solution}}
+=
+[$molarity]\ \mathrm{M\ HCl}
+```]
+
+END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+ENDDOCUMENT();

@@ -1,0 +1,154 @@
+## DBCCSS('')
+## Institution(PCC)
+## Author(Lee McPherson, Stephanie Bryan)
+
+##############################################
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "answerHints.pl",
+  "parserPopUp.pl",
+  "contextInexactValue.pl",
+  "contextInexactValueWithUnits.pl",
+  "parserDimensionalAnalysis.pl",
+  "parserMultiAnswer.pl",
+  "weightedGrader.pl"
+);
+
+
+install_weighted_grader();
+
+Context("InexactValueWithUnits");
+
+$m = random(1.10, 9.90, 0.01);
+$sigFigAns = 3;
+
+$random_molarity = random(0.01, 1.5, 0.01);
+$molarity = InexactValue($random_molarity, 3);
+
+
+$givenValue = InexactValue($m,$sigFigAns);
+$given = InexactValueWithUnits(InexactValue($givenValue), 'L');
+
+#Context()->flags->set('newUnit'=>[['molarity','M','moles/L', 'moles/Liter', 'mol/L']]);
+
+# using 0.6214 miles = 1 km
+$n1 = InexactValueWithUnits(InexactValue($molarity), 'mol'); 
+$d1 = InexactValueWithUnits(['1', 9**9**9], 'L'); # make this exact (infinite s.f., 9**9**9 is a shortcut for infinity)
+
+
+$answer = $given * $n1 / $d1;
+
+# To create a dimensional analysis problem, first put all of the expected answer blanks into the MultiAnswer section.
+# These need to be numerator, then denominator... in that pattern exactly.  You end it with a precalculated answer because
+# we expect students to fill in that blank, too.
+# Finally, instead of customizing your own MultiAnswer, call the asDimensionalAnalysis function and provide it the starting value for the 
+# actual dimensional analysis.  A second parameter will adjust how the scoring is done.
+
+$ma = MultiAnswer($n1,$d1,$answer)->asDimensionalAnalysis($given, {creditSigFigsGiven => 0.25,
+creditValueGiven   => 0.75,
+
+creditSigFigsFinal => 0.30,
+creditValueFinal   => 0.50,
+creditUnitsFinal   => 0.20,
+
+messageDigitsDiff => "Your numerical value is close, but check that you are using all the digits given in the problem.",
+messageDigitsDiffAns => "This problem specifies that the answer should be rounded to $sigFigAns significant figures."});
+
+# use the conversionEQ below by filling in the starting value, an array of the conversion factor blanks, then the final answer blank.
+
+$dimensionalAnalysisSolution = DimensionalAnalysis::generateExplanation([$given],[$n1,$d1],$answer);
+##############################################
+
+BEGIN_PGML
+##Using Molarity as a conversion factor
+
+*Given [`[$given]`] of a [$molarity] M solution, calculate the number of moles of solute in this solution.*
+
+The given value has been placed into the single line of dimensional analysis for you.  Place the molarity into the problem as a conversion factor. Remember that a number with a unit that has a numerator and denominator can be written as a conversion factor. For example, a 2.00 M HCl solution means that 2.00 moles = 1 L for this solution. 
+
+Round your answer to [$sigFigAns] significant digits.
+
+[#
+    [.[`[$given]`] .]
+    [.[`\times`].]
+
+    [.
+        [#
+            [.[_]{$ma}[<divided by>]{[
+                'span',
+                style => 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;'
+            ]}{['%', "\n"]}.]*{bottom => 1}
+            [.[_]{$ma} .]*
+        #]*
+    .]
+
+    [.[`=`].]
+    [.[_]{$ma}.]
+#]*{valign => 'middle'}
+
+END_PGML
+
+# This weights the final answer with X percentage and splits the rest among the conversion factors.
+my $finalAnswerWeight = 50;
+my $remain = 100-$finalAnswerWeight;
+my @ansArr = $ma->cmp();
+my $finalAns = pop @ansArr;
+for ($i=0; $i<scalar @ansArr; $i++){
+	WEIGHTED_ANS($ansArr[$i], $remain/(scalar @ansArr)); # sets weighting for dimensional analysis blanks
+}
+WEIGHTED_ANS($finalAns, $finalAnswerWeight); # sets weighting for final answer
+
+# Without weighting, you could simply use this:
+# ANS($ma->cmp);
+# each answer blank will be worth the same amount of points.
+
+##############################################
+
+
+BEGIN_PGML_HINT
+
+Molarity relates moles of solute to liters of solution:
+
+[```
+\mathrm{molarity}
+=
+\frac{\mathrm{moles\:of\:solute}}
+{\mathrm{liters\:of\:solution}}
+```]
+
+A solution with a molarity of [$molarity] M contains [$molarity] mol of solute in 1 L of solution.
+
+Write the molarity as a conversion factor. Arrange the conversion factor so that the unit **L** from the given volume cancels:
+
+[```
+\mathrm{L\:solution}
+\times
+\frac{\mathrm{mol\:solute}}
+{\mathrm{L\:solution}}
+```]
+
+After the liter units cancel, the remaining unit should be **mol**, which is the unit requested in the problem.
+
+To calculate the final value:
+
+1. Multiply the given volume by the number of moles in the numerator of the conversion factor.
+2. Divide by the number in the denominator.
+3. Include the unit **mol** in the final answer.
+4. Round the final answer to [$sigFigAns] significant figures.
+
+END_PGML_HINT
+##############################################
+
+BEGIN_PGML_SOLUTION
+
+[```[$dimensionalAnalysisSolution]```]
+
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
