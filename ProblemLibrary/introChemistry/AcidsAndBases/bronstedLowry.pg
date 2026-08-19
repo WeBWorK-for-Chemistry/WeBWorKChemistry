@@ -1,0 +1,344 @@
+## DBsubject(Chemistry)
+## DBchapter(Acids and Bases)
+## DBsection(Bronsted-Lowry Acids and Bases)
+## Institution(PCC)
+## Author(Stephanie Bryan)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Reaction pool
+#
+# The species listed in "species" is always a reactant in
+# the forward reaction.
+############################################################
+
+@reactions = (
+
+  ##########################################################
+  # Brønsted-Lowry acids
+  ##########################################################
+
+  {
+    species    => "HCl",
+    reaction   => "HCl + H_2O \longrightarrow H_3O^{+} + Cl^-",
+    role       => "acid",
+    behavior   => "donates H+",
+    conjugate  => "Cl^-",
+  },
+
+  {
+    species    => "NH_4^+",
+    reaction   => "NH_4^{+} + H_2O \rightleftharpoons NH_3 + H_3O^+",
+    role       => "acid",
+    behavior   => "donates H+",
+    conjugate  => "NH_3",
+  },
+
+  {
+    species    => "CH_3COOH",
+    reaction   => "CH_3COOH + H_2O \rightleftharpoons H_3O^+ + CH_3COO^-",
+    role       => "acid",
+    behavior   => "donates H+",
+    conjugate  => "CH_3COO^-",
+  },
+
+  {
+    species    => "H_2PO_4^-",
+    reaction   => "H_2PO_4^{-}  + H_2O \rightleftharpoons HPO_4^{2-} + H_3O^+",
+    role       => "acid",
+    behavior   => "donates H+",
+    conjugate  => "HPO_4^{2-}",
+  },
+
+  ##########################################################
+  # Brønsted-Lowry bases
+  ##########################################################
+
+  {
+    species    => "NH_3",
+    reaction   => "NH_3 + H_2O \rightleftharpoons NH_4^{+} + OH^-",
+    role       => "base",
+    behavior   => "accepts H+",
+    conjugate  => "NH_4^+",
+  },
+
+  {
+    species    => "CH_3COO^-",
+    reaction   => "CH_3COO^{-} + H_2O \rightleftharpoons CH_3COOH + OH^-",
+    role       => "base",
+    behavior   => "accepts H+",
+    conjugate  => "CH_3COOH",
+  },
+
+  {
+    species    => "CO_3^{2-}",
+    reaction   => "CO_3^{2-} + H_2O \rightleftharpoons HCO_3^{-} + OH^-",
+    role       => "base",
+    behavior   => "accepts H+",
+    conjugate  => "HCO_3^-",
+  },
+
+  {
+    species    => "HPO_4^{2-}",
+    reaction   => "HPO_4^{2-} + H_2O \rightleftharpoons H_2PO_4^{-} + OH^-",
+    role       => "base",
+    behavior   => "accepts H+",
+    conjugate  => "H_2PO_4^-",
+  },
+);
+
+############################################################
+# Separate acid and base pools
+############################################################
+
+@acidPool = (0, 1, 2, 3);
+@basePool = (4, 5, 6, 7);
+
+############################################################
+# Shuffle each pool without using sort
+############################################################
+
+for ($i = $#acidPool; $i > 0; $i--) {
+  $j = random(0, $i, 1);
+
+  $temporary    = $acidPool[$i];
+  $acidPool[$i] = $acidPool[$j];
+  $acidPool[$j] = $temporary;
+}
+
+for ($i = $#basePool; $i > 0; $i--) {
+  $j = random(0, $i, 1);
+
+  $temporary    = $basePool[$i];
+  $basePool[$i] = $basePool[$j];
+  $basePool[$j] = $temporary;
+}
+
+############################################################
+# Select either:
+#
+#   two acids and one base
+#
+# or:
+#
+#   one acid and two bases
+############################################################
+
+if (random(0, 1, 1) == 0) {
+  @selected = (
+    $acidPool[0],
+    $acidPool[1],
+    $basePool[0]
+  );
+}
+else {
+  @selected = (
+    $acidPool[0],
+    $basePool[0],
+    $basePool[1]
+  );
+}
+
+############################################################
+# Randomize the order of the three rows
+############################################################
+
+for ($i = $#selected; $i > 0; $i--) {
+  $j = random(0, $i, 1);
+
+  $temporary    = $selected[$i];
+  $selected[$i] = $selected[$j];
+  $selected[$j] = $temporary;
+}
+
+############################################################
+# Construct answer objects
+############################################################
+
+for ($i = 0; $i < 3; $i++) {
+
+  $pick = $selected[$i];
+
+  $species[$i]   = $reactions[$pick]{species};
+  $reaction[$i]  = $reactions[$pick]{reaction};
+  $role[$i]      = $reactions[$pick]{role};
+  $behavior[$i]  = $reactions[$pick]{behavior};
+  $conjugate[$i] = $reactions[$pick]{conjugate};
+
+  $rolePopUp[$i] = PopUp(
+    [
+      "?",
+      "acid",
+      "base"
+    ],
+    $role[$i]
+  );
+
+  $behaviorPopUp[$i] = PopUp(
+    [
+      "?",
+      "donates H+",
+      "accepts H+"
+    ],
+    $behavior[$i]
+  );
+}
+
+############################################################
+# Scalar variables for PGML
+############################################################
+
+$species1 = $species[0];
+$species2 = $species[1];
+$species3 = $species[2];
+
+$reaction1 = $reaction[0];
+$reaction2 = $reaction[1];
+$reaction3 = $reaction[2];
+
+$rolePopUp1 = $rolePopUp[0];
+$rolePopUp2 = $rolePopUp[1];
+$rolePopUp3 = $rolePopUp[2];
+
+$behaviorPopUp1 = $behaviorPopUp[0];
+$behaviorPopUp2 = $behaviorPopUp[1];
+$behaviorPopUp3 = $behaviorPopUp[2];
+
+############################################################
+# Display
+############################################################
+
+BEGIN_PGML
+
+## Brønsted–Lowry Acids and Bases
+
+A Brønsted–Lowry acid donates a proton, [`\mathrm{H^+}`].
+
+A Brønsted–Lowry base accepts a proton, [`\mathrm{H^+}`].
+
+For each reaction, classify the specified reactant based on what happens in the forward direction shown.
+
+[#
+[.Species to classify.]
+[.Reaction.]
+[.Classification.]
+[.Behavior.]*{headerrow => 1}
+
+[.[`\mathrm{[$species1]}`].]
+[.[`\mathrm{[$reaction1]}`].]
+[.[_]{$rolePopUp1}.]
+[.[_]{$behaviorPopUp1}.]*
+
+[.[`\mathrm{[$species2]}`].]
+[.[`\mathrm{[$reaction2]}`].]
+[.[_]{$rolePopUp2}.]
+[.[_]{$behaviorPopUp2}.]*
+
+[.[`\mathrm{[$species3]}`].]
+[.[`\mathrm{[$reaction3]}`].]
+[.[_]{$rolePopUp3}.]
+[.[_]{$behaviorPopUp3}.]*
+
+#]{align => '|c|l|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Answer checkers
+############################################################
+
+ANS($rolePopUp1->cmp());
+ANS($behaviorPopUp1->cmp());
+
+ANS($rolePopUp2->cmp());
+ANS($behaviorPopUp2->cmp());
+
+ANS($rolePopUp3->cmp());
+ANS($behaviorPopUp3->cmp());
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+Compare the specified reactant with the substance it becomes on the product side.
+
+If the species has one fewer hydrogen on the product side, it donated [`\mathrm{H^+}`] and is a Brønsted–Lowry acid.
+
+If the species has one more hydrogen on the product side, it accepted [`\mathrm{H^+}`] and is a Brønsted–Lowry base.
+
+Do not classify a substance only by whether its formula contains hydrogen. Follow the proton as it moves from a reactant to a product.
+
+END_PGML_HINT
+
+############################################################
+# Solution variables
+############################################################
+
+$solutionSpecies1 = $species[0];
+$solutionSpecies2 = $species[1];
+$solutionSpecies3 = $species[2];
+
+$solutionReaction1 = $reaction[0];
+$solutionReaction2 = $reaction[1];
+$solutionReaction3 = $reaction[2];
+
+$solutionRole1 = $role[0];
+$solutionRole2 = $role[1];
+$solutionRole3 = $role[2];
+
+$solutionBehavior1 = $behavior[0];
+$solutionBehavior2 = $behavior[1];
+$solutionBehavior3 = $behavior[2];
+
+$solutionConjugate1 = $conjugate[0];
+$solutionConjugate2 = $conjugate[1];
+$solutionConjugate3 = $conjugate[2];
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+A Brønsted–Lowry acid donates [`\mathrm{H^+}`], while a Brønsted–Lowry base accepts [`\mathrm{H^+}`].
+
+[#
+[.Species.]
+[.Reaction.]
+[.What the species does.]
+[.Classification.]*{headerrow => 1}
+
+[.[`\mathrm{[$solutionSpecies1]}`].]
+[.[`\mathrm{[$solutionReaction1]}`].]
+[.[$solutionBehavior1] and becomes [`\mathrm{[$solutionConjugate1]}`].]
+[.[$solutionRole1].]*
+
+[.[`\mathrm{[$solutionSpecies2]}`].]
+[.[`\mathrm{[$solutionReaction2]}`].]
+[.[$solutionBehavior2] and becomes [`\mathrm{[$solutionConjugate2]}`].]
+[.[$solutionRole2].]*
+
+[.[`\mathrm{[$solutionSpecies3]}`].]
+[.[`\mathrm{[$solutionReaction3]}`].]
+[.[$solutionBehavior3] and becomes [`\mathrm{[$solutionConjugate3]}`].]
+[.[$solutionRole3].]*
+
+#]{align => '|c|l|l|c|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
