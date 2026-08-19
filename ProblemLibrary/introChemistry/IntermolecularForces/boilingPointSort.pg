@@ -1,0 +1,284 @@
+## DBsubject(Chemistry)
+## DBchapter(Intermolecular Forces)
+## DBsection(Boiling Point)
+## Level()
+## KEYWORDS('intermolecular forces', 'boiling point', 'Lewis structures')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "draggableSubsets.pl",
+    "answerHints.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Image location
+#
+# Put the PNG files in:
+#   html/images/lewis_structures/
+#
+# Example:
+#   html/images/lewis_structures/lewis_HF.png
+############################################################
+
+$imageDir = "$htmlURL/images/lewis_structures";
+
+############################################################
+# Predefined boiling point comparison sets
+#
+# Each set should have one highest, one middle, and one lowest.
+# These are intentionally chosen to avoid messy borderline comparisons.
+############################################################
+
+@sets = (
+  [
+    {
+      formula      => "HF",
+      formulaHTML  => "HF",
+      image        => "lewis_HF.png",
+      alt          => "Lewis structure for hydrogen fluoride showing hydrogen single bonded to fluorine. Fluorine has three lone pairs.",
+      rank         => "highest",
+      reason       => "HF has hydrogen bonding, so it has the strongest intermolecular forces in this set.",
+    },
+    {
+      formula      => "HCl",
+      formulaHTML  => "HCl",
+      image        => "lewis_HCl.png",
+      alt          => "Lewis structure for hydrogen chloride showing hydrogen single bonded to chlorine. Chlorine has three lone pairs.",
+      rank         => "middle",
+      reason       => "HCl is polar, so it has dipole-dipole forces, but it does not have hydrogen bonding.",
+    },
+    {
+      formula      => "N_2",
+      formulaHTML  => "N<sub>2</sub>",
+      image        => "lewis_N2.png",
+      alt          => "Lewis structure for nitrogen gas showing two nitrogen atoms triple bonded to each other. Each nitrogen atom has one lone pair.",
+      rank         => "lowest",
+      reason       => "N2 is nonpolar, so its strongest intermolecular force is London dispersion forces.",
+    },
+  ],
+
+  [
+    {
+      formula      => "H_2O",
+      formulaHTML  => "H<sub>2</sub>O",
+      image        => "lewis_H2O.png",
+      alt          => "Lewis structure for water showing oxygen bonded to two hydrogen atoms with two lone pairs on the central oxygen atom.",
+      rank         => "highest",
+      reason       => "H2O has hydrogen bonding, so it has the strongest intermolecular forces in this set.",
+    },
+    {
+      formula      => "SO_2",
+      formulaHTML  => "SO<sub>2</sub>",
+      image        => "lewis_SO2.png",
+      alt          => "Lewis structure for sulfur dioxide showing sulfur bonded to two oxygen atoms with one lone pair on the central sulfur atom.",
+      rank         => "middle",
+      reason       => "SO2 is polar, so it has dipole-dipole forces, but it does not have hydrogen bonding.",
+    },
+    {
+      formula      => "N_2",
+      formulaHTML  => "N<sub>2</sub>",
+      image        => "lewis_N2.png",
+      alt          => "Lewis structure for nitrogen gas showing two nitrogen atoms triple bonded to each other. Each nitrogen atom has one lone pair.",
+      rank         => "lowest",
+      reason       => "N2 is nonpolar, so its strongest intermolecular force is London dispersion forces.",
+    },
+  ],
+
+  [
+    {
+      formula      => "NH_3",
+      formulaHTML  => "NH<sub>3</sub>",
+      image        => "lewis_NH3.png",
+      alt          => "Lewis structure for ammonia showing nitrogen bonded to three hydrogen atoms with one lone pair on the central nitrogen atom.",
+      rank         => "highest",
+      reason       => "NH3 has hydrogen bonding, so it has the strongest intermolecular forces in this set.",
+    },
+    {
+      formula      => "HCl",
+      formulaHTML  => "HCl",
+      image        => "lewis_HCl.png",
+      alt          => "Lewis structure for hydrogen chloride showing hydrogen single bonded to chlorine. Chlorine has three lone pairs.",
+      rank         => "middle",
+      reason       => "HCl is polar, so it has dipole-dipole forces, but it does not have hydrogen bonding.",
+    },
+    {
+      formula      => "Cl_2",
+      formulaHTML  => "Cl<sub>2</sub>",
+      image        => "lewis_Cl2.png",
+      alt          => "Lewis structure for chlorine gas showing two chlorine atoms single bonded to each other. Each chlorine atom has three lone pairs.",
+      rank         => "lowest",
+      reason       => "Cl2 is nonpolar, so its strongest intermolecular force is London dispersion forces.",
+    },
+  ],
+);
+
+############################################################
+# Choose one set and randomize display order
+############################################################
+
+$setIndex = random(0, scalar(@sets) - 1, 1);
+
+@selected = @{ $sets[$setIndex] };
+
+# Randomize order of draggable items
+@selected = random_subset(3, @selected);
+
+############################################################
+# Build draggable image tiles
+############################################################
+
+@items = ();
+
+for my $i (0..$#selected) {
+  my $image = $selected[$i]->{image};
+  my $alt   = $selected[$i]->{alt};
+  my $label = $selected[$i]->{formulaHTML};
+
+  # Avoid breaking the alt attribute if the alt text contains apostrophes.
+  $alt =~ s/'/&#39;/g;
+
+  my $img = image(
+    "$image",
+    width => 120,
+    tex_size => 600,
+    extra_html_tags => "alt='$alt'"
+  );
+
+  my $tile = qq{
+    <div style="text-align:center; min-width:130px;">
+      $img
+    </div>
+  };
+
+  push(@items, $tile);
+}
+
+############################################################
+# Correct subset indices
+#
+# Bucket order:
+#   0 = Molecules
+#   1 = Highest boiling point
+#   2 = Middle boiling point
+#   3 = Lowest boiling point
+############################################################
+
+@highest_indices = grep { $selected[$_]{rank} eq "highest" } 0..$#selected;
+@middle_indices  = grep { $selected[$_]{rank} eq "middle"  } 0..$#selected;
+@lowest_indices  = grep { $selected[$_]{rank} eq "lowest"  } 0..$#selected;
+
+$draggable = DraggableSubsets(
+  ~~@items ,
+
+  [
+    ~~@highest_indices,
+    ~~@middle_indices,
+    ~~@lowest_indices,
+  ],
+
+  DefaultSubsets => [
+    {
+      label     => 'Highest boiling point',
+      indices   => [],
+      removable => 0,
+    },
+    {
+      label     => 'Middle boiling point',
+      indices   => [],
+      removable => 0,
+    },
+    {
+      label     => 'Lowest boiling point',
+      indices   => [],
+      removable => 0,
+    },
+  ],
+
+  OrderedSubsets     => 1,
+  AllowNewBuckets    => 0,
+  ShowUniversalSet   => 1,
+  UniversalSetLabel  => 'Molecules',
+  ResetButtonText    => 'Reset',
+);
+
+############################################################
+# Problem text
+############################################################
+
+BEGIN_PGML
+
+## Boiling Point and Intermolecular Forces
+
+Drag each Lewis structure into the box that describes its relative boiling point.
+
+Use intermolecular forces to compare the molecules.
+
+[_]{$draggable}
+
+END_PGML
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+First identify the strongest intermolecular force for each molecule.
+
+Use these rules:
+
+If the molecule has H directly bonded to N, O, or F, it can have hydrogen bonding.
+
+If the molecule is polar but does not have H directly bonded to N, O, or F, its strongest intermolecular force is dipole-dipole forces.
+
+If the molecule is nonpolar, its strongest intermolecular force is London dispersion forces.
+
+For this problem, stronger intermolecular forces generally mean a higher boiling point.
+
+Hydrogen bonding usually gives the highest boiling point.
+
+Dipole-dipole forces are usually in the middle.
+
+London dispersion forces are usually the weakest for the small molecules in this problem.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The correct order is:
+
+[#
+[.Boiling point rank.]
+[.Molecule.]
+[.Reason.]*{ headerrow => 1 }
+
+[.Highest boiling point.]
+[.[``\mathrm{[$selected[$highest_indices[0]]{formula}]}``].]
+[.[$selected[$highest_indices[0]]{reason}].]*
+
+[.Middle boiling point.]
+[.[``\mathrm{[$selected[$middle_indices[0]]{formula}]}``].]
+[.[$selected[$middle_indices[0]]{reason}].]*
+
+[.Lowest boiling point.]
+[.[``\mathrm{[$selected[$lowest_indices[0]]{formula}]}``].]
+[.[$selected[$lowest_indices[0]]{reason}].]*
+
+#]{align => '|c|c|l|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

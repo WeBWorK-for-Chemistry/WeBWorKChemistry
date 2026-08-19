@@ -1,0 +1,382 @@
+## DBsubject(Chemistry)
+## DBchapter(Intermolecular Forces)
+## DBsection(Boiling Point)
+## Level()
+## KEYWORDS('intermolecular forces', 'boiling point', 'London dispersion forces', 'nonpolar molecules')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Predefined boiling point comparison sets
+#
+# Each set has one highest, one middle, and one lowest.
+#
+# These examples focus on nonpolar substances.
+#
+# Main idea:
+#   larger particle / more electrons / greater polarizability
+#   -> stronger London dispersion forces
+#   -> higher boiling point
+############################################################
+
+@sets = (
+  [
+    {
+      formula      => "I_2",
+      formulaHTML  => "I<sub>2</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "I2 is the largest molecule in this set and has the most electrons, so it has the strongest London dispersion forces and the highest boiling point.",
+    },
+    {
+      formula      => "Br_2",
+      formulaHTML  => "Br<sub>2</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "Br2 is larger than Cl2 but smaller than I2, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "Cl_2",
+      formulaHTML  => "Cl<sub>2</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "Cl2 is the smallest molecule in this set and has the weakest London dispersion forces, so it has the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "Br_2",
+      formulaHTML  => "Br<sub>2</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "Br2 is larger than Cl2 and F2, so it has the strongest London dispersion forces and the highest boiling point.",
+    },
+    {
+      formula      => "Cl_2",
+      formulaHTML  => "Cl<sub>2</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "Cl2 is larger than F2 but smaller than Br2, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "F_2",
+      formulaHTML  => "F<sub>2</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "F2 is the smallest molecule in this set and has the weakest London dispersion forces, so it has the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "Xe",
+      formulaHTML  => "Xe",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "Xe is the largest atom in this set and has the most electrons, so it has the strongest London dispersion forces and the highest boiling point.",
+    },
+    {
+      formula      => "Kr",
+      formulaHTML  => "Kr",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "Kr is larger than Ar but smaller than Xe, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "Ar",
+      formulaHTML  => "Ar",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "Ar is the smallest atom in this set and has the weakest London dispersion forces, so it has the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "Kr",
+      formulaHTML  => "Kr",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "Kr is the largest atom in this set and has the strongest London dispersion forces, so it has the highest boiling point.",
+    },
+    {
+      formula      => "Ar",
+      formulaHTML  => "Ar",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "Ar is larger than Ne but smaller than Kr, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "Ne",
+      formulaHTML  => "Ne",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "Ne is the smallest atom in this set and has the weakest London dispersion forces, so it has the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "CBr_4",
+      formulaHTML  => "CBr<sub>4</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "CBr4 is the largest molecule in this set and has the most electrons, so it has the strongest London dispersion forces and the highest boiling point.",
+    },
+    {
+      formula      => "CCl_4",
+      formulaHTML  => "CCl<sub>4</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "CCl4 is larger than CF4 but smaller than CBr4, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "CF_4",
+      formulaHTML  => "CF<sub>4</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "CF4 is the smallest molecule in this set and has the weakest London dispersion forces, so it has the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "CS_2",
+      formulaHTML  => "CS<sub>2</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "CS2 is larger and has more electrons than CO2 and N2, so it has the strongest London dispersion forces in this set.",
+    },
+    {
+      formula      => "CO_2",
+      formulaHTML  => "CO<sub>2</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "CO2 is larger and has more electrons than N2, but smaller than CS2, so its London dispersion forces are in the middle.",
+    },
+    {
+      formula      => "N_2",
+      formulaHTML  => "N<sub>2</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "N2 is the smallest molecule in this set and has the weakest London dispersion forces, so it has the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "SiH_4",
+      formulaHTML  => "SiH<sub>4</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "SiH4 is larger and has more electrons than CH4 and Ne, so it has the strongest London dispersion forces in this set.",
+    },
+    {
+      formula      => "CH_4",
+      formulaHTML  => "CH<sub>4</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "CH4 is larger than Ne but smaller than SiH4, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "Ne",
+      formulaHTML  => "Ne",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "Ne is the smallest particle in this set and has the weakest London dispersion forces, so it has the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "C_4H_10",
+      formulaHTML  => "C<sub>4</sub>H<sub>10</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "C4H10 is the largest hydrocarbon in this set, so it has the strongest London dispersion forces and the highest boiling point.",
+    },
+    {
+      formula      => "C_3H_8",
+      formulaHTML  => "C<sub>3</sub>H<sub>8</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "C3H8 is larger than C2H6 but smaller than C4H10, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "C_2H_6",
+      formulaHTML  => "C<sub>2</sub>H<sub>6</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "C2H6 is the smallest hydrocarbon in this set, so it has the weakest London dispersion forces and the lowest boiling point.",
+    },
+  ],
+
+  [
+    {
+      formula      => "C_4H_10",
+      formulaHTML  => "C<sub>4</sub>H<sub>10</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest boiling point",
+      reason       => "C4H10 is the largest hydrocarbon in this set, so it has the strongest London dispersion forces and the highest boiling point.",
+    },
+    {
+      formula      => "C_2H_6",
+      formulaHTML  => "C<sub>2</sub>H<sub>6</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle boiling point",
+      reason       => "C2H6 is larger than CH4 but smaller than C4H10, so its London dispersion forces are in the middle for this set.",
+    },
+    {
+      formula      => "CH_4",
+      formulaHTML  => "CH<sub>4</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest boiling point",
+      reason       => "CH4 is the smallest hydrocarbon in this set, so it has the weakest London dispersion forces and the lowest boiling point.",
+    },
+  ],
+);
+
+############################################################
+# Choose one set and randomize display order
+############################################################
+
+$setIndex = random(0, scalar(@sets) - 1, 1);
+
+@selected = @{ $sets[$setIndex] };
+
+# Randomize display order
+@selected = random_subset(3, @selected);
+
+############################################################
+# Dropdown menus
+############################################################
+
+@rankOptions = (
+  "1 - highest boiling point",
+  "2 - middle boiling point",
+  "3 - lowest boiling point",
+);
+
+@rankMenus = map {
+  PopUp(
+    ["", @rankOptions],
+    $_->{rankNumber}
+  )
+} @selected;
+
+############################################################
+# Find indices for solution table
+############################################################
+
+@highest_indices = grep { $selected[$_]->{rank} eq "highest" } 0..$#selected;
+@middle_indices  = grep { $selected[$_]->{rank} eq "middle"  } 0..$#selected;
+@lowest_indices  = grep { $selected[$_]->{rank} eq "lowest"  } 0..$#selected;
+
+############################################################
+# Problem text
+############################################################
+
+BEGIN_PGML
+
+## Boiling Point Ranking: Nonpolar Substances
+
+The substances shown are nonpolar. Their strongest intermolecular force is London dispersion forces.
+
+Use molecular size, number of electrons, and polarizability to rank the boiling points of the substances shown.
+
+For each substance, choose the correct boiling point rank.
+
+[`1`] = highest boiling point
+
+[`2`] = middle boiling point
+
+[`3`] = lowest boiling point
+
+[#
+[.Substance.]
+[.Boiling point rank.]*{ headerrow => 1 }
+
+[.[`\mathrm{[$selected[0]->{formula}]}`].]
+[.[_]{$rankMenus[0]}.]*
+
+[.[`\mathrm{[$selected[1]->{formula}]}`].]
+[.[_]{$rankMenus[1]}.]*
+
+[.[`\mathrm{[$selected[2]->{formula}]}`].]
+[.[_]{$rankMenus[2]}.]*
+
+#]{align => '|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Answer checkers
+############################################################
+
+for my $i (0..$#selected) {
+  ANS($rankMenus[$i]->cmp());
+}
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+All of the substances in this problem are nonpolar, so their strongest intermolecular force is London dispersion forces.
+
+London dispersion forces get stronger when particles have more electrons and larger, more polarizable electron clouds.
+
+For similar nonpolar substances:
+
+larger particle size usually means stronger London dispersion forces.
+
+stronger London dispersion forces usually means a higher boiling point.
+
+So, rank the substances from largest particle or most electrons to smallest particle or fewest electrons.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The correct order is:
+
+[#
+[.Boiling point rank.]
+[.Substance.]
+[.Reason.]*{ headerrow => 1 }
+
+[.1 - highest boiling point.]
+[.[``\mathrm{[$selected[$highest_indices[0]]->{formula}]}``].]
+[.[$selected[$highest_indices[0]]->{reason}].]*
+
+[.2 - middle boiling point.]
+[.[``\mathrm{[$selected[$middle_indices[0]]->{formula}]}``].]
+[.[$selected[$middle_indices[0]]->{reason}].]*
+
+[.3 - lowest boiling point.]
+[.[``\mathrm{[$selected[$lowest_indices[0]]->{formula}]}``].]
+[.[$selected[$lowest_indices[0]]->{reason}].]*
+
+#]{align => '|c|c|l|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

@@ -1,0 +1,283 @@
+## DBsubject(Chemistry)
+## DBchapter(Intermolecular Forces)
+## DBsection(Melting Point)
+## Level()
+## KEYWORDS('intermolecular forces', 'melting point', 'ionic compounds', 'molecular compounds')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Predefined melting point comparison sets
+#
+# Each set has one highest, one middle, and one lowest.
+#
+# These are intentionally chosen to emphasize:
+#
+# ionic solid > polar molecular / hydrogen bonding > small nonpolar molecular
+#
+# The ranking is for the specific substances in each set.
+############################################################
+
+@sets = (
+  [
+    {
+      formula      => "NaCl",
+      formulaHTML  => "NaCl",
+      rank         => "highest",
+      rankNumber   => "1 - highest melting point",
+      reason       => "NaCl is an ionic compound. Ionic compounds usually have much higher melting points than covalent compounds.",
+    },
+    {
+      formula      => "H_2O",
+      formulaHTML  => "H<sub>2</sub>O",
+      rank         => "middle",
+      rankNumber   => "2 - middle melting point",
+      reason       => "H2O is a molecular compound with hydrogen bonding, so it has a higher melting point than nonpolar molecules.",
+    },
+    {
+      formula      => "N_2",
+      formulaHTML  => "N<sub>2</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest melting point",
+      reason       => "N2 is a nonpolar molecule, so it only has London dispersion forces and has the lowest melting point in this set.",
+    },
+  ],
+
+  [
+    {
+      formula      => "MgO",
+      formulaHTML  => "MgO",
+      rank         => "highest",
+      rankNumber   => "1 - highest melting point",
+      reason       => "MgO is an ionic compound with strongly attracted ions, so it has the highest melting point in this set.",
+    },
+    {
+      formula      => "NH_3",
+      formulaHTML  => "NH<sub>3</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle melting point",
+      reason       => "NH3 is a molecular compound with hydrogen bonding, so it has a higher melting point than nonpolar molecules.",
+    },
+    {
+      formula      => "CH_4",
+      formulaHTML  => "CH<sub>4</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest melting point",
+      reason       => "CH4 is a nonpolar molecule, so it only has London dispersion forces and has the lowest melting point in this set.",
+    },
+  ],
+
+  [
+    {
+      formula      => "CaCl_2",
+      formulaHTML  => "CaCl<sub>2</sub>",
+      rank         => "highest",
+      rankNumber   => "1 - highest melting point",
+      reason       => "CaCl2 is an ionic compound. Ionic compounds usually have much higher melting points than molecular compounds.",
+    },
+    {
+      formula      => "HF",
+      formulaHTML  => "HF",
+      rank         => "middle",
+      rankNumber   => "2 - middle melting point",
+      reason       => "HF is a molecular compound with hydrogen bonding, so it has a higher melting point than nonpolar molecules.",
+    },
+    {
+      formula      => "Cl_2",
+      formulaHTML  => "Cl<sub>2</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest melting point",
+      reason       => "Cl2 is a nonpolar molecular substance, so its strongest intermolecular force is London dispersion forces.",
+    },
+  ],
+
+  [
+    {
+      formula      => "LiF",
+      formulaHTML  => "LiF",
+      rank         => "highest",
+      rankNumber   => "1 - highest melting point",
+      reason       => "LiF is an ionic compound. Ionic compounds usually have high melting points because ions are held together by strong electrostatic attractions.",
+    },
+    {
+      formula      => "HCl",
+      formulaHTML  => "HCl",
+      rank         => "middle",
+      rankNumber   => "2 - middle melting point",
+      reason       => "HCl is a polar molecular compound, so it has dipole-dipole forces as well as London dispersion forces.",
+    },
+    {
+      formula      => "CO_2",
+      formulaHTML  => "CO<sub>2</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest melting point",
+      reason       => "CO2 is nonpolar, so its strongest intermolecular force is London dispersion forces.",
+    },
+  ],
+
+  [
+    {
+      formula      => "KBr",
+      formulaHTML  => "KBr",
+      rank         => "highest",
+      rankNumber   => "1 - highest melting point",
+      reason       => "KBr is an ionic compound. Ionic compounds usually have much higher melting points than molecular compounds.",
+    },
+    {
+      formula      => "SO_2",
+      formulaHTML  => "SO<sub>2</sub>",
+      rank         => "middle",
+      rankNumber   => "2 - middle melting point",
+      reason       => "SO2 is a polar molecular compound, so it has dipole-dipole forces as well as London dispersion forces.",
+    },
+    {
+      formula      => "CS_2",
+      formulaHTML  => "CS<sub>2</sub>",
+      rank         => "lowest",
+      rankNumber   => "3 - lowest melting point",
+      reason       => "CS2 is nonpolar, so its strongest intermolecular force is London dispersion forces.",
+    },
+  ],
+);
+
+############################################################
+# Choose one set and randomize display order
+############################################################
+
+$setIndex = random(0, scalar(@sets) - 1, 1);
+
+@selected = @{ $sets[$setIndex] };
+
+# Randomize display order
+@selected = random_subset(3, @selected);
+
+############################################################
+# Dropdown menus
+############################################################
+
+@rankOptions = (
+  "1 - highest melting point",
+  "2 - middle melting point",
+  "3 - lowest melting point",
+);
+
+@rankMenus = map {
+  PopUp(
+    ["", @rankOptions],
+    $_->{rankNumber}
+  )
+} @selected;
+
+############################################################
+# Find indices for solution table
+############################################################
+
+@highest_indices = grep { $selected[$_]->{rank} eq "highest" } 0..$#selected;
+@middle_indices  = grep { $selected[$_]->{rank} eq "middle"  } 0..$#selected;
+@lowest_indices  = grep { $selected[$_]->{rank} eq "lowest"  } 0..$#selected;
+
+############################################################
+# Problem text
+############################################################
+
+BEGIN_PGML
+
+## Melting Point Ranking
+
+Use the type of compound and the strength of the attractive forces between particles to rank the melting points of the substances shown.
+
+For each compound, choose the correct melting point rank.
+
+[`1`] = highest melting point
+
+[`2`] = middle melting point
+
+[`3`] = lowest melting point
+
+[#
+[.Compound.]
+[.Melting point rank.]*{ headerrow => 1 }
+
+[.[`\mathrm{[$selected[0]->{formula}]}`].]
+[.[_]{$rankMenus[0]}.]*
+
+[.[`\mathrm{[$selected[1]->{formula}]}`].]
+[.[_]{$rankMenus[1]}.]*
+
+[.[`\mathrm{[$selected[2]->{formula}]}`].]
+[.[_]{$rankMenus[2]}.]*
+
+#]{align => '|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Answer checkers
+############################################################
+
+for my $i (0..$#selected) {
+  ANS($rankMenus[$i]->cmp());
+}
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+First decide whether each substance is ionic or molecular.
+
+Ionic compounds usually have high melting points because the ions are held together by strong electrostatic attractions.
+
+For molecular substances, compare the strongest intermolecular forces.
+
+Hydrogen bonding is usually stronger than dipole-dipole forces.
+
+Dipole-dipole forces are usually stronger than London dispersion forces for small molecules.
+
+Small nonpolar molecules usually have low melting points because their strongest intermolecular force is London dispersion forces.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The correct order is:
+
+[#
+[.Melting point rank.]
+[.Compound.]
+[.Reason.]*{ headerrow => 1 }
+
+[.1 - highest melting point.]
+[.[``\mathrm{[$selected[$highest_indices[0]]->{formula}]}``].]
+[.[$selected[$highest_indices[0]]->{reason}].]*
+
+[.2 - middle melting point.]
+[.[``\mathrm{[$selected[$middle_indices[0]]->{formula}]}``].]
+[.[$selected[$middle_indices[0]]->{reason}].]*
+
+[.3 - lowest melting point.]
+[.[``\mathrm{[$selected[$lowest_indices[0]]->{formula}]}``].]
+[.[$selected[$lowest_indices[0]]->{reason}].]*
+
+#]{align => '|c|c|l|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

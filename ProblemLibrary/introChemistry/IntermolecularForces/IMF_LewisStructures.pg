@@ -1,0 +1,329 @@
+## DBsubject(Chemistry)
+## DBchapter(Chemical Bonding)
+## DBsection(VSEPR)
+## Level()
+## KEYWORDS('VSEPR', 'electron geometry', 'molecular geometry', 'Lewis structure')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "PGcourse.pl",
+);
+
+TEXT(beginproblem());
+
+
+############################################################
+# Lewis structure image bank
+#
+# The alt text should describe the Lewis structure itself,
+# not simply repeat the molecule name.
+############################################################
+
+@h_bond = (
+  {
+    formula      => "HF",
+    formulaPlain => "HF",
+    image        => "lewis_HF.png",
+    alt          => "Lewis structure for hydrogen fluoride showing hydrogen single bonded to fluorine. Fluorine has three lone pairs.",
+    polarity     => "polar",
+    IMF          => "hydrogen bonding",
+  },
+  {
+    formula      => "H_2O",
+    formulaPlain => "H2O",
+    image        => "lewis_H2O.png",
+    alt          => "Lewis structure for water showing oxygen bonded to two hydrogen atoms with two lone pairs on the central oxygen atom.",
+    polarity     => "polar",
+    IMF          => "hydrogen bonding",
+  },
+  {
+    formula      => "NH_3",
+    formulaPlain => "NH3",
+    image        => "lewis_NH3.png",
+    alt          => "Lewis structure for ammonia showing nitrogen bonded to three hydrogen atoms with one lone pair on the central nitrogen atom.",
+    polarity     => "polar",
+    IMF          => "hydrogen bonding",
+  },
+);
+
+@dipole_dipole = (
+  {
+    formula      => "HCl",
+    formulaPlain => "HCl",
+    image        => "lewis_HCl.png",
+    alt          => "Lewis structure for hydrogen chloride showing hydrogen single bonded to chlorine. Chlorine has three lone pairs.",
+    polarity     => "polar",
+    IMF          => "dipole-dipole forces",
+  },
+  {
+    formula      => "OF_2",
+    formulaPlain => "OF2",
+    image        => "lewis_OF2.png",
+    alt          => "Lewis structure for oxygen difluoride showing oxygen bonded to two fluorine atoms with two lone pairs on the central oxygen atom. Each fluorine atom has three lone pairs.",
+    polarity     => "polar",
+    IMF          => "dipole-dipole forces",
+  },
+  {
+    formula      => "PF_3",
+    formulaPlain => "PF3",
+    image        => "lewis_PF3.png",
+    alt          => "Lewis structure for phosphorus trifluoride showing phosphorus bonded to three fluorine atoms with one lone pair on the central phosphorus atom. Each fluorine atom has three lone pairs.",
+    polarity     => "polar",
+    IMF          => "dipole-dipole forces",
+  },
+  {
+    formula      => "SO_2",
+    formulaPlain => "SO2",
+    image        => "lewis_SO2.png",
+    alt          => "Lewis structure for sulfur dioxide showing sulfur bonded to two oxygen atoms with one lone pair on the central sulfur atom.",
+    polarity     => "polar",
+    IMF          => "dipole-dipole forces",
+  },
+  {
+    formula      => "O_3",
+    formulaPlain => "O3",
+    image        => "lewis_O3.png",
+    alt          => "Lewis structure for ozone showing a central oxygen atom bonded to two other oxygen atoms with one lone pair on the central oxygen atom.",
+    polarity     => "polar",
+    IMF          => "dipole-dipole forces",
+  },
+);
+
+@ldf = (
+  {
+    formula      => "Cl_2",
+    formulaPlain => "Cl2",
+    image        => "lewis_Cl2.png",
+    alt          => "Lewis structure for chlorine gas showing two chlorine atoms single bonded to each other. Each chlorine atom has three lone pairs.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+  {
+    formula      => "N_2",
+    formulaPlain => "N2",
+    image        => "lewis_N2.png",
+    alt          => "Lewis structure for nitrogen gas showing two nitrogen atoms triple bonded to each other. Each nitrogen atom has one lone pair.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+  {
+    formula      => "CH_4",
+    formulaPlain => "CH4",
+    image        => "lewis_CH4.png",
+    alt          => "Lewis structure for methane showing carbon bonded to four hydrogen atoms with no lone pairs on the central carbon atom.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+  {
+    formula      => "CF_4",
+    formulaPlain => "CF4",
+    image        => "lewis_CF4.png",
+    alt          => "Lewis structure for carbon tetrafluoride showing carbon bonded to four fluorine atoms with no lone pairs on the central carbon atom. Each fluorine atom has three lone pairs.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+  {
+    formula      => "CO_2",
+    formulaPlain => "CO2",
+    image        => "lewis_CO2.png",
+    alt          => "Lewis structure for carbon dioxide showing carbon double bonded to two oxygen atoms with no lone pairs on the central carbon atom. Each oxygen atom has two lone pairs.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+  {
+    formula      => "CS_2",
+    formulaPlain => "CS2",
+    image        => "lewis_CS2.png",
+    alt          => "Lewis structure for carbon disulfide showing carbon double bonded to two sulfur atoms with no lone pairs on the central carbon atom. Each sulfur atom has two lone pairs.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+  {
+    formula      => "BF_3",
+    formulaPlain => "BF3",
+    image        => "lewis_BF3.png",
+    alt          => "Lewis structure for boron trifluoride showing boron bonded to three fluorine atoms with no lone pairs on the central boron atom. Each fluorine atom has three lone pairs.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+  {
+    formula      => "SO_3",
+    formulaPlain => "SO3",
+    image        => "lewis_SO3.png",
+    alt          => "Lewis structure for sulfur trioxide showing sulfur bonded to three oxygen atoms with no lone pairs on the central sulfur atom.",
+    polarity     => "nonpolar",
+    IMF          => "London dispersion forces",
+  },
+);
+############################################################
+# Randomize so each student gets at least one from each group
+############################################################
+
+@structures = (
+  random_subset(1, @h_bond),
+  random_subset(2, @dipole_dipole),
+  random_subset(2, @ldf),
+);
+
+@structures = random_subset(5, @structures);
+############################################################
+# Dropdown options
+############################################################
+
+@polarityOptions = (
+  "polar",
+  "nonpolar",
+);
+
+@IMFoptions = (
+  "hydrogen bonding",
+  "dipole-dipole forces",
+  "London dispersion forces",
+);
+
+@polarityMenus = map {
+  PopUp(
+    ["", @polarityOptions],
+    $_->{polarity}
+  )
+} @structures;
+
+@IMFmenus = map {
+  PopUp(
+    ["", @IMFoptions],
+    $_->{IMF}
+  )
+} @structures;
+############################################################
+# Problem text
+############################################################
+
+BEGIN_PGML
+
+## Polarity and Intermolecular Forces
+
+For each Lewis structure, categorize the molecule as polar or nonpolar. Then specifiy the strongest intermolecular force that would occur between molecules in a pure sample of this compound.
+
+[#
+[.Molecule.]
+[.Lewis structure.]
+[.Polar or nonpolar?.]
+[.Strongest intermolecular force.]*{ headerrow => 1 }
+
+[.[``\mathrm{[$structures[0]{formula}]}``].]
+[.[@ image( "$structures[0]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[0]->{alt}'"  )@]*.]
+[.[_]{$polarityMenus[0]}.]
+[.[_]{$IMFmenus[0]}.]*
+
+[.[``\mathrm{[$structures[1]{formula}]}``].]
+[.[@ image( "$structures[1]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[1]->{alt}'"  )@]*.]
+[.[_]{$polarityMenus[1]}.]
+[.[_]{$IMFmenus[1]}.]*
+
+[.[``\mathrm{[$structures[2]{formula}]}``].]
+[.[@ image( "$structures[2]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[2]->{alt}'"  )@]*.]
+[.[_]{$polarityMenus[2]}.]
+[.[_]{$IMFmenus[2]}.]*
+
+[.[``\mathrm{[$structures[3]{formula}]}``].]
+[.[@ image( "$structures[3]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[3]->{alt}'"  )@]*.]
+[.[_]{$polarityMenus[3]}.]
+[.[_]{$IMFmenus[3]}.]*
+
+[.[``\mathrm{[$structures[4]{formula}]}``].]
+[.[@ image( "$structures[4]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[4]->{alt}'"  )@]*.]
+[.[_]{$polarityMenus[4]}.]
+[.[_]{$IMFmenus[4]}.]*
+
+#]{align => '|c|c|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Answer checkers
+############################################################
+
+for my $i (0..4) {
+  ANS($polarityMenus[$i]->cmp());
+  ANS($IMFmenus[$i]->cmp());
+}
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+First decide whether the molecule is polar or nonpolar.
+
+A molecule is usually *nonpolar* if either:
+
+* all of the bonds are nonpolar, or
+* the molecule has polar bonds arranged symmetrically so the bond dipoles cancel.
+
+A molecule is *polar* if it has polar bonds and the bond dipoles do not cancel.
+
+After deciding whether the molecule is polar or nonpolar, choose the strongest intermolecular force.
+
+Use these rules:
+
+1. If the molecule has H directly bonded to N, O, or F, its strongest intermolecular force is hydrogen bonding.
+
+2. If the molecule is polar but does not have H directly bonded to N, O, or F, its strongest intermolecular force is dipole-dipole forces.
+
+3. If the molecule is nonpolar, its strongest intermolecular force is London dispersion forces.
+
+Remember that all molecules have London dispersion forces, but this question asks for the strongest intermolecular force.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The correct classifications are:
+
+[#
+[.Molecule.]
+[.Polar or nonpolar?.]
+[.Strongest intermolecular force.]*{ headerrow => 1 }
+
+[.[``\mathrm{[$structures[0]{formula}]}``].]
+[.[$structures[0]{polarity}].]
+[.[$structures[0]{IMF}].]*
+
+[.[``\mathrm{[$structures[1]{formula}]}``].]
+[.[$structures[1]{polarity}].]
+[.[$structures[1]{IMF}].]*
+
+[.[``\mathrm{[$structures[2]{formula}]}``].]
+[.[$structures[2]{polarity}].]
+[.[$structures[2]{IMF}].]*
+
+[.[``\mathrm{[$structures[3]{formula}]}``].]
+[.[$structures[3]{polarity}].]
+[.[$structures[3]{IMF}].]*
+
+[.[``\mathrm{[$structures[4]{formula}]}``].]
+[.[$structures[4]{polarity}].]
+[.[$structures[4]{IMF}].]*
+
+#]{align => '|c|c|c|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
