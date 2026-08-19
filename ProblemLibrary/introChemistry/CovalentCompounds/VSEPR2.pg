@@ -1,0 +1,302 @@
+## DBsubject(Chemistry)
+## DBchapter(Chemical Bonding)
+## DBsection(VSEPR)
+## Level()
+## KEYWORDS('VSEPR', 'electron geometry', 'molecular geometry', 'Lewis structure')
+## Author('Stephanie Bryan')
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "PGML.pl",
+  "parserPopUp.pl",
+  "PGcourse.pl",
+);
+
+TEXT(beginproblem());
+
+
+############################################################
+# Lewis structure image bank
+#
+# The alt text should describe the Lewis structure itself,
+# not simply repeat the molecule name.
+############################################################
+
+@tetrahedral = (
+  {
+    formula      => "CH_4",
+    formulaPlain => "CH4",
+    image        => "lewis_CH4.png",
+    alt          => "Lewis structure for methane showing carbon bonded to four hydrogen atoms with no lone pairs on the central carbon atom.",
+    EG           => "tetrahedral",
+    MG           => "tetrahedral",
+  },
+  {
+    formula      => "CF_4",
+    formulaPlain => "CF4",
+    image        => "lewis_CF4.png",
+    alt          => "Lewis structure for carbon tetrafluoride showing carbon bonded to four fluorine atoms with no lone pairs on the central carbon atom. Each fluorine atom has three lone pairs.",
+    EG           => "tetrahedral",
+    MG           => "tetrahedral",
+  },
+);
+
+@trigonal_pyramid = (
+  {
+    formula      => "NH_3",
+    formulaPlain => "NH3",
+    image        => "lewis_NH3.png",
+    alt          => "Lewis structure for ammonia showing nitrogen bonded to three hydrogen atoms with one lone pair on the central nitrogen atom.",
+    EG           => "tetrahedral",
+    MG           => "trigonal pyramid",
+  },
+  {
+    formula      => "PF_3",
+    formulaPlain => "PF3",
+    image        => "lewis_PF3.png",
+    alt          => "Lewis structure for phosphorus trifluoride showing phosphorus bonded to three fluorine atoms with one lone pair on the central phosphorus atom. Each fluorine atom has three lone pairs.",
+    EG           => "tetrahedral",
+    MG           => "trigonal pyramid",
+  },
+);
+
+@bent_104 = (
+  {
+    formula      => "H_2O",
+    formulaPlain => "H2O",
+    image        => "lewis_H2O.png",
+    alt          => "Lewis structure for water showing oxygen bonded to two hydrogen atoms with two lone pairs on the central oxygen atom.",
+    EG           => "tetrahedral",
+    MG           => "bent",
+  },
+  {
+    formula      => "OF_2",
+    formulaPlain => "OF2",
+    image        => "lewis_OF2.png",
+    alt          => "Lewis structure for oxygen difluoride showing oxygen bonded to two fluorine atoms with two lone pairs on the central oxygen atom. Each fluorine atom has three lone pairs.",
+    EG           => "tetrahedral",
+    MG           => "bent",
+  },
+);
+
+@linear = (
+  {
+    formula      => "CO_2",
+    formulaPlain => "CO2",
+    image        => "lewis_CO2.png",
+    alt          => "Lewis structure for carbon dioxide showing carbon double bonded to two oxygen atoms with no lone pairs on the central carbon atom. Each oxygen atom has two lone pairs.",
+    EG           => "linear",
+    MG           => "linear",
+  },
+  {
+    formula      => "CS_2",
+    formulaPlain => "CS2",
+    image        => "lewis_CS2.png",
+    alt          => "Lewis structure for carbon disulfide showing carbon double bonded to two sulfur atoms with no lone pairs on the central carbon atom. Each sulfur atom has two lone pairs.",
+    EG           => "linear",
+    MG           => "linear",
+  },
+);
+
+@trigonal_planar = (
+  {
+    formula      => "SO_3",
+    formulaPlain => "SO3",
+    image        => "lewis_SO3.png",
+    alt          => "Lewis structure for sulfur trioxide showing sulfur bonded to three oxygen atoms with no lone pairs on the central sulfur atom.",
+    EG           => "trigonal planar",
+    MG           => "trigonal planar",
+  },
+  {
+    formula      => "BF_3",
+    formulaPlain => "BF3",
+    image        => "lewis_BF3.png",
+    alt          => "Lewis structure for boron trifluoride showing boron bonded to three fluorine atoms with no lone pairs on the central boron atom. Each fluorine atom has three lone pairs.",
+    EG           => "trigonal planar",
+    MG           => "trigonal planar",
+  },
+);
+
+@bent_120 = (
+  {
+    formula      => "SO_2",
+    formulaPlain => "SO2",
+    image        => "lewis_SO2.png",
+    alt          => "Lewis structure for sulfur dioxide showing sulfur bonded to two oxygen atoms with one lone pair on the central sulfur atom.",
+    EG           => "trigonal planar",
+    MG           => "bent",
+  },
+  {
+    formula      => "O_3",
+    formulaPlain => "O3",
+    image        => "lewis_O3.png",
+    alt          => "Lewis structure for ozone showing a central oxygen atom bonded to two other oxygen atoms with one lone pair on the central oxygen atom.",
+    EG           => "trigonal planar",
+    MG           => "bent",
+  },
+);
+
+############################################################
+# Randomize one from each group
+############################################################
+
+@structures = (
+  random_subset(1, @tetrahedral),
+  random_subset(1, @trigonal_pyramid),
+  random_subset(1, @bent_104),
+  random_subset(1, @linear),
+  random_subset(1, @trigonal_planar),
+  random_subset(1, @bent_120),
+);
+
+@structures = random_subset(4, @structures);
+
+############################################################
+# Dropdown options
+############################################################
+
+@EGoptions = (
+  "tetrahedral",
+  "trigonal planar",
+  "linear",
+);
+
+@MGoptions = (
+  "tetrahedral",
+  "trigonal pyramid",
+  "trigonal planar",
+  "bent",
+  "linear",
+);
+
+@EGmenus = map {
+  PopUp(
+    ["", @EGoptions],
+    $_->{EG}
+  )
+} @structures;
+
+@MGmenus = map {
+  PopUp(
+    ["", @MGoptions],
+    $_->{MG}
+  )
+} @structures;
+
+
+
+############################################################
+# Problem text
+############################################################
+
+BEGIN_PGML
+
+## Electron Geometry and Molecular Geometry
+
+For each Lewis structure, choose the correct electron geometry and molecular geometry.
+
+Remember:
+
+Electron geometry depends on all electron groups around the central atom.
+
+Molecular geometry depends on the arrangement of atoms around the central atom.
+
+[#
+[.Molecule.]
+[.Lewis structure.]
+[.Electron geometry.]
+[.Molecular geometry.]*{ headerrow => 1 }
+
+[.[``\mathrm{[$structures[0]{formula}]}``].]
+[.[@ image( "$structures[0]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[0]->{alt}'"  )@]*.]
+[.[_]{$EGmenus[0]}.]
+[.[_]{$MGmenus[0]}.]*
+
+[.[``\mathrm{[$structures[1]{formula}]}``].]
+[.[@ image( "$structures[1]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[1]->{alt}'"  )@]*.]
+[.[_]{$EGmenus[1]}.]
+[.[_]{$MGmenus[1]}.]*
+
+[.[``\mathrm{[$structures[2]{formula}]}``].]
+[.[@ image( "$structures[2]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[2]->{alt}'"  )@]*.]
+[.[_]{$EGmenus[2]}.]
+[.[_]{$MGmenus[2]}.]*
+
+[.[``\mathrm{[$structures[3]{formula}]}``].]
+[.[@ image( "$structures[3]->{image}", width=>200, 
+ extra_html_tags=>"alt='$structures[3]->{alt}'"  )@]*.]
+[.[_]{$EGmenus[3]}.]
+[.[_]{$MGmenus[3]}.]*
+
+#]{align => '|c|c|c|c|', horizontalrules => 1}
+
+END_PGML
+
+############################################################
+# Answer checkers
+############################################################
+
+for my $i (0..3) {
+  ANS($EGmenus[$i]->cmp());
+  ANS($MGmenus[$i]->cmp());
+}
+
+############################################################
+# Hint
+############################################################
+
+BEGIN_PGML_HINT
+
+Count the number of electron groups around the central atom.
+
+A single bond, double bond, triple bond, or lone pair each counts as one electron group.
+
+Electron geometry uses all electron groups.
+
+Molecular geometry uses the positions of the atoms only.
+
+Be careful: trigonal planar and trigonal pyramid are different geometries.
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+BEGIN_PGML_SOLUTION
+
+The correct classifications are:
+
+[#
+[.Molecule.]
+[.Electron geometry.]
+[.Molecular geometry.]*{ headerrow => 1 }
+
+[.[``\mathrm{[$structures[0]{formula}]}``].]
+[.[$structures[0]{EG}].]
+[.[$structures[0]{MG}].]*
+
+[.[``\mathrm{[$structures[1]{formula}]}``].]
+[.[$structures[1]{EG}].]
+[.[$structures[1]{MG}].]*
+
+[.[``\mathrm{[$structures[2]{formula}]}``].]
+[.[$structures[2]{EG}].]
+[.[$structures[2]{MG}].]*
+
+[.[``\mathrm{[$structures[3]{formula}]}``].]
+[.[$structures[3]{EG}].]
+[.[$structures[3]{MG}].]*
+
+#]{align => '|c|c|c|', horizontalrules => 1}
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
