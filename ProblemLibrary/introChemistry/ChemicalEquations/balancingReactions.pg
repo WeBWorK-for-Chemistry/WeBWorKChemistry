@@ -1,0 +1,126 @@
+## DBsubject()
+## DBchapter()
+## DBsection()
+## Level()
+## KEYWORDS()
+## TitleText1()
+## EditionText1()
+## AuthorText1()
+## Section1()
+## Problem1()
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+############################################################
+# Load Macros
+############################################################
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "PGunion.pl",
+  "contextReaction.pl",
+  "PGcourse.pl",
+  "parserPopUp.pl",
+  "answerHints.pl",
+);
+
+############################################################
+# Header
+############################################################
+#COMMENT('');
+TEXT(beginproblem());
+
+############################################################
+# PG Setup
+############################################################
+Context("Numeric");
+Context()->flags->set(
+  #tolerance => 10**-10,      #default is 0.001
+  #tolType => 'absolute',  #default is 'relative'
+);
+
+
+@reaction = ( "2Fe + 3H_2SO_4 \rightarrow Fe_2(SO_4)_3 + 3H_2", "CH_4 + 2O_2 \rightarrow CO_2 + 2H_2O", "SiCl_4 + 2H_2O \rightarrow SiO_2 + 4HCl","2AgI + Na_2S \rightarrow Ag_2S + 2NaI", "4NH_3 + 5O_2 \rightarrow 4NO + 6H_2O", "FeO_3 + 3CO \rightarrow Fe + 3CO_2", "SiO_2 + 4HF \rightarrow SiF_4 + 2H_2O", "2NaBr + Cl_2 \rightarrow 2NaCl + Br_2","Mg(OH)_2 + 2HCl \rightarrow MgCl_2 + 2H_2O", "4(NH_4)_3PO_4 + 3Pb(NO_3)_4 \rightarrow Pb_3(PO_4)_4 + 12NH_4NO_3") ;
+
+@coeff1 = ('2','','','2','4','','','2','','4');
+@unit1 = ("atoms", "molecules","molecules","formula units", "molecules","formula units","molecules","formula units","formula units","formula units");
+@reactant1 = ("Fe", "CH_4","SiCl_4","AgI", "NH_3", "FeO_3","SiO_2","NaBr","Mg(OH)_2","(NH_4)_3PO_4");
+@coeff2 = ('3','2','2','','5','3','4','','2','3');
+@unit2 = ("molecules", "molecules","molecules","formula units","molecules","molecules","molecules","molecules","molecules","formula units" );
+@reactant2 = ("H_2SO_4", "O_2","H_2O","Na_2S","O_2", "CO","HF","Cl_2","HCl ","Pb(NO_3)_4");
+
+@coeff3 = ('','','','','4','','','2','','');
+@unit3 = ("formula units", "molecules","molecules","formula units","molecules","atoms","molecules","formula units","formula units","formula units");
+@product1 = ("Fe_2(SO_4)_3", "CO_2","SiO_2","Ag_2S","NO", "Fe","SiF_4", "NaCl","MgCl_2","Pb_3(PO_4)_4");
+@coeff4 = ('3','2','4','2','6','3','2','','2','12');
+@unit4 = ("molecules", "molecules","molecules","formula units", "molecules","molecules","molecules","molecules","molecules","formula units");
+@product2 = ("H_2", "H_2O","HCl","NaI","H_2O", "CO_2", "H_2O", "Br_2","H_2O","NH_4NO_3");
+
+
+my @numbers;
+my %unique;
+
+for (0..4) {
+    my $number = random(0,9);
+    redo if $unique{$number}++;
+    push @numbers, $number;
+ }
+
+$a = $numbers[0];
+$b = $numbers[1];
+$c = $numbers[2];
+$d = $numbers[3];
+
+
+    
+
+
+
+
+############################################################
+# Body
+############################################################
+
+BEGIN_PGML
+##Balancing Reactions
+
+Balance the following reactions.  If the coeffient is one, leave the space blank. 
+
+[___]{$coeff1[$a]}[``[$reactant1[$a]]``] + [___]{$coeff2[$a]}[``[$reactant2[$a]] \rightarrow``] [___]{$coeff3[$a]}[``[$product1[$a]]``] + [___]{$coeff4[$a]}[``[$product2[$a]]``]
+
+[___]{$coeff1[$b]}[``[$reactant1[$b]]``] + [___]{$coeff2[$b]}[``[$reactant2[$b]] \rightarrow``] [___]{$coeff3[$b]}[``[$product1[$b]]``] + [___]{$coeff4[$b]}[``[$product2[$b]]``]
+
+[___]{$coeff1[$c]}[``[$reactant1[$c]]``] + [___]{$coeff2[$c]}[``[$reactant2[$c]] \rightarrow``] [___]{$coeff3[$c]}[``[$product1[$c]]``] + [___]{$coeff4[$c]}[``[$product2[$c]]``]
+
+[___]{$coeff1[$d]}[``[$reactant1[$d]]``] + [___]{$coeff2[$d]}[``[$reactant2[$d]] \rightarrow``] [___]{$coeff3[$d]}[``[$product1[$d]]``] + [___]{$coeff4[$d]}[``[$product2[$d]]``]
+
+
+END_PGML
+############################################################
+BEGIN_PGML_HINT
+
+To review balancing chemical equations, click [@ htmlLink( protect_underbar("https://chem.libretexts.org/Courses/Portland_Community_College/CH151%3A_Preparatory_Chemistry/09%3A_An_Introduction_to_Chemical_Reactions/9.02%3A_Balancing_Chemical_Equations"), protect_underbar("here"), "TARGET='_blank'" ); @]*
+
+
+END_PGML_HINT
+
+############################################################
+# Solution
+############################################################
+
+#BEGIN_PGML_SOLUTION
+
+#END_PGML_SOLUTION
+
+############################################################
+# End Problem
+############################################################
+
+
+
+
+ENDDOCUMENT();
