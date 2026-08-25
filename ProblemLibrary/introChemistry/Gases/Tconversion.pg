@@ -1,0 +1,211 @@
+## DBsubject(Chemistry)
+## DBchapter(Measurement)
+## DBsection(Temperature)
+## KEYWORDS('temperature', 'Celsius', 'Kelvin', 'unit conversion')
+## Author('Stephanie Bryan')
+## Institution('PCC')
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+    "PGstandard.pl",
+    "MathObjects.pl",
+    "PGML.pl",
+    "PGcourse.pl",
+    "contextInexactValue.pl",
+    "answerHints.pl"
+);
+
+TEXT(beginproblem());
+
+############################################################
+# Setup
+############################################################
+
+Context("InexactValue");
+
+# Generate three Celsius temperatures
+$C1 = random(-100, 150, 1);
+
+while ($C1 == 0) {
+    $C1 = random(-100, 150, 1);
+}
+
+$absC1 = abs($C1);
+
+if ($absC1 < 10) {
+    $sigFigs = 1;
+}
+elsif ($absC1 < 100) {
+    $sigFigs = 2;
+}
+else {
+    $sigFigs = 3;
+}
+
+$C1_sigfigs = InexactValue($C1, $sigFigs);
+
+$C2 = random(-100, 150, 1);
+
+while ($C2 == 0) {
+    $C2 = random(-100, 150, 1);
+}
+
+$absC2 = abs($C2);
+
+if ($absC2 < 10) {
+    $sigFigs2 = 1;
+}
+elsif ($absC2 < 100) {
+    $sigFigs2 = 2;
+}
+else {
+    $sigFigs2 = 3;
+}
+
+$C2_sigfigs = InexactValue($C2, $sigFigs2);
+
+$C3 = random(-100, 150, 1);
+
+while ($C3 == 0) {
+    $C3 = random(-100, 150, 1);
+}
+
+$absC3 = abs($C3);
+
+if ($absC3 < 10) {
+    $sigFigs3 = 1;
+}
+elsif ($absC3 < 100) {
+    $sigFigs3 = 2;
+}
+else {
+    $sigFigs3 = 3;
+}
+
+$C3_sigfigs = InexactValue($C3, $sigFigs3);
+
+
+# Kelvin = Celsius + 273.15
+
+
+$K1 = InexactValue($C1_sigfigs + 273.15);
+$K2 = InexactValue($C2_sigfigs + 273.15);
+$K3 = InexactValue($C3_sigfigs + 273.15);
+
+$K1_checker = $K1->cmp()->withPostFilter(
+    AnswerHints(
+
+        # Correct numerical value, incorrect significant figures
+        sub {
+            my ($correct, $student, $ans) = @_;
+
+            return (
+                $correct->valueAsNumber() == $student->valueAsNumber()
+                &&
+                $correct->sigFigs() != $student->sigFigs()
+            );
+        } => [
+            "Your numerical value is correct, but the precision of your answer is not. If a trailing zero is significant, include a decimal point after the number.",
+            replaceMessage => 1
+        ],
+
+        # General precision feedback
+        sub {
+            my ($correct, $student, $ans) = @_;
+
+            return (
+                $correct->sigFigs() != $student->sigFigs()
+            );
+        } => [
+            "Check the precision of your answer. When adding 273.15 to the Celsius temperature, round the Kelvin temperature to the same decimal place as the least precise value.",
+            replaceMessage => 1
+        ]
+    )
+);
+
+$K2_checker = $K2->cmp()->withPostFilter(
+    AnswerHints(
+
+        # Correct numerical value, incorrect significant figures
+        sub {
+            my ($correct, $student, $ans) = @_;
+
+            return (
+                $correct->valueAsNumber() == $student->valueAsNumber()
+                &&
+                $correct->sigFigs() != $student->sigFigs()
+            );
+        } => [
+            "Your numerical value is correct, but the precision of your answer is not. If a trailing zero is significant, include a decimal point after the number.",
+            replaceMessage => 1
+        ],
+
+        # General precision feedback
+        sub {
+            my ($correct, $student, $ans) = @_;
+
+            return (
+                $correct->sigFigs() != $student->sigFigs()
+            );
+        } => [
+            "Check the precision of your answer. When adding 273.15 to the Celsius temperature, round the Kelvin temperature to the same decimal place as the least precise value.",
+            replaceMessage => 1
+        ]
+    )
+);
+
+$K3_checker = $K3->cmp()->withPostFilter(
+    AnswerHints(
+
+        # Correct numerical value, incorrect significant figures
+        sub {
+            my ($correct, $student, $ans) = @_;
+
+            return (
+                $correct->valueAsNumber() == $student->valueAsNumber()
+                &&
+                $correct->sigFigs() != $student->sigFigs()
+            );
+        } => [
+            "Your numerical value is correct, but the precision of your answer is not. If a trailing zero is significant, include a decimal point after the number.",
+            replaceMessage => 1
+        ],
+
+        # General precision feedback
+        sub {
+            my ($correct, $student, $ans) = @_;
+
+            return (
+                $correct->sigFigs() != $student->sigFigs()
+            );
+        } => [
+            "Check the precision of your answer. When adding 273.15 to the Celsius temperature, round the Kelvin temperature to the same decimal place as the least precise value.",
+            replaceMessage => 1
+        ]
+    )
+);
+
+############################################################
+# Problem
+############################################################
+
+BEGIN_PGML
+##Converting Temperature Measurements from Celsius to Kelvin
+
+Convert each temperature from Celsius to Kelvin.
+
+Use  [` T(\mathrm{K}) = T(^\circ\mathrm{C}) + 273.15 `]
+
+Enter only the numerical value for the answer. The units are already specified.
+
+a. [`[$C1]^\circ\mathrm{C}`] = [__________]{$K1_checker} K
+
+b. [`[$C2]^\circ\mathrm{C}`] = [__________]{$K2_checker} K
+
+c. [`[$C3]^\circ\mathrm{C}`] = [__________]{$K3_checker} K
+
+END_PGML
+
+ENDDOCUMENT();
