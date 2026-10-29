@@ -1,0 +1,328 @@
+## DBsubject(Chemistry)
+## DBchapter(Math Prep)
+## DBsection(Rounding Tutorial)
+## Author(Stephanie Bryan)
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  'PGstandard.pl',
+  'MathObjects.pl',
+  'PGML.pl',
+  'PGcourse.pl'
+);
+
+TEXT(beginproblem());
+
+Context('Numeric');
+
+$showPartialCorrectAnswers = 1;
+
+####################################################
+# Randomized number
+####################################################
+
+# Avoid zeros and repeated digits so students focus
+# on the distinction between digits and values.
+# Distinct digits also allow more specific feedback.
+
+$h = random(2,9,1);
+
+$t = random(2,9,1);
+while ($t == $h) {
+    $t = random(2,9,1);
+}
+
+$o = random(2,9,1);
+while ($o == $h || $o == $t) {
+    $o = random(2,9,1);
+}
+
+$number = 100*$h + 10*$t + $o;
+
+$tens_value = 10*$t;
+$hundreds_value = 100*$h;
+
+####################################################
+# Custom grader for place-value mistakes
+####################################################
+
+sub placeValueGrader {
+
+    my ($question, $h, $t, $o) = @_;
+
+    return sub {
+
+        my ($correct, $student, $ansHash) = @_;
+
+        my $s = $student->value;
+        my $c = $correct->value;
+
+        # Correct answers receive full credit.
+        return 1 if ($s == $c);
+
+        my $message = "";
+
+        ################################################
+        # Question 1: Digit in the tens place
+        ################################################
+
+        if ($question == 1) {
+
+            if ($s == 10*$t) {
+                $message =
+                    "You entered the value of the digit "
+                    . "instead of the digit itself. "
+                    . "A digit is a single number from 0 to 9.";
+            }
+            elsif ($s == $h) {
+                $message =
+                    "You selected the hundreds digit. "
+                    . "The tens place is immediately "
+                    . "to the right of the hundreds place.";
+            }
+            elsif ($s == $o) {
+                $message =
+                    "You selected the ones digit. "
+                    . "The tens place is one position "
+                    . "to its left.";
+            }
+            else {
+                $message =
+                    "Count from the right: ones, tens, "
+                    . "hundreds. Enter only the digit "
+                    . "in the tens place.";
+            }
+        }
+
+        ################################################
+        # Question 2: Value of the tens digit
+        ################################################
+
+        elsif ($question == 2) {
+
+            if ($s == $t) {
+                $message =
+                    "You identified the correct digit, "
+                    . "but the question asks for its value. "
+                    . "Multiply the digit by 10.";
+            }
+            elsif ($s == 100*$t) {
+                $message =
+                    "You multiplied by 100 instead of 10. "
+                    . "That would give its value in "
+                    . "the hundreds place.";
+            }
+            elsif ($s == $t/10) {
+                $message =
+                    "You divided by 10 instead of "
+                    . "multiplying by 10.";
+            }
+            elsif ($s == 100*$h) {
+                $message =
+                    "That is the value of the hundreds "
+                    . "digit, not the tens digit.";
+            }
+            elsif ($s == $o) {
+                $message =
+                    "That is the value of the ones digit. "
+                    . "Find the tens digit and multiply by 10.";
+            }
+            else {
+                $message =
+                    "First identify the digit in the tens "
+                    . "place. Multiply it by 10 to find "
+                    . "its value.";
+            }
+        }
+
+        ################################################
+        # Question 3: Digit in the hundreds place
+        ################################################
+
+        elsif ($question == 3) {
+
+            if ($s == 100*$h) {
+                $message =
+                    "You entered the value of the "
+                    . "hundreds digit instead of "
+                    . "the digit itself.";
+            }
+            elsif ($s == $t) {
+                $message =
+                    "You selected the tens digit. "
+                    . "The hundreds place is immediately "
+                    . "to the left of the tens place.";
+            }
+            elsif ($s == $o) {
+                $message =
+                    "You selected the ones digit. "
+                    . "Count from the right: ones, "
+                    . "tens, hundreds.";
+            }
+            else {
+                $message =
+                    "The hundreds place is the third "
+                    . "position from the right. "
+                    . "Enter the digit in that position.";
+            }
+        }
+
+        ################################################
+        # Question 4: Value of the hundreds digit
+        ################################################
+
+        elsif ($question == 4) {
+
+            if ($s == $h) {
+                $message =
+                    "You entered the hundreds digit "
+                    . "rather than its value. "
+                    . "Multiply the digit by 100.";
+            }
+            elsif ($s == 10*$h) {
+                $message =
+                    "You multiplied by 10 instead of 100. "
+                    . "The hundreds place has a "
+                    . "place value of 100.";
+            }
+            elsif ($s == 1000*$h) {
+                $message =
+                    "You multiplied by 1000, which "
+                    . "corresponds to the thousands place.";
+            }
+            elsif ($s == 10*$t) {
+                $message =
+                    "That is the value of the tens "
+                    . "digit, not the hundreds digit.";
+            }
+            elsif ($s == $h/100) {
+                $message =
+                    "You divided by 100 instead of "
+                    . "multiplying by 100.";
+            }
+            else {
+                $message =
+                    "Identify the digit in the hundreds "
+                    . "place, then multiply it by 100.";
+            }
+        }
+
+        # Display targeted feedback in the answer
+        # feedback field, without awarding credit.
+        $ansHash->setMessage($message);
+
+        return 0;
+    };
+}
+
+####################################################
+# Answer objects
+####################################################
+
+$ans1 = Real($t)->cmp(
+    checker => placeValueGrader(1, $h, $t, $o),
+    tolerance => 0
+);
+
+$ans2 = Real($tens_value)->cmp(
+    checker => placeValueGrader(2, $h, $t, $o),
+    tolerance => 0
+);
+
+$ans3 = Real($h)->cmp(
+    checker => placeValueGrader(3, $h, $t, $o),
+    tolerance => 0
+);
+
+$ans4 = Real($hundreds_value)->cmp(
+    checker => placeValueGrader(4, $h, $t, $o),
+    tolerance => 0
+);
+
+####################################################
+# Problem text
+####################################################
+
+BEGIN_PGML
+
+## Place Value - left of the decimal point
+
+Digits in a number have different values depending on their positions. Moving one place to the left multiplies the place value by 10, while moving one place to the right divides it by 10. Notice that places to the left of the decimal point are equal to or greater than 1. They do not end in the letters -th.
+
+Compare the places on both sides of the decimal point in **458.27**.
+
+[#
+    [.Name.]
+    [.Hundreds.]
+    [.Tens.]
+    [.Ones.]
+    [...]
+    [.Tenths.]
+    [.Hundredths.]*
+
+    [.Value.]
+    [.100.]
+    [.10.]
+    [.1.]
+    [. . .]
+    [.0.1.]
+    [.0.01.]*{rowbottom => 3}
+
+    [.Digit.]
+    [.4.][.5.][.8.][...][.2.][.7.]*
+
+    [.Value of Digit.]
+    [.400.][.50.][.8.][...][.0.2.][.0.07.]*
+
+#]{align => '|c|c|c|c|p{2px}|c|c|',
+   horizontalrules => 1,
+   rowheaders => 1}
+
+The digit in the tens place in the number 458.27 is 5. This digit has a value of 50 because it is in the tens place.
+
+The digit in the hundreds place in the number 458.27 is 4. This digit has a value of 400 because it is in the hundreds place.
+
+### Now Try this Problem:
+
+Consider the number [$number].
+
+1. What **digit** is in the tens place? [_____]{$ans1}
+2. What is the **value** of the digit in the tens place? [_____]{$ans2}
+3. What **digit** is in the hundreds place? [_____]{$ans3}
+4. What is the **value** of the digit in the hundreds place? [_____]{$ans4}
+
+*Check the distinction:* A digit in the tens place is worth 10 times that digit, and a digit in the hundreds place is worth 100 times that digit.
+
+In the next problem, you'll answer the same questions about places to the right of the decimal point.
+
+END_PGML
+
+####################################################
+# Hint
+####################################################
+
+BEGIN_PGML_HINT
+
+### Identifying Digits and Their Values
+
+Start at the right side of the whole number and count toward the left.
+
+- **Ones place:** First digit from the right.
+- **Tens place:** Second digit from the right.
+- **Hundreds place:** Third digit from the right.
+
+Remember that a digit and the value of a digit are different.
+
+For example, consider the number 326.
+
+- The tens digit is 2, but its value is 20.
+- The hundreds digit is 3, but its value is 300.
+
+To find the value of a digit, multiply it by its place value.
+
+END_PGML_HINT
+
+ENDDOCUMENT();
