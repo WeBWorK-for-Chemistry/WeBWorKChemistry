@@ -1,0 +1,222 @@
+## DBsubject(Chemistry)
+## DBchapter(Measurements and Significant Figures)
+## DBsection(Rounding Tutorial)
+## Author(Stephanie Bryan)
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  'PGstandard.pl',
+  'MathObjects.pl',
+  'PGML.pl',
+  'PGcourse.pl',
+  'contextInexactValue.pl'
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+############################################################
+# Part A: Whole numbers. Every case requires carrying.
+# Use Real, with decimal literals disallowed.
+############################################################
+
+Context('Numeric');
+Parser::Number::NoDecimals(Context());
+Context()->flags->set(tolerance => 0, tolType => 'absolute');
+
+# Nearest ten: the tens digit is 9 and the ones digit >= 5.
+$whole_ten = 1000*random(1,7,1) + 100*random(1,8,1)
+           + 90 + random(5,9,1);
+$ten_correct = 10*int(($whole_ten + 5)/10);
+
+# Nearest hundred: the hundreds digit is 9 and tens >= 5.
+$whole_hundred = 1000*random(1,7,1) + 900
+               + 10*random(5,9,1) + random(0,9,1);
+$hundred_correct = 100*int(($whole_hundred + 50)/100);
+
+sub wholeCarryChecker {
+    my ($place, $given) = @_;
+    return sub {
+        my ($correct, $student, $ansHash) = @_;
+        my $s = $student->value;
+        my $c = $correct->value;
+        return 1 if $s == $c;
+
+        my $down = $place * int($given/$place);
+        my $message;
+        if ($s == $down) {
+            $message = 'You rounded down. The digit immediately to the right is 5 or greater, so you must round up. When the target digit is 9, carry 1 to the next place on the left.';
+        }
+        elsif ($s == $given) {
+            $message = 'You entered the original number. Round up and replace all places to the right of the target place with zeros.';
+        }
+        elsif ($s == int($given/$place) + 1) {
+            $message = 'You carried correctly but left off the placeholder zeros. The rounded number should stay approximately the same size.';
+        }
+        elsif ($s == $c + $place) {
+            $message = 'You increased the number by one extra place-value step. Carry once, not twice.';
+        }
+        else {
+            $message = ($place == 10)
+                ? 'Look at the ones digit. Since it is at least 5, round up. The tens digit is 9, so it becomes 0 and you increase the hundreds digit by 1.'
+                : 'Look at the tens digit. Since it is at least 5, round up. The hundreds digit is 9, so it becomes 0 and you increase the thousands digit by 1.';
+        }
+        $ansHash->{ans_message} = $message;
+        return 0;
+    };
+}
+
+$ans_whole_ten = Real($ten_correct)->cmp(
+    checker => wholeCarryChecker(10, $whole_ten),
+    tolerance => 0
+);
+$ans_whole_hundred = Real($hundred_correct)->cmp(
+    checker => wholeCarryChecker(100, $whole_hundred),
+    tolerance => 0
+);
+
+############################################################
+# Part B: Decimal places. Use InexactValue to require
+# the correct precision, including trailing zeros.
+# Calculations use integers to avoid floating-point ties.
+############################################################
+
+Context('InexactValue');
+
+# Nearest tenth: tenths digit is 9, hundredths >= 5.
+$decimal_tenth_int = 1000*random(1,8,1) + 900
+                   + 10*random(5,9,1) + random(1,9,1);
+$decimal_tenth = sprintf('%.3f', $decimal_tenth_int/1000);
+$tenth_correct_int = int(($decimal_tenth_int + 50)/100);
+$tenth_correct = $tenth_correct_int/10;
+$tenth_text = sprintf('%.1f', $tenth_correct);
+
+# Nearest hundredth: hundredths digit is 9, thousandths >= 5.
+$decimal_hundredth_int = 1000*random(1,8,1)
+                       + 100*random(1,9,1)
+                       + 90 + random(5,9,1);
+$decimal_hundredth = sprintf('%.3f', $decimal_hundredth_int/1000);
+$hundredth_correct_int = int(($decimal_hundredth_int + 5)/10);
+$hundredth_correct = $hundredth_correct_int/100;
+$hundredth_text = sprintf('%.2f', $hundredth_correct);
+
+# The strings, rather than only numeric values, preserve
+# 2.0 versus 2 and 4.00 versus 4.
+$answer_decimal_tenth = InexactValue($tenth_text);
+$answer_decimal_hundredth = InexactValue($hundredth_text);
+
+sub decimalCarryFeedback {
+    my ($place, $given_int, $correct_num) = @_;
+    return sub {
+        my $ansHash = shift;
+        return $ansHash if (($ansHash->{score} // 0) == 1);
+
+        my $raw = $ansHash->{original_student_ans};
+        $raw = $ansHash->{student_ans}
+            unless defined($raw) && $raw ne '';
+        $raw = '' unless defined($raw);
+        return $ansHash if $raw =~ /^[[:space:]]*$/;
+
+        my $numeric = $raw =~ /^[[:space:]]*[+-]?(?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[eE][+-]?[0-9]+)?[[:space:]]*$/;
+        my $s = $numeric ? 0 + $raw : undef;
+        if (!defined($s) && defined($ansHash->{student_value})) {
+            my $v = $ansHash->{student_value};
+            if (ref($v) && eval { $v->can('value') }) {
+                $s = eval { $v->value };
+            }
+        }
+        my $same = sub {
+            my ($a, $b) = @_;
+            return defined($a) && defined($b)
+                && abs($a - $b) < 0.00000001;
+        };
+        my $target = ($place == 10) ? 'tenth' : 'hundredth';
+        my $digits = ($place == 10) ? 'one' : 'two';
+        my $down = ($place == 10)
+            ? int($given_int/100)/10
+            : int($given_int/10)/100;
+        my $original = $given_int/1000;
+        my $message;
+
+        if ($same->($s, $correct_num)) {
+            $message = "Your numerical value is correct, but the precision is not. A rounded answer to the nearest $target must show exactly $digits decimal place" . (($place == 10) ? '' : 's') . ', including trailing zeros.';
+        }
+        elsif ($same->($s, $down)) {
+            $message = "You rounded down. The digit to the right of the $target place is 5 or greater. Increase the 9 by 1 and carry to the place on its left.";
+        }
+        elsif ($same->($s, $original)) {
+            $message = "You entered the original number. Round to the nearest $target and remove the digits to the right.";
+        }
+        else {
+            $message = ($place == 10)
+                ? 'The tenths digit is 9 and the hundredths digit is at least 5. Carry 1 into the ones place, write 0 in the tenths place, and keep exactly one digit after the decimal.'
+                : 'The hundredths digit is 9 and the thousandths digit is at least 5. Carry 1 into the tenths place (and farther left if needed), then write 0 in the hundredths place. Keep exactly two digits after the decimal.';
+        }
+        $ansHash->{score} = 0;
+        $ansHash->{ans_message} = $message;
+        return $ansHash;
+    };
+}
+
+$ans_decimal_tenth = $answer_decimal_tenth->cmp(
+    failOnValueWrong => 1,
+    creditValue => 0,
+    creditSigFigs => 1
+)->withPostFilter(decimalCarryFeedback(10, $decimal_tenth_int, $tenth_correct));
+
+$ans_decimal_hundredth = $answer_decimal_hundredth->cmp(
+    failOnValueWrong => 1,
+    creditValue => 0,
+    creditSigFigs => 1
+)->withPostFilter(decimalCarryFeedback(100, $decimal_hundredth_int, $hundredth_correct));
+
+############################################################
+# Student-facing tutorial
+############################################################
+
+BEGIN_PGML
+
+## Rounding with Carrying
+
+Sometimes rounding up makes a digit become **10**. Since 10 is not a single digit, we write 0 in that place and **carry 1 to the place immediately to its left**. The carry can continue across more than one place.
+
+### Rounding Whole Numbers
+
+For example, round **2,995** to the nearest ten.
+
+The tens digit is 9. The ones digit is 5, so we must round up. Increasing 9 by 1 makes 10 tens, which is 1 hundred. Carry into the hundreds place and replace the ones and tens places with zeros.
+
+**2,995 rounded to the nearest ten is 3,000.**
+
+[@ image(
+    "rounding2.png",
+    width => 520,
+    height => 200,
+    alt => "Rounding 2995 to the nearest ten gives 3000."
+) @]*
+
+### Now Try These Problems
+
+1. Round [$whole_ten] to the nearest ten: [________]{$ans_whole_ten}
+2. Round [$whole_hundred] to the nearest hundred: [________]{$ans_whole_hundred}
+
+### Rounding Decimal Numbers
+
+The same carrying rule applies to decimal places. For example, round **1.96** to the nearest tenth.
+
+The tenths digit is 9. Since the hundredths digit is 6, round up. Increasing 9 tenths by 1 makes 10 tenths, which is 1 whole. The answer is **2.0**, not 2, because we are rounding to the nearest tenth and must show one digit after the decimal point.
+
+Another example: **3.996** rounded to the nearest hundredth is **4.00**. The 6 rounds the 9 in the hundredths place up, and the carry continues through the tenths place into the ones place. We keep two decimal places, even when both digits are zero.
+
+### Now Try These Problems
+
+3. Round [$decimal_tenth] to the nearest tenth: [________]{$ans_decimal_tenth}
+4. Round [$decimal_hundredth] to the nearest hundredth: [________]{$ans_decimal_hundredth}
+
+
+END_PGML
+
+ENDDOCUMENT();

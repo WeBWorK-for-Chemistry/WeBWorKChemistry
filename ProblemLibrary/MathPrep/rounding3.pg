@@ -1,0 +1,309 @@
+## DBsubject(Chemistry)
+## DBchapter(Measurements and Significant Figures)
+## DBsection(Rounding Tutorial)
+## Author(Stephanie Bryan)
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  'PGstandard.pl',
+  'MathObjects.pl',
+  'PGML.pl',
+  'PGcourse.pl',
+  'parserPopUp.pl',
+  'contextInexactValue.pl'
+);
+
+TEXT(beginproblem());
+
+Context('Numeric');
+
+# Reject decimal numbers, including trailing decimal zeros.
+Parser::Number::NoDecimals(Context());
+
+Context()->flags->set(
+    tolerance => 0,
+    tolType => 'absolute'
+);
+
+$showPartialCorrectAnswers = 1;
+
+####################################################
+# Randomization
+####################################################
+
+$hundreds = random(12,89,1);
+$tens = random(1,9,1);
+$ones = random(0,9,1);
+
+$number = 100*$hundreds + 10*$tens + $ones;
+
+$nearest_ten =
+    10*int(($number+5)/10);
+
+$nearest_hundred =
+    100*int(($number+50)/100);
+
+####################################################
+# Values used to identify common mistakes
+####################################################
+
+# Rounding down without considering the next digit
+
+$ten_down = 10*int($number/10);
+
+$hundred_down = 100*int($number/100);
+
+# Rounding up regardless of the next digit
+
+$ten_up = $ten_down + 10;
+
+$hundred_up = $hundred_down + 100;
+
+# Determine the digit used to decide rounding
+
+$ones_digit = $number % 10;
+
+$tens_digit = int($number/10) % 10;
+
+####################################################
+# Custom rounding answer checker
+####################################################
+
+sub roundingChecker {
+
+    my ($place) = @_;
+
+    return sub {
+
+        my ($correct, $student, $ansHash) = @_;
+
+        my $s = $student->value;
+        my $c = $correct->value;
+
+        # Correct answer: full credit
+        return 1 if ($s == $c);
+
+        my $message = "";
+
+        ################################################
+        # Question 1: Nearest ten
+        ################################################
+
+        if ($place == 10) {
+
+            # Rounded to hundreds instead
+            if ($s == $nearest_hundred) {
+
+                $message =
+                    "You rounded to the nearest hundred "
+                    . "instead of the nearest ten. "
+                    . "Find the tens digit and look "
+                    . "at the ones digit to decide "
+                    . "whether to round up or down.";
+            }
+
+            # Student kept original number
+            elsif ($s == $number) {
+
+                $message =
+                    "You entered the original number "
+                    . "without rounding. When rounding "
+                    . "to the nearest ten, the ones "
+                    . "digit should become zero.";
+            }
+
+            # Rounded down when should round up
+            elsif (
+                $ones_digit >= 5 &&
+                $s == $ten_down
+            ) {
+
+                $message =
+                    "You rounded down, but the ones "
+                    . "digit is 5 or greater. "
+                    . "Increase the tens digit by 1 "
+                    . "and replace the ones digit "
+                    . "with zero.";
+            }
+
+            # Rounded up when should round down
+            elsif (
+                $ones_digit < 5 &&
+                $s == $ten_up
+            ) {
+
+                $message =
+                    "You rounded up, but the ones "
+                    . "digit is less than 5. "
+                    . "Keep the tens digit unchanged "
+                    . "and replace the ones digit "
+                    . "with zero.";
+            }
+
+            # Student may have simply removed ones digit
+            elsif (
+                $s == int($number/10)
+            ) {
+
+                $message =
+                    "It looks like you removed the "
+                    . "ones digit instead of rounding. "
+                    . "The rounded answer must retain "
+                    . "the tens place and use a zero "
+                    . "in the ones place.";
+            }
+
+            else {
+
+                $message =
+                    "To round to the nearest ten, "
+                    . "find the tens digit and look "
+                    . "one digit to its right. "
+                    . "Use the ones digit to decide "
+                    . "whether to increase the tens "
+                    . "digit, then replace the ones "
+                    . "digit with zero.";
+            }
+        }
+
+        ################################################
+        # Question 2: Nearest hundred
+        ################################################
+
+        elsif ($place == 100) {
+
+            # Rounded to tens instead
+            if ($s == $nearest_ten) {
+
+                $message =
+                    "You rounded to the nearest ten "
+                    . "instead of the nearest hundred. "
+                    . "Find the hundreds digit and "
+                    . "look at the tens digit to "
+                    . "decide whether to round up "
+                    . "or down.";
+            }
+
+            # Student kept original number
+            elsif ($s == $number) {
+
+                $message =
+                    "You entered the original number "
+                    . "without rounding. When rounding "
+                    . "to the nearest hundred, the "
+                    . "tens and ones digits should "
+                    . "both become zero.";
+            }
+
+            # Rounded down when should round up
+            elsif (
+                $tens_digit >= 5 &&
+                $s == $hundred_down
+            ) {
+
+                $message =
+                    "You rounded down, but the tens "
+                    . "digit is 5 or greater. "
+                    . "Increase the hundreds digit "
+                    . "by 1 and replace the tens "
+                    . "and ones digits with zeros.";
+            }
+
+            # Rounded up when should round down
+            elsif (
+                $tens_digit < 5 &&
+                $s == $hundred_up
+            ) {
+
+                $message =
+                    "You rounded up, but the tens "
+                    . "digit is less than 5. "
+                    . "Keep the hundreds digit "
+                    . "unchanged and replace the tens "
+                    . "and ones digits with zeros.";
+            }
+
+            # Student removed last two digits
+            elsif (
+                $s == int($number/100)
+            ) {
+
+                $message =
+                    "It looks like you removed the "
+                    . "tens and ones digits rather "
+                    . "than rounding. You need to "
+                    . "keep the hundreds place and "
+                    . "fill in zeros for the tens "
+                    . "and ones places.";
+            }
+
+            else {
+
+                $message =
+                    "To round to the nearest hundred, "
+                    . "find the hundreds digit and "
+                    . "look one digit to its right. "
+                    . "Use the tens digit to decide "
+                    . "whether to round up or down. "
+                    . "Then replace both the tens "
+                    . "and ones digits with zeros.";
+            }
+        }
+
+        # Attach feedback to this answer.
+        $ansHash->{ans_message} = $message;
+
+        # Incorrect response: zero credit
+        return 0;
+    };
+}
+
+####################################################
+# Answer objects
+####################################################
+
+$ans_ten = Real($nearest_ten)->cmp(
+    checker => roundingChecker(10),
+    tolerance => 0
+);
+
+$ans_hundred = Real($nearest_hundred)->cmp(
+    checker => roundingChecker(100),
+    tolerance => 0
+);
+
+####################################################
+# Problem text
+####################################################
+
+BEGIN_PGML
+
+## Rounding Numbers Greater Than 1.
+
+To round, find the target place value. Look **one digit to its right**.
+
+- If that digit is 0, 1, 2, 3, or 4, keep the target digit unchanged.
+- If it is 5, 6, 7, 8, or 9, increase the target digit by one.
+- Replace all digits to the right with zeros when rounding whole numbers.
+
+For example, if we want to round the number 3462 to the nearest hundred, we first find the digit in the hundreds place. This is a 4. Then we look one digit to the right of this digit to determine if we should round the target digit up or down. The 6 tells us that we need to increase the target digit by 1. So our final rounded answer is 3500. We fill in the places smaller than the target digit with zeros, but stop doing this when we get to where we would expect a decimal.
+
+[@ image(
+    "rounding.png",
+    width => 520,
+    height => 200,
+    alt => "Rounding 3462 to the nearest hundred gives 3500."
+) @]*
+
+Round [$number] to the nearest:
+
+1. Ten: [________]{$ans_ten}
+2. Hundred: [________]{$ans_hundred}
+
+
+END_PGML
+
+ENDDOCUMENT();

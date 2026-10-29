@@ -1,0 +1,363 @@
+
+## DBsubject(Chemistry)
+## DBchapter(Math Prep)
+## DBsection(Rounding Tutorial)
+## Author(Stephanie Bryan)
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  'PGstandard.pl',
+  'MathObjects.pl',
+  'PGML.pl',
+  'PGcourse.pl'
+);
+
+TEXT(beginproblem());
+
+Context('Numeric');
+
+Context()->flags->set(
+    tolerance => 0,
+    tolType => 'absolute'
+);
+
+$showPartialCorrectAnswers = 1;
+
+####################################################
+# Randomized number
+####################################################
+
+# Use distinct nonzero digits so that mistakes
+# involving the wrong decimal place can be identified.
+
+$tenths = random(2,9,1);
+
+$hundredths = random(2,9,1);
+while ($hundredths == $tenths) {
+    $hundredths = random(2,9,1);
+}
+
+$thousandths = random(2,9,1);
+while (
+    $thousandths == $tenths ||
+    $thousandths == $hundredths
+) {
+    $thousandths = random(2,9,1);
+}
+
+# Three decimal places.
+$number = sprintf(
+    "%.3f",
+    $tenths/10 +
+    $hundredths/100 +
+    $thousandths/1000
+);
+
+$tenths_value = $tenths/10;
+$hundredths_value = $hundredths/100;
+
+####################################################
+# Custom grader
+####################################################
+
+sub decimalPlaceGrader {
+
+    my ($question, $tenths, $hundredths, $thousandths) = @_;
+
+    return sub {
+
+        my ($correct, $student, $ansHash) = @_;
+
+        my $s = $student->value;
+        my $c = $correct->value;
+
+        # Account for floating-point representation.
+        my $same = sub {
+            my ($a, $b) = @_;
+            return abs($a - $b) < 0.000000001;
+        };
+
+        # Full credit for correct answers.
+        return 1 if $same->($s, $c);
+
+        my $message = "";
+
+        ################################################
+        # Question 1: Tenths digit
+        ################################################
+
+        if ($question == 1) {
+
+            if ($same->($s, $tenths/10)) {
+                $message =
+                    "You entered the VALUE of the tenths "
+                    . "digit instead of the digit itself. "
+                    . "A digit is a whole number from 0 to 9.";
+            }
+            elsif ($same->($s, $hundredths)) {
+                $message =
+                    "You selected the hundredths digit. "
+                    . "The tenths place is immediately "
+                    . "to the right of the decimal point.";
+            }
+            elsif ($same->($s, $thousandths)) {
+                $message =
+                    "You selected the thousandths digit. "
+                    . "Count from the decimal point: "
+                    . "tenths, hundredths, thousandths.";
+            }
+            else {
+                $message =
+                    "The tenths digit is the first digit "
+                    . "to the right of the decimal point. "
+                    . "Enter only that digit.";
+            }
+        }
+
+        ################################################
+        # Question 2: Value of the tenths digit
+        ################################################
+
+        elsif ($question == 2) {
+
+            if ($same->($s, $tenths)) {
+                $message =
+                    "You identified the correct digit, "
+                    . "but the question asks for its value. "
+                    . "Divide the digit by 10.";
+            }
+            elsif ($same->($s, $tenths/100)) {
+                $message =
+                    "You divided by 100 instead of 10. "
+                    . "That would give the digit's value "
+                    . "in the hundredths place.";
+            }
+            elsif ($same->($s, 10*$tenths)) {
+                $message =
+                    "You multiplied the digit by 10. "
+                    . "That would give its value in the "
+                    . "tens place, not the tenths place.";
+            }
+            elsif ($same->($s, $hundredths/100)) {
+                $message =
+                    "That is the value of the hundredths "
+                    . "digit. This question asks for "
+                    . "the tenths digit's value.";
+            }
+            elsif ($same->($s, $thousandths/1000)) {
+                $message =
+                    "That is the value of the thousandths "
+                    . "digit, not the tenths digit.";
+            }
+            else {
+                $message =
+                    "The tenths place has a place value "
+                    . "of 0.1. Multiply the digit by 0.1 "
+                    . "or divide it by 10.";
+            }
+        }
+
+        ################################################
+        # Question 3: Hundredths digit
+        ################################################
+
+        elsif ($question == 3) {
+
+            if ($same->($s, $hundredths/100)) {
+                $message =
+                    "You entered the VALUE of the "
+                    . "hundredths digit instead of "
+                    . "the digit itself.";
+            }
+            elsif ($same->($s, $tenths)) {
+                $message =
+                    "You selected the tenths digit. "
+                    . "The hundredths place is immediately "
+                    . "to its right.";
+            }
+            elsif ($same->($s, $thousandths)) {
+                $message =
+                    "You selected the thousandths digit. "
+                    . "The hundredths place is one "
+                    . "position to its left.";
+            }
+            else {
+                $message =
+                    "The hundredths digit is the second "
+                    . "digit to the right of the decimal "
+                    . "point. Enter only the digit.";
+            }
+        }
+
+        ################################################
+        # Question 4: Value of the hundredths digit
+        ################################################
+
+        elsif ($question == 4) {
+
+            if ($same->($s, $hundredths)) {
+                $message =
+                    "You entered the digit rather than "
+                    . "its value. Divide the hundredths "
+                    . "digit by 100.";
+            }
+            elsif ($same->($s, $hundredths/10)) {
+                $message =
+                    "You divided by 10 instead of 100. "
+                    . "That gives the value in the tenths "
+                    . "place, not the hundredths place.";
+            }
+            elsif ($same->($s, $hundredths/1000)) {
+                $message =
+                    "You divided by 1000 instead of 100. "
+                    . "That would give its value in "
+                    . "the thousandths place.";
+            }
+            elsif ($same->($s, $tenths/10)) {
+                $message =
+                    "That is the value of the tenths "
+                    . "digit. This question asks for "
+                    . "the hundredths digit's value.";
+            }
+            elsif ($same->($s, $thousandths/1000)) {
+                $message =
+                    "That is the value of the thousandths "
+                    . "digit, not the hundredths digit.";
+            }
+            elsif ($same->($s, 100*$hundredths)) {
+                $message =
+                    "You multiplied by 100 instead of "
+                    . "dividing by 100. The hundredths "
+                    . "place has a value less than 1.";
+            }
+            else {
+                $message =
+                    "The hundredths place has a place "
+                    . "value of 0.01. Multiply the digit "
+                    . "by 0.01 or divide it by 100.";
+            }
+        }
+
+        # Send feedback to WeBWorK.
+        $ansHash->setMessage($message);
+
+        # No credit for an incorrect answer.
+        return 0;
+    };
+}
+
+####################################################
+# Answer objects
+####################################################
+
+$ans1 = Real($tenths)->cmp(
+    checker => decimalPlaceGrader(
+        1, $tenths, $hundredths, $thousandths
+    )
+);
+
+$ans2 = Real($tenths_value)->cmp(
+    checker => decimalPlaceGrader(
+        2, $tenths, $hundredths, $thousandths
+    )
+);
+
+$ans3 = Real($hundredths)->cmp(
+    checker => decimalPlaceGrader(
+        3, $tenths, $hundredths, $thousandths
+    )
+);
+
+$ans4 = Real($hundredths_value)->cmp(
+    checker => decimalPlaceGrader(
+        4, $tenths, $hundredths, $thousandths
+    )
+);
+
+####################################################
+# Problem text
+####################################################
+
+BEGIN_PGML
+
+## Place Value - right of the decimal point
+
+Digits in a number have different values depending on their positions. Moving one place to the left multiplies the place value by 10, while moving one place to the right divides it by 10.
+
+Notice that places to the right of the decimal point have values less than 1. These place names end in the letters **-th**, such as tenths, hundredths, and thousandths.
+
+Compare the places on both sides of the decimal point in **458.27**.
+
+[#
+    [.Name.]
+    [.Hundreds.]
+    [.Tens.]
+    [.Ones.]
+    [...]
+    [.Tenths.]
+    [.Hundredths.]*
+
+    [.Value.]
+    [.100.]
+    [.10.]
+    [.1.]
+    [. . .]
+    [.0.1.]
+    [.0.01.]*{rowbottom => 3}
+
+    [.Digit.]
+    [.4.][.5.][.8.][...][.2.][.7.]*
+
+    [.Value of Digit.]
+    [.400.][.50.][.8.][...][.0.2.][.0.07.]*
+
+#]{align => '|c|c|c|c|p{2px}|c|c|', horizontalrules => 1, rowheaders => 1}
+
+The digit in the tenths place in the number 458.27 is 2. This digit has a value of 0.2 because it is in the tenths place (2 divided by 10).
+
+The digit in the hundredths place in the number 458.27 is 7. This digit has a value of 0.07 because it is in the hundredths place (7 divided by 100).
+
+### Now Try this Problem:
+
+Consider the number [$number].
+
+1. What **digit** is in the tenths place? [_____]{$ans1}
+2. What is the **value** of the digit in the tenths place? [_____]{$ans2}
+3. What **digit** is in the hundredths place? [_____]{$ans3}
+4. What is the **value** of the digit in the hundredths place? [_____]{$ans4}
+
+*Check the distinction:* A digit in the tenths place is worth one-tenth of that digit, and a digit in the hundredths place is worth one-hundredth of that digit.
+
+
+END_PGML
+
+####################################################
+# Hint
+####################################################
+
+BEGIN_PGML_HINT
+
+### Identifying Decimal Places
+
+Start at the decimal point and count toward the right.
+
+- **Tenths place:** First digit to the right of the decimal point.
+- **Hundredths place:** Second digit to the right.
+- **Thousandths place:** Third digit to the right.
+
+Remember that a digit and the value of a digit are different.
+
+For example, consider the number 0.326.
+
+- The tenths digit is 3, but its value is 0.3.
+- The hundredths digit is 2, but its value is 0.02.
+- The thousandths digit is 6, but its value is 0.006.
+
+To find the value of a digit, multiply it by its place value.
+
+END_PGML_HINT
+
+ENDDOCUMENT();

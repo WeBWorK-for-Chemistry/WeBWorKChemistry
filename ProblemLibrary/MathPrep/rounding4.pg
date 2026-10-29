@@ -1,0 +1,213 @@
+## DBsubject(Chemistry)
+## DBchapter(Measurements and Significant Figures)
+## DBsection(Rounding Tutorial)
+## Author(Stephanie Bryan)
+## Institution(PCC)
+## Language(en-US)
+
+DOCUMENT();
+
+loadMacros(
+  'PGstandard.pl',
+  'MathObjects.pl',
+  'PGML.pl',
+  'PGcourse.pl',
+  'contextInexactValue.pl'
+);
+
+TEXT(beginproblem());
+Context('InexactValue');
+
+$showPartialCorrectAnswers = 1;
+
+####################################################
+# Randomization (integer arithmetic avoids rounding
+# errors while calculating the correct decimal values)
+####################################################
+
+$whole = random(1,9,1);
+$tenths = random(1,9,1);
+$hundredths = random(1,9,1);
+$thousandths = random(1,9,1);
+
+$number_int = 1000*$whole + 100*$tenths
+            + 10*$hundredths + $thousandths;
+
+$number = sprintf('%.3f', $number_int/1000);
+
+# Rounded numeric values, including carry-over cases.
+$rounded_tenth = int(($number_int + 50)/100)/10;
+$rounded_hundredth = int(($number_int + 5)/10)/100;
+
+# Strings preserve the precision of answers such as
+# 4.80, 10.0, and 10.00.
+$tenth_string = sprintf('%.1f', $rounded_tenth);
+$hundredth_string = sprintf('%.2f', $rounded_hundredth);
+
+$answer_tenth = InexactValue($tenth_string);
+$answer_hundredth = InexactValue($hundredth_string);
+
+$tenth_down = int($number_int/100)/10;
+$tenth_up = $tenth_down + 0.1;
+$hundredth_down = int($number_int/10)/100;
+$hundredth_up = $hundredth_down + 0.01;
+
+####################################################
+# Feedback postfilter: InexactValue grades first.
+# This filter only supplies explanations and ensures
+# incorrect precision does not receive partial credit.
+####################################################
+
+sub decimalRoundingFeedback {
+    my ($place) = @_;
+
+    return sub {
+        my $ansHash = shift;
+
+        # Fully correct values AND precision need no feedback.
+        return $ansHash if (($ansHash->{score} // 0) == 1);
+
+        # Do not overwrite useful parser errors for blanks.
+        my $raw = $ansHash->{original_student_ans};
+        $raw = $ansHash->{student_ans}
+            unless defined($raw) && $raw ne '';
+        $raw = '' unless defined($raw);
+        return $ansHash if $raw =~ /^[[:space:]]*$/;
+
+        # Try the original typed numeric answer.  Use a
+        # pattern with no backslash escapes, to avoid PG
+        # preprocessing of Perl regular expressions.
+        my $numeric = $raw =~ /^[[:space:]]*[+-]?(?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[eE][+-]?[0-9]+)?[[:space:]]*$/;
+        my $s = $numeric ? (0 + $raw) : undef;
+
+        # If an expression was entered, the evaluated
+        # numeric value may still be available.
+        if (!defined($s) && defined($ansHash->{student_value})) {
+            my $v = $ansHash->{student_value};
+            if (ref($v) && eval { $v->can('value') }) {
+                $s = eval { $v->value };
+            }
+        }
+
+        my $correct_value = ($place == 10)
+            ? $rounded_tenth : $rounded_hundredth;
+        my $other_value = ($place == 10)
+            ? $rounded_hundredth : $rounded_tenth;
+
+        my $same = sub {
+            my ($a, $b) = @_;
+            return defined($a) && defined($b)
+                && abs($a - $b) < 0.00000001;
+        };
+
+        my $message = '';
+
+        if ($same->($s, $correct_value)) {
+            my $decimals = ($place == 10) ? 'one' : 'two';
+            $message =
+                "Your numerical value is correct, but the precision is not. "
+                . "Write the answer with exactly $decimals digit"
+                . (($place == 10) ? '' : 's')
+                . " after the decimal point, including any necessary trailing zeros.";
+        }
+        elsif ($same->($s, $other_value)
+            && !$same->($other_value, $correct_value)) {
+            $message = ($place == 10)
+                ? 'You rounded to the nearest hundredth instead of the nearest tenth. Look at the hundredths digit.'
+                : 'You rounded to the nearest tenth instead of the nearest hundredth. Look at the thousandths digit.';
+        }
+        elsif ($same->($s, $number_int/1000)) {
+            $message = 'You entered the original number without rounding. Find the target place and check the digit immediately to its right.';
+        }
+        elsif ($place == 10) {
+            if ($hundredths >= 5 && $same->($s, $tenth_down)) {
+                $message = 'You rounded down, but the hundredths digit is 5 or greater. Increase the tenths digit by one.';
+            }
+            elsif ($hundredths < 5 && $same->($s, $tenth_up)) {
+                $message = 'You rounded up, but the hundredths digit is less than 5. Keep the tenths digit unchanged.';
+            }
+            else {
+                $message = 'To round to the nearest tenth, check the hundredths digit. Keep one digit after the decimal point.';
+            }
+        }
+        elsif ($place == 100) {
+            if ($thousandths >= 5 && $same->($s, $hundredth_down)) {
+                $message = 'You rounded down, but the thousandths digit is 5 or greater. Increase the hundredths digit by one.';
+            }
+            elsif ($thousandths < 5 && $same->($s, $hundredth_up)) {
+                $message = 'You rounded up, but the thousandths digit is less than 5. Keep the hundredths digit unchanged.';
+            }
+            else {
+                $message = 'To round to the nearest hundredth, check the thousandths digit. Keep two digits after the decimal point.';
+            }
+        }
+
+        # Incorrect value or precision earns no credit.
+        $ansHash->{score} = 0;
+        $ansHash->{ans_message} = $message if $message ne '';
+        return $ansHash;
+    };
+}
+
+####################################################
+# Answer evaluators
+####################################################
+
+$ans_tenth = $answer_tenth->cmp(
+    failOnValueWrong => 1,
+    creditValue => 0,
+    creditSigFigs => 1
+)->withPostFilter(decimalRoundingFeedback(10));
+
+$ans_hundredth = $answer_hundredth->cmp(
+    failOnValueWrong => 1,
+    creditValue => 0,
+    creditSigFigs => 1
+)->withPostFilter(decimalRoundingFeedback(100));
+
+####################################################
+# Problem text
+####################################################
+
+BEGIN_PGML
+
+## Rounding Numbers Less Than the Ones Place
+
+Rounding decimals follows the same rules as rounding whole numbers. First, find the place you want to round to, then look **one digit to its right**.
+
+- If that digit is 0, 1, 2, 3, or 4, keep the target digit unchanged.
+- If it is 5, 6, 7, 8, or 9, increase the target digit by one.
+- Remove the digits to the right of the target place.
+
+When rounding whole numbers, we replace digits to the right of the target place with zeros to maintain the number's place value. When rounding decimals, we remove the digits to the right of the target place.
+
+### Example: Rounding 4.768
+
+**Rounding to the nearest tenth**
+
+The tenths digit is 7. Look one digit to the right, which is 6 in the hundredths place.
+
+Since 6 is greater than 5, increase the tenths digit from 7 to 8. Remove the remaining digits.
+
+The rounded answer is **4.8**.
+
+**Rounding to the nearest hundredth**
+
+The hundredths digit is 6. Look one digit to the right, which is 8 in the thousandths place.
+
+Since 8 is greater than 5, increase the hundredths digit from 6 to 7. Remove the remaining digits.
+
+The rounded answer is **4.77**.
+
+### Now Try This Problem:
+
+Round [$number] to the nearest:
+
+1. Tenth: [________]{$ans_tenth}
+2. Hundredth: [________]{$ans_hundredth}
+
+*Remember:* Keep the decimal point in the same place. Your answer must show the requested decimal precision, even if this requires a zero at the end.
+
+END_PGML
+
+ENDDOCUMENT();
