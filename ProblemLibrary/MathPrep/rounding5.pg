@@ -183,7 +183,7 @@ BEGIN_PGML
 
 Sometimes rounding up makes a digit become **10**. Since 10 is not a single digit, we write 0 in that place and **carry 1 to the place immediately to its left**. The carry can continue across more than one place.
 
-### Rounding Whole Numbers
+### Rounding to the ones place or higher.
 
 For example, round **2,995** to the nearest ten.
 
@@ -203,7 +203,7 @@ The tens digit is 9. The ones digit is 5, so we must round up. Increasing 9 by 1
 1. Round [$whole_ten] to the nearest ten: [________]{$ans_whole_ten}
 2. Round [$whole_hundred] to the nearest hundred: [________]{$ans_whole_hundred}
 
-### Rounding Decimal Numbers
+### Rounding to the tenths place or lower.
 
 The same carrying rule applies to decimal places. For example, round **1.96** to the nearest tenth.
 
