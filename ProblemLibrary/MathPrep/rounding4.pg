@@ -171,7 +171,7 @@ $ans_hundredth = $answer_hundredth->cmp(
 
 BEGIN_PGML
 
-## Rounding Numbers Less Than the Ones Place
+## Rounding Numbers Less Than One
 
 Rounding decimals follows the same rules as rounding whole numbers. First, find the place you want to round to, then look **one digit to its right**.
 
@@ -179,8 +179,7 @@ Rounding decimals follows the same rules as rounding whole numbers. First, find 
 - If it is 5, 6, 7, 8, or 9, increase the target digit by one.
 - Remove the digits to the right of the target place.
 
-When rounding whole numbers, we replace digits to the right of the target place with zeros to maintain the number's place value. When rounding decimals, we remove the digits to the right of the target place.
-
+When rounding numbers greater than 1, we replace digits to the right of the target place with zeros. We do this up to the position of the decimal point in order to maintain the number’s place value. When rounding decimals, we remove the digits to the right of the target place.
 ### Example: Rounding 4.768
 
 **Rounding to the nearest tenth**
